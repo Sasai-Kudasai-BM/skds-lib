@@ -211,11 +211,9 @@ public class ThreadUtil {
 			}
 
 			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(Long.MAX_VALUE);
-					} catch (InterruptedException ex) {
-					}
+				try {
+					Thread.sleep(Long.MAX_VALUE);
+				} catch (InterruptedException ignored) {
 				}
 			}
 		};

@@ -72,6 +72,4 @@ public class ArrayUtils {
 		if (pos < 0) pos = -pos;
 		return array[pos % array.length];
 	}
-
-
 }

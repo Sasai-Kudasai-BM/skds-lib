@@ -16,6 +16,9 @@ import java.util.zip.Inflater;
 
 public class SKDSUtils {
 
+	public static final HexFormat HEX_FORMAT_LC = HexFormat.of();
+	public static final OSType OS_TYPE = getOS();
+
 	private static final ThreadLocal<Zipper> zippers = ThreadLocal.withInitial(Zipper::new);
 
 	public static final Random R = new Random();
@@ -223,6 +226,30 @@ public class SKDSUtils {
 			}
 		} else if (filter.test(root)) {
 			collection.add(root);
+		}
+	}
+
+	private static OSType getOS() {
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win")) {
+			return OSType.WINDOWS;
+		} else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
+			return OSType.LINUX;
+		} else if (os.contains("mac")) {
+			return OSType.OSX;
+		} else if (os.contains("sunos")) {
+			return OSType.SOLARIS;
+		}
+		return OSType.UNKNOWN;
+	}
+
+	public enum OSType {
+		WINDOWS, LINUX, OSX, SOLARIS, UNKNOWN;
+
+		public final String nameLC;
+
+		OSType() {
+			this.nameLC = name().toLowerCase();
 		}
 	}
 }
