@@ -10,8 +10,6 @@ public final class Holders {
 
 	}
 
-	;
-
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ObjectHolder<T> {
