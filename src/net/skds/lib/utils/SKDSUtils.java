@@ -3,10 +3,12 @@ package net.skds.lib.utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -18,10 +20,20 @@ public class SKDSUtils {
 
 	public static final HexFormat HEX_FORMAT_LC = HexFormat.of();
 	public static final OSType OS_TYPE = getOS();
+	public static final String OS_ARC = getOSAndArc();
+
+	private static final ThreadLocal<MessageDigest> tlSHA1 = ThreadLocal.withInitial(() -> getMDSafe("SHA1"));
+	private static final ThreadLocal<MessageDigest> tlSHA256 = ThreadLocal.withInitial(() -> getMDSafe("SHA256"));
+	private static final ThreadLocal<MessageDigest> tlMD5 = ThreadLocal.withInitial(() -> getMDSafe("MD5"));
 
 	private static final ThreadLocal<Zipper> zippers = ThreadLocal.withInitial(Zipper::new);
 
 	public static final Random R = new Random();
+
+	@SneakyThrows
+	private static MessageDigest getMDSafe(String algorithm) {
+		return MessageDigest.getInstance(algorithm);
+	}
 
 	public static <T> void consumeIfNotNull(T object, Consumer<T> action) {
 		if (object != null) {
@@ -218,15 +230,52 @@ public class SKDSUtils {
 		return files;
 	}
 
+	public static List<File> collectFileTree(File root, Predicate<File> filter, int depth) {
+		ArrayList<File> files = new ArrayList<>();
+		collectFileTree(root, filter, files, depth);
+		return files;
+	}
+
 	public static void collectFileTree(File root, Predicate<File> filter, Collection<File> collection) {
+		collectFileTree(root, filter, collection, Integer.MAX_VALUE);
+	}
+
+	public static void collectFileTree(File root, Predicate<File> filter, Collection<File> collection, int depth) {
 		if (root.isDirectory()) {
+			if (depth <= 0) {
+				return;
+			}
 			File[] files = root.listFiles();
 			for (int i = 0; i < files.length; i++) {
-				collectFileTree(files[i], filter, collection);
+				collectFileTree(files[i], filter, collection, depth - 1);
 			}
 		} else if (filter.test(root)) {
 			collection.add(root);
 		}
+	}
+
+	public static MessageDigest getSHA1() {
+		MessageDigest md = tlSHA1.get();
+		md.reset();
+		return md;
+	}
+
+	public static MessageDigest getSHA256() {
+		MessageDigest md = tlSHA1.get();
+		md.reset();
+		return md;
+	}
+
+	public static MessageDigest getMD5() {
+		MessageDigest md = tlSHA1.get();
+		md.reset();
+		return md;
+	}
+
+	private static String getOSAndArc() {
+		String arc = System.getProperty("os.arch");
+		//System.out.println(OS_TYPE.nameLC + "-" + arc);
+		return OS_TYPE.nameLC + "-" + arc;
 	}
 
 	private static OSType getOS() {
