@@ -3,12 +3,12 @@ package net.skds.lib.utils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -30,9 +30,26 @@ public class SKDSUtils {
 
 	public static final Random R = new Random();
 
-	@SneakyThrows
 	private static MessageDigest getMDSafe(String algorithm) {
-		return MessageDigest.getInstance(algorithm);
+		try {
+			return MessageDigest.getInstance(algorithm);
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String memoryCompact(long bytes) {
+		if (bytes < 1L << 10) {
+			return bytes + " Bytes";
+		} else if (bytes < 1L << 20) {
+			return "%.2f kBytes".formatted(bytes / 1024d);
+		} else if (bytes < 1L << 30) {
+			return "%.2f MBytes".formatted(bytes / (1024d * 1024));
+		} else if (bytes < 1L << 40) {
+			return "%.2f GBytes".formatted(bytes / (1024d * 1024 * 1024));
+		} else {
+			return "%.2f TBytes".formatted(bytes / (1024d * 1024 * 1024 * 1024));
+		}
 	}
 
 	public static <T> void consumeIfNotNull(T object, Consumer<T> action) {
