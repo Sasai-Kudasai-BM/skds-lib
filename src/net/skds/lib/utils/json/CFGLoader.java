@@ -170,6 +170,10 @@ public class CFGLoader {
 		return "";
 	}
 
+	public static String toJson(Object cfg) {
+		return GSON.toJson(cfg);
+	}
+
 	public static boolean saveConfig(File file, Object cfg) {
 		try {
 			String text = GSON.toJson(cfg);
