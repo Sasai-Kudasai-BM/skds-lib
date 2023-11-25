@@ -19,27 +19,15 @@ public class Test {
 
 	public static void main(String[] args) throws IOException {
 
-		AbstractNetServer server = null;
-		ServerConnection client = null;
+		InetSocketAddress addr = new InetSocketAddress("0.0.0.0", 25565);
+		AbstractNetServer server = new AbstractNetServer();
+		server.start(addr, ThreadUtil::runTaskNewThread);
 
-		for (int i = 0; i < args.length; i++) {
-			String arg = args[i];
-			if (arg.contains("server=") && server == null) {
-				String value = arg.substring(arg.indexOf('=') + 1, arg.length() - 1);
-				InetSocketAddress addr = new InetSocketAddress("0.0.0.0", Integer.valueOf(value));
-				server = new AbstractNetServer();
-				server.start(addr, ThreadUtil::runTaskNewThread);
-			}
-			if (arg.contains("client=") && client == null) {
-				String value = arg.substring(arg.indexOf('=') + 1, arg.length() - 1);
-				String[] valueArr = value.split(":");
-				InetSocketAddress addr = new InetSocketAddress(valueArr[0], Integer.valueOf(valueArr[1]));
-				client = AbstractConnection.connectTo(addr, ThreadUtil::runTaskNewThread, packetSize);
-			}
-		}
+		addr = new InetSocketAddress("100.65.0.183", 10001);
+		ServerConnection client = AbstractConnection.connectTo(addr, ThreadUtil::runTaskNewThread, packetSize);
 
-		if (client != null) {
-			client.sendPacket(new TestPacket<>(1, 0, System.nanoTime()));
-		}
+
+		client.sendPacket(new TestPacket<>(1, 0, System.nanoTime()));
+
 	}
 }
