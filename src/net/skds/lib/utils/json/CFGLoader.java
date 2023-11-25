@@ -77,22 +77,24 @@ public class CFGLoader {
 					out.value(value);
 				}
 
-			})
-			.setPrettyPrinting();
+			});
 
 	@Getter
-	private static Gson GSON = builder.create();
+	private static Gson GSON_COMPACT = builder.create();
+	@Getter
+	private static Gson GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
 	private static final TypeAdapter<JsonElement> JE_ADAPTER = GSON.getAdapter(JsonElement.class);
 	private static final TypeAdapter<JsonArray> JA_ADAPTER = GSON.getAdapter(JsonArray.class);
 	private static final TypeAdapter<JsonObject> JO_ADAPTER = GSON.getAdapter(JsonObject.class);
 
 	public static void addAdapter(Type type, TypeAdapter<?> adapter) {
-		GSON = builder.registerTypeAdapter(type, adapter).create();
+		GSON_COMPACT = builder.registerTypeAdapter(type, adapter).create();
+		GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
 	}
 
 	public static <AT, CT extends AT, E extends Enum<E> & ConfigType<CT>> void addTypedAdapter(Class<AT> type, Class<E> typeClass) {
 
-		GSON = builder.registerTypeAdapter(type, new TypeAdapter<CT>() {
+		GSON_COMPACT = builder.registerTypeAdapter(type, new TypeAdapter<CT>() {
 
 			@Override
 			public CT read(JsonReader in) throws IOException {
@@ -117,6 +119,7 @@ public class CFGLoader {
 			}
 
 		}).create();
+		GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
 	}
 
 	public static <T> T readConfig(File file, Class<T> clazz) {
@@ -170,6 +173,10 @@ public class CFGLoader {
 		return "";
 	}
 
+	public static String toJsonCompact(Object cfg) {
+		return GSON_COMPACT.toJson(cfg);
+	}
+
 	public static String toJson(Object cfg) {
 		return GSON.toJson(cfg);
 	}
@@ -177,6 +184,21 @@ public class CFGLoader {
 	public static boolean saveConfig(File file, Object cfg) {
 		try {
 			String text = GSON.toJson(cfg);
+			File parent = file.getParentFile();
+			if (parent != null) {
+				parent.mkdirs();
+			}
+			Files.writeString(file.toPath(), text, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public static boolean saveConfigCompact(File file, Object cfg) {
+		try {
+			String text = GSON_COMPACT.toJson(cfg);
 			File parent = file.getParentFile();
 			if (parent != null) {
 				parent.mkdirs();

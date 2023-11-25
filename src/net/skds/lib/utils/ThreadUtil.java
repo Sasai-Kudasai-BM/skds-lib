@@ -93,6 +93,10 @@ public class ThreadUtil {
 		EXECUTOR.execute(runnable);
 	}
 
+	public static void runAsync(UnsafeRunnable runnable) {
+		EXECUTOR.execute(runnable);
+	}
+
 	public static class SKDSThread extends Thread {
 
 		//private final float k = 0.05f;
