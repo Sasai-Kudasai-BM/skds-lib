@@ -52,6 +52,10 @@ public class SKDSUtils {
 		}
 	}
 
+	public static String stringHash(MessageDigest md, String value) {
+		return HEX_FORMAT_LC.formatHex(md.digest(value.getBytes(StandardCharsets.UTF_8)));
+	}
+
 	public static <T> void consumeIfNotNull(T object, Consumer<T> action) {
 		if (object != null) {
 			action.accept(object);
