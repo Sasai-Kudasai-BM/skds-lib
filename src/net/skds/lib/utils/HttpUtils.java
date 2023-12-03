@@ -42,8 +42,11 @@ public class HttpUtils {
 		try {
 			HttpClient client = builder.build();
 			HttpRequest request = HttpRequest.newBuilder(URI.create(url)).build();
-			System.out.println(request.headers().map());
+			//System.out.println(request.headers().map());
 			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofInputStream());
+			if (response.statusCode() != 200) {
+				throw new RuntimeException("non-ok response " + response.statusCode() + " on " + url);
+			}
 			List<String> cl = response.headers().map().get("content-length");
 			if (cl == null || cl.isEmpty()) {
 				throw new RuntimeException("content-length not provided");
@@ -75,6 +78,18 @@ public class HttpUtils {
 				this.progress += inputStream.read(content, progress, content.length - progress);
 			} while (!isReady());
 			inputStream.close();
+		}
+
+		public boolean read() throws IOException {
+			if (isReady()) {
+				return false;
+			}
+			this.progress += inputStream.read(content, progress, content.length - progress);
+			boolean ready = isReady();
+			if (ready) {
+				inputStream.close();
+			}
+			return !ready;
 		}
 
 		public boolean checkSHA1(String sha1) {
