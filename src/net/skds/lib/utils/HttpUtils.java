@@ -60,6 +60,23 @@ public class HttpUtils {
 		throw new RuntimeException("Unable to download " + url);
 	}
 
+	public record Response(int code, byte[] data) {
+	}
+
+	public static Response doRequest(String url, byte[] requestBody) {
+		try {
+			HttpClient client = builder.build();
+			HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+					.POST(HttpRequest.BodyPublishers.ofByteArray(requestBody))
+					.build();
+			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofByteArray());
+			return new Response(response.statusCode(), response.body());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		throw new RuntimeException("Unable to download " + url);
+	}
+
 	public static class DownloadProcess {
 
 		private final InputStream inputStream;
