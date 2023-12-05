@@ -52,7 +52,7 @@ public class HttpUtils {
 				throw new RuntimeException("content-length not provided");
 			}
 			int len = Integer.parseInt(cl.get(0));
-			return new DownloadProcess(len, response.body());
+			return new DownloadProcess(response.statusCode(), len, response.body());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -67,8 +67,11 @@ public class HttpUtils {
 		private final byte[] content;
 		@Getter
 		private volatile int progress = 0;
+		@Getter
+		private final int responseCode;
 
-		protected DownloadProcess(int size, InputStream is) {
+		protected DownloadProcess(int code, int size, InputStream is) {
+			this.responseCode = code;
 			this.content = new byte[size];
 			this.inputStream = is;
 		}
