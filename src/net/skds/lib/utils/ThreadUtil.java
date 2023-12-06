@@ -1,5 +1,7 @@
 package net.skds.lib.utils;
 
+import lombok.SneakyThrows;
+
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +35,11 @@ public class ThreadUtil {
 
 	public static void runTaskNewThread(Runnable runnable) {
 		new SKDSThread(UTIL_GROUP, runnable).start();
+	}
+
+	@SneakyThrows
+	public static void await(long millis) {
+		Thread.sleep(millis);
 	}
 
 	public static SKDSThread runNewThreadMainGroup(Runnable runnable, String name) {
