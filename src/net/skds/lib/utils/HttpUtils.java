@@ -60,7 +60,18 @@ public class HttpUtils {
 		throw new RuntimeException("Unable to download " + url);
 	}
 
-	public record Response(int code, byte[] data) {
+	public record Response(int code, byte[] data, HttpResponse<byte[]> response) {
+	}
+
+	public static Response doRequest(HttpRequest request) {
+		try {
+			HttpClient client = builder.build();
+			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofByteArray());
+			return new Response(response.statusCode(), response.body(), response);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		throw new RuntimeException("Unable to download " + request.uri());
 	}
 
 	public static Response doRequest(String url, byte[] requestBody) {
@@ -70,7 +81,7 @@ public class HttpUtils {
 					.POST(HttpRequest.BodyPublishers.ofByteArray(requestBody))
 					.build();
 			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofByteArray());
-			return new Response(response.statusCode(), response.body());
+			return new Response(response.statusCode(), response.body(), response);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

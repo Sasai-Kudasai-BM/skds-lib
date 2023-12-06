@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.awt.*;
 import java.io.File;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -35,6 +38,14 @@ public class SKDSUtils {
 			return MessageDigest.getInstance(algorithm);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static void openInBrowser(String link) {
+		try {
+			Desktop.getDesktop().browse(new URI(link));
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
