@@ -19,7 +19,7 @@ import java.util.Map;
 public class HttpUtils {
 
 	private static final HttpClient.Builder builder = HttpClient.newBuilder()
-			.connectTimeout(Duration.ofSeconds(2));
+			.connectTimeout(Duration.ofSeconds(10));
 
 	public static Map<String, String> queryToMap(String query) {
 		if (query == null || query.isEmpty()) {
