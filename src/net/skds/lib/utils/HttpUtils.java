@@ -49,7 +49,8 @@ public class HttpUtils {
 			}
 			List<String> cl = response.headers().map().get("content-length");
 			if (cl == null || cl.isEmpty()) {
-				throw new RuntimeException("content-length not provided");
+				return new DownloadProcess(response.statusCode(), 0, response.body());
+				//throw new RuntimeException("content-length not provided");
 			}
 			int len = Integer.parseInt(cl.get(0));
 			return new DownloadProcess(response.statusCode(), len, response.body());
