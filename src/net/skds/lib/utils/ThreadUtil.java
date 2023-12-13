@@ -100,6 +100,18 @@ public class ThreadUtil {
 		EXECUTOR.execute(runnable);
 	}
 
+	public static void runNThreads(UnsafeRunnable runnable, int n) {
+		for (int i = 0; i < n; i++) {
+			new SKDSThread(UTIL_GROUP, runnable).start();
+		}
+	}
+	
+	public static void runNThreads(Runnable runnable, int n) {
+		for (int i = 0; i < n; i++) {
+			new SKDSThread(UTIL_GROUP, runnable).start();
+		}
+	}
+
 	public static void runAsync(UnsafeRunnable runnable) {
 		EXECUTOR.execute(runnable);
 	}

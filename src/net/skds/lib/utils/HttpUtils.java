@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntConsumer;
 
 public class HttpUtils {
 
@@ -122,6 +123,15 @@ public class HttpUtils {
 				inputStream.close();
 			}
 			return !ready;
+		}
+
+		public void readAll(IntConsumer action) throws IOException {
+			do {
+				int r = inputStream.read(content, progress, content.length - progress);
+				this.progress += r;
+				action.accept(r);
+			} while (!isReady());
+			inputStream.close();
 		}
 
 		public boolean checkSHA1(String sha1) {
