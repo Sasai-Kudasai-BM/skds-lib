@@ -307,13 +307,13 @@ public class SKDSUtils {
 	}
 
 	public static MessageDigest getSHA256() {
-		MessageDigest md = tlSHA1.get();
+		MessageDigest md = tlSHA256.get();
 		md.reset();
 		return md;
 	}
 
 	public static MessageDigest getMD5() {
-		MessageDigest md = tlSHA1.get();
+		MessageDigest md = tlMD5.get();
 		md.reset();
 		return md;
 	}
