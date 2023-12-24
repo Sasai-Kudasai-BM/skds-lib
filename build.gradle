@@ -5,3 +5,10 @@ archivesBaseName = "SKDS-Lib"
 dependencies {
 
 }
+
+configurations {
+    exposedRuntime {
+        canBeResolved = false
+        assert canBeConsumed
+    }
+}
