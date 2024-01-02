@@ -3,7 +3,6 @@ group = "net.skds"
 archivesBaseName = "SKDS-Lib"
 
 dependencies {
-
 }
 
 configurations {

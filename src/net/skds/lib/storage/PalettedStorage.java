@@ -4,14 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import net.skds.lib.utils.SKDSByteBuf;
 
-public class PalettedStorage<T extends Palettable<T>> implements Cloneable {
+public class PalettedStorage<T> implements Cloneable {
 
 	protected T defaultValue;
 	@Setter
 	@Getter
 	protected PalettedData data;
-	protected final int bits;
-	protected final int size;
+	public final int bits;
+	public final int size;
 	protected final DirectSupplier<T> directSupplier;
 
 	public PalettedStorage(int size, T defaultValue, DirectSupplier<T> directSupplier) {
@@ -51,13 +51,13 @@ public class PalettedStorage<T extends Palettable<T>> implements Cloneable {
 			}
 			expand();
 		}
-		int ind = data.setValue(index, newValue.getIndex());
+		int ind = data.setValue(index, directSupplier.getIndex(newValue));
 		return directSupplier.get(ind);
 	}
 
 	public int getDataSize() {
 		if (isSingle()) {
-			return 1 + SKDSByteBuf.getVarIntSize(defaultValue.getIndex()) + 1;
+			return 1 + SKDSByteBuf.getVarIntSize(directSupplier.getIndex(defaultValue)) + 1;
 		}
 		int size = SKDSByteBuf.getVarIntSize(bits);
 		size += SKDSByteBuf.getVarIntSize(data.words.length);
@@ -68,7 +68,7 @@ public class PalettedStorage<T extends Palettable<T>> implements Cloneable {
 	public void write(SKDSByteBuf buffer) {
 		if (isSingle()) {
 			buffer.writeByte(0); // Bits Per Entry
-			buffer.writeVarInt(defaultValue.getIndex()); // Palette
+			buffer.writeVarInt(directSupplier.getIndex(defaultValue)); // Palette
 			buffer.writeVarInt(0); //Data Array Length
 			// empty //Data Array
 		} else {
@@ -78,24 +78,19 @@ public class PalettedStorage<T extends Palettable<T>> implements Cloneable {
 				buffer.putLong(data.words[i]);
 			}
 		}
-
 	}
 
 	public static interface DirectSupplier<T> {
 
-		public T get(int index);
+		T get(int index);
 
-		public int size();
+		int getIndex(T value);
 
-		public int bitThreshold();
+		int size();
 
-		public int minBits();
-
-		public default int bits() {
+		default int bits() {
 			return calcBits(size());
 		}
-
-		public Class<T> getType();
 	}
 
 	public static int calcBits(int values) {

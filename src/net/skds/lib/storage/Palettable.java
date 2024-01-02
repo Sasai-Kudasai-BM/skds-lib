@@ -2,6 +2,7 @@ package net.skds.lib.storage;
 
 import net.skds.lib.utils.SKDSUtils.Indexed;
 
+@Deprecated
 public interface Palettable<T extends Palettable<T>> extends Indexed, Comparable<T> {
 
 	@Override
