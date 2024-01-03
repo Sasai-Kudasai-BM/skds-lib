@@ -88,6 +88,11 @@ public class PalettedStorage<T> implements Cloneable {
 
 		int size();
 
+		public int bitThreshold();
+
+		public int minBits();
+
+
 		default int bits() {
 			return calcBits(size());
 		}
