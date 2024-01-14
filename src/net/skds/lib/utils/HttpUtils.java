@@ -2,6 +2,7 @@ package net.skds.lib.utils;
 
 import lombok.Getter;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -92,7 +93,7 @@ public class HttpUtils {
 
 	public static class DownloadProcess {
 
-		private final InputStream inputStream;
+		private final BufferedInputStream inputStream;
 		@Getter
 		private final byte[] content;
 		@Getter
@@ -103,7 +104,7 @@ public class HttpUtils {
 		protected DownloadProcess(int code, int size, InputStream is) {
 			this.responseCode = code;
 			this.content = new byte[size];
-			this.inputStream = is;
+			this.inputStream = new BufferedInputStream(is);
 		}
 
 		public void readAll() throws IOException {
