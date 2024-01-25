@@ -69,6 +69,11 @@ public class Box implements ConvexShape {
 		return new Box(pos.x - dx, pos.y - dy, pos.z - dz, pos.x + dx, pos.y + dy, pos.z + dz);
 	}
 
+	public static Box fromPosSize(Vec3 pos, double size) {
+		size /= 2;
+		return new Box(pos.x - size, pos.y - size, pos.z - size, pos.x + size, pos.y + size, pos.z + size);
+	}
+
 	public static Box fromNormal(Vec3 n) {
 		return new Box(n.x < 0 ? n.x : 0, n.y < 0 ? n.y : 0, n.z < 0 ? n.z : 0, n.x > 0 ? n.x : 0, n.y > 0 ? n.y : 0, n.z > 0 ? n.z : 0);
 	}

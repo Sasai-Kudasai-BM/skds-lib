@@ -1,6 +1,5 @@
 package net.skds.lib.collision;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.skds.lib.collision.Direction.Axis;
@@ -164,13 +163,18 @@ public class ConvexCollision {
 		return null;
 	}
 
-	@AllArgsConstructor
 	public static class SimpleCollisionResult {
 		public final double depth;
 		public final Vec3 normal;
 		@Getter
 		@Setter
 		private IShape shape;
+
+		public SimpleCollisionResult(double depth, Vec3 normal, IShape shape) {
+			this.depth = depth;
+			this.normal = normal;
+			this.shape = shape;
+		}
 	}
 
 	public static class CollisionResult extends SimpleCollisionResult {
