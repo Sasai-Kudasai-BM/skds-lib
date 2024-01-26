@@ -119,7 +119,6 @@ public class ConvexCollision {
 
 		double pMin = 0;
 		double pMax = 1;
-		boolean intersect = true;
 
 		for (int i = 0; i < Axis.VALUES.length; i++) {
 			Axis terminator = Axis.VALUES[i];
@@ -129,38 +128,29 @@ public class ConvexCollision {
 			double bMin = b.getMin(terminator);
 			double bMax = b.getMax(terminator);
 
-			//double iMin = Math.max(aMin, bMin);
-			double iMax = Math.min(aMax, bMax);
+			double tMin = (aMin - bMax) / v;
+			double tMax = (aMax - bMin) / v;
 
-			double zero;
-			double inner;
-			double outer;
-			if (v > 0) {
-				zero = bMin;
-				outer = aMax;
-				inner = aMin - (bMax - bMin);
-			} else {
-				zero = bMax;
-				outer = aMin;
-				inner = iMax + (bMax - bMin);
+			if (v < 0) {
+				double d = tMin;
+				tMin = tMax;
+				tMax = d;
 			}
-			inner -= zero;
-			outer -= zero;
 
-			pMin = Math.max(pMin, inner / v);
-			pMax = Math.min(pMax, outer / v);
-
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
 			if (pMax < pMin) {
-				intersect = false;
-				break;
+				return null;
 			}
 		}
 
-		if (intersect) {
-			Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
-			return new SimpleCollisionResult(pMin, inter.minTerminator().getDir(velocityBA).getOpposite().createVector3D(), null);
-		}
-		return null;
+		Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
+		return new SimpleCollisionResult(pMin, inter.minTerminator().getDir(velocityBA).getOpposite().createVector3D(), null);
+
 	}
 
 	public static class SimpleCollisionResult {

@@ -1,6 +1,10 @@
 package net.skds.lib.mat;
 
+import java.util.Random;
+
 public class FastMath {
+
+	public static final Random RANDOM = new Random();
 
 	public static double modInt(double a, int b) {
 		int div = ((int) a) / b;

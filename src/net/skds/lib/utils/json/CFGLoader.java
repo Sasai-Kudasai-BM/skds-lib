@@ -109,6 +109,9 @@ public class CFGLoader {
 
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				CT value = adapter.read(in);
+				if (value instanceof JsonPostInit jpi) {
+					jpi.jsomPostInit();
+				}
 				in.endObject();
 				return value;
 			}
