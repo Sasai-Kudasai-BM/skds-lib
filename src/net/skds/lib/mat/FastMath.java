@@ -6,6 +6,27 @@ public class FastMath {
 
 	public static final Random RANDOM = new Random();
 
+	public static boolean roll(double chance) {
+		if (chance <= 0) {
+			return false;
+		} else if (chance >= 1) {
+			return true;
+		} else {
+			return RANDOM.nextDouble() <= chance;
+		}
+	}
+
+	public static double gaussian() {
+		double v1, v2, s;
+		do {
+			v1 = 2 * RANDOM.nextDouble() - 1; // between -1 and 1
+			v2 = 2 * RANDOM.nextDouble() - 1; // between -1 and 1
+			s = v1 * v1 + v2 * v2;
+		} while (s >= 1 || s == 0);
+		double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s) / s);
+		return v1 * multiplier;
+	}
+
 	public static double modInt(double a, int b) {
 		int div = ((int) a) / b;
 		//log.info(div);
