@@ -8,7 +8,7 @@ import net.skds.lib.utils.Holders.DoubleHolder;
 
 import java.util.Collection;
 
-public class Box implements ConvexShape {
+public final class Box implements ConvexShape {
 	public final double minX;
 	public final double minY;
 	public final double minZ;
@@ -437,86 +437,93 @@ public class Box implements ConvexShape {
 
 	@Override
 	public ConvexCollision.SimpleCollisionResult raytrace(Vec3 from, Vec3 to) {
-		double tMax = Double.POSITIVE_INFINITY;
-		double tMin = Double.NEGATIVE_INFINITY;
-		int axis = 0;
-		boolean inverse = false;
-		Vec3 dir = to.copy().sub(from);
-
+		/*
+		double pMax = 1;
+		double pMin = 0;
+		double len = Double.MAX_VALUE;
+		Axis axis = null;
+		final Vec3 vel = to.copy().sub(from);
 		for (int i = 0; i < Axis.VALUES.length; i++) {
-			Axis ax = Axis.VALUES[i];
-			double nomLen = -ax.choose(from);
-			double denomLen = ax.choose(dir);
+			final Axis ax = Axis.VALUES[i];
+			double fp = ax.choose(from);
+			double v = ax.choose(vel);
 
-			double a = (nomLen + getProjectionMax(ax)) / denomLen;
-			double b = (nomLen + getProjectionMin(ax)) / denomLen;
+			double aMin = getProjectionMin(ax);
+			double aMax = getProjectionMax(ax);
 
-			double min;
-			double max;
-			if (a < b) {
-				min = a;
-				max = b;
-			} else {
-				min = b;
-				max = a;
+			double tMin = (aMin - fp) / v;
+			double tMax = (aMax - fp) / v;
+
+			if (v < 0) {
+				double d = tMin;
+				tMin = tMax;
+				tMax = d;
 			}
-			if (min > tMin) {
-				tMin = min;
-				axis = i;
-				inverse = a > b;
+
+			if (tMin > pMin) {
+				pMin = tMin;
 			}
-			if (max < tMax) {
-				tMax = max;
+			if (tMax < pMax) {
+				pMax = tMax;
 			}
-			if (tMax < tMin) {
+			if (pMax < pMin) {
 				return null;
 			}
+			double len2 = tMax - tMin;
+			if (len2 < len) {
+				axis = ax;
+				len = len2;
+			}
 		}
-		return new ConvexCollision.SimpleCollisionResult(tMin, Axis.VALUES[axis].getNormal(inverse).copy(), this);
+		 */
+		final DoubleHolder depth = new DoubleHolder(1);
+		final Direction dir = traceCollisionSide(from, depth, null, to.x - from.x, to.y - from.y, to.z - from.z);
+
+		if (dir == null) {
+			return null;
+		}
+
+		return new ConvexCollision.SimpleCollisionResult(depth.getValue(), dir.createVector3D(), this);
 	}
 
-	public record BoxHitResult(double depth, Vec3 normal) {
-	}
-
-	private static Direction traceCollisionSide(Box box, Vec3 intersectingVector, DoubleHolder distance,
-												Direction direction, double dx, double dy, double dz) {
+	private Direction traceCollisionSide(Vec3 intersectingVector, DoubleHolder distance, Direction direction, double dx, double dy, double dz) {
 		if (dx > 1.0E-7) {
-			direction = Box.traceCollisionSide(distance, direction, dx, dy, dz,
-					box.minX, box.minY, box.maxY, box.minZ, box.maxZ, Direction.WEST, intersectingVector.x,
+			direction = traceCollisionSide(distance, direction, dx, dy, dz,
+					minX, minY, maxY, minZ, maxZ, Direction.WEST, intersectingVector.x,
 					intersectingVector.y, intersectingVector.z);
 		} else if (dx < -1.0E-7) {
-			direction = Box.traceCollisionSide(distance, direction, dx, dy, dz,
-					box.maxX, box.minY, box.maxY, box.minZ, box.maxZ, Direction.EAST, intersectingVector.x,
+			direction = traceCollisionSide(distance, direction, dx, dy, dz,
+					maxX, minY, maxY, minZ, maxZ, Direction.EAST, intersectingVector.x,
 					intersectingVector.y, intersectingVector.z);
 		}
 		if (dy > 1.0E-7) {
-			direction = Box.traceCollisionSide(distance, direction, dy, dz, dx,
-					box.minY, box.minZ, box.maxZ, box.minX, box.maxX, Direction.DOWN, intersectingVector.y,
+			direction = traceCollisionSide(distance, direction, dy, dz, dx,
+					minY, minZ, maxZ, minX, maxX, Direction.DOWN, intersectingVector.y,
 					intersectingVector.z, intersectingVector.x);
 		} else if (dy < -1.0E-7) {
-			direction = Box.traceCollisionSide(distance, direction, dy, dz, dx,
-					box.maxY, box.minZ, box.maxZ, box.minX, box.maxX, Direction.UP, intersectingVector.y,
+			direction = traceCollisionSide(distance, direction, dy, dz, dx,
+					maxY, minZ, maxZ, minX, maxX, Direction.UP, intersectingVector.y,
 					intersectingVector.z, intersectingVector.x);
 		}
 		if (dz > 1.0E-7) {
-			direction = Box.traceCollisionSide(distance, direction, dz, dx, dy,
-					box.minZ, box.minX, box.maxX, box.minY, box.maxY, Direction.NORTH, intersectingVector.z,
+			direction = traceCollisionSide(distance, direction, dz, dx, dy,
+					minZ, minX, maxX, minY, maxY, Direction.NORTH, intersectingVector.z,
 					intersectingVector.x, intersectingVector.y);
 		} else if (dz < -1.0E-7) {
-			direction = Box.traceCollisionSide(distance, direction, dz, dx, dy,
-					box.maxZ, box.minX, box.maxX, box.minY, box.maxY, Direction.SOUTH, intersectingVector.z,
+			direction = traceCollisionSide(distance, direction, dz, dx, dy,
+					maxZ, minX, maxX, minY, maxY, Direction.SOUTH, intersectingVector.z,
 					intersectingVector.x, intersectingVector.y);
 		}
 		return direction;
 	}
 
 	private static Direction traceCollisionSide(DoubleHolder traceDistanceResult, Direction approachDirection,
-												double deltaX, double deltaY, double deltaZ, double begin, double minX, double maxX, double minZ,
+												double deltaX, double deltaY, double deltaZ, double begin, double minA, double maxA, double minB,
 												double maxZ, Direction resultDirection, double startX, double startY, double startZ) {
 		double d = (begin - startX) / deltaX;
 		double e = startY + d * deltaY;
 		double f = startZ + d * deltaZ;
-		if (0.0 < d && d < traceDistanceResult.getValue() && minX - 1.0E-7 < e && e < maxX + 1.0E-7 && minZ - 1.0E-7 < f
+		if (0.0 < d && d < traceDistanceResult.getValue() && minA - 1.0E-7 < e && e < maxA + 1.0E-7 && minB - 1.0E-7 < f
 				&& f < maxZ + 1.0E-7) {
 			traceDistanceResult.setValue(d);
 			return resultDirection;
