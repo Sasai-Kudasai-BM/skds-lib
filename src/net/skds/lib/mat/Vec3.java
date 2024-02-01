@@ -5,7 +5,7 @@ import net.skds.lib.utils.SKDSUtils;
 
 import java.util.Random;
 
-public class Vec3 implements IVec3 {
+public final class Vec3 implements IVec3 {
 
 	public static final Vec3 XN = new Vec3(-1.0F, 0.0F, 0.0F);
 	public static final Vec3 XP = new Vec3(1.0F, 0.0F, 0.0F);
