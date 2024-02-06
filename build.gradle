@@ -3,11 +3,5 @@ group = "net.skds"
 archivesBaseName = "SKDS-Lib"
 
 dependencies {
-}
-
-configurations {
-    exposedRuntime {
-        canBeResolved = false
-        assert canBeConsumed
-    }
+    implementation("com.google.code.gson:gson:2.8.9")
 }

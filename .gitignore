@@ -3,6 +3,9 @@
 
 # Ignore Gradle build output directory
 
+.git
+.gitignore
+build.gradle
 **/build
 bin
 *.log
