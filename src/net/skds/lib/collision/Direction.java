@@ -3,17 +3,8 @@ package net.skds.lib.collision;
 import net.skds.lib.mat.FastMath;
 import net.skds.lib.mat.Vec3;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.function.Predicate;
 
-/**
- * An enum representing 6 cardinal directions in Minecraft.
- *
- * <p>In Minecraft, the X axis determines the east-west direction, the Y axis determines
- * the up-down direction, and the Z axis determines the south-north direction (note
- * that positive-Z direction is south, not north).
- */
 public enum Direction {
 	DOWN(0, 1, -1, "down", AxisDirection.NEGATIVE, Axis.Y, new BlockPos(0, -1, 0)),
 	UP(1, 0, -1, "up", AxisDirection.POSITIVE, Axis.Y, new BlockPos(0, 1, 0)),
@@ -22,7 +13,8 @@ public enum Direction {
 	WEST(4, 5, 1, "west", AxisDirection.NEGATIVE, Axis.X, new BlockPos(-1, 0, 0)),
 	EAST(5, 4, 3, "east", AxisDirection.POSITIVE, Axis.X, new BlockPos(1, 0, 0));
 
-	public static Direction[] values = values();
+	public static final Direction[] VALUES = values();
+	public static final Direction[] HORIZONTAL = {NORTH, SOUTH, WEST, EAST};
 
 	private final int id;
 	private final int idOpposite;
@@ -31,9 +23,6 @@ public enum Direction {
 	private final Axis axis;
 	private final AxisDirection direction;
 	private final BlockPos vector;
-	private static final Direction[] ALL;
-	private static final Direction[] VALUES;
-	private static final Direction[] HORIZONTAL;
 
 	public static final Direction LEFT = EAST;
 	public static final Direction RIGHT = WEST;
@@ -47,8 +36,8 @@ public enum Direction {
 	public static final Direction ZP = SOUTH;
 	public static final Direction ZN = NORTH;
 
-	private Direction(int id, int idOpposite, int idHorizontal, String name, AxisDirection direction, Axis axis,
-					  BlockPos vector) {
+	Direction(int id, int idOpposite, int idHorizontal, String name, AxisDirection direction, Axis axis,
+			  BlockPos vector) {
 		this.id = id;
 		this.idHorizontal = idHorizontal;
 		this.idOpposite = idOpposite;
@@ -58,75 +47,6 @@ public enum Direction {
 		this.vector = vector;
 	}
 
-	//public static Direction[] getEntityFacingOrder(Entity entity) {
-	//    Direction direction3;
-	//    float f = entity.getPitch(1.0f) * ((float)Math.PI / 180);
-	//    float g = -entity.getYaw(1.0f) * ((float)Math.PI / 180);
-	//    float h = Math.sin(f);
-	//    float i = Math.cos(f);
-	//    float j = Math.sin(g);
-	//    float k = Math.cos(g);
-	//    boolean bl = j > 0.0f;
-	//    boolean bl2 = h < 0.0f;
-	//    boolean bl3 = k > 0.0f;
-	//    float l = bl ? j : -j;
-	//    float m = bl2 ? -h : h;
-	//    float n = bl3 ? k : -k;
-	//    float o = l * i;
-	//    float p = n * i;
-	//    Direction direction = bl ? EAST : WEST;
-	//    Direction direction2 = bl2 ? UP : DOWN;
-	//    Direction direction4 = direction3 = bl3 ? SOUTH : NORTH;
-	//    if (l > n) {
-	//        if (m > o) {
-	//            return Direction.listClosest(direction2, direction, direction3);
-	//        }
-	//        if (p > m) {
-	//            return Direction.listClosest(direction, direction3, direction2);
-	//        }
-	//        return Direction.listClosest(direction, direction2, direction3);
-	//    }
-	//    if (m > p) {
-	//        return Direction.listClosest(direction2, direction3, direction);
-	//    }
-	//    if (o > m) {
-	//        return Direction.listClosest(direction3, direction, direction2);
-	//    }
-	//    return Direction.listClosest(direction3, direction2, direction);
-	//}
-
-	/**
-	 * Helper function that returns the 3 directions given, followed by the 3 opposite given in opposite order.
-	 */
-
-	//public static Direction transform(Matrix4f matrix, Direction direction) {
-	//    BlockPos BlockPos = direction.getVector();
-	//    Vector4f vector4f = matrix.transform(new Vector4f(BlockPos.getX(), BlockPos.getY(), BlockPos.getZ(), 0.0f));
-	//    return Direction.getFacing(vector4f.x(), vector4f.y(), vector4f.z());
-	//}
-
-	///**
-	// * {@return a shuffled collection of all directions}
-	// */
-	//public static Collection<Direction> shuffle(Random random) {
-	//    return Util.copyShuffled(Direction.values(), random);
-	//}
-
-	//public static Stream<Direction> stream() {
-	//    return Stream.of(ALL);
-	//}
-
-	//public Quaternionf getRotationQuaternion() {
-	//    return switch (this) {
-	//        default -> throw new IncompatibleClassChangeError();
-	//        case DOWN -> new Quaternionf().rotationX((float)Math.PI);
-	//        case UP -> new Quaternionf();
-	//        case NORTH -> new Quaternionf().rotationXYZ(1.5707964f, 0.0f, (float)Math.PI);
-	//        case SOUTH -> new Quaternionf().rotationX(1.5707964f);
-	//        case WEST -> new Quaternionf().rotationXYZ(1.5707964f, 0.0f, 1.5707964f);
-	//        case EAST -> new Quaternionf().rotationXYZ(1.5707964f, 0.0f, -1.5707964f);
-	//    };
-	//}
 	public int getId() {
 		return this.id;
 	}
@@ -138,25 +58,6 @@ public enum Direction {
 	public AxisDirection getDirection() {
 		return this.direction;
 	}
-
-	//public static Direction getLookDirectionForAxis(Entity entity, Axis axis) {
-	//    return switch (axis) {
-	//        default -> throw new IncompatibleClassChangeError();
-	//        case X -> {
-	//            if (EAST.pointsTo(entity.getYaw(1.0f))) {
-	//                yield EAST;
-	//            }
-	//            yield WEST;
-	//        }
-	//        case Z -> {
-	//            if (SOUTH.pointsTo(entity.getYaw(1.0f))) {
-	//                yield SOUTH;
-	//            }
-	//            yield NORTH;
-	//        }
-	//        case Y -> entity.getPitch(1.0f) < 0.0f ? UP : DOWN;
-	//    };
-	//}
 
 	public Direction getOpposite() {
 		return Direction.byId(this.idOpposite);
@@ -322,7 +223,7 @@ public enum Direction {
 	public static Direction getFacing(float x, float y, float z) {
 		Direction direction = NORTH;
 		float f = Float.MIN_VALUE;
-		for (Direction direction2 : ALL) {
+		for (Direction direction2 : VALUES) {
 			float g = x * direction2.vector.x + y * direction2.vector.y + z * direction2.vector.z;
 			if (!(g > f))
 				continue;
@@ -360,7 +261,7 @@ public enum Direction {
 	}
 
 	public static Direction get(AxisDirection direction, Axis axis) {
-		for (Direction direction2 : ALL) {
+		for (Direction direction2 : VALUES) {
 			if (direction2.getDirection() != direction || direction2.getAxis() != axis)
 				continue;
 			return direction2;
@@ -388,14 +289,6 @@ public enum Direction {
 		float g = -FastMath.sin(f);
 		float h = FastMath.cos(f);
 		return (float) this.vector.x * g + (float) this.vector.z * h > 0.0f;
-	}
-
-	static {
-		ALL = Direction.values();
-		VALUES = (Direction[]) Arrays.stream(ALL).sorted(Comparator.comparingInt(direction -> direction.id))
-				.toArray(Direction[]::new);
-		HORIZONTAL = (Direction[]) Arrays.stream(ALL).filter(direction -> direction.getAxis().isHorizontal())
-				.sorted(Comparator.comparingInt(direction -> direction.idHorizontal)).toArray(Direction[]::new);
 	}
 
 	/*

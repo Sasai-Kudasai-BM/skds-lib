@@ -124,6 +124,25 @@ public final class Vec3 implements IVec3 {
 		return this;
 	}
 
+	public Vec3 clamp(double min, double max) {
+		if (this.x > max) {
+			this.x = max;
+		} else if (this.x < min) {
+			this.x = min;
+		}
+		if (this.y > max) {
+			this.y = max;
+		} else if (this.y < min) {
+			this.y = min;
+		}
+		if (this.z > max) {
+			this.z = max;
+		} else if (this.z < min) {
+			this.z = min;
+		}
+		return this;
+	}
+
 	public Vec3 set(double x, double y, double z) {
 		this.x = x;
 		this.y = y;

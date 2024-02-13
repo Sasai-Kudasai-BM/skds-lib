@@ -73,6 +73,20 @@ public class Vec3I implements IVec3 {
 	}
 
 	@Override
+	public int hashCode() {
+		return ((y << 7 ^ z) << 7) ^ x;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o instanceof Vec3I vec3I) {
+			return x == vec3I.x && y == vec3I.y && z == vec3I.z;
+		}
+		return false;
+	}
+
+	@Override
 	public String toString() {
 		return "[" + x + ", " + y + ", " + z + "]";
 	}
