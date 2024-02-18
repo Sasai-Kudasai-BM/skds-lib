@@ -157,6 +157,13 @@ public final class Vec3 implements IVec3 {
 		return this;
 	}
 
+	public Vec3 sub(IVec3 vec) {
+		this.x -= vec.x();
+		this.y -= vec.y();
+		this.z -= vec.z();
+		return this;
+	}
+
 	public Vec3 sub(double x, double y, double z) {
 		this.x -= x;
 		this.y -= y;
@@ -215,6 +222,7 @@ public final class Vec3 implements IVec3 {
 		return this;
 	}
 
+	@Override
 	public double distanceTo(IVec3 vec) {
 		double d0 = vec.x() - this.x;
 		double d1 = vec.y() - this.y;
@@ -222,6 +230,7 @@ public final class Vec3 implements IVec3 {
 		return Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
 	}
 
+	@Override
 	public double distanceTo(double dx, double dy, double dz) {
 		double d0 = dx - this.x;
 		double d1 = dy - this.y;
@@ -229,6 +238,7 @@ public final class Vec3 implements IVec3 {
 		return Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
 	}
 
+	@Override
 	public double squareDistanceTo(IVec3 vec) {
 		double d0 = vec.x() - this.x;
 		double d1 = vec.y() - this.y;
@@ -236,6 +246,7 @@ public final class Vec3 implements IVec3 {
 		return d0 * d0 + d1 * d1 + d2 * d2;
 	}
 
+	@Override
 	public double squareDistanceTo(double xIn, double yIn, double zIn) {
 		double d0 = xIn - this.x;
 		double d1 = yIn - this.y;

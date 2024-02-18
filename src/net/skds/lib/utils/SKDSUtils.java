@@ -41,6 +41,10 @@ public class SKDSUtils {
 		}
 	}
 
+	public static StartTime startTimeMeasure() {
+		return new StartTime(System.nanoTime());
+	}
+
 	public static void openInBrowser(String link) {
 		try {
 			Desktop.getDesktop().browse(new URI(link));

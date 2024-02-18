@@ -3,7 +3,7 @@ package net.skds.lib.collision;
 import net.skds.lib.mat.FastMath;
 import net.skds.lib.mat.Vec3;
 
-public class BlockPos extends Vec3I {
+public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
 
 	public static final BlockPos ZERO = new BlockPos(0, 0, 0);
 	private static final int SIZE_BITS_X;
@@ -56,7 +56,7 @@ public class BlockPos extends Vec3I {
 	public static long asLong(int x, int y, int z) {
 		long l = 0L;
 		l |= ((long) x & BITS_X) << BIT_SHIFT_X;
-		l |= ((long) y & BITS_Y) << 0;
+		l |= ((long) y & BITS_Y);
 		return l |= ((long) z & BITS_Z) << BIT_SHIFT_Z;
 	}
 
@@ -239,4 +239,22 @@ public class BlockPos extends Vec3I {
 		BIT_SHIFT_X = SIZE_BITS_Y + SIZE_BITS_Z;
 	}
 
+	@Override
+	public int compareTo(final BlockPos o) {
+
+		if (x > o.x) {
+			return 1;
+		}
+		if (x < o.x) {
+			return -1;
+		}
+		if (y > o.y) {
+			return 1;
+		}
+		if (y < o.y) {
+			return -1;
+		}
+		return Integer.compare(z, o.z);
+
+	}
 }

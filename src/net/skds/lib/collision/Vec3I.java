@@ -74,7 +74,7 @@ public class Vec3I implements IVec3 {
 
 	@Override
 	public int hashCode() {
-		return ((y << 7 ^ z) << 7) ^ x;
+		return (((y << 8) ^ z) << 8) ^ x;
 	}
 
 	@Override

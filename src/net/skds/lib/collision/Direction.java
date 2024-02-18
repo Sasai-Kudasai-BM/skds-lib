@@ -1,6 +1,7 @@
 package net.skds.lib.collision;
 
 import net.skds.lib.mat.FastMath;
+import net.skds.lib.mat.IVec3;
 import net.skds.lib.mat.Vec3;
 
 import java.util.function.Predicate;
@@ -65,7 +66,6 @@ public enum Direction {
 
 	public Direction rotateClockwise(Axis axis) {
 		return switch (axis) {
-			default -> throw new IncompatibleClassChangeError();
 			case X -> {
 				if (this == WEST || this == EAST) {
 					yield this;
@@ -84,7 +84,6 @@ public enum Direction {
 
 	public Direction rotateCounterclockwise(Axis axis) {
 		return switch (axis) {
-			default -> throw new IncompatibleClassChangeError();
 			case X -> {
 				if (this == WEST || this == EAST) {
 					yield this;
@@ -195,7 +194,6 @@ public enum Direction {
 
 	public static Direction from(Axis axis, AxisDirection direction) {
 		return switch (axis) {
-			default -> throw new IncompatibleClassChangeError();
 			case X -> {
 				if (direction == AxisDirection.POSITIVE) {
 					yield EAST;
@@ -220,11 +218,49 @@ public enum Direction {
 		return Direction.getFacing((float) x, (float) y, (float) z);
 	}
 
+	public static Direction getFacing(IVec3 from, IVec3 to) {
+		return getFacing((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()));
+	}
+
 	public static Direction getFacing(float x, float y, float z) {
 		Direction direction = NORTH;
 		float f = Float.MIN_VALUE;
 		for (Direction direction2 : VALUES) {
 			float g = x * direction2.vector.x + y * direction2.vector.y + z * direction2.vector.z;
+			if (!(g > f))
+				continue;
+			f = g;
+			direction = direction2;
+		}
+		return direction;
+	}
+
+	public static Direction getHorizontalFacing(IVec3 from, IVec3 to) {
+		return getHorizontalFacing((float) (to.x() - from.x()), (float) (to.z() - from.z()));
+	}
+
+	public static Direction getHorizontalFacingFrom(IVec3 from, IVec3 to, Iterable<Direction> iterable) {
+		return getHorizontalFacingFrom((float) (to.x() - from.x()), (float) (to.z() - from.z()), iterable);
+	}
+
+	public static Direction getHorizontalFacing(float x, float z) {
+		Direction direction = NORTH;
+		float f = Float.NEGATIVE_INFINITY;
+		for (Direction direction2 : HORIZONTAL) {
+			float g = x * direction2.vector.x + z * direction2.vector.z;
+			if (!(g > f))
+				continue;
+			f = g;
+			direction = direction2;
+		}
+		return direction;
+	}
+
+	public static Direction getHorizontalFacingFrom(float x, float z, Iterable<Direction> iterable) {
+		Direction direction = null;
+		float f = Float.NEGATIVE_INFINITY;
+		for (Direction direction2 : iterable) {
+			float g = x * direction2.vector.x + z * direction2.vector.z;
 			if (!(g > f))
 				continue;
 			f = g;
@@ -277,13 +313,8 @@ public enum Direction {
 		return new Vec3(this.vector);
 	}
 
-	/**
-	 * {@return whether the given yaw points to the direction}
-	 *
-	 * @implNote This returns whether the yaw can make an acute angle with the direction.
-	 *
-	 * <p>This always returns {@code false} for vertical directions.
-	 */
+
+	@Deprecated // rewrite
 	public boolean pointsTo(float yaw) {
 		float f = yaw * ((float) Math.PI / 180);
 		float g = -FastMath.sin(f);
@@ -291,9 +322,6 @@ public enum Direction {
 		return (float) this.vector.x * g + (float) this.vector.z * h > 0.0f;
 	}
 
-	/*
-	 * Uses 'sealed' constructs - enablewith --sealed true
-	 */
 	public static enum Axis implements Predicate<Direction> {
 		X("x") {
 			@Override
@@ -408,7 +436,7 @@ public enum Direction {
 		}
 	}
 
-	public static enum AxisDirection {
+	public enum AxisDirection {
 		POSITIVE(1, "Towards positive"),
 		NEGATIVE(-1, "Towards negative");
 
