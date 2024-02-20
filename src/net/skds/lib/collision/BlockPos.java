@@ -19,6 +19,10 @@ public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
 		super(x, y, z);
 	}
 
+	public BlockPos(double x, double y, double z) {
+		super(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
+	}
+
 	public BlockPos(Vec3 pos) {
 		super(FastMath.floor(pos.x), FastMath.floor(pos.y), FastMath.floor(pos.z));
 	}

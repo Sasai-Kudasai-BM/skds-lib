@@ -107,6 +107,38 @@ public final class Box implements ConvexShape {
 		}
 	}
 
+
+	public Vec3 minTerminator(Box box) {
+
+		double minX = Math.max(this.minX, box.minX);
+		double minY = Math.max(this.minY, box.minY);
+		double minZ = Math.max(this.minZ, box.minZ);
+		double maxX = Math.min(this.maxX, box.maxX);
+		double maxY = Math.min(this.maxY, box.maxY);
+		double maxZ = Math.min(this.maxZ, box.maxZ);
+
+		double sx = maxX - minX;
+		double sy = maxY - minY;
+		double sz = maxZ - minZ;
+
+		double asx = Math.abs(sx);
+		double asy = Math.abs(sy);
+		double asz = Math.abs(sz);
+
+		if (asx > asy) {
+			if (asx > asz) {
+				sy = sz = 0;
+			} else {
+				sy = sx = 0;
+			}
+		} else if (asy > asz) {
+			sz = sx = 0;
+		} else {
+			sy = sz = 0;
+		}
+		return new Vec3(sx, sy, sz);
+	}
+
 	public Box withMinX(double minX) {
 		return new Box(minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
 	}
@@ -423,6 +455,15 @@ public final class Box implements ConvexShape {
 			case X -> maxX;
 			case Y -> maxY;
 			case Z -> maxZ;
+		};
+	}
+
+
+	public double getProjection(Axis axis) {
+		return switch (axis) {
+			case X -> maxX - minX;
+			case Y -> maxY - minY;
+			case Z -> maxZ - minZ;
 		};
 	}
 

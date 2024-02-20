@@ -117,6 +117,19 @@ public class ConvexCollision {
 
 	public static SimpleCollisionResult intersectionMoving(Box a, Box b, Vec3 velocityBA) {
 
+		if (a.intersects(b)) {
+			final Vec3 ac = a.getCenter();
+			final Vec3 bc = b.getCenter();
+			final Box inter = a.intersection(b);
+			final Axis term = inter.minTerminator();
+			final double d = term.choose(bc) - term.choose(ac);
+			final Vec3 norm = term.getDirection(d).createVector3D();
+			if (d * term.choose(velocityBA) >= 0) {
+				return null;
+			}
+			return new SimpleCollisionResult(0, norm, null, inter.getProjection(term));
+		}
+
 		double pMin = 0;
 		double pMax = 1;
 
@@ -148,13 +161,22 @@ public class ConvexCollision {
 			}
 		}
 
-		Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
-		return new SimpleCollisionResult(pMin, inter.minTerminator().getDir(velocityBA).getOpposite().createVector3D(), null);
+		final Vec3 ac = a.getCenter();
+		final Vec3 bc = b.getCenter();
+		final Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
+		final Axis term = inter.minTerminator();
+		final double d = term.choose(bc) - term.choose(ac);
+		final Vec3 norm = term.getDirection(d).createVector3D();
+		if (d * term.choose(velocityBA) >= 0) {
+			return null;
+		}
+		return new SimpleCollisionResult(pMin, norm, null);
 
 	}
 
 	public static class SimpleCollisionResult {
 		public final double depth;
+		public final double insert;
 		public final Vec3 normal;
 		@Getter
 		@Setter
@@ -164,6 +186,14 @@ public class ConvexCollision {
 			this.depth = depth;
 			this.normal = normal;
 			this.shape = shape;
+			this.insert = 0;
+		}
+
+		public SimpleCollisionResult(double depth, Vec3 normal, IShape shape, double insert) {
+			this.depth = depth;
+			this.normal = normal;
+			this.shape = shape;
+			this.insert = insert;
 		}
 	}
 
