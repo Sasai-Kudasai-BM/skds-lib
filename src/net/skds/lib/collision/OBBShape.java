@@ -106,7 +106,7 @@ public class OBBShape implements CompositeShape {
 
 	@Override
 	public Vec3 getCenter() {
-		return null;
+		return pos;
 	}
 
 	@Override

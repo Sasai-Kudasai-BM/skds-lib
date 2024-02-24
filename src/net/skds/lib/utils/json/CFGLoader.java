@@ -110,7 +110,7 @@ public class CFGLoader {
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				CT value = adapter.read(in);
 				if (value instanceof JsonPostInit jpi) {
-					jpi.jsomPostInit();
+					jpi.jsonPostInit();
 				}
 				in.endObject();
 				return value;
@@ -133,7 +133,7 @@ public class CFGLoader {
 		try {
 			T cfg = GSON.fromJson(text, clazz);
 			if (cfg instanceof JsonPostInit post) {
-				post.jsomPostInit();
+				post.jsonPostInit();
 			}
 			return cfg;
 		} catch (Exception e) {
