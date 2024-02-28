@@ -37,8 +37,8 @@ public class Vec3I implements IVec3 {
 		return new Vec3I(this.x + i, this.y + j, this.z + k);
 	}
 
-	public Vec3I add(Vec3I BlockPos) {
-		return this.add(BlockPos.x, BlockPos.y, BlockPos.z);
+	public Vec3I add(Vec3I delta) {
+		return this.add(delta.x, delta.y, delta.z);
 	}
 
 	public Vec3I subtract(Vec3I BlockPos) {

@@ -62,16 +62,16 @@ public final class Box implements ConvexShape {
 		return new Box(pos.x, pos.y, pos.z, pos.x + 1.0, pos.y + 1.0, pos.z + 1.0);
 	}
 
-	public static Box fromPosSize(Vec3 pos, Vec3 size) {
-		double dx = size.x / 2;
-		double dy = size.y / 2;
-		double dz = size.z / 2;
-		return new Box(pos.x - dx, pos.y - dy, pos.z - dz, pos.x + dx, pos.y + dy, pos.z + dz);
+	public static Box fromPosSize(IVec3 pos, IVec3 size) {
+		double dx = size.x() / 2;
+		double dy = size.y() / 2;
+		double dz = size.z() / 2;
+		return new Box(pos.x() - dx, pos.y() - dy, pos.z() - dz, pos.x() + dx, pos.y() + dy, pos.z() + dz);
 	}
 
-	public static Box fromPosSize(Vec3 pos, double size) {
+	public static Box fromPosSize(IVec3 pos, double size) {
 		size /= 2;
-		return new Box(pos.x - size, pos.y - size, pos.z - size, pos.x + size, pos.y + size, pos.z + size);
+		return new Box(pos.x() - size, pos.y() - size, pos.z() - size, pos.x() + size, pos.y() + size, pos.z() + size);
 	}
 
 	public static Box fromNormal(Vec3 n) {

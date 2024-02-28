@@ -36,6 +36,34 @@ public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
 				BlockPos.unpackLongZ(value) + z);
 	}
 
+	@Override
+	public BlockPos add(Vec3I delta) {
+		return add(delta.x, delta.y, delta.z);
+	}
+
+	@Override
+	public BlockPos add(int i, int j, int k) {
+		if (i == 0 && j == 0 && k == 0) {
+			return this;
+		}
+		return new BlockPos(this.x + i, this.y + j, this.z + k);
+	}
+
+	@Override
+	public int floorX() {
+		return x;
+	}
+
+	@Override
+	public int floorY() {
+		return y;
+	}
+
+	@Override
+	public int floorZ() {
+		return z;
+	}
+
 	public static int unpackLongX(long packedPos) {
 		return (int) (packedPos << 64 - BIT_SHIFT_X - SIZE_BITS_X >> 64 - SIZE_BITS_X);
 	}
