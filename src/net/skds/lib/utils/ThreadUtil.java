@@ -16,7 +16,8 @@ public class ThreadUtil {
 	public static final boolean USE_ANALYZER = Boolean.getBoolean("skds.thread-analyzer");
 	public static final ThreadAnalyzer ANALYZER;
 
-	private static final int threads = Runtime.getRuntime().availableProcessors();
+	//private static final int threads = Runtime.getRuntime().availableProcessors();
+	private static final int threads = Math.max(4, Runtime.getRuntime().availableProcessors());
 
 	public static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(threads,
 			threads,
@@ -105,7 +106,7 @@ public class ThreadUtil {
 			new SKDSThread(UTIL_GROUP, runnable).start();
 		}
 	}
-	
+
 	public static void runNThreads(Runnable runnable, int n) {
 		for (int i = 0; i < n; i++) {
 			new SKDSThread(UTIL_GROUP, runnable).start();
