@@ -52,8 +52,7 @@ public class CFGLoader {
 					out.endArray();
 				}
 
-			})
-			.registerTypeAdapter(String.class, new TypeAdapter<String>() {
+			}).registerTypeAdapter(String.class, new TypeAdapter<String>() {
 
 				@Override
 				public String read(JsonReader in) throws IOException {
@@ -75,6 +74,18 @@ public class CFGLoader {
 				@Override
 				public void write(JsonWriter out, String value) throws IOException {
 					out.value(value);
+				}
+
+			}).registerTypeAdapter(File.class, new TypeAdapter<File>() {
+
+				@Override
+				public File read(JsonReader in) throws IOException {
+					return new File(in.nextString());
+				}
+
+				@Override
+				public void write(JsonWriter out, File value) throws IOException {
+					out.value(value.getName());
 				}
 
 			});
