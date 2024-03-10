@@ -6,6 +6,9 @@ public class FastMath {
 
 	public static final Random RANDOM = new Random();
 
+	public static final float RAD_2_DEGREES = (float) (180 / Math.PI);
+	public static final float DEGREES_2_RAD = (float) (Math.PI / 180);
+
 	public static boolean roll(double chance) {
 		if (chance <= 0) {
 			return false;
