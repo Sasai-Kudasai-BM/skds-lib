@@ -18,6 +18,6 @@ public class EventBus<T extends Event> {
 		listeners.forEach(listener -> {
 			listener.onEvent(event);
 		});
-		return event.canceled;
+		return event != null && event.canceled;
 	}
 }
