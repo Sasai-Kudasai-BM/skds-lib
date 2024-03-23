@@ -111,9 +111,9 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 lerp(Vec3 vectorIn, float pctIn) {
-		this.x += vectorIn.x * pctIn;
-		this.y += vectorIn.y * pctIn;
-		this.z += vectorIn.z * pctIn;
+		this.x += (vectorIn.x - x) * pctIn;
+		this.y += (vectorIn.y - y) * pctIn;
+		this.z += (vectorIn.z - z) * pctIn;
 		return this;
 	}
 

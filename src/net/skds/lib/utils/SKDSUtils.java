@@ -53,6 +53,21 @@ public class SKDSUtils {
 		}
 	}
 
+	public static int[] UUID2IntArray(UUID uuid) {
+		long l = uuid.getLeastSignificantBits();
+		long m = uuid.getMostSignificantBits();
+		return new int[]{(int) (m >> 32), (int) m, (int) (l >> 32), (int) l};
+	}
+
+	public static UUID IntArray2UUID(int[] uuid) {
+		assert (uuid.length == 4) : "uuid int array length must be 4";
+		long m = (long) uuid[0] << 32;
+		m |= uuid[1];
+		long l = (long) uuid[2] << 32;
+		l |= uuid[3];
+		return new UUID(m, l);
+	}
+
 	public static String memoryCompact(long bytes) {
 		if (bytes < 1L << 10) {
 			return bytes + " Bytes";
