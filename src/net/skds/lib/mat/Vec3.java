@@ -172,10 +172,10 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 normalize() {
-		double d0 = (double) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+		double d0 = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 		if (d0 < 1E-60) {
 			this.x = 0;
-			this.y = 1;
+			this.y = 0;
 			this.z = 0;
 			return this;
 		}
@@ -270,6 +270,13 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 mul(double factorX, double factorY, double factorZ) {
+		this.x *= factorX;
+		this.y *= factorY;
+		this.z *= factorZ;
+		return this;
+	}
+
+	public Vec3 scale(double factorX, double factorY, double factorZ) {
 		this.x *= factorX;
 		this.y *= factorY;
 		this.z *= factorZ;
