@@ -400,4 +400,39 @@ public class Matrix3 {
 		return vec3;
 	}
 
+	public static Matrix3 rotationFromAToB(Vec3 a, Vec3 b) {
+		Vec3 cross = a.copy().cross(b);
+		Matrix3 m3 = new Matrix3();
+		double len = cross.length();
+		if (len < 1E-7) {
+			return m3;
+		}
+
+		double lenXLen = a.length() * b.length();
+		double dot = a.dot(b);
+		cross.div(len);
+
+		double c = dot / lenXLen;
+		double s = len / lenXLen;
+
+		double oneMinusC = 1.0f - c;
+		double xy = cross.x * cross.y;
+		double yz = cross.y * cross.z;
+		double xz = cross.x * cross.z;
+		double xs = cross.x * s;
+		double ys = cross.y * s;
+		double zs = cross.z * s;
+
+
+		m3.m20 = xz * oneMinusC + ys;
+		m3.m21 = yz * oneMinusC - xs;
+		m3.m22 = cross.z * cross.z * oneMinusC + c;
+		m3.m00 = cross.x * cross.x * oneMinusC + c;
+		m3.m01 = xy * oneMinusC + zs;
+		m3.m02 = xz * oneMinusC - ys;
+		m3.m10 = xy * oneMinusC - zs;
+		m3.m11 = cross.y * cross.y * oneMinusC + c;
+		m3.m12 = yz * oneMinusC + xs;
+		return m3;
+	}
 }

@@ -2,6 +2,7 @@ package net.skds.lib.mat;
 
 import java.util.Random;
 
+@SuppressWarnings("ManualMinMaxCalculation")
 public class FastMath {
 
 	public static final Random RANDOM = new Random();
@@ -17,6 +18,15 @@ public class FastMath {
 		} else {
 			return RANDOM.nextDouble() <= chance;
 		}
+	}
+
+	public static double dist2Line(Vec3 start, Vec3 direction, Vec3 point) {
+		return perpendicularPoint(start, direction, point).distanceTo(point);
+	}
+
+	public static Vec3 perpendicularPoint(Vec3 start, Vec3 direction, Vec3 point) {
+		double dot = point.copy().sub(start).projOn(direction);
+		return start.copy().add(direction.copy().normalize().scale(dot));
 	}
 
 	public static double gaussian() {
@@ -109,11 +119,11 @@ public class FastMath {
 
 	public static float wrapDegrees(float degrees) {
 		float d = modInt(degrees, 360);
-		if (d >= 180.0) {
-			d -= 360.0;
+		if (d >= 180.0f) {
+			d -= 360.0f;
 		}
-		if (d < -180.0) {
-			d += 360.0;
+		if (d < -180.0f) {
+			d += 360.0f;
 		}
 		return d;
 	}

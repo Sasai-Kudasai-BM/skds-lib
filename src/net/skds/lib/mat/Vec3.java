@@ -97,12 +97,34 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 transform(Quat quaternionIn) {
-		Quat q = quaternionIn.copy().multiplyQ(this.x, this.y, this.z, 0.0F);
-		Quat q2 = quaternionIn.copy().conjugate();
-		q.multiply(q2);
-		this.x = q.x;
-		this.y = q.y;
-		this.z = q.z;
+		double x = quaternionIn.x;
+		double y = quaternionIn.y;
+		double z = quaternionIn.z;
+		double w = quaternionIn.w;
+		double fx22 = 2.0 * x * x;
+		double fy22 = 2.0 * y * y;
+		double fz22 = 2.0 * z * z;
+		double m00 = 1.0 - fy22 - fz22;
+		double m11 = 1.0 - fz22 - fx22;
+		double m22 = 1.0 - fx22 - fy22;
+		double xy = x * y;
+		double yz = y * z;
+		double zx = z * x;
+		double xw = x * w;
+		double yw = y * w;
+		double zw = z * w;
+		double m10 = 2.0 * (xy + zw);
+		double m01 = 2.0 * (xy - zw);
+		double m20 = 2.0 * (zx - yw);
+		double m02 = 2.0 * (zx + yw);
+		double m21 = 2.0 * (yz + xw);
+		double m12 = 2.0 * (yz - xw);
+		double x2 = this.x;
+		double y2 = this.y;
+		double z2 = this.z;
+		this.x = m00 * x2 + m01 * y2 + m02 * z2;
+		this.y = m10 * x2 + m11 * y2 + m12 * z2;
+		this.z = m20 * x2 + m21 * y2 + m22 * z2;
 		return this;
 	}
 

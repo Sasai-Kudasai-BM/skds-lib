@@ -88,6 +88,34 @@ public class Quat {
 		}
 	}
 
+	public Quat rotate(Vec3 spin) {
+		double angle = spin.length();
+		if (angle < 1E-7) {
+			return this;
+		}
+
+		double axisX = spin.x / angle;
+		double axisY = spin.y / angle;
+		double axisZ = spin.z / angle;
+
+		double f0 = Math.sin(angle / 2.0);
+		double f = axisX * f0;
+		double f1 = axisY * f0;
+		double f2 = axisZ * f0;
+		double f3 = Math.cos(angle / 2.0);
+
+		double x = this.x;
+		double y = this.y;
+		double z = this.z;
+		double w = this.w;
+
+		this.x = f3 * x + f * w + f1 * z - f2 * y;
+		this.y = f3 * y - f * z + f1 * w + f2 * x;
+		this.z = f3 * z + f * y - f1 * x + f2 * w;
+		this.w = f3 * w - f * x - f1 * y - f2 * z;
+		return this;
+	}
+
 	public static Quat fromForward(Vec3 forward) {
 		return new Quat(Matrix3.fromForward(forward));
 	}
@@ -123,12 +151,11 @@ public class Quat {
 	}
 
 	public String toString() {
-		StringBuilder stringbuilder = new StringBuilder();
-		stringbuilder.append("Quat[").append(this.w).append(" + ");
-		stringbuilder.append(this.x).append("i + ");
-		stringbuilder.append(this.y).append("j + ");
-		stringbuilder.append(this.z).append("k]");
-		return stringbuilder.toString();
+		String stringBuilder = "Quat[" + this.w + " + " +
+				this.x + "i + " +
+				this.y + "j + " +
+				this.z + "k]";
+		return stringBuilder;
 	}
 
 	public Quat multiplyQ(double qx, double qy, double qz, double qw) {
