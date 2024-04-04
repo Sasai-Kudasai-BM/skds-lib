@@ -24,9 +24,40 @@ public class FastMath {
 		return perpendicularPoint(start, direction, point).distanceTo(point);
 	}
 
+	public static double dist2LineLimited(Vec3 start, Vec3 direction, Vec3 point) {
+		Vec3 p = perpendicularPointLimited(start, direction, point);
+		if (p == null) {
+			return -1;
+		}
+		return p.distanceTo(point);
+	}
+
 	public static Vec3 perpendicularPoint(Vec3 start, Vec3 direction, Vec3 point) {
 		double dot = point.copy().sub(start).projOn(direction);
 		return start.copy().add(direction.copy().normalize().scale(dot));
+	}
+
+	public static Vec3 perpendicularPointLimited(Vec3 start, Vec3 direction, Vec3 point) {
+		double proj = point.copy().sub(start).projOn(direction);
+		if (proj > direction.length()) {
+			return null;
+		}
+		return start.copy().add(direction.copy().normalize().scale(proj));
+	}
+
+	public static Vec3 sphereContactPointLimited(Vec3 start, Vec3 direction, Vec3 center, double radius) {
+		double proj = center.copy().sub(start).projOn(direction);
+		if (proj > direction.length() + radius) {
+			return null;
+		}
+		Vec3 pp = start.copy().add(direction.copy().normalize().scale(proj));
+		double r2 = radius * radius;
+		double k2 = pp.squareDistanceTo(center);
+		double delta = Math.sqrt(r2 - k2);
+		if (proj > direction.length() + delta) {
+			return null;
+		}
+		return pp.sub(direction.copy().normalize().scale(delta));
 	}
 
 	public static double gaussian() {
