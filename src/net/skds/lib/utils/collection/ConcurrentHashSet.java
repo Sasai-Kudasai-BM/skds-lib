@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConcurrentHashSet<T> implements Set<T> {
+public final class ConcurrentHashSet<T> implements Set<T> {
 
 	final ConcurrentHashMap<T, Boolean> map = new ConcurrentHashMap<>();
 
