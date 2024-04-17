@@ -1,6 +1,5 @@
 package net.skds.lib.mat;
 
-import net.skds.lib.mat.graphics.Vec3f;
 import net.skds.lib.utils.SKDSUtils;
 
 import java.util.Random;
@@ -229,8 +228,16 @@ public final class Vec3 implements IVec3 {
 		return add(vec.x, vec.y, vec.z);
 	}
 
-	public Vec3 add(Vec3f vec) {
-		return add(vec.x, vec.y, vec.z);
+	public Vec3 addMul(Vec3 vec, double scale) {
+		return addMul(vec.x, vec.y, vec.z, scale);
+	}
+
+	public Vec3 add(IVec3 vec) {
+		return add(vec.x(), vec.y(), vec.z());
+	}
+
+	public Vec3 addMul(IVec3 vec, double scale) {
+		return addMul(vec.x(), vec.y(), vec.z(), scale);
 	}
 
 	public Vec3 moveNorm(Vec3 norm, double dist) {
@@ -241,6 +248,13 @@ public final class Vec3 implements IVec3 {
 		this.x += x;
 		this.y += y;
 		this.z += z;
+		return this;
+	}
+
+	public Vec3 addMul(double x, double y, double z, double scale) {
+		this.x += x * scale;
+		this.y += y * scale;
+		this.z += z * scale;
 		return this;
 	}
 

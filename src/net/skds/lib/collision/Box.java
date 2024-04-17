@@ -517,6 +517,9 @@ public final class Box implements ConvexShape {
 			}
 		}
 		 */
+		if (contains(from)) {
+			return new ConvexCollision.SimpleCollisionResult(0, from.copy().sub(to).normalize(), this);
+		}
 		final DoubleHolder depth = new DoubleHolder(1);
 		final Direction dir = traceCollisionSide(from, depth, null, to.x - from.x, to.y - from.y, to.z - from.z);
 
