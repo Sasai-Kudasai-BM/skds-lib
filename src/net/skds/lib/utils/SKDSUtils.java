@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +42,43 @@ public class SKDSUtils {
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static String hashFile(File f) {
+		try {
+			byte[] buffer = new byte[1024];
+			MessageDigest md = getSHA1();
+			InputStream is = new BufferedInputStream(new FileInputStream(f));
+			if (!f.exists()) {
+				return HEX_FORMAT_LC.formatHex(md.digest());
+			}
+			int c;
+			while ((c = is.read(buffer)) >= 0) {
+				md.update(buffer, 0, c);
+			}
+			return HEX_FORMAT_LC.formatHex(md.digest());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String hashInput(InputStream is) {
+		try {
+			byte[] buffer = new byte[1024];
+			MessageDigest md = getSHA1();
+			int c;
+			while ((c = is.read(buffer)) >= 0) {
+				md.update(buffer, 0, c);
+			}
+			return HEX_FORMAT_LC.formatHex(md.digest());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String hashArray(byte[] data) {
+		MessageDigest md = getSHA1();
+		return HEX_FORMAT_LC.formatHex(md.digest(data));
 	}
 
 	public static StartTime startTimeMeasure() {

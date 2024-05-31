@@ -188,16 +188,26 @@ public class CFGLoader {
 	}
 
 	public static String toJsonCompact(Object cfg) {
+		if (cfg instanceof JsonPreSerialize pre) {
+			pre.jsonPreSerialize();
+		}
 		return GSON_COMPACT.toJson(cfg);
 	}
 
 	public static String toJson(Object cfg) {
+		if (cfg instanceof JsonPreSerialize pre) {
+			pre.jsonPreSerialize();
+		}
 		return GSON.toJson(cfg);
+	}
+
+	public static boolean saveConfig(String file, Object cfg) {
+		return saveConfig(new File(file), cfg);
 	}
 
 	public static boolean saveConfig(File file, Object cfg) {
 		try {
-			String text = GSON.toJson(cfg);
+			String text = toJson(cfg);
 			File parent = file.getParentFile();
 			if (parent != null) {
 				parent.mkdirs();
@@ -212,7 +222,7 @@ public class CFGLoader {
 
 	public static boolean saveConfigCompact(File file, Object cfg) {
 		try {
-			String text = GSON_COMPACT.toJson(cfg);
+			String text = toJsonCompact(cfg);
 			File parent = file.getParentFile();
 			if (parent != null) {
 				parent.mkdirs();

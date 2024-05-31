@@ -15,10 +15,10 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class SKDSByteBuf {
+public final class SKDSByteBuf {
 
 	@Getter
-	protected ByteBuffer buffer;
+	private ByteBuffer buffer;
 	//public final int capacity;
 	//private int readerOffset, writerOffset;
 
@@ -57,10 +57,19 @@ public class SKDSByteBuf {
 		return str;
 	}
 
-	public <T> void writeOptional(Optional<T> value, BiConsumer<SKDSByteBuf, T> consumer) {
-		if (value.isPresent()) {
+	public <T> void writeOptional(Optional<T> op, BiConsumer<SKDSByteBuf, T> consumer) {
+		if (op.isPresent()) {
 			this.writeBoolean(true);
-			consumer.accept(this, value.get());
+			consumer.accept(this, op.get());
+		} else {
+			this.writeBoolean(false);
+		}
+	}
+
+	public <T> void writeOptional(T op, BiConsumer<SKDSByteBuf, T> consumer) {
+		if (op != null) {
+			this.writeBoolean(true);
+			consumer.accept(this, op);
 		} else {
 			this.writeBoolean(false);
 		}
@@ -121,6 +130,16 @@ public class SKDSByteBuf {
 		byte[] bytes = new byte[length];
 		buffer.get(bytes);
 		return new String(bytes, StandardCharsets.UTF_8);
+	}
+
+	public byte[] getBytes(int length) {
+		byte[] bytes = new byte[length];
+		buffer.get(bytes);
+		return bytes;
+	}
+
+	public void getBytes(byte[] bytes) {
+		buffer.get(bytes);
 	}
 
 	public UUID readUUID() {
@@ -462,7 +481,7 @@ public class SKDSByteBuf {
 			byte temp = (byte) (value & 0b01111111);
 			value >>>= 7;
 			if (value != 0) {
-				temp |= 0b10000000;
+				temp |= (byte) 0b10000000;
 			}
 			buffer.put(temp);
 		} while (value != 0);
@@ -484,6 +503,15 @@ public class SKDSByteBuf {
 		final ArrayList<T> list = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			list.add(i, reader.apply(this));
+		}
+		return list;
+	}
+
+	public <T> T[] readArray(Function<SKDSByteBuf, T> reader, Class<T> type) {
+		final int size = readVarInt();
+		final T[] list = ArrayUtils.createGenericArray(type, size);
+		for (int i = 0; i < size; i++) {
+			list[i] = reader.apply(this);
 		}
 		return list;
 	}
@@ -557,10 +585,6 @@ public class SKDSByteBuf {
 			count = Math.min(count, len);
 			buffer.get(b, off, count);
 			return count;
-		}
-
-		@Override
-		public synchronized void mark(int readlimit) {
 		}
 
 	}

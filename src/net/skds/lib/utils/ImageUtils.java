@@ -1,18 +1,20 @@
 package net.skds.lib.utils;
 
+import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageInputStreamSpi;
 import javax.imageio.spi.ImageReaderSpi;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Set;
 
 public class ImageUtils {
-	
+
 	private static final ImageReaderSpi PNG_READER;
 	private static final ImageReaderSpi JPG_READER;
 	private static final ImageReaderSpi GIF_READER;
@@ -44,6 +46,24 @@ public class ImageUtils {
 			BufferedImage bi = reader.read(0, param);
 			reader.dispose();
 			return bi;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static byte[] writeImageToArrayPng(final BufferedImage image) {
+		return writeImageToArray(image, "png");
+	}
+	
+	public static byte[] writeImageToArrayJpg(final BufferedImage image) {
+		return writeImageToArray(image, "jpg");
+	}
+
+	private static byte[] writeImageToArray(final BufferedImage image, String format) {
+		try {
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			ImageIO.write(image, format, os); // TODO speedup
+			return os.toByteArray();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

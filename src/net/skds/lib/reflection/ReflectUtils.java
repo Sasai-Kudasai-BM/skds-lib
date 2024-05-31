@@ -2,6 +2,7 @@ package net.skds.lib.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -63,8 +64,16 @@ public class ReflectUtils {
 		}
 	}
 
+	public static Type extractFieldType(Class<?> clazz, String fieldName) {
+		try {
+			return clazz.getDeclaredField(fieldName).getGenericType();
+		} catch (NoSuchFieldException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@FunctionalInterface
-	public static interface FillingFunction {
+	public interface FillingFunction {
 		public void accept(Field field, Consumer<Object> consumer);
 	}
 }

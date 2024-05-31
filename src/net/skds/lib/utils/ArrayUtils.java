@@ -1,6 +1,7 @@
 package net.skds.lib.utils;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 
 public class ArrayUtils {
@@ -71,5 +72,256 @@ public class ArrayUtils {
 	public static <T> T loop(T[] array, int pos) {
 		if (pos < 0) pos = -pos;
 		return array[pos % array.length];
+	}
+
+	public static class ObjHashedArray {
+
+		public final Object[] array;
+		private final int hash;
+
+		public ObjHashedArray(Object[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof ObjHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class IntHashedArray {
+
+		public final int[] array;
+		private final int hash;
+
+		public IntHashedArray(int[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof IntHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class ByteHashedArray {
+
+		public final byte[] array;
+		private final int hash;
+
+		public ByteHashedArray(byte[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof ByteHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class CharHashedArray {
+
+		public final char[] array;
+		private final int hash;
+
+		public CharHashedArray(char[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof CharHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class ShortHashedArray {
+
+		public final short[] array;
+		private final int hash;
+
+		public ShortHashedArray(short[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof ShortHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class FloatHashedArray {
+
+		public final float[] array;
+		private final int hash;
+
+		public FloatHashedArray(float[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof FloatHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class DoubleHashedArray {
+
+		public final double[] array;
+		private final int hash;
+
+		public DoubleHashedArray(double[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof DoubleHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class LongHashedArray {
+
+		public final long[] array;
+		private final int hash;
+
+		public LongHashedArray(long[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof LongHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
+	}
+
+	public static class BooleanHashedArray {
+
+		public final boolean[] array;
+		private final int hash;
+
+		public BooleanHashedArray(boolean[] array) {
+			this.array = array;
+			this.hash = Arrays.hashCode(array);
+		}
+
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof BooleanHashedArray ah) {
+				return Arrays.equals(array, ah.array);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return hash;
+		}
 	}
 }
