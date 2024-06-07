@@ -498,7 +498,7 @@ public final class SKDSByteBuf {
 		}
 	}
 
-	public <T> Collection<T> readCollection(Function<SKDSByteBuf, T> reader) {
+	public <T> List<T> readCollection(Function<SKDSByteBuf, T> reader) {
 		final int size = readVarInt();
 		final ArrayList<T> list = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
