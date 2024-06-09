@@ -228,18 +228,20 @@ public class ThreadUtil {
 			ANALYZER = null;
 		}
 
-		new Thread() { // Windows timer fix
-			{
-				this.setDaemon(true);
-				this.start();
-			}
-
-			public void run() {
-				try {
-					Thread.sleep(Long.MAX_VALUE);
-				} catch (InterruptedException ignored) {
+		if (SKDSUtils.OS_TYPE == SKDSUtils.OSType.WINDOWS) {
+			new Thread() { // dirty Windows timer fix
+				{
+					this.setDaemon(true);
+					this.start();
 				}
-			}
-		};
+
+				public void run() {
+					try {
+						Thread.sleep(Long.MAX_VALUE);
+					} catch (InterruptedException ignored) {
+					}
+				}
+			};
+		}
 	}
 }

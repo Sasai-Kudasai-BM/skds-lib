@@ -1,5 +1,7 @@
 package net.skds.lib.utils;
 
+import net.skds.lib.mat.FastMath;
+
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
@@ -51,10 +53,56 @@ public class ImageUtils {
 		}
 	}
 
+	public static int packARGB(int r, int g, int b, int a) {
+		return (((0xff & a) << 8 | (0xff & r)) << 8 | (0xff & g)) << 8 | (0xff & b);
+	}
+
+	public static int packRGB(int r, int g, int b) {
+		return ((0xff & r) << 8 | (0xff & g)) << 8 | (0xff & b);
+	}
+
+	public static int packARGB(byte r, byte g, byte b, byte a) {
+		return ((a << 8 | r) << 8 | g) << 8 | b;
+	}
+
+	public static int packRGB(byte r, byte g, byte b) {
+		return (r << 8 | g) << 8 | b;
+	}
+
+	public static int packARGB(float r, float g, float b, float a) {
+		return (((0xff & FastMath.floor(a * 255)) << 8 |
+				(0xff & FastMath.floor(r * 255))) << 8 |
+				(0xff & FastMath.floor(g * 255))) << 8 |
+				(0xff & FastMath.floor(b * 255));
+	}
+
+	public static int packRGB(float r, float g, float b) {
+		return ((0xff & FastMath.floor(r * 255)) << 8 |
+				(0xff & FastMath.floor(g * 255))) << 8 |
+				(0xff & FastMath.floor(b * 255));
+	}
+
+	public static byte unpackR(int argb) {
+		return (byte) (argb >> 16 & 0xff);
+	}
+
+	public static byte unpackG(int argb) {
+		return (byte) (argb >> 8 & 0xff);
+	}
+
+	public static byte unpackB(int argb) {
+		return (byte) (argb & 0xff);
+	}
+
+	public static byte unpackA(int argb) {
+		return (byte) (argb >> 24);
+	}
+
+
 	public static byte[] writeImageToArrayPng(final BufferedImage image) {
 		return writeImageToArray(image, "png");
 	}
-	
+
 	public static byte[] writeImageToArrayJpg(final BufferedImage image) {
 		return writeImageToArray(image, "jpg");
 	}
