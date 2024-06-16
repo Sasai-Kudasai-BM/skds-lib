@@ -33,6 +33,7 @@ public class Console {
 			mem();
 		});
 		regCommand("mem", arg -> mem());
+		regCommand("dump", arg -> SKDSUtils.dumpHeap("heap.hprof"));
 	}
 
 	private void mem() {

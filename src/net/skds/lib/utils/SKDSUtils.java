@@ -1,14 +1,17 @@
 package net.skds.lib.utils;
 
+import com.sun.management.HotSpotDiagnosticMXBean;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.management.MBeanServer;
 import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -415,6 +418,30 @@ public class SKDSUtils {
 		}
 		return OSType.UNKNOWN;
 	}
+
+	public static void dumpHeap(String filePath) {
+		File f = new File(filePath);
+		if (f.exists()) {
+			if (!f.delete()) {
+				System.out.println("Unable to dump heap: File \"" + filePath + "\" cannot be overwritten");
+				return;
+			}
+		}
+		System.out.println("Dumping heap");
+		try {
+			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+			HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
+					server,
+					"com.sun.management:type=HotSpotDiagnostic",
+					HotSpotDiagnosticMXBean.class
+			);
+			mxBean.dumpHeap(filePath, true);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		System.out.println("Heap dump created \"" + filePath + "\"");
+	}
+
 
 	public enum OSType {
 		WINDOWS, LINUX, OSX, SOLARIS, UNKNOWN;
