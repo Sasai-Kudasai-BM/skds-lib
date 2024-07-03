@@ -89,6 +89,37 @@ public class ThreadUtil {
 		return t;
 	}
 
+	public static SKDSThread runTickable(FiniteTickable tickable, String name, int period) {
+		SKDSThread t = new SKDSThread(MAIN_GROUP, name) {
+			@Override
+			public void run() {
+				while (tick(tickable, period))
+					;
+			}
+
+		};
+		t.start();
+		return t;
+	}
+
+	public static SKDSThread runTickable(FiniteTickable tickable, Runnable initRun, String name, int period, Consumer<Exception> exceptionHandler) {
+		SKDSThread t = new SKDSThread(MAIN_GROUP, name) {
+			@Override
+			public synchronized void run() {
+				try {
+					initRun.run();
+					while (tick(tickable, period))
+						;
+				} catch (Exception e) {
+					exceptionHandler.accept(e);
+				}
+			}
+
+		};
+		t.start();
+		return t;
+	}
+
 	private static boolean tick(FiniteTickable tickable, int period) {
 		long t0 = System.nanoTime();
 		boolean tick = tickable.tick();

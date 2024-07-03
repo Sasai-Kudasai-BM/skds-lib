@@ -96,6 +96,14 @@ public class SKDSUtils {
 		}
 	}
 
+	public static int arrToInt(byte[] arr) {
+		return ((arr[0] << 8 | arr[1]) << 8 | arr[2]) << 8 | arr[3];
+	}
+
+	public static long arrToLong(byte[] arr) {
+		return ((((((((long) arr[0] << 8 | arr[1]) << 8 | arr[2]) << 8 | arr[3]) << 8 | arr[4]) << 8) | arr[5]) << 8 | arr[6]) << 8 | arr[7];
+	}
+
 	public static int[] UUID2IntArray(UUID uuid) {
 		long l = uuid.getLeastSignificantBits();
 		long m = uuid.getMostSignificantBits();
