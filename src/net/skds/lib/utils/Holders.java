@@ -18,6 +18,10 @@ public final class Holders {
 		@Setter
 		protected T value;
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -32,6 +36,10 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -46,6 +54,10 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -60,6 +72,10 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -74,6 +90,10 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -84,6 +104,10 @@ public final class Holders {
 		@Setter
 		protected boolean value;
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -98,6 +122,10 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -112,6 +140,10 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 
 	@NoArgsConstructor
@@ -126,5 +158,9 @@ public final class Holders {
 			return value += inc;
 		}
 
+		@Override
+		public String toString() {
+			return "Holder(" + value + ")";
+		}
 	}
 }
