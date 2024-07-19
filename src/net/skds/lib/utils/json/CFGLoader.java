@@ -127,13 +127,14 @@ public class CFGLoader {
 				return value;
 			}
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public void write(JsonWriter out, CT value) throws IOException {
-				if (!(value instanceof TypedConfig tc)) {
+				if (!(value instanceof TypedConfig<?> tc)) {
 					throw new UnsupportedOperationException("Value is not a TypedConfig");
 				}
 				out.beginObject();
-				E type = tc.getConfigType();
+				E type = (E) tc.getConfigType();
 				out.name(type.name());
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				if (value instanceof JsonPreSerialize jps) {
