@@ -104,7 +104,6 @@ public class CFGLoader {
 	}
 
 	public static <AT, CT extends AT, E extends Enum<E> & ConfigType<CT>> void addTypedAdapter(Class<AT> type, Class<E> typeClass) {
-
 		GSON_COMPACT = builder.registerTypeAdapter(type, new TypeAdapter<CT>() {
 
 			@Override

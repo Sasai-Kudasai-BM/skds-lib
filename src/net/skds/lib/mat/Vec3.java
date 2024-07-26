@@ -193,13 +193,14 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 normalize() {
-		double d0 = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+		double d0 = this.x * this.x + this.y * this.y + this.z * this.z;
 		if (d0 < 1E-60) {
 			this.x = 0;
 			this.y = 0;
 			this.z = 0;
 			return this;
 		}
+		d0 = Math.sqrt(d0);
 		this.x /= d0;
 		this.y /= d0;
 		this.z /= d0;

@@ -599,6 +599,12 @@ public final class Box implements ConvexShape {
 				center.y() + dy / 2.0, center.z() + dz / 2.0);
 	}
 
+
+	public static Box of(double centerX, double centerY, double centerZ, double dx, double dy, double dz) {
+		return new Box(centerX - dx / 2.0, centerY - dy / 2.0, centerZ - dz / 2.0, centerX + dx / 2.0,
+				centerY + dy / 2.0, centerZ + dz / 2.0);
+	}
+
 	public static Box of(IVec3 size) {
 		double dx = size.x() / 2;
 		double dy = size.y() / 2;

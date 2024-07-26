@@ -37,6 +37,9 @@ public class SKDSUtils {
 
 	private static final ThreadLocal<Zipper> zippers = ThreadLocal.withInitial(Zipper::new);
 
+	public static final Runnable EMPTY_RUNNABLE = () -> {
+	};
+
 	public static final Random R = new Random();
 
 	private static MessageDigest getMDSafe(String algorithm) {
