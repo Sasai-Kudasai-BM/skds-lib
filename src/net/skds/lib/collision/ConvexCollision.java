@@ -110,7 +110,7 @@ public class ConvexCollision {
 				normal.inverse();
 			}
 
-			return new CollisionResult(dep, normal, Vec3.ZERO(), null);
+			return new CollisionResult(dep, normal, Vec3.ZERO(), null, null);
 		}
 		return null;
 	}
@@ -127,7 +127,7 @@ public class ConvexCollision {
 			if (d * term.choose(velocityBA) >= 0) {
 				return null;
 			}
-			return new SimpleCollisionResult(0, norm, null, inter.getProjection(term));
+			return new SimpleCollisionResult(0, norm, null, null, inter.getProjection(term));
 		}
 
 		double pMin = 0;
@@ -166,11 +166,12 @@ public class ConvexCollision {
 		final Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
 		final Axis term = inter.minTerminator();
 		final double d = term.choose(bc) - term.choose(ac);
-		final Vec3 norm = term.getDirection(d).createVector3D();
+		Direction direction = term.getDirection(d);
+		final Vec3 norm = direction.createVector3D();
 		if (d * term.choose(velocityBA) >= 0) {
 			return null;
 		}
-		return new SimpleCollisionResult(pMin, norm, null);
+		return new SimpleCollisionResult(pMin, norm, direction, null);
 
 	}
 
@@ -178,21 +179,24 @@ public class ConvexCollision {
 		public final double depth;
 		public final double insert;
 		public final Vec3 normal;
+		public final Direction direction;
 		@Getter
 		@Setter
 		private IShape shape;
 
-		public SimpleCollisionResult(double depth, Vec3 normal, IShape shape) {
+		public SimpleCollisionResult(double depth, Vec3 normal, Direction direction, IShape shape) {
 			this.depth = depth;
 			this.normal = normal;
 			this.shape = shape;
+			this.direction = direction;
 			this.insert = 0;
 		}
 
-		public SimpleCollisionResult(double depth, Vec3 normal, IShape shape, double insert) {
+		public SimpleCollisionResult(double depth, Vec3 normal, Direction direction, IShape shape, double insert) {
 			this.depth = depth;
 			this.normal = normal;
 			this.shape = shape;
+			this.direction = direction;
 			this.insert = insert;
 		}
 	}
@@ -200,8 +204,8 @@ public class ConvexCollision {
 	public static class CollisionResult extends SimpleCollisionResult {
 		public final Vec3 point;
 
-		public CollisionResult(double distance, Vec3 normal, Vec3 point, IShape shape) {
-			super(distance, normal, shape);
+		public CollisionResult(double distance, Vec3 normal, Vec3 point, Direction direction, IShape shape) {
+			super(distance, normal, direction, shape);
 			this.point = point;
 		}
 	}

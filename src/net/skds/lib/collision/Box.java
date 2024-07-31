@@ -200,10 +200,9 @@ public final class Box implements ConvexShape {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof Box)) {
+		if (!(o instanceof Box box)) {
 			return false;
 		}
-		Box box = (Box) o;
 		if (box.minX != this.minX) {
 			return false;
 		}
@@ -518,7 +517,7 @@ public final class Box implements ConvexShape {
 		}
 		 */
 		if (contains(from)) {
-			return new ConvexCollision.SimpleCollisionResult(0, from.copy().sub(to).normalize(), this);
+			return new ConvexCollision.SimpleCollisionResult(0, from.copy().sub(to).normalize(), null, this);
 		}
 		final DoubleHolder depth = new DoubleHolder(1);
 		final Direction dir = traceCollisionSide(from, depth, null, to.x - from.x, to.y - from.y, to.z - from.z);
@@ -527,7 +526,7 @@ public final class Box implements ConvexShape {
 			return null;
 		}
 
-		return new ConvexCollision.SimpleCollisionResult(depth.getValue(), dir.createVector3D(), this);
+		return new ConvexCollision.SimpleCollisionResult(depth.getValue(), dir.createVector3D(), dir, this);
 	}
 
 	private Direction traceCollisionSide(Vec3 intersectingVector, DoubleHolder distance, Direction direction, double dx, double dy, double dz) {

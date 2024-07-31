@@ -68,6 +68,7 @@ public interface ConvexShape extends IShape {
 		return max;
 	}
 
+	// TODO Direction
 	@Override
 	default ConvexCollision.SimpleCollisionResult raytrace(Vec3 from, Vec3 to) {
 		Vec3 dir = to.copy().sub(from);
@@ -113,7 +114,13 @@ public interface ConvexShape extends IShape {
 		if (inverse) {
 			n.inverse();
 		}
-		return new ConvexCollision.SimpleCollisionResult(tMin, n, this);
+		Direction direction = switch (normal) {
+			case 0 -> inverse ? Direction.WEST : Direction.EAST;
+			case 1 -> inverse ? Direction.NORTH : Direction.SOUTH;
+			case 2 -> inverse ? Direction.DOWN : Direction.UP;
+			default -> null;
+		};
+		return new ConvexCollision.SimpleCollisionResult(tMin, n, direction, this);
 	}
 
 	Vec3[] getNormals();
