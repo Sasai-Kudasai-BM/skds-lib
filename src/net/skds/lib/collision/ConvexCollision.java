@@ -199,6 +199,10 @@ public class ConvexCollision {
 			this.direction = direction;
 			this.insert = insert;
 		}
+
+		public Object getAttachment() {
+			return (shape == null) ? null : shape.getAttachment();
+		}
 	}
 
 	public static class CollisionResult extends SimpleCollisionResult {

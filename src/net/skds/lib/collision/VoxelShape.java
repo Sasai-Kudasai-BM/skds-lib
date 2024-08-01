@@ -1,9 +1,10 @@
 package net.skds.lib.collision;
 
 import net.skds.lib.mat.IVec3;
+import net.skds.lib.mat.Matrix3;
 import net.skds.lib.mat.Vec3;
 
-public class VoxelShape {
+public class VoxelShape implements CompositeShape {
 
 	public static final VoxelShape EMPTY = new VoxelShape(new Box[0]) {
 		@Override
@@ -13,9 +14,19 @@ public class VoxelShape {
 	};
 
 	protected Box[] boxes;
+	protected Box bounding;
 
 	private VoxelShape(Box[] boxes) {
 		this.boxes = boxes;
+		if (boxes.length == 0) {
+			this.bounding = Box.EMPTY;
+		} else {
+			Box b = boxes[0];
+			for (int i = 1; i < boxes.length; i++) {
+				b = b.union(boxes[i]);
+			}
+			this.bounding = b;
+		}
 	}
 
 	public static VoxelShape of(Box[] boxes) {
@@ -27,15 +38,6 @@ public class VoxelShape {
 
 	public Box[] getBoxes() {
 		return boxes;
-	}
-
-	public VoxelShape offset(Vec3 offset) {
-		Box[] list = new Box[boxes.length];
-		for (int i = 0; i < list.length; i++) {
-			list[i] = boxes[i].offset(offset);
-		}
-		VoxelShape shape2 = new VoxelShape(list);
-		return shape2;
 	}
 
 	public VoxelShape copy() {
@@ -69,14 +71,38 @@ public class VoxelShape {
 		return false;
 	}
 
-	public Box boundingBox() {
-		if (isEmpty()) {
-			return Box.EMPTY;
+	@Override
+	public ConvexShape[] simplify() {
+		return boxes;
+	}
+
+	@Override
+	public void setPos(Vec3 pos) {
+	}
+
+	public VoxelShape offset(IVec3 offset) {
+		final Box[] offBoxes = new Box[boxes.length];
+		for (int i = 0; i < offBoxes.length; i++) {
+			offBoxes[i] = boxes[i].offset(offset);
 		}
-		Box b = boxes[0];
-		for (int i = 1; i < boxes.length; i++) {
-			b = b.union(boxes[i]);
-		}
-		return b;
+		return new VoxelShape(offBoxes);
+	}
+
+	@Override
+	public void scale(double scale) {
+	}
+
+	@Override
+	public Vec3 getCenter() {
+		return bounding.getCenter();
+	}
+
+	@Override
+	public Box getBoundingBox() {
+		return bounding;
+	}
+
+	@Override
+	public void setRotation(Matrix3 m3) {
 	}
 }

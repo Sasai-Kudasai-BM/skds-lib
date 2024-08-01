@@ -370,6 +370,10 @@ public final class Box implements ConvexShape {
 		return this.offset(vec.x, vec.y, vec.z);
 	}
 
+	public Box offset(IVec3 vec) {
+		return this.offset(vec.x(), vec.y(), vec.z());
+	}
+
 	/**
 	 * Checks if this box intersects the given box.
 	 */
