@@ -176,28 +176,28 @@ public class ConvexCollision {
 	}
 
 	public static class SimpleCollisionResult {
+		public final double distance;
 		public final double depth;
-		public final double insert;
 		public final Vec3 normal;
 		public final Direction direction;
 		@Getter
 		@Setter
 		private IShape shape;
 
-		public SimpleCollisionResult(double depth, Vec3 normal, Direction direction, IShape shape) {
-			this.depth = depth;
+		public SimpleCollisionResult(double distance, Vec3 normal, Direction direction, IShape shape) {
+			this.distance = distance;
 			this.normal = normal;
 			this.shape = shape;
 			this.direction = direction;
-			this.insert = 0;
+			this.depth = 0;
 		}
 
-		public SimpleCollisionResult(double depth, Vec3 normal, Direction direction, IShape shape, double insert) {
-			this.depth = depth;
+		public SimpleCollisionResult(double distance, Vec3 normal, Direction direction, IShape shape, double depth) {
+			this.distance = distance;
 			this.normal = normal;
 			this.shape = shape;
 			this.direction = direction;
-			this.insert = insert;
+			this.depth = depth;
 		}
 
 		public Object getAttachment() {

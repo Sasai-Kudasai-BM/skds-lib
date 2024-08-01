@@ -21,7 +21,7 @@ public interface CompositeShape extends IShape {
 		for (int i = 0; i < simple.length; i++) {
 			ConvexShape cs = simple[i];
 			ConvexCollision.SimpleCollisionResult result = cs.raytrace(from, to);
-			if (result != null && (min == null || result.depth < min.depth)) {
+			if (result != null && (min == null || result.distance < min.distance)) {
 				min = result;
 			}
 		}
@@ -54,7 +54,7 @@ public interface CompositeShape extends IShape {
 						if (cc == null) {
 							cc = cc2;
 							cc.setShape(myBox);
-						} else if (cc2.depth < cc.depth) {
+						} else if (cc2.distance < cc.distance) {
 							cc = cc2;
 							cc.setShape(myBox);
 						}
@@ -84,7 +84,7 @@ public interface CompositeShape extends IShape {
 					if (cc == null) {
 						cc = cc2;
 						cc.setShape(myBox);
-					} else if (cc2.depth < cc.depth) {
+					} else if (cc2.distance < cc.distance) {
 						cc = cc2;
 						cc.setShape(myBox);
 					}
