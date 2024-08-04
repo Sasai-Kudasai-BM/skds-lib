@@ -141,8 +141,7 @@ public class FastMath {
 		double d = modInt(degrees, 360);
 		if (d >= 180.0) {
 			d -= 360.0;
-		}
-		if (d < -180.0) {
+		} else if (d < -180.0) {
 			d += 360.0;
 		}
 		return d;
@@ -152,8 +151,7 @@ public class FastMath {
 		float d = modInt(degrees, 360);
 		if (d >= 180.0f) {
 			d -= 360.0f;
-		}
-		if (d < -180.0f) {
+		} else if (d < -180.0f) {
 			d += 360.0f;
 		}
 		return d;
