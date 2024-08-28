@@ -366,8 +366,8 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 rotatePitch(float pitch) {
-		double f = Math.cos(pitch);
-		double f1 = Math.sin(pitch);
+		double f = FastMath.cosDegr(pitch);
+		double f1 = FastMath.sinDegr(pitch);
 		double d0 = this.x;
 		double d1 = this.y * f + this.z * f1;
 		double d2 = this.z * f - this.y * f1;
@@ -378,8 +378,8 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 rotateYaw(float yaw) {
-		double f = Math.cos(yaw);
-		double f1 = Math.sin(yaw);
+		double f = FastMath.cosDegr(yaw);
+		double f1 = FastMath.sinDegr(yaw);
 		double d0 = this.x * f + this.z * f1;
 		double d1 = this.y;
 		double d2 = this.z * f - this.x * f1;
@@ -390,8 +390,8 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 rotateRoll(float roll) {
-		double f = Math.cos(roll);
-		double f1 = Math.sin(roll);
+		double f = FastMath.cosDegr(roll);
+		double f1 = FastMath.sinDegr(roll);
 		double d0 = this.x * f + this.y * f1;
 		double d1 = this.y * f - this.x * f1;
 		double d2 = this.z;

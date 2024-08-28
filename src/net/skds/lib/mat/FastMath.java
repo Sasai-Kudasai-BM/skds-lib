@@ -7,8 +7,12 @@ public class FastMath {
 
 	public static final Random RANDOM = new Random();
 
-	public static final float RAD_2_DEGREES = (float) (180 / Math.PI);
-	public static final float DEGREES_2_RAD = (float) (Math.PI / 180);
+	public static final float Pi = (float) Math.PI;
+	public static final float TwoPi = Pi * 2;
+	public static final float Pi2 = Pi / 2;
+
+	public static final float RAD_2_DEGREES = (180 / Pi);
+	public static final float DEGREES_2_RAD = (Pi / 180);
 
 	public static boolean roll(double chance) {
 		if (chance <= 0) {
@@ -67,7 +71,7 @@ public class FastMath {
 			v2 = 2 * RANDOM.nextDouble() - 1; // between -1 and 1
 			s = v1 * v1 + v2 * v2;
 		} while (s >= 1 || s == 0);
-		double multiplier = StrictMath.sqrt(-2 * StrictMath.log(s) / s);
+		double multiplier = Math.sqrt(-2 * Math.log(s) / s);
 		return v1 * multiplier;
 	}
 
@@ -234,24 +238,59 @@ public class FastMath {
 		return (max - min) * t + min;
 	}
 
-	public static float sin(float a) {
-		int b = (int) (a * sinTable.length / 360);
-		b %= sinTable.length;
-		if (b < 0) {
-			b += sinTable.length;
+	public static float sinDegr(float a) {
+		float pos = modInt(a * sinTable.length / 360f, sinTable.length);
+		if (pos < 0) {
+			pos += sinTable.length;
 		}
-		return sinTable[b];
+		int b1 = (int) pos;
+		int b2 = b1 + 1;
+		float part = pos - b1;
+		b2 %= sinTable.length;
+		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
 	}
 
-	public static float cos(final float x) {
-		return sin(x + 90);
+	public static float sinRad(float a) {
+		return sinDegr(a * RAD_2_DEGREES);
 	}
 
-	private static final float[] sinTable = new float[4096 * 4];
+	public static float cosDegr(final float x) {
+		return sinDegr(x + 90);
+	}
+
+	public static float cosRad(final float x) {
+		return sinRad(x + Pi2);
+	}
+
+	public static double sinDegr(double a) {
+		double pos = modInt(a * sinTable.length / 360f, sinTable.length);
+		if (pos < 0) {
+			pos += sinTable.length;
+		}
+		int b1 = (int) pos;
+		int b2 = b1 + 1;
+		double part = pos - b1;
+		b2 %= sinTable.length;
+		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
+	}
+
+	public static double sinRad(double a) {
+		return sinDegr(a * RAD_2_DEGREES);
+	}
+
+	public static double cosDegr(final double x) {
+		return sinDegr(x + 90);
+	}
+
+	public static double cosRad(final double x) {
+		return sinRad(x + Pi2);
+	}
+
+	private static final float[] sinTable = new float[1024 * 4];
 
 	static {
 		for (int i = 0; i < sinTable.length; i++) {
-			sinTable[i] = (float) StrictMath.sin(2 * Math.PI * i / sinTable.length);
+			sinTable[i] = (float) Math.sin(2 * Math.PI * i / sinTable.length);
 		}
 	}
 
