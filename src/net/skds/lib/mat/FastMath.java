@@ -2,7 +2,7 @@ package net.skds.lib.mat;
 
 import java.util.Random;
 
-@SuppressWarnings("ManualMinMaxCalculation")
+@SuppressWarnings({"ManualMinMaxCalculation", "unused"})
 public class FastMath {
 
 	public static final Random RANDOM = new Random();
@@ -22,6 +22,46 @@ public class FastMath {
 		} else {
 			return RANDOM.nextDouble() <= chance;
 		}
+	}
+
+	public static double avg(double a, double b) {
+		return (a + b) / 2;
+	}
+
+	public static double avg(double a, double b, double c) {
+		return (a + b + c) / 3;
+	}
+
+	public static double avg(double a, double b, double c, double d) {
+		return (a + b + c + d) / 4;
+	}
+
+	public static double avg(double... arr) {
+		double r = 0;
+		for (int i = 0; i < arr.length; i++) {
+			r += arr[i];
+		}
+		return r / arr.length;
+	}
+
+	public static float avg(float a, float b) {
+		return (a + b) / 2;
+	}
+
+	public static float avg(float a, float b, float c) {
+		return (a + b + c) / 3;
+	}
+
+	public static float avg(float a, float b, float c, float d) {
+		return (a + b + c + d) / 4;
+	}
+
+	public static float avg(float... arr) {
+		float r = 0;
+		for (int i = 0; i < arr.length; i++) {
+			r += arr[i];
+		}
+		return r / arr.length;
 	}
 
 	public static double dist2Line(Vec3 start, Vec3 direction, Vec3 point) {
@@ -331,5 +371,8 @@ public class FastMath {
 
 	public static boolean approxEqual(double a, double b, double eps) {
 		return Math.abs(a - b) < eps;
+	}
+
+	private FastMath() {
 	}
 }
