@@ -4,32 +4,29 @@ import net.skds.lib.utils.functester.api.ITestFunction;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class GraphPad extends JPanel {
 
 	private Color bg = new Color(255, 255, 255);
 	private Color smallGrid = new Color(200, 200, 200);
 	private Color grid = new Color(0, 0, 0);
-	private Timer timer;
+	//private Timer timer;
 
 	private final Frame frame;
 
 	public GraphPad(Frame frame) {
 		this.frame = frame;
 		setBackground(bg);
-		timer = new Timer(100, new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				repaint();
-			}
-		});
-		timer.setInitialDelay(0);
-		timer.setRepeats(true);
-		timer.setCoalesce(true);
-		timer.start();
+		//timer = new Timer(100, new ActionListener() {
+		//	@Override
+		//	public void actionPerformed(ActionEvent e) {
+		//		repaint();
+		//	}
+		//});
+		//timer.setInitialDelay(0);
+		//timer.setRepeats(true);
+		//timer.setCoalesce(true);
+		//timer.start();
 
 		setVisible(true);
 		setBounds(0, 0, 1600, 800);
@@ -78,7 +75,7 @@ public class GraphPad extends JPanel {
 		int ym = h / 2;
 
 		g.setColor(function.color());
-		int yPre = frame.tester.genValue(function, 0 - xm) - ym;
+		int yPre = frame.tester.genValue(function, -xm) - ym;
 		for (int x = 1; x < w; x++) {
 			int y = frame.tester.genValue(function, x - xm) - ym;
 			g.drawLine(x, -yPre, x, -y);

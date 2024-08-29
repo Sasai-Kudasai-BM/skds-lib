@@ -26,6 +26,11 @@ public final class SKDSByteBuf {
 		this.buffer = buffer;
 		// this.capacity = buffer.capacity();
 	}
+	
+	public SKDSByteBuf(byte[] array) {
+		this.buffer = ByteBuffer.wrap(array);
+		// this.capacity = buffer.capacity();
+	}
 
 	public static SKDSByteBuf allocate(int size) {
 		return new SKDSByteBuf(ByteBuffer.allocate(size));

@@ -51,10 +51,9 @@ public class SKDSUtils {
 	}
 
 	public static String hashFile(File f) {
-		try {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(f))) {
 			byte[] buffer = new byte[1024];
 			MessageDigest md = getSHA1();
-			InputStream is = new BufferedInputStream(new FileInputStream(f));
 			if (!f.exists()) {
 				return HEX_FORMAT_LC.formatHex(md.digest());
 			}
@@ -63,6 +62,23 @@ public class SKDSUtils {
 				md.update(buffer, 0, c);
 			}
 			return HEX_FORMAT_LC.formatHex(md.digest());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static byte[] hashFileArray(File f) {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(f))) {
+			byte[] buffer = new byte[1024];
+			MessageDigest md = getSHA1();
+			if (!f.exists()) {
+				return md.digest();
+			}
+			int c;
+			while ((c = is.read(buffer)) >= 0) {
+				md.update(buffer, 0, c);
+			}
+			return md.digest();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

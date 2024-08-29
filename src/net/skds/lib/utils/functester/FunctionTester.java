@@ -13,17 +13,29 @@ public class FunctionTester {
 	//*
 	public static void main(String[] args) {
 		FunctionTester tester = new FunctionTester();
-		tester.addFunction(FastMath::sin);
 		//*
 		tester.addFunction(new ITestFunction() {
 			@Override
 			public double calc(float input) {
-				return (FastMath.sin(input) - Math.sin(Math.toRadians(input))) * 1000;
+				input /= 5f;
+				return (FastMath.sinDegr(input) - Math.sin(Math.toRadians(input))) * 1_000_000;
 			}
 
 			@Override
 			public Color color() {
 				return Color.RED;
+			}
+		});
+		tester.addFunction(new ITestFunction() {
+			@Override
+			public double calc(float input) {
+				input /= 5f;
+				return FastMath.sinDegr(input) * 2;
+			}
+
+			@Override
+			public Color color() {
+				return Color.BLUE;
 			}
 		});
 		//tester.addFunction(new ITestFunction() {

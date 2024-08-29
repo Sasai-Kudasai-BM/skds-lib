@@ -1,5 +1,6 @@
 package net.skds.lib.mat.graphics;
 
+import net.skds.lib.mat.FastMath;
 import net.skds.lib.mat.Quat;
 
 public class Quatf {
@@ -39,7 +40,7 @@ public class Quatf {
 		}
 
 		if (degrees) {
-			angle *= (Math.PI / 180D);
+			angle *= FastMath.Pi / 180f;
 		}
 
 		float f = (float) Math.sin(angle / 2.0F);
@@ -90,12 +91,11 @@ public class Quatf {
 	}
 
 	public String toString() {
-		StringBuilder stringbuilder = new StringBuilder();
-		stringbuilder.append("Quat[").append(this.w).append(" + ");
-		stringbuilder.append(this.x).append("i + ");
-		stringbuilder.append(this.y).append("j + ");
-		stringbuilder.append(this.z).append("k]");
-		return stringbuilder.toString();
+		String str = "Quat[" + this.w + " + " +
+				this.x + "i + " +
+				this.y + "j + " +
+				this.z + "k]";
+		return str;
 	}
 
 	public Quatf multiplyQ(float qx, float qy, float qz, float qw) {
@@ -132,7 +132,7 @@ public class Quatf {
 
 	public Quatf rotate(Vec3f axis, float angle, boolean degrees) {
 		if (degrees) {
-			angle *= (Math.PI / 180D);
+			angle *= (FastMath.Pi / 180f);
 		}
 
 		float f0 = (float) Math.sin(angle / 2.0);

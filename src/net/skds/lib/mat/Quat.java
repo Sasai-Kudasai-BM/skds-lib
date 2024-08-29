@@ -34,15 +34,15 @@ public class Quat {
 			return;
 		}
 
-		if (degrees) {
-			angle *= (Math.PI / 180D);
+		if (!degrees) {
+			angle *= FastMath.RAD_2_DEGREES;
 		}
 
-		double f = Math.sin(angle / 2.0F);
+		double f = FastMath.sinDegr(angle / 2.0F);
 		this.x = axis.x * f;
 		this.y = axis.y * f;
 		this.z = axis.z * f;
-		this.w = Math.cos(angle / 2.0F);
+		this.w = FastMath.cosDegr(angle / 2.0F);
 	}
 
 	public Quat(Quat quaternionIn) {
@@ -98,11 +98,11 @@ public class Quat {
 		double axisY = spin.y / angle;
 		double axisZ = spin.z / angle;
 
-		double f0 = Math.sin(angle / 2.0);
+		double f0 = FastMath.sinRad(angle / 2.0);
 		double f = axisX * f0;
 		double f1 = axisY * f0;
 		double f2 = axisZ * f0;
-		double f3 = Math.cos(angle / 2.0);
+		double f3 = FastMath.cosRad(angle / 2.0);
 
 		double x = this.x;
 		double y = this.y;
@@ -187,15 +187,15 @@ public class Quat {
 	}
 
 	public Quat rotate(Vec3 axis, double angle, boolean degrees) {
-		if (degrees) {
-			angle *= (Math.PI / 180D);
+		if (!degrees) {
+			angle *= FastMath.RAD_2_DEGREES;
 		}
 
-		double f0 = Math.sin(angle / 2.0);
+		double f0 = FastMath.sinDegr(angle / 2.0);
 		double x = axis.x * f0;
 		double y = axis.y * f0;
 		double z = axis.z * f0;
-		double w = Math.cos(angle / 2.0);
+		double w = FastMath.cosDegr(angle / 2.0);
 
 		double f = this.x;
 		double f1 = this.y;
@@ -295,8 +295,8 @@ public class Quat {
 			qm.z = (qa.z * 0.5 + qb.z * 0.5);
 			return qm;
 		}
-		double ratioA = Math.sin((1 - t) * halfTheta) / sinHalfTheta;
-		double ratioB = Math.sin(t * halfTheta) / sinHalfTheta;
+		double ratioA = FastMath.sinRad((1 - t) * halfTheta) / sinHalfTheta;
+		double ratioB = FastMath.sinRad(t * halfTheta) / sinHalfTheta;
 		//calculate Quaternion.
 		qm.w = (qa.w * ratioA + qb.w * ratioB);
 		qm.x = (qa.x * ratioA + qb.x * ratioB);

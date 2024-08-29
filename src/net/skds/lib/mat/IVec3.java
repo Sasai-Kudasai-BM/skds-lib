@@ -28,15 +28,15 @@ public interface IVec3 {
 	double z();
 
 	default int floorX() {
-		return (int) Math.floor(x());
+		return FastMath.floor(x());
 	}
 
 	default int floorY() {
-		return (int) Math.floor(y());
+		return FastMath.floor(y());
 	}
 
 	default int floorZ() {
-		return (int) Math.floor(z());
+		return FastMath.floor(z());
 	}
 
 	default int roundX() {

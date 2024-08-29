@@ -1,6 +1,5 @@
 package net.skds.lib.network;
 
-import net.skds.lib.network.test.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -46,7 +45,7 @@ public class AbstractNetServer {
 	}
 
 	protected int getBufferSize() {
-		return Test.packetSize;
+		return 1024 * 16;
 	}
 
 	protected void onSelect(SelectionKey key) {

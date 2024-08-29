@@ -2,9 +2,8 @@ package net.skds.lib.utils;
 
 import lombok.SneakyThrows;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
@@ -13,26 +12,40 @@ public class ThreadUtil {
 	public static final ThreadGroup MAIN_GROUP = new ThreadGroup("Main");
 	public static final ThreadGroup UTIL_GROUP = new ThreadGroup("Util");
 
-	public static final boolean USE_ANALYZER = Boolean.getBoolean("skds.thread-analyzer");
-	public static final ThreadAnalyzer ANALYZER;
-
-	//private static final int threads = Runtime.getRuntime().availableProcessors();
 	private static final int threads = Math.max(4, Runtime.getRuntime().availableProcessors());
 
-	public static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(threads,
-			threads,
-			10,
-			TimeUnit.SECONDS,
-			new LinkedBlockingQueue<>(),
-			//new Queue(),
-			r -> {
-				SKDSThread t = new SKDSThread(UTIL_GROUP, r);
-				t.setDaemon(true);
-				return t;
-			},
-			(r, e) -> {
-				throw new UnsupportedOperationException("Tasks will not be rejected!");
+	private static final ThreadFactory VT_FACTORY = Thread.ofVirtual().name("SKDS-VT-", 0).factory();
+
+	public static final Executor EXECUTOR = r -> VT_FACTORY.newThread(r).start();
+
+	//ForkJoinPool.commonPool();
+			/*
+			new ForkJoinPool(threads,
+					p -> {
+						ForkJoinWorkerThread t = new ForkJoinWorkerThread(UTIL_GROUP, p, true) {
+						};
+						t.setName("SKDS-ForkJoinPool-" + t.getPoolIndex());
+						t.setDaemon(true);
+						return t;
+					},
+					(r, e) -> {
+						throw new RuntimeException(e);
+					},
+					false
+			);
+	// */
+
+	public static void main(String[] args) {
+		for (int i = 0; i < 100; i++) {
+			int j = i;
+			EXECUTOR.execute(() -> {
+				System.out.println(Thread.currentThread());
+				ThreadUtil.await(10_000);
 			});
+		}
+
+		ThreadUtil.await(10_000);
+	}
 
 	public static void runTaskNewThread(Runnable runnable) {
 		new SKDSThread(UTIL_GROUP, runnable).start();
@@ -150,10 +163,6 @@ public class ThreadUtil {
 
 	public static class SKDSThread extends Thread {
 
-		//private final float k = 0.05f;
-		//private float busy = 0;
-		//private long lastCheck = 0;
-
 		private static volatile int threadInitNumber;
 		private final Runnable task;
 
@@ -186,82 +195,14 @@ public class ThreadUtil {
 			task.run();
 		}
 
-		//private void analyze() {
-		//	final long time = System.nanoTime();
-		//	final float dt = (time - this.lastCheck) / 1_000_000f;
-		//	this.lastCheck = time;
-		//	final State state = getState();
-		//	final float k2 = k * dt;
-		//	final float m = 1 - k2;
-		//	busy *= m;
-		//	if (state == State.RUNNABLE) {
-		//		busy += k2;
-		//	}
-		//}
-
 	}
 
-	public static class ThreadAnalyzer extends Thread {
-
-		private Thread[] threadArray = new Thread[2];
-		//private DecimalFormat df = new DecimalFormat("##.##%");
-
-		long t = 0;
-
-		private ThreadAnalyzer() {
-			super(MAIN_GROUP, "SKDS-Thread-Analyzer");
-			setDaemon(true);
-		}
-
-		@Override
-		public void run() {
-			while (true) {
-				loop();
-				try {
-					sleep(1);
-				} catch (InterruptedException e) {
-				}
-			}
-
-		}
-
-		private void loop() {
-			int count;
-			while ((count = MAIN_GROUP.enumerate(threadArray)) == threadArray.length) {
-				threadArray = new Thread[threadArray.length * 2];
-			}
-
-			long t2 = System.currentTimeMillis();
-			if (t2 > t) {
-				t = t2 + 1000;
-				for (int i = 0; i < count; i++) {
-					Thread t = threadArray[i];
-					if (t instanceof SKDSThread skdsThread) {
-						//log.info(skdsThread.getName() + " " + df.format(skdsThread.busy));
-					}
-				}
-			}
-			for (int i = 0; i < count; i++) {
-				Thread t = threadArray[i];
-				if (t instanceof SKDSThread skdsThread) {
-					//skdsThread.analyze();
-					//log.info(skdsThread.getName() + " " + skdsThread.busy);
-				}
-			}
-		}
-	}
 
 	static {
-		if (USE_ANALYZER) {
-			ANALYZER = new ThreadAnalyzer();
-			ANALYZER.start();
-		} else {
-			ANALYZER = null;
-		}
-
 		if (SKDSUtils.OS_TYPE == SKDSUtils.OSType.WINDOWS) {
 			new Thread() { // dirty Windows timer fix
 				{
+					this.setName("Dirty-Windows-timer-fix");
 					this.setDaemon(true);
 					this.start();
 				}

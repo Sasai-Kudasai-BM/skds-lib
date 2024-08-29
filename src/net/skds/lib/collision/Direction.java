@@ -316,9 +316,8 @@ public enum Direction {
 
 	@Deprecated // rewrite
 	public boolean pointsTo(float yaw) {
-		float f = yaw * ((float) Math.PI / 180);
-		float g = -FastMath.sin(f);
-		float h = FastMath.cos(f);
+		float g = -FastMath.sinDegr(yaw);
+		float h = FastMath.cosDegr(yaw);
 		return (float) this.vector.x * g + (float) this.vector.z * h > 0.0f;
 	}
 

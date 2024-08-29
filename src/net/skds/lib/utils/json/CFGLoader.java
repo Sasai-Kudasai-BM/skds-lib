@@ -164,6 +164,19 @@ public class CFGLoader {
 		return null;
 	}
 
+	public static <T> T parseConfig(JsonElement json, Class<T> clazz) {
+		try {
+			T cfg = GSON.fromJson(json, clazz);
+			if (cfg instanceof JsonPostInit post) {
+				post.jsonPostInit();
+			}
+			return cfg;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public static <T> T readConfig(Path file, Class<T> clazz) {
 		try {
 			String text = Files.readString(file);

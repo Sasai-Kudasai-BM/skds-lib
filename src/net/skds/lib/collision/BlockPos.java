@@ -1,6 +1,7 @@
 package net.skds.lib.collision;
 
 import net.skds.lib.mat.FastMath;
+import net.skds.lib.mat.IVec3;
 import net.skds.lib.mat.Vec3;
 
 public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
@@ -23,8 +24,8 @@ public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
 		super(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
 	}
 
-	public BlockPos(Vec3 pos) {
-		super(FastMath.floor(pos.x), FastMath.floor(pos.y), FastMath.floor(pos.z));
+	public BlockPos(IVec3 pos) {
+		super(pos.floorX(), pos.floorY(), pos.floorZ());
 	}
 
 	public static long offset(long value, Direction direction) {
