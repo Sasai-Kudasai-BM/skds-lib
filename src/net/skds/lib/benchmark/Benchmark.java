@@ -46,7 +46,7 @@ public abstract class Benchmark {
 				"======= Bench end =======";
 	}
 
-	public abstract void prepare();
+	protected abstract void prepare();
 
-	public abstract void bench();
+	protected abstract void bench();
 }

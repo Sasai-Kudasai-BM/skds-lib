@@ -235,8 +235,7 @@ public class Quat {
 	public Quat normalize() {
 		double f = this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
 		if (f > 1.0E-30) {
-			//double g = MathHelper.fastInverseSqrt(f);
-			double g = Math.sqrt(1D / f);
+			double g = FastMath.invSqrt(f);
 			this.x *= g;
 			this.y *= g;
 			this.z *= g;

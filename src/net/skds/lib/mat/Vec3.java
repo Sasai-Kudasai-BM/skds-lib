@@ -207,10 +207,10 @@ public final class Vec3 implements IVec3 {
 			this.z = 0;
 			return this;
 		}
-		d0 = Math.sqrt(d0);
-		this.x /= d0;
-		this.y /= d0;
-		this.z /= d0;
+		d0 = FastMath.invSqrt(d0);
+		this.x *= d0;
+		this.y *= d0;
+		this.z *= d0;
 		return this;
 	}
 
@@ -328,7 +328,7 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public double length() {
-		return (double) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+		return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
 	}
 
 	public double lengthSquared() {

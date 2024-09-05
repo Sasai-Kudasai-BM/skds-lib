@@ -14,6 +14,8 @@ public class FastMath {
 	public static final float RAD_2_DEGREES = (180 / Pi);
 	public static final float DEGREES_2_RAD = (Pi / 180);
 
+	private static final float[] sinTable = new float[1024 * 4];
+
 	public static boolean roll(double chance) {
 		if (chance <= 0) {
 			return false;
@@ -283,8 +285,8 @@ public class FastMath {
 		if (pos < 0) {
 			pos += sinTable.length;
 		}
-		int b1 = (int) pos;
-		int b2 = b1 + 1;
+		int b1 = ((int) pos) % sinTable.length;
+		int b2 = (b1 + 1) % sinTable.length;
 		float part = pos - b1;
 		b2 %= sinTable.length;
 		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
@@ -307,10 +309,9 @@ public class FastMath {
 		if (pos < 0) {
 			pos += sinTable.length;
 		}
-		int b1 = (int) pos;
-		int b2 = b1 + 1;
+		int b1 = ((int) pos) % sinTable.length;
+		int b2 = (b1 + 1) % sinTable.length;
 		double part = pos - b1;
-		b2 %= sinTable.length;
 		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
 	}
 
@@ -326,13 +327,6 @@ public class FastMath {
 		return sinRad(x + Pi2);
 	}
 
-	private static final float[] sinTable = new float[1024 * 4];
-
-	static {
-		for (int i = 0; i < sinTable.length; i++) {
-			sinTable[i] = (float) Math.sin(2 * Math.PI * i / sinTable.length);
-		}
-	}
 
 	public static int floor(double value) {
 		int i = (int) value;
@@ -352,6 +346,24 @@ public class FastMath {
 	public static int ceil(float value) {
 		int i = (int) value;
 		return i >= value ? i : i + 1;
+	}
+
+	public static float invSqrt(float x) {
+		float half = 0.5f * x;
+		int i = Float.floatToRawIntBits(x);
+		i = 0x5f3759df - (i >> 1);
+		x = Float.intBitsToFloat(i);
+		x *= (1.5f - half * x * x);
+		return x;
+	}
+
+	public static double invSqrt(double x) {
+		double half = 0.5d * x;
+		long i = Double.doubleToRawLongBits(x);
+		i = 0x5fe6ec85e7de30daL - (i >> 1);
+		x = Double.longBitsToDouble(i);
+		x *= (1.5d - half * x * x);
+		return x;
 	}
 
 	public static int smallestEncompassingPowerOfTwo(int value) {
@@ -374,5 +386,11 @@ public class FastMath {
 	}
 
 	private FastMath() {
+	}
+
+	static {
+		for (int i = 0; i < sinTable.length; i++) {
+			sinTable[i] = (float) Math.sin(2 * Math.PI * i / sinTable.length);
+		}
 	}
 }
