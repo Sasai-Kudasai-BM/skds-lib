@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.math.BigInteger;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -116,11 +117,12 @@ public class SKDSUtils {
 	}
 
 	public static int arrToInt(byte[] arr) {
-		return ((arr[0] << 8 | arr[1]) << 8 | arr[2]) << 8 | arr[3];
+		return (((arr[0] & 255) << 8 | arr[1] & 255) << 8 | arr[2] & 255) << 8 | arr[3] & 255;
 	}
 
 	public static long arrToLong(byte[] arr) {
-		return ((((((((long) arr[0] << 8 | arr[1]) << 8 | arr[2]) << 8 | arr[3]) << 8 | arr[4]) << 8) | arr[5]) << 8 | arr[6]) << 8 | arr[7];
+		BigInteger bi = new BigInteger(arr);
+		return ((((((((long) (arr[0] & 255) << 8 | arr[1] & 255) << 8 | arr[2] & 255) << 8 | arr[3] & 255) << 8 | arr[4] & 255) << 8) | arr[5] & 255) << 8 | arr[6] & 255) << 8 | arr[7] & 255;
 	}
 
 	public static int[] UUID2IntArray(UUID uuid) {

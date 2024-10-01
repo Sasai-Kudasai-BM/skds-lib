@@ -30,13 +30,17 @@ public class CryptoCodec {
 		}
 	}
 
-	private CryptoCodec(Cipher encryptor, Cipher decryptor) {
+	public CryptoCodec(Cipher encryptor, Cipher decryptor) {
 		this.encryptor = encryptor;
 		this.decryptor = decryptor;
 	}
 
 	public static CryptoCodec createAES(String key) {
 		return new CryptoCodec(key.getBytes(StandardCharsets.UTF_8), "AES");
+	}
+
+	public static CryptoCodec createAES(byte[] key) {
+		return new CryptoCodec(key, "AES");
 	}
 
 	public static Pair<CryptoCodec, byte[]> createHostRSA() {
