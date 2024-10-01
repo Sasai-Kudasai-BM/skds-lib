@@ -82,16 +82,17 @@ public class PalettedStorage<T> implements Cloneable {
 
 	public static interface DirectSupplier<T> {
 
+		T getDefault();
+
 		T get(int index);
 
 		int getIndex(T value);
 
 		int size();
 
-		public int bitThreshold();
+		int bitThreshold();
 
-		public int minBits();
-
+		int minBits();
 
 		default int bits() {
 			return calcBits(size());
