@@ -29,49 +29,46 @@ public class ArrayUtils {
 		return -1;
 	}
 
+	public static int loop(int pos, int length) {
+		int ret = pos % length;
+		if (ret < 0) ret += length;
+		return ret;
+	}
+
 	public static byte loop(byte[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static boolean loop(boolean[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static short loop(short[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static char loop(char[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static int loop(int[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static long loop(long[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static float loop(float[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static double loop(double[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static <T> T loop(T[] array, int pos) {
-		if (pos < 0) pos = -pos;
-		return array[pos % array.length];
+		return array[loop(pos, array.length)];
 	}
 
 	public static class ObjHashedArray {
