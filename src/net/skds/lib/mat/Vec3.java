@@ -299,7 +299,7 @@ public final class Vec3 implements IVec3 {
 	}
 
 	public Vec3 scale(double factor) {
-		return this.mul(factor, factor, factor);
+		return this.scale(factor, factor, factor);
 	}
 
 	public Vec3 inverse() {
@@ -309,15 +309,8 @@ public final class Vec3 implements IVec3 {
 		return this;
 	}
 
-	public Vec3 mul(Vec3 vec) {
-		return this.mul(vec.x, vec.y, vec.z);
-	}
-
-	public Vec3 mul(double factorX, double factorY, double factorZ) {
-		this.x *= factorX;
-		this.y *= factorY;
-		this.z *= factorZ;
-		return this;
+	public Vec3 scale(IVec3 vec) {
+		return this.scale(vec.x(), vec.y(), vec.z());
 	}
 
 	public Vec3 scale(double factorX, double factorY, double factorZ) {

@@ -280,6 +280,10 @@ public class FastMath {
 		return (max - min) * t + min;
 	}
 
+	public static float lerpAngle(float t, float min, float max) {
+		return wrapDegrees(wrapDegrees(max - min) * t + min);
+	}
+
 	public static float sinDegr(float a) {
 		float pos = modInt(a * sinTable.length / 360f, sinTable.length);
 		if (pos < 0) {
