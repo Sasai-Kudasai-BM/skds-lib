@@ -34,7 +34,7 @@ public class CFGLoader {
 					}
 					if (peek == JsonToken.BEGIN_OBJECT) {
 						JsonObject j = JO_ADAPTER.read(in);
-						return new Vec3(j.get("x").getAsDouble(), j.get("y").getAsDouble(), j.get("z").getAsDouble());
+						return new Vec3(j.get("xf").getAsDouble(), j.get("yf").getAsDouble(), j.get("zf").getAsDouble());
 					}
 					return new Vec3();
 				}

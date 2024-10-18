@@ -1,5 +1,6 @@
 package net.skds.lib.mat;
 
+import net.skds.lib.mat.graphics.Matrix4f;
 import net.skds.lib.utils.SKDSUtils;
 
 import java.util.Random;
@@ -68,9 +69,9 @@ public final class Vec3 implements IVec3 {
 	}
 
 	//public Vec3(Vec3d moj) {
-	//	this.x = moj.x;
-	//	this.y = moj.y;
-	//	this.z = moj.z;
+	//	this.xf = moj.xf;
+	//	this.yf = moj.yf;
+	//	this.zf = moj.zf;
 	//}
 
 	public Vec3(double x, double y, double z) {
@@ -92,6 +93,24 @@ public final class Vec3 implements IVec3 {
 		this.x = matrixIn.m00 * x + matrixIn.m01 * y + matrixIn.m02 * z;
 		this.y = matrixIn.m10 * x + matrixIn.m11 * y + matrixIn.m12 * z;
 		this.z = matrixIn.m20 * x + matrixIn.m21 * y + matrixIn.m22 * z;
+		return this;
+	}
+
+	public Vec3 transform(Matrix4f matrixIn) {
+		double x = this.x;
+		double y = this.y;
+		double z = this.z;
+		this.x = matrixIn.m00 * x + matrixIn.m01 * y + matrixIn.m02 * z + matrixIn.m03;
+		this.y = matrixIn.m10 * x + matrixIn.m11 * y + matrixIn.m12 * z + matrixIn.m13;
+		this.z = matrixIn.m20 * x + matrixIn.m21 * y + matrixIn.m22 * z + matrixIn.m23;
+		double w = matrixIn.m30 * x + matrixIn.m31 * y + matrixIn.m32 * z + matrixIn.m33;
+
+		if (w <= 0) {
+			return this;
+		}
+		this.x /= w;
+		this.y /= w;
+		this.z /= w;
 		return this;
 	}
 
@@ -466,6 +485,17 @@ public final class Vec3 implements IVec3 {
 		return this;
 	}
 
+	public boolean aprEquals(IVec3 other, double lim) {
+
+		if (Math.abs(x - other.x()) > lim) {
+			return false;
+		}
+		if (Math.abs(y - other.y()) > lim) {
+			return false;
+		}
+		return Math.abs(z - other.z()) < lim;
+	}
+
 	public static Vec3 avg(Vec3... vecs) {
 		Vec3 ret = new Vec3();
 		int c = 0;
@@ -543,6 +573,6 @@ public final class Vec3 implements IVec3 {
 	}
 
 	//public Vec3d getMoj() {
-	//	return new Vec3d(x, y, z);
+	//	return new Vec3d(xf, yf, zf);
 	//}
 }

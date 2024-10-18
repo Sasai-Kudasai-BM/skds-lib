@@ -393,7 +393,7 @@ public class Vec3f implements IVec3 {
 	}
 
 	//public Vec3d getMoj() {
-	//	return new Vec3d(x, y, z);
+	//	return new Vec3d(xf, yf, zf);
 	//}
 
 }

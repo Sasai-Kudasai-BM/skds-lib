@@ -281,9 +281,9 @@ public class Matrix3f {
 	}
 	/*
 	
-		float f = quaternionIn.x;
-		float f1 = quaternionIn.y;
-		float f2 = quaternionIn.z;
+		float f = quaternionIn.xf;
+		float f1 = quaternionIn.yf;
+		float f2 = quaternionIn.zf;
 		float f3 = quaternionIn.w;
 		float f4 = 2.0 * f * f;
 		float f5 = 2.0 * f1 * f1;

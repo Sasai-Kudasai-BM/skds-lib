@@ -123,9 +123,47 @@ public interface ConvexShape extends IShape {
 		return new ConvexCollision.SimpleCollisionResult(tMin, n, direction, this);
 	}
 
+	@Override
+	default ConvexCollision.CollisionResult collide(IShape shape, Vec3 relativeVelocity) {
+		Box ext = getBoundingBox();
+		if (relativeVelocity != null) {
+			ext = ext.stretch(relativeVelocity);
+		}
+		if (!ext.intersects(shape.getBoundingBox())) {
+			return null;
+		}
+
+		ConvexCollision.CollisionResult cc = null;
+		final ConvexShape[] shapes = shape instanceof CompositeShape cs ? cs.simplify() : new ConvexShape[]{(ConvexShape) shape};
+		for (int i = 0; i < shapes.length; i++) {
+			final ConvexShape convexShape = shapes[i];
+			final Box convexBound = convexShape.getBoundingBox();
+			if (!convexBound.intersects(ext)) {
+				continue;
+			}
+			if (getBoundingBox().intersects(convexBound)) {
+				ConvexCollision.CollisionResult cc2 = ConvexCollision.collide(convexShape, this, relativeVelocity);
+				if (cc2 != null) {
+					if (cc == null) {
+						cc = cc2;
+						cc.setShape(this);
+					} else if (cc2.distance < cc.distance) {
+						cc = cc2;
+						cc.setShape(this);
+					}
+				}
+			}
+		}
+		return cc;
+	}
+
 	Vec3[] getNormals();
 
 	Vec3[] getPoints();
+	
+	default Vec3[] getPointsNew() {
+		return getPoints();
+	}
 
 	@Override
 	default boolean isConvex() {

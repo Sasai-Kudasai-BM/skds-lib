@@ -28,7 +28,8 @@ public interface CompositeShape extends IShape {
 		return min;
 	}
 
-	default ConvexCollision.CollisionResult collide(CompositeShape shape, Vec3 relativeVelocity) {
+	@Override
+	default ConvexCollision.CollisionResult collide(IShape shape, Vec3 relativeVelocity) {
 		Box ext = getBoundingBox();
 		if (relativeVelocity != null) {
 			ext = ext.stretch(relativeVelocity);
@@ -38,7 +39,7 @@ public interface CompositeShape extends IShape {
 		}
 
 		ConvexCollision.CollisionResult cc = null;
-		final ConvexShape[] shapes = shape.simplify();
+		final ConvexShape[] shapes = shape instanceof CompositeShape cs ? cs.simplify() : new ConvexShape[]{(ConvexShape) shape};
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape convexShape = shapes[i];
 			final Box convexBound = convexShape.getBoundingBox();
@@ -65,6 +66,7 @@ public interface CompositeShape extends IShape {
 		return cc;
 	}
 
+	@Deprecated
 	default ConvexCollision.CollisionResult collideWithMoving(ConvexShape shape, Vec3 relativeVelocity) {
 		Box ext = shape.getBoundingBox();
 		if (relativeVelocity != null) {

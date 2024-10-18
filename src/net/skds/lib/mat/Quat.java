@@ -55,9 +55,9 @@ public class Quat {
 	public Quat(Matrix3 m) {
 		//this.w = Math.sqrt(1.0 + m1.m00 + m1.m11 + m1.m22) / 2.0;
 		//double w4 = (4.0 * w);
-		//this.x = (m1.m21 - m1.m12) / w4;
-		//this.y = (m1.m02 - m1.m20) / w4;
-		//this.z = (m1.m10 - m1.m01) / w4;
+		//this.xf = (m1.m21 - m1.m12) / w4;
+		//this.yf = (m1.m02 - m1.m20) / w4;
+		//this.zf = (m1.m10 - m1.m01) / w4;
 
 		double tr = m.m00 + m.m11 + m.m22;
 

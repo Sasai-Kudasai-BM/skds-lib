@@ -8,6 +8,7 @@ import net.skds.lib.utils.Holders.DoubleHolder;
 
 import java.util.Collection;
 
+@SuppressWarnings("unused")
 public final class Box implements ConvexShape {
 	public final double minX;
 	public final double minY;
@@ -107,6 +108,29 @@ public final class Box implements ConvexShape {
 		}
 	}
 
+	public double surfaceArea() {
+		double x = maxX - minX;
+		double y = maxY - minY;
+		double z = maxZ - minZ;
+
+		return 2 * (x * y + x * z + y * z);
+	}
+
+	public double sizeX() {
+		return maxX - minX;
+	}
+
+	public Vec3 dimensions() {
+		return new Vec3(sizeX(), sizeY(), sizeZ());
+	}
+
+	public double sizeY() {
+		return maxY - minY;
+	}
+
+	public double sizeZ() {
+		return maxZ - minZ;
+	}
 
 	public Vec3 minTerminator(Box box) {
 
@@ -338,7 +362,7 @@ public final class Box implements ConvexShape {
 	}
 
 	/**
-	 * Creates a box that is translated by {@code x}, {@code y}, {@code z} on
+	 * Creates a box that is translated by {@code xf}, {@code yf}, {@code zf} on
 	 * each axis from this box.
 	 */
 	public Box offset(double x, double y, double z) {
@@ -358,8 +382,8 @@ public final class Box implements ConvexShape {
 	 * }
 	 * <p>
 	 * /**
-	 * Creates a box that is translated by {@code vec.x}, {@code vec.y}, {@code
-	 * vec.z} on each axis from this box.
+	 * Creates a box that is translated by {@code vec.xf}, {@code vec.yf}, {@code
+	 * vec.zf} on each axis from this box.
 	 * @see #offset(double, double, double)
 	 */
 	public Box offset(Vec3 vec) {
@@ -381,6 +405,10 @@ public final class Box implements ConvexShape {
 		return this.intersects(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
 	}
 
+	public boolean contains(Box box) {
+		return this.contains(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+	}
+
 	public boolean intersects(Box box, IVec3 offset) {
 		return this.minX + offset.x() < box.maxX && this.maxX + offset.x() > box.minX
 				&& this.minY + offset.y() < box.maxY
@@ -394,6 +422,11 @@ public final class Box implements ConvexShape {
 	public boolean intersects(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
 		return this.minX < maxX && this.maxX > minX && this.minY < maxY && this.maxY > minY && this.minZ < maxZ
 				&& this.maxZ > minZ;
+	}
+
+	public boolean contains(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+		return this.minX <= minX && this.maxX >= maxX && this.minY <= minY && this.maxY >= maxY && this.minZ <= minZ
+				&& this.maxZ >= maxZ;
 	}
 
 	/**
@@ -600,6 +633,11 @@ public final class Box implements ConvexShape {
 	public static Box of(IVec3 center, double dx, double dy, double dz) {
 		return new Box(center.x() - dx / 2.0, center.y() - dy / 2.0, center.z() - dz / 2.0, center.x() + dx / 2.0,
 				center.y() + dy / 2.0, center.z() + dz / 2.0);
+	}
+
+	public static Box of(IVec3 center, double radius) {
+		return new Box(center.x() - radius, center.y() - radius, center.z() - radius, center.x() + radius,
+				center.y() + radius, center.z() + radius);
 	}
 
 

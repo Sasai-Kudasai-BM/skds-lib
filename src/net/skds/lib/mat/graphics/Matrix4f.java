@@ -419,6 +419,78 @@ public final class Matrix4f {
 		return this;
 	}
 
+	public Matrix4f mul(Matrix3f matrix) {
+		float f = this.m00 * matrix.m00 + this.m01 * matrix.m10 + this.m02 * matrix.m20;
+		float f1 = this.m00 * matrix.m01 + this.m01 * matrix.m11 + this.m02 * matrix.m21;
+		float f2 = this.m00 * matrix.m02 + this.m01 * matrix.m12 + this.m02 * matrix.m22;
+		float f3 = this.m03;
+		float f4 = this.m10 * matrix.m00 + this.m11 * matrix.m10 + this.m12 * matrix.m20;
+		float f5 = this.m10 * matrix.m01 + this.m11 * matrix.m11 + this.m12 * matrix.m21;
+		float f6 = this.m10 * matrix.m02 + this.m11 * matrix.m12 + this.m12 * matrix.m22;
+		float f7 = this.m13;
+		float f8 = this.m20 * matrix.m00 + this.m21 * matrix.m10 + this.m22 * matrix.m20;
+		float f9 = this.m20 * matrix.m01 + this.m21 * matrix.m11 + this.m22 * matrix.m21;
+		float f10 = this.m20 * matrix.m02 + this.m21 * matrix.m12 + this.m22 * matrix.m22;
+		float f11 = this.m23;
+		float f12 = this.m30 * matrix.m00 + this.m31 * matrix.m10 + this.m32 * matrix.m20;
+		float f13 = this.m30 * matrix.m01 + this.m31 * matrix.m11 + this.m32 * matrix.m21;
+		float f14 = this.m30 * matrix.m02 + this.m31 * matrix.m12 + this.m32 * matrix.m22;
+		float f15 = this.m33;
+		this.m00 = f;
+		this.m01 = f1;
+		this.m02 = f2;
+		this.m03 = f3;
+		this.m10 = f4;
+		this.m11 = f5;
+		this.m12 = f6;
+		this.m13 = f7;
+		this.m20 = f8;
+		this.m21 = f9;
+		this.m22 = f10;
+		this.m23 = f11;
+		this.m30 = f12;
+		this.m31 = f13;
+		this.m32 = f14;
+		this.m33 = f15;
+		return this;
+	}
+
+	public Matrix4f mul(Matrix3 matrix) {
+		float f = (float) (this.m00 * matrix.m00 + this.m01 * matrix.m10 + this.m02 * matrix.m20);
+		float f1 = (float) (this.m00 * matrix.m01 + this.m01 * matrix.m11 + this.m02 * matrix.m21);
+		float f2 = (float) (this.m00 * matrix.m02 + this.m01 * matrix.m12 + this.m02 * matrix.m22);
+		float f3 = this.m03;
+		float f4 = (float) (this.m10 * matrix.m00 + this.m11 * matrix.m10 + this.m12 * matrix.m20);
+		float f5 = (float) (this.m10 * matrix.m01 + this.m11 * matrix.m11 + this.m12 * matrix.m21);
+		float f6 = (float) (this.m10 * matrix.m02 + this.m11 * matrix.m12 + this.m12 * matrix.m22);
+		float f7 = this.m13;
+		float f8 = (float) (this.m20 * matrix.m00 + this.m21 * matrix.m10 + this.m22 * matrix.m20);
+		float f9 = (float) (this.m20 * matrix.m01 + this.m21 * matrix.m11 + this.m22 * matrix.m21);
+		float f10 = (float) (this.m20 * matrix.m02 + this.m21 * matrix.m12 + this.m22 * matrix.m22);
+		float f11 = this.m23;
+		float f12 = (float) (this.m30 * matrix.m00 + this.m31 * matrix.m10 + this.m32 * matrix.m20);
+		float f13 = (float) (this.m30 * matrix.m01 + this.m31 * matrix.m11 + this.m32 * matrix.m21);
+		float f14 = (float) (this.m30 * matrix.m02 + this.m31 * matrix.m12 + this.m32 * matrix.m22);
+		float f15 = this.m33;
+		this.m00 = f;
+		this.m01 = f1;
+		this.m02 = f2;
+		this.m03 = f3;
+		this.m10 = f4;
+		this.m11 = f5;
+		this.m12 = f6;
+		this.m13 = f7;
+		this.m20 = f8;
+		this.m21 = f9;
+		this.m22 = f10;
+		this.m23 = f11;
+		this.m30 = f12;
+		this.m31 = f13;
+		this.m32 = f14;
+		this.m33 = f15;
+		return this;
+	}
+
 	public Matrix4f mul(Quat quaternion) {
 		this.mul(new Matrix4f(quaternion));
 		return this;
@@ -494,9 +566,9 @@ public final class Matrix4f {
 	}
 
 	public Matrix4f translate(Vec3 vector) {
-		this.m03 += vector.x;
-		this.m13 += vector.y;
-		this.m23 += vector.z;
+		this.m03 += (float) vector.x;
+		this.m13 += (float) vector.y;
+		this.m23 += (float) vector.z;
 		return this;
 	}
 

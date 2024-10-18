@@ -33,7 +33,7 @@ public class OBB implements ConvexShape {
 		this(dimensions, new Matrix3());
 	}
 
-	private OBB(Vec3 pos, Vec3 dim) {
+	public OBB(Vec3 pos, Vec3 dim) {
 		this.pos = pos;
 		this.baseMatrix = new Matrix3();
 		this.dimensions = dim;
@@ -105,19 +105,24 @@ public class OBB implements ConvexShape {
 	@Override
 	public Vec3[] getPoints() {
 		if (vertexCash == null) {
-			Vec3 hd = dimensions.copy().transform(baseMatrix).scale(.5);
-			vertexCash = new Vec3[8];
-			vertexCash[0] = pos.copy().sub(hd);
-			vertexCash[1] = baseMatrix.left().scale(dimensions.x).add(vertexCash[0]);
-			vertexCash[2] = baseMatrix.up().scale(dimensions.y).add(vertexCash[0]);
-			vertexCash[3] = baseMatrix.forward().scale(dimensions.z).add(vertexCash[0]);
-			vertexCash[4] = pos.copy().add(hd);
-			vertexCash[5] = baseMatrix.left().scale(-dimensions.x).add(vertexCash[4]);
-			vertexCash[6] = baseMatrix.up().scale(-dimensions.y).add(vertexCash[4]);
-			vertexCash[7] = baseMatrix.forward().scale(-dimensions.z).add(vertexCash[4]);
+			vertexCash = getPointsNew();
 		}
-
 		return vertexCash;
+	}
+
+	@Override
+	public Vec3[] getPointsNew() {
+		Vec3 hd = dimensions.copy().transform(baseMatrix).scale(.5);
+		Vec3[] vc = new Vec3[8];
+		vc[0] = pos.copy().sub(hd);
+		vc[1] = baseMatrix.left().scale(dimensions.x).add(vc[0]);
+		vc[2] = baseMatrix.up().scale(dimensions.y).add(vc[0]);
+		vc[3] = baseMatrix.forward().scale(dimensions.z).add(vc[0]);
+		vc[4] = pos.copy().add(hd);
+		vc[5] = baseMatrix.left().scale(-dimensions.x).add(vc[4]);
+		vc[6] = baseMatrix.up().scale(-dimensions.y).add(vc[4]);
+		vc[7] = baseMatrix.forward().scale(-dimensions.z).add(vc[4]);
+		return vc;
 	}
 
 	public Vec3[] getLines() {

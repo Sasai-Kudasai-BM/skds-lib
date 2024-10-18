@@ -38,4 +38,6 @@ public interface IShape {
 	default String getName() {
 		return "Unnamed";
 	}
+
+	ConvexCollision.CollisionResult collide(IShape shape, Vec3 relativeVelocity);
 }

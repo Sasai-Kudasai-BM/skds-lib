@@ -183,14 +183,14 @@ public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
 	//			return this;
 	//		}
 	//		case CLOCKWISE_90: {
-	//			return new BlockPos(-this.z, this.y, this.x);
+	//			return new BlockPos(-this.zf, this.yf, this.xf);
 	//		}
 	//		case CLOCKWISE_180: {
-	//			return new BlockPos(-this.x, this.y, -this.z);
+	//			return new BlockPos(-this.xf, this.yf, -this.zf);
 	//		}
 	//		case COUNTERCLOCKWISE_90:
 	//	}
-	//	return new BlockPos(this.z, this.y, -this.x);
+	//	return new BlockPos(this.zf, this.yf, -this.xf);
 	//}
 
 	//public static Optional<BlockPos> findClosest(BlockPos pos, int horizontalRange, int verticalRange,
@@ -208,9 +208,9 @@ public final class BlockPos extends Vec3I implements Comparable<BlockPos> {
 	//}
 
 	//public static Iterable<BlockPos> iterate(BlockPos start, BlockPos end) {
-	//	return BlockPos.iterate(Math.min(start.x, end.x), Math.min(start.y, end.y),
-	//			Math.min(start.z, end.z), Math.max(start.x, end.x),
-	//			Math.max(start.y, end.y), Math.max(start.z, end.z));
+	//	return BlockPos.iterate(Math.min(start.xf, end.xf), Math.min(start.yf, end.yf),
+	//			Math.min(start.zf, end.zf), Math.max(start.xf, end.xf),
+	//			Math.max(start.yf, end.yf), Math.max(start.zf, end.zf));
 	//}
 
 	//public static Stream<BlockPos> stream(BlockPos start, BlockPos end) {

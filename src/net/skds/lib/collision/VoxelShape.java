@@ -64,7 +64,7 @@ public class VoxelShape implements CompositeShape {
 		}
 		for (int i = 0; i < boxes.length; i++) {
 			if (boxes[i].intersects(box, shapePos)) {
-				//if (boxes[i].offset(shapePos.x(), shapePos.y(), shapePos.z()).intersects(box)) {
+				//if (boxes[i].offset(shapePos.xf(), shapePos.yf(), shapePos.zf()).intersects(box)) {
 				return true;
 			}
 		}

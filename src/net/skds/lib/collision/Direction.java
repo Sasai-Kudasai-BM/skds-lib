@@ -322,7 +322,7 @@ public enum Direction {
 	}
 
 	public static enum Axis implements Predicate<Direction> {
-		X("x") {
+		X("xf") {
 			@Override
 			public int choose(int x, int y, int z) {
 				return x;
@@ -343,7 +343,7 @@ public enum Direction {
 				return negative ? Vec3.XN : Vec3.XP;
 			}
 		},
-		Y("y") {
+		Y("yf") {
 			@Override
 			public int choose(int x, int y, int z) {
 				return y;
@@ -364,7 +364,7 @@ public enum Direction {
 				return negative ? Vec3.YN : Vec3.YP;
 			}
 		},
-		Z("z") {
+		Z("zf") {
 			@Override
 			public int choose(int x, int y, int z) {
 				return z;

@@ -1,6 +1,7 @@
 package net.skds.lib.mat;
 
 import net.skds.lib.mat.graphics.Matrix4f;
+import net.skds.lib.mat.graphics.Quatf;
 
 public class Matrix3 {
 
@@ -82,6 +83,32 @@ public class Matrix3 {
 	}
 
 	public Matrix3 set(Quat quaternionIn) {
+		double x = quaternionIn.x;
+		double y = quaternionIn.y;
+		double z = quaternionIn.z;
+		double w = quaternionIn.w;
+		double fx22 = 2.0 * x * x;
+		double fy22 = 2.0 * y * y;
+		double fz22 = 2.0 * z * z;
+		this.m00 = 1.0 - fy22 - fz22;
+		this.m11 = 1.0 - fz22 - fx22;
+		this.m22 = 1.0 - fx22 - fy22;
+		double xy = x * y;
+		double yz = y * z;
+		double zx = z * x;
+		double xw = x * w;
+		double yw = y * w;
+		double zw = z * w;
+		this.m10 = 2.0 * (xy + zw);
+		this.m01 = 2.0 * (xy - zw);
+		this.m20 = 2.0 * (zx - yw);
+		this.m02 = 2.0 * (zx + yw);
+		this.m21 = 2.0 * (yz + xw);
+		this.m12 = 2.0 * (yz - xw);
+		return this;
+	}
+
+	public Matrix3 set(Quatf quaternionIn) {
 		double x = quaternionIn.x;
 		double y = quaternionIn.y;
 		double z = quaternionIn.z;
@@ -310,9 +337,9 @@ public class Matrix3 {
 	}
 	/*
 	
-		double f = quaternionIn.x;
-		double f1 = quaternionIn.y;
-		double f2 = quaternionIn.z;
+		double f = quaternionIn.xf;
+		double f1 = quaternionIn.yf;
+		double f2 = quaternionIn.zf;
 		double f3 = quaternionIn.w;
 		double f4 = 2.0 * f * f;
 		double f5 = 2.0 * f1 * f1;

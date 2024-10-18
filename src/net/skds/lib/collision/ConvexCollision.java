@@ -6,11 +6,10 @@ import net.skds.lib.collision.Direction.Axis;
 import net.skds.lib.mat.Vec3;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ConvexCollision {
-
-	public static final Vec3[] NORMALS = {Vec3.XP, Vec3.YP, Vec3.ZP};
 
 	public static CollisionResult collide(ConvexShape s1, ConvexShape s2, Vec3 velocity21) {
 
@@ -18,14 +17,18 @@ public class ConvexCollision {
 		Vec3[] s2Norm = s2.getNormals();
 
 		List<Vec3> terminators = new ArrayList<>();
+		if (s1Norm.length * s2Norm.length == 0) {
+			terminators.add(velocity21.copy().normalize());
+		}
 
-		for (int i = 0; i < 3; i++) {
-			terminators.add(s1Norm[i]);
-			terminators.add(s2Norm[i]);
-			for (int j = 0; j < 3; j++) {
-				Vec3 cross = s1Norm[i].copy().cross(s2Norm[i]);
+		Collections.addAll(terminators, s1Norm);
+		Collections.addAll(terminators, s2Norm);
+
+		for (int i = 0; i < s1Norm.length; i++) {
+			for (int j = 0; j < s2Norm.length; j++) {
+				Vec3 cross = s1Norm[i].copy().cross(s2Norm[j]);
 				double len = cross.length();
-				if (len > 1E-10) {
+				if (len > 1E-30) {
 					terminators.add(cross);
 				}
 				cross.div(len);
@@ -34,85 +37,76 @@ public class ConvexCollision {
 		return intersectionMoving(s1, s2, terminators, velocity21);
 	}
 
-	//TODO correct normals
 	private static CollisionResult intersectionMoving(ConvexShape a, ConvexShape b, List<Vec3> terminators, Vec3 velocityBA) {
 
-		ProjPair projInterval = new ProjPair(0, 1);
-		Vec3 minTeminator = null;
-		double minL = Double.MAX_VALUE;
-
-		//boolean velN = false;
-		boolean revNorm = false;
-
-		boolean iS = true;
-
-		boolean intersect = true;
+		double pMin = 0;
+		double pMax = 1;
 
 		for (int i = 0; i < terminators.size(); i++) {
 			Vec3 terminator = terminators.get(i);
-			double v = velocityBA.projOnNormal(terminator);
-			ProjPair projA = a.getProjection(terminator);
-			ProjPair projB = b.getProjection(terminator);
-			ProjPair interA = projA.copy();
-			if (Math.abs(v) < 1E-30) {
-				interA.intersect(projB);
-				if (!interA.isNormal()) {
-					intersect = false;
-					break;
-				}
-				continue;
-			}
-			double zero;
-			double inner;
-			double outer;
-			if (v > 0) {
-				zero = projB.min;
-				outer = interA.max;
-				inner = interA.min - projB.len();
-			} else {
-				zero = projB.max;
-				outer = interA.min;
-				inner = interA.max + projB.len();
-			}
-			inner -= zero;
-			outer -= zero;
-			ProjPair inter = new ProjPair(inner / v, outer / v);
-			projInterval.intersect(inter);
-			if (!projInterval.isNormal()) {
-				intersect = false;
-				break;
+			double v = velocityBA.dot(terminator);
+			double aMin = a.getProjectionMin(terminator);
+			double aMax = a.getProjectionMax(terminator);
+			double bMin = b.getProjectionMin(terminator);
+			double bMax = b.getProjectionMax(terminator);
+
+			double tMin = (aMin - bMax) / v;
+			double tMax = (aMax - bMin) / v;
+
+			if (v < 0) {
+				double d = tMin;
+				tMin = tMax;
+				tMax = d;
 			}
 
-			interA.intersect(projB);
-			double d = interA.len();
-			if (d < 0) {
-				iS = false;
+			if (tMin > pMin) {
+				pMin = tMin;
 			}
-			d = Math.abs(d);
-			//log.info("====  " + d + "  " + terminator);
-			if (d < minL) {
-				minL = d;
-				minTeminator = terminator;
-
-				revNorm = projA.mid() < projB.mid();
-				//velN = v < 0;
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return null;
 			}
 		}
 
-		intersect &= projInterval.isNormal();
+		final double distance = pMin;
 
-		if (intersect && minTeminator != null) {
-			double dep = projInterval.min;
-			Vec3 point = Vec3.ZERO();
-			Vec3 normal = minTeminator.copy();
-			//log.info(revNorm ^ velN);
-			if (revNorm) {
-				normal.inverse();
+		double termLen = Double.MAX_VALUE;
+		Vec3 minTerm = null;
+		boolean nInv = false;
+		for (int i = 0; i < terminators.size(); i++) {
+			Vec3 terminator = terminators.get(i);
+			double v = velocityBA.dot(terminator);
+			double aMin = a.getProjectionMin(terminator);
+			double aMax = a.getProjectionMax(terminator);
+			double bMin = b.getProjectionMin(terminator) + v * distance;
+			double bMax = b.getProjectionMax(terminator) + v * distance;
+
+			double tMin = Math.max(aMin, bMin);
+			double tMax = Math.min(aMax, bMax);
+
+			double d = tMax - tMin;
+
+			if (d < termLen) {
+				double dc = (aMax - aMin) - (bMax - bMin);
+				nInv = v * dc < 0;
+				termLen = d;
+				minTerm = terminator;
 			}
-
-			return new CollisionResult(dep, normal, Vec3.ZERO(), null, null);
 		}
-		return null;
+
+		assert minTerm != null : "nan or infinite values";
+		minTerm = minTerm.copy();
+		if (nInv) {
+			minTerm.inverse();
+		}
+		if (distance > 0) {
+			termLen = 0;
+		} else if (termLen < 0) {
+			termLen = -termLen;
+		}
+		return new CollisionResult(distance, termLen, minTerm, new Vec3(), null, null);
 	}
 
 	public static SimpleCollisionResult intersectionMoving(Box a, Box b, Vec3 velocityBA) {
@@ -161,6 +155,7 @@ public class ConvexCollision {
 			}
 		}
 
+		// TODO optimal calculation
 		final Vec3 ac = a.getCenter();
 		final Vec3 bc = b.getCenter();
 		final Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
@@ -210,6 +205,11 @@ public class ConvexCollision {
 
 		public CollisionResult(double distance, Vec3 normal, Vec3 point, Direction direction, IShape shape) {
 			super(distance, normal, direction, shape);
+			this.point = point;
+		}
+
+		public CollisionResult(double distance, double depth, Vec3 normal, Vec3 point, Direction direction, IShape shape) {
+			super(distance, normal, direction, shape, depth);
 			this.point = point;
 		}
 	}

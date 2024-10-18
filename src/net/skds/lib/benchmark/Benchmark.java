@@ -39,8 +39,8 @@ public abstract class Benchmark {
 
 	public final String result() {
 		return "======== Bench =========\n" +
-				"Warmup: " + (resultWarmup / 1000_000) + " ms\n" +
-				((resultWarmup / 1000) / warmup) + " us/op\n" +
+				//"Warmup: " + (resultWarmup / 1000_000) + " ms\n" +
+				//((resultWarmup / 1000) / warmup) + " us/op\n" +
 				"Bench: " + (resultBench / 1000_000) + " ms\n" +
 				((resultBench / 1000) / iterations) + " us/op\n" +
 				"======= Bench end =======";

@@ -1,5 +1,6 @@
 package net.skds.lib.mat.graphics;
 
+import net.skds.lib.mat.Matrix3;
 import net.skds.lib.mat.Quat;
 import net.skds.lib.mat.Vec3;
 import net.skds.lib.utils.exeption.StackOverflowExeption;
@@ -78,6 +79,16 @@ public class MatrixStack implements AutoCloseable {
 	}
 
 	public MatrixStack mul(Matrix4f m) {
+		last.mul(m);
+		return this;
+	}
+
+	public MatrixStack mul(Matrix3 m) {
+		last.mul(m);
+		return this;
+	}
+
+	public MatrixStack mul(Matrix3f m) {
 		last.mul(m);
 		return this;
 	}
