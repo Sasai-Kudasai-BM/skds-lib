@@ -4,7 +4,7 @@ import net.skds.lib2.utils.linkiges.Obj2DoublePair;
 import net.skds.lib2.utils.linkiges.Obj2FloatPair;
 
 @SuppressWarnings("unused")
-public interface Matrix3 {
+public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 
 	Matrix3 SINGLE = Matrix3D.SINGLE;
 
@@ -160,6 +160,34 @@ public interface Matrix3 {
 		);
 	}
 
+	static Matrix3D fromQuatNS(Quat q, double sx, double sy, double sz) {
+		double x = q.x();
+		double y = q.y();
+		double z = q.z();
+		double w = q.w();
+		double fx22 = 2.0 * x * x;
+		double fy22 = 2.0 * y * y;
+		double fz22 = 2.0 * z * z;
+		double xy = x * y;
+		double yz = y * z;
+		double zx = z * x;
+		double xw = x * w;
+		double yw = y * w;
+		double zw = z * w;
+
+		return new Matrix3D(
+				sx * (1.0 - fy22 - fz22),
+				sy * (2.0 * (xy - zw)),
+				sz * (2.0 * (zx + yw)),
+				sx * (2.0 * (xy + zw)),
+				sy * (1.0 - fz22 - fx22),
+				sz * (2.0 * (yz - xw)),
+				sx * (2.0 * (zx - yw)),
+				sy * (2.0 * (yz + xw)),
+				sz * (1.0 - fx22 - fy22)
+		);
+	}
+
 	static Matrix3F fromQuatF(Quat q) {
 		float x = q.xf();
 		float y = q.yf();
@@ -185,6 +213,34 @@ public interface Matrix3 {
 				2.0f * (zx - yw),
 				2.0f * (yz + xw),
 				1.0f - fx22 - fy22
+		);
+	}
+
+	static Matrix3F fromQuatNSF(Quat q, float sx, float sy, float sz) {
+		float x = q.xf();
+		float y = q.yf();
+		float z = q.zf();
+		float w = q.wf();
+		float fx22 = 2.0f * x * x;
+		float fy22 = 2.0f * y * y;
+		float fz22 = 2.0f * z * z;
+		float xy = x * y;
+		float yz = y * z;
+		float zx = z * x;
+		float xw = x * w;
+		float yw = y * w;
+		float zw = z * w;
+
+		return new Matrix3F(
+				sx * (1.0f - fy22 - fz22),
+				sy * (2.0f * (xy - zw)),
+				sz * (2.0f * (zx + yw)),
+				sx * (2.0f * (xy + zw)),
+				sy * (1.0f - fz22 - fx22),
+				sz * (2.0f * (yz - xw)),
+				sx * (2.0f * (zx - yw)),
+				sy * (2.0f * (yz + xw)),
+				sz * (1.0f - fx22 - fy22)
 		);
 	}
 
@@ -382,6 +438,20 @@ public interface Matrix3 {
 		);
 	}
 
+	default Matrix3D scaleNS(double sx, double sy, double sz) {
+		return new Matrix3D(
+				m00() * sx,
+				m01() * sy,
+				m02() * sz,
+				m10() * sx,
+				m11() * sy,
+				m12() * sz,
+				m20() * sx,
+				m21() * sy,
+				m22() * sz
+		);
+	}
+
 	default Matrix3F scaleF(float scale) {
 		return new Matrix3F(
 				m00f() * scale,
@@ -393,6 +463,20 @@ public interface Matrix3 {
 				m20f() * scale,
 				m21f() * scale,
 				m22f() * scale
+		);
+	}
+
+	default Matrix3F scaleNSF(float sx, float sy, float sz) {
+		return new Matrix3F(
+				m00f() * sx,
+				m01f() * sy,
+				m02f() * sz,
+				m10f() * sx,
+				m11f() * sy,
+				m12f() * sz,
+				m20f() * sx,
+				m21f() * sy,
+				m22f() * sz
 		);
 	}
 
@@ -438,24 +522,48 @@ public interface Matrix3 {
 		return new Vec3D(m00(), m10(), m20());
 	}
 
+	default Vec3D leftNorm() {
+		return Vec3.normalized(m00(), m10(), m20());
+	}
+
 	default Vec3F leftF() {
 		return new Vec3F(m00f(), m10f(), m20f());
+	}
+
+	default Vec3F leftNormF() {
+		return Vec3.normalizedF(m00f(), m10f(), m20f());
 	}
 
 	default Vec3D up() {
 		return new Vec3D(m01(), m11(), m21());
 	}
 
+	default Vec3D upNorm() {
+		return Vec3.normalized(m01(), m11(), m21());
+	}
+
 	default Vec3F upF() {
 		return new Vec3F(m01f(), m11f(), m21f());
+	}
+
+	default Vec3F upNormF() {
+		return Vec3.normalizedF(m01f(), m11f(), m21f());
 	}
 
 	default Vec3D forward() {
 		return new Vec3D(m02(), m12(), m22());
 	}
 
+	default Vec3D forwardNorm() {
+		return Vec3.normalized(m02(), m12(), m22());
+	}
+
 	default Vec3F forwardF() {
 		return new Vec3F(m02f(), m12f(), m22f());
+	}
+
+	default Vec3F forwardNormF() {
+		return Vec3.normalizedF(m02f(), m12f(), m22f());
 	}
 
 	static Matrix3D rotationFromAToB(Vec3 a, Vec3 b) {

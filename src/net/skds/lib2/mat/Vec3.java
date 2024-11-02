@@ -3,7 +3,7 @@ package net.skds.lib2.mat;
 import java.util.Random;
 
 @SuppressWarnings("unused")
-public interface Vec3 extends IVec {
+public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction {
 
 	Vec3 XN = Vec3D.XN;
 	Vec3 XP = Vec3D.XP;
@@ -197,7 +197,7 @@ public interface Vec3 extends IVec {
 		return this.xf() * this.xf() + this.yf() * this.yf() + this.zf() * this.zf();
 	}
 
-	default Vec3D inverse() {
+	default Vec3 inverse() {
 		return new Vec3D(-x(), -y(), -z());
 	}
 
@@ -538,6 +538,14 @@ public interface Vec3 extends IVec {
 		);
 	}
 
+	default Vec3D invSub(Vec3 vec) {
+		return new Vec3D(
+				-this.y() - vec.z(),
+				-this.z() - vec.x(),
+				-this.x() - vec.y()
+		);
+	}
+
 	default Vec3D sub(double x2, double y2, double z2) {
 		return new Vec3D(
 				this.y() - z2,
@@ -551,6 +559,14 @@ public interface Vec3 extends IVec {
 				this.yf() - vec.zf(),
 				this.zf() - vec.xf(),
 				this.xf() - vec.yf()
+		);
+	}
+
+	default Vec3F invSubF(Vec3 vec) {
+		return new Vec3F(
+				-this.yf() - vec.zf(),
+				-this.zf() - vec.xf(),
+				-this.xf() - vec.yf()
 		);
 	}
 
@@ -988,4 +1004,93 @@ public interface Vec3 extends IVec {
 	default float[] asArrayF() {
 		return new float[]{xf(), yf(), zf()};
 	}
+
+	default Vec3D xzy() {
+		return new Vec3D(x(), z(), y());
+	}
+
+	default Vec3F xzyF() {
+		return new Vec3F(xf(), zf(), yf());
+	}
+
+	default Vec3D zxy() {
+		return new Vec3D(z(), x(), y());
+	}
+
+	default Vec3F zxyF() {
+		return new Vec3F(zf(), xf(), yf());
+	}
+
+	default Vec3D zyx() {
+		return new Vec3D(z(), y(), x());
+	}
+
+	default Vec3F zyxF() {
+		return new Vec3F(zf(), yf(), xf());
+	}
+
+	default Vec3D yxz() {
+		return new Vec3D(y(), x(), z());
+	}
+
+	default Vec3F yxzF() {
+		return new Vec3F(yf(), xf(), zf());
+	}
+
+	default Vec3D yzc() {
+		return new Vec3D(y(), z(), x());
+	}
+
+	default Vec3F yzcF() {
+		return new Vec3F(yf(), zf(), xf());
+	}
+
+	default Vec2D xy() {
+		return new Vec2D(x(), y());
+	}
+
+	default Vec2F xyF() {
+		return new Vec2F(xf(), yf());
+	}
+
+	default Vec2D xz() {
+		return new Vec2D(x(), z());
+	}
+
+	default Vec2F xzF() {
+		return new Vec2F(xf(), zf());
+	}
+
+	default Vec2D yx() {
+		return new Vec2D(y(), x());
+	}
+
+	default Vec2F yxF() {
+		return new Vec2F(yf(), xf());
+	}
+
+	default Vec2D yz() {
+		return new Vec2D(y(), z());
+	}
+
+	default Vec2F yzF() {
+		return new Vec2F(yf(), zf());
+	}
+
+	default Vec2D zx() {
+		return new Vec2D(z(), x());
+	}
+
+	default Vec2F zxF() {
+		return new Vec2F(zf(), xf());
+	}
+
+	default Vec2D zy() {
+		return new Vec2D(z(), y());
+	}
+
+	default Vec2F zyF() {
+		return new Vec2F(zf(), yf());
+	}
+
 }

@@ -1,58 +1,55 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib.mat.Matrix3;
-import net.skds.lib.mat.Vec3;
+import net.skds.lib2.mat.Matrix3;
+import net.skds.lib2.mat.Quat;
+import net.skds.lib2.mat.Vec3;
 
 public class OBB implements ConvexShape {
 
-	public final Matrix3 baseMatrix;
-	public final Vec3 pos;
-	public final Vec3 dimensions;
+	public final Matrix3 normals;
+	public final Vec3 center;
+	//public final Vec3 dimensions;
 
-	private Vec3[] vertexCash = null;
-	private AABB boundingCash = null;
+	private Vec3[] vertexCache;
+	private AABB boundingCache;
 
-	private Object attachment = null;
+	private Object attachment;
 
-	public OBB(Vec3 dimensions, Matrix3 baseMatrix) {
-		this.pos = new Vec3();
-		this.baseMatrix = baseMatrix.copy();
-		this.dimensions = dimensions.copy();
-		update();
+	public OBB(Vec3 center, Vec3 dimensions, Quat q) {
+		this.center = center;
+		this.normals = Matrix3.fromQuatNS(q, dimensions.x(), dimensions.y(), dimensions.z());
 	}
 
-	public OBB(OBB obb) {
-		this.pos = obb.pos.copy();
-		this.baseMatrix = obb.baseMatrix.copy();
-		this.dimensions = obb.dimensions.copy();
-		this.vertexCash = obb.vertexCash;
-		this.boundingCash = obb.boundingCash;
+	public OBB(Vec3 center, Matrix3 normals) {
+		this.center = center;
+		this.normals = normals;
 	}
 
-	public OBB(Vec3 dimensions) {
-		this(dimensions, new Matrix3());
+	private OBB(Vec3 center, Matrix3 normals, Object attachment) {
+		this.center = center;
+		this.normals = normals;
+		this.attachment = attachment;
 	}
 
-	public OBB(Vec3 pos, Vec3 dim) {
-		this.pos = pos;
-		this.baseMatrix = new Matrix3();
-		this.dimensions = dim;
-		update();
-	}
 
-	public static OBB fromTo(Vec3 from, Vec3 to) {
-		return new OBB(from.copy().add(to).scale(.5), to.copy().sub(from));
+	@Override
+	public OBB rotate(Matrix3 m3) {
+		return new OBB(center, m3.multiply(normals), attachment);
 	}
 
 	@Override
-	public OBB copy() {
-		return new OBB(this);
+	public OBB move(Vec3 delta) {
+		return new OBB(center.add(delta), normals, attachment);
 	}
 
 	@Override
-	public void scale(double scale) {
-		dimensions.scale(scale);
-		update();
+	public OBB scale(double scale) {
+		return new OBB(center, normals.scale(scale), attachment);
+	}
+
+	@Override
+	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
+		return new OBB(center.add(pos), m3.multiply(normals).scale(scale), attachment);
 	}
 
 	@Override
@@ -61,150 +58,65 @@ public class OBB implements ConvexShape {
 	}
 
 	@Override
-	public void setAttachment(Object attachment) {
+	public Object setAttachment(Object attachment) {
+		Object old = this.attachment;
 		this.attachment = attachment;
+		return old;
 	}
 
 	@Override
 	public Vec3 getCenter() {
-		return pos;
-	}
-
-	@Override
-	public void setPos(Vec3 pos) {
-		this.pos.set(pos);
-		update();
-	}
-
-	@Override
-	public void setRotation(Matrix3 m3) {
-		this.baseMatrix.set(m3);
-		update();
-	}
-
-	@Override
-	public void setPosAndRotation(Vec3 pos, Matrix3 m3) {
-		this.pos.set(pos);
-		this.baseMatrix.set(m3);
-		update();
-	}
-
-	public void update() {
-		this.vertexCash = null;
-		this.boundingCash = null;
+		return center;
 	}
 
 	@Override
 	public AABB getBoundingBox() {
-		if (boundingCash == null) {
-			boundingCash = createBounding();
+		AABB bb = boundingCache;
+		if (bb == null) {
+			bb = new AABBBuilder(center).expand(getPoints()).build();
+			boundingCache = bb;
 		}
-		return boundingCash;
+		return bb;
 	}
+
 
 	@Override
 	public Vec3[] getPoints() {
-		if (vertexCash == null) {
-			vertexCash = getPointsNew();
+		Vec3[] vc = vertexCache;
+		Vec3 l = normals.left();
+		Vec3 u = normals.up();
+		Vec3 f = normals.forward();
+		if (vc == null) {
+			vc = new Vec3[]{
+					center.addScale(l.sub(u), .5),
+					center.addScale(f.sub(u), .5),
+					center.addScale(l.invSub(u), .5),
+					center.addScale(f.invSub(u), .5),
+					center.addScale(l.add(u), .5),
+					center.addScale(f.add(u), .5),
+					center.addScale(l.invSub(u), .5),
+					center.addScale(f.invSub(u), .5)
+			};
+			vertexCache = vc;
 		}
-		return vertexCash;
-	}
-
-	@Override
-	public Vec3[] getPointsNew() {
-		Vec3 hd = dimensions.copy().transform(baseMatrix).scale(.5);
-		Vec3[] vc = new Vec3[8];
-		vc[0] = pos.copy().sub(hd);
-		vc[1] = baseMatrix.left().scale(dimensions.x).add(vc[0]);
-		vc[2] = baseMatrix.up().scale(dimensions.y).add(vc[0]);
-		vc[3] = baseMatrix.forward().scale(dimensions.z).add(vc[0]);
-		vc[4] = pos.copy().add(hd);
-		vc[5] = baseMatrix.left().scale(-dimensions.x).add(vc[4]);
-		vc[6] = baseMatrix.up().scale(-dimensions.y).add(vc[4]);
-		vc[7] = baseMatrix.forward().scale(-dimensions.z).add(vc[4]);
 		return vc;
 	}
 
-	public Vec3[] getLines() {
-		return new Vec3[]{
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2)),
-				//==========
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.up().scale(dimensions.y / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.up().scale(dimensions.y / -2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.up().scale(dimensions.y / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.up().scale(dimensions.y / -2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.up().scale(dimensions.y / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.up().scale(dimensions.y / -2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.up().scale(dimensions.y / +2)),
-				pos.copy().add(baseMatrix.left().scale(dimensions.x / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.up().scale(dimensions.y / -2)),
-				//==========
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.left().scale(dimensions.x / +2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.left().scale(dimensions.x / -2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.left().scale(dimensions.x / +2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / +2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.left().scale(dimensions.x / -2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.left().scale(dimensions.x / +2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / +2))
-						.add(baseMatrix.left().scale(dimensions.x / -2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2))
-						.add(baseMatrix.left().scale(dimensions.x / +2)),
-				pos.copy().add(baseMatrix.up().scale(dimensions.y / -2))
-						.add(baseMatrix.forward().scale(dimensions.z / -2)).add(baseMatrix.left().scale(dimensions.x / -2))
-		};
+	@Override
+	public double surfaceArea() {
+		double l = normals.left().length();
+		double u = normals.up().length();
+		double f = normals.forward().length();
+		return 2 * (l * u + l * f + u * f);
 	}
+
 
 	@Override
 	public Vec3[] getNormals() {
-		return baseMatrix.asNormals();
+		return new Vec3[]{
+				normals.leftNorm(),
+				normals.upNorm(),
+				normals.forwardNorm()
+		};
 	}
 }

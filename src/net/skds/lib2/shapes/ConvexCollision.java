@@ -1,47 +1,43 @@
 package net.skds.lib2.shapes;
 
-import lombok.Getter;
-import lombok.Setter;
-import net.skds.lib.collision.Box;
-import net.skds.lib.collision.ConvexShape;
-import net.skds.lib.collision.Direction;
-import net.skds.lib.collision.Direction.Axis;
-import net.skds.lib.collision.IShape;
-import net.skds.lib.mat.Vec3;
+import lombok.experimental.UtilityClass;
+import net.skds.lib2.mat.Direction;
+import net.skds.lib2.mat.Vec3;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@UtilityClass
 public class ConvexCollision {
 
-	public static CollisionResult collide(net.skds.lib.collision.ConvexShape s1, net.skds.lib.collision.ConvexShape s2, Vec3 velocity21) {
+	public static Collision collide(ConvexShape s1, ConvexShape s2, Vec3 velocity21) {
 
 		Vec3[] s1Norm = s1.getNormals();
 		Vec3[] s2Norm = s2.getNormals();
 
 		List<Vec3> terminators = new ArrayList<>();
 		if (s1Norm.length * s2Norm.length == 0) {
-			terminators.add(velocity21.copy().normalize());
-		}
+			terminators.add(velocity21.normalize());
+		} else {
+			Collections.addAll(terminators, s1Norm);
+			Collections.addAll(terminators, s2Norm);
 
-		Collections.addAll(terminators, s1Norm);
-		Collections.addAll(terminators, s2Norm);
-
-		for (int i = 0; i < s1Norm.length; i++) {
-			for (int j = 0; j < s2Norm.length; j++) {
-				Vec3 cross = s1Norm[i].copy().cross(s2Norm[j]);
-				double len = cross.length();
-				if (len > 1E-30) {
-					terminators.add(cross);
+			for (int i = 0; i < s1Norm.length; i++) {
+				for (int j = 0; j < s2Norm.length; j++) {
+					Vec3 cross = s1Norm[i].cross(s2Norm[j]);
+					double len = cross.length();
+					if (len > 1E-30) {
+						terminators.add(cross.scale(1 / len));
+					}
 				}
-				cross.div(len);
 			}
 		}
+
 		return intersectionMoving(s1, s2, terminators, velocity21);
 	}
 
-	private static CollisionResult intersectionMoving(net.skds.lib.collision.ConvexShape a, ConvexShape b, List<Vec3> terminators, Vec3 velocityBA) {
+	private static Collision intersectionMoving(ConvexShape a, ConvexShape b, List<Vec3> terminators, Vec3 velocityBA) {
 
 		double pMin = 0;
 		double pMax = 1;
@@ -101,43 +97,32 @@ public class ConvexCollision {
 		}
 
 		assert minTerm != null : "nan or infinite values";
-		minTerm = minTerm.copy();
 		if (nInv) {
-			minTerm.inverse();
+			minTerm = minTerm.inverse();
 		}
 		if (distance > 0) {
 			termLen = 0;
 		} else if (termLen < 0) {
 			termLen = -termLen;
 		}
-		return new CollisionResult(distance, termLen, minTerm, new Vec3(), null, null);
+		return new Collision(distance, termLen, minTerm, Vec3.ZERO, null, a, b);
 	}
 
-	public static SimpleCollisionResult intersectionMoving(Box a, Box b, Vec3 velocityBA) {
 
-		if (a.intersects(b)) {
-			final Vec3 ac = a.getCenter();
-			final Vec3 bc = b.getCenter();
-			final Box inter = a.intersection(b);
-			final Axis term = inter.minTerminator();
-			final double d = term.choose(bc) - term.choose(ac);
-			final Vec3 norm = term.getDirection(d).createVector3D();
-			if (d * term.choose(velocityBA) >= 0) {
-				return null;
-			}
-			return new SimpleCollisionResult(0, norm, null, null, inter.getProjection(term));
-		}
+	public static Collision collideAABB(AABB a, AABB b, Vec3 velocityBA) {
 
 		double pMin = 0;
 		double pMax = 1;
 
-		for (int i = 0; i < Axis.VALUES.length; i++) {
-			Axis terminator = Axis.VALUES[i];
-			double v = terminator.choose(velocityBA);
-			double aMin = a.getMin(terminator);
-			double aMax = a.getMax(terminator);
-			double bMin = b.getMin(terminator);
-			double bMax = b.getMax(terminator);
+		var axs = Direction.Axis.VALUES;
+
+		for (int i = 0; i < axs.length; i++) {
+			Direction.Axis axis = axs[i];
+			double v = axis.choose(velocityBA);
+			double aMin = a.getProjectionMin(axis);
+			double aMax = a.getProjectionMax(axis);
+			double bMin = b.getProjectionMin(axis);
+			double bMax = b.getProjectionMax(axis);
 
 			double tMin = (aMin - bMax) / v;
 			double tMax = (aMax - bMin) / v;
@@ -159,63 +144,43 @@ public class ConvexCollision {
 			}
 		}
 
-		// TODO optimal calculation
-		final Vec3 ac = a.getCenter();
-		final Vec3 bc = b.getCenter();
-		final Box inter = a.intersection(b.offset(velocityBA.copy().scale(pMin)));
-		final Axis term = inter.minTerminator();
-		final double d = term.choose(bc) - term.choose(ac);
-		Direction direction = term.getDirection(d);
-		final Vec3 norm = direction.createVector3D();
-		if (d * term.choose(velocityBA) >= 0) {
-			return null;
-		}
-		return new SimpleCollisionResult(pMin, norm, direction, null);
+		final double distance = pMin;
 
-	}
+		double termLen = Double.MAX_VALUE;
+		Direction minTerm = null;
+		boolean nInv = false;
 
-	public static class SimpleCollisionResult {
-		public final double distance;
-		public final double depth;
-		public final Vec3 normal;
-		public final Direction direction;
-		@Getter
-		@Setter
-		private net.skds.lib.collision.IShape shape;
+		for (int i = 0; i < axs.length; i++) {
+			Direction.Axis axis = axs[i];
+			double v = axis.choose(velocityBA);
+			double aMin = a.getProjectionMin(axis);
+			double aMax = a.getProjectionMax(axis);
+			double bMin = b.getProjectionMin(axis) + v * distance;
+			double bMax = b.getProjectionMax(axis) + v * distance;
 
-		public SimpleCollisionResult(double distance, Vec3 normal, Direction direction, net.skds.lib.collision.IShape shape) {
-			this.distance = distance;
-			this.normal = normal;
-			this.shape = shape;
-			this.direction = direction;
-			this.depth = 0;
+			double tMin = Math.max(aMin, bMin);
+			double tMax = Math.min(aMax, bMax);
+
+			double d = tMax - tMin;
+
+			if (d < termLen) {
+				double dc = (aMax - aMin) - (bMax - bMin);
+				nInv = v * dc < 0;
+				termLen = d;
+				minTerm = axis.getDirection(!nInv);
+			}
 		}
 
-		public SimpleCollisionResult(double distance, Vec3 normal, Direction direction, net.skds.lib.collision.IShape shape, double depth) {
-			this.distance = distance;
-			this.normal = normal;
-			this.shape = shape;
-			this.direction = direction;
-			this.depth = depth;
+		assert minTerm != null : "nan or infinite values";
+		if (nInv) {
+			minTerm = minTerm.inverse();
 		}
-
-		public Object getAttachment() {
-			return (shape == null) ? null : shape.getAttachment();
+		if (distance > 0) {
+			termLen = 0;
+		} else if (termLen < 0) {
+			termLen = -termLen;
 		}
-	}
-
-	public static class CollisionResult extends SimpleCollisionResult {
-		public final Vec3 point;
-
-		public CollisionResult(double distance, Vec3 normal, Vec3 point, Direction direction, net.skds.lib.collision.IShape shape) {
-			super(distance, normal, direction, shape);
-			this.point = point;
-		}
-
-		public CollisionResult(double distance, double depth, Vec3 normal, Vec3 point, Direction direction, IShape shape) {
-			super(distance, normal, direction, shape, depth);
-			this.point = point;
-		}
+		return new Collision(distance, termLen, minTerm, Vec3.ZERO, minTerm, a, b);
 	}
 
 

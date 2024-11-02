@@ -1,7 +1,7 @@
 package net.skds.lib2.mat;
 
 @SuppressWarnings("unused")
-public interface Quat extends Vec4 {
+public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 
 	Quat ONE = QuatD.ONE;
 

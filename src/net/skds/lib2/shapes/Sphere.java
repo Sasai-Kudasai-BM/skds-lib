@@ -1,39 +1,38 @@
 package net.skds.lib2.shapes;
 
-import lombok.Getter;
-import net.skds.lib.collision.ConvexCollision;
-import net.skds.lib.collision.Direction;
-import net.skds.lib.collision.ProjPair;
-import net.skds.lib.mat.Matrix3;
-import net.skds.lib.mat.Vec3;
+import net.skds.lib2.mat.*;
 
-public class Sphere implements ConvexShape {
+public final class Sphere implements ConvexShape {
 
 	private static final Vec3[] empty = {};
 
-	private final Vec3 pos = new Vec3();
+	public final Vec3 center;
+	public final double radius;
 
-	@Getter
-	private double radius = .5;
-
-	private Object attachment;
 	private AABB boxCache;
+	private Object attachment;
 
-	public Sphere() {
-	}
-
-	public Sphere(Vec3 pos, double radius) {
-		this.pos.set(pos);
+	public Sphere(Vec3 center, double radius) {
+		this.center = center;
 		this.radius = radius;
 	}
 
-	public void setRadius(double radius) {
+	private Sphere(Vec3 center, double radius, Object attachment) {
+		this.center = center;
 		this.radius = radius;
-		invalidate();
+		this.attachment = attachment;
 	}
 
-	private void invalidate() {
-		boxCache = null;
+	@Override
+	public Object getAttachment() {
+		return attachment;
+	}
+
+	@Override
+	public Object setAttachment(Object attachment) {
+		Object old = this.attachment;
+		this.attachment = attachment;
+		return old;
 	}
 
 	@Override
@@ -47,106 +46,106 @@ public class Sphere implements ConvexShape {
 	}
 
 	@Override
+	public double surfaceArea() {
+		return Math.PI * radius * radius;
+	}
+
+	@Override
 	public AABB getBoundingBox() {
-		if (boxCache == null) {
-			boxCache = AABB.of(pos, radius);
+		AABB bc = boxCache;
+		if (bc == null) {
+			bc = AABB.fromRadius(center, radius);
+			boxCache = bc;
 		}
-		return boxCache;
+		return bc;
 	}
 
 	@Override
-	public AABB createBounding() {
-		return AABB.of(pos, radius);
+	public Sphere rotate(Quat q) {
+		return this;
 	}
 
 	@Override
-	public void setRotation(Matrix3 m3) {
+	public Sphere rotate(Matrix3 m3) {
+		return this;
 	}
 
 	@Override
-	public void setPos(Vec3 pos) {
-		pos.set(pos);
-		invalidate();
+	public Sphere move(Vec3 delta) {
+		return new Sphere(center.add(delta), radius, attachment);
 	}
 
 	@Override
-	public void scale(double scale) {
-		radius *= scale;
-		invalidate();
+	public Sphere moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
+		return new Sphere(center.add(pos), radius * scale, attachment);
+	}
+
+	@Override
+	public Sphere moveRotScale(Vec3 pos, Quat q, double scale) {
+		return new Sphere(center.add(pos), radius * scale, attachment);
+	}
+
+
+	@Override
+	public Sphere scale(double scale) {
+		return new Sphere(center, radius * scale, attachment);
 	}
 
 	@Override
 	public Vec3 getCenter() {
-		return pos;
+		return center;
 	}
 
 	@Override
-	public Sphere copy() {
-		return new Sphere(pos, radius);
-	}
-
-	@Override
-	public ProjPair getProjection(Vec3 axis) {
-		return ConvexShape.super.getProjection(axis);//TODO
+	public Vec2D getProjection(Vec3 axis) {
+		double dot = center.projOn(axis);
+		return new Vec2D(dot - radius, dot + radius);
 	}
 
 	@Override
 	public double getProjectionMin(Vec3 axis) {
-		Vec3 tmp = axis.copy().normalize().scale(-radius);
-		return tmp.add(pos).dot(axis);
+		return center.projOn(axis) - radius;
 	}
 
 	@Override
 	public double getProjectionMax(Vec3 axis) {
-		Vec3 tmp = axis.copy().normalize().scale(radius);
-		return tmp.add(pos).dot(axis);
+		return center.projOn(axis) + radius;
 	}
 
 	@Override
 	public double getProjectionMin(Direction.Axis axis) {
-		return axis.choose(pos) - radius;
+		return axis.choose(center) - radius;
 	}
 
 	@Override
 	public double getProjectionMax(Direction.Axis axis) {
-		return axis.choose(pos) + radius;
+		return axis.choose(center) + radius;
 	}
 
 	@Override
-	public Object getAttachment() {
-		return attachment;
-	}
+	public Collision raytrace(Vec3 from, Vec3 to) {
 
-	@Override
-	public void setAttachment(Object attachment) {
-		this.attachment = attachment;
-	}
-
-	@Override
-	public ConvexCollision.SimpleCollisionResult raytrace(Vec3 from, Vec3 to) {
-
-		double dist = from.distanceTo(pos);
+		double dist = from.distanceTo(center);
 		double dirL = from.distanceTo(to);
 		if (dist <= radius) {
-			Vec3 normal = from.copy().sub(pos).normalize();
-			Vec3 point = normal.copy().scale(dist).add(pos);
-			return new ConvexCollision.CollisionResult(dist / dirL, normal, point, null, this);
+			Vec3 normal = from.sub(center).normalize();
+			return new Collision(0, radius - dist, normal, from, null, this, null);
 		}
-		Vec3 dir = to.copy().sub(from);
+		Vec3 dir = to.sub(from).scale(1 / dirL);
 
-		double proj = pos.copy().sub(from).projOn(dir);
+		double proj = center.sub(from).dot(dir);
 		if (proj > dirL + radius) {
 			return null;
 		}
-		Vec3 pp = from.copy().add(dir.copy().normalize().scale(proj));
+		Vec3 pp = from.add(dir.scale(proj));
 		double r2 = radius * radius;
-		double k2 = pp.squareDistanceTo(pos);
+		double k2 = pp.squareDistanceTo(center);
 		double delta = Math.sqrt(r2 - k2);
 		if (proj > dirL + delta) {
 			return null;
 		}
-		Vec3 point = pp.sub(dir.copy().normalize().scale(delta));
+		Vec3 point = pp.sub(dir.scale(delta));
 
-		return new ConvexCollision.CollisionResult(0, point.copy().sub(pos).normalize().scale(radius), point, null, this);
+		return new Collision(delta, 0, point.sub(center).normalizeScale(radius), point, null, this, null);
 	}
 }

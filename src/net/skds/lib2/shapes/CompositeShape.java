@@ -1,104 +1,103 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib.collision.ConvexCollision;
-import net.skds.lib.mat.Matrix3;
-import net.skds.lib.mat.Vec3;
 
-public interface CompositeShape extends IShape {
+import net.skds.lib2.mat.Matrix3;
+import net.skds.lib2.mat.Quat;
+import net.skds.lib2.mat.Vec3;
 
-	ConvexShape[] simplify();
+public non-sealed interface CompositeShape extends Shape {
 
-	void setPos(Vec3 pos);
 
-	void scale(double scale);
-
-	void setRotation(Matrix3 m3);
+	ConvexShape[] simplify(AABB bounding);
 
 	@Override
-	default ConvexCollision.SimpleCollisionResult raytrace(Vec3 from, Vec3 to) {
+	CompositeShape scale(double scale);
 
-		ConvexCollision.SimpleCollisionResult min = null;
-		final ConvexShape[] simple = simplify();
-		for (int i = 0; i < simple.length; i++) {
-			ConvexShape cs = simple[i];
-			ConvexCollision.SimpleCollisionResult result = cs.raytrace(from, to);
-			if (result != null && (min == null || result.distance < min.distance)) {
-				min = result;
-			}
-		}
-		return min;
+	@Override
+	CompositeShape rotate(Matrix3 m3);
+
+	@Override
+	CompositeShape move(Vec3 delta);
+
+	@Override
+	CompositeShape moveRotScale(Vec3 pos, Matrix3 m3, double scale);
+
+	@Override
+	default CompositeShape moveRotScale(Vec3 pos, Quat q, double scale) {
+		return moveRotScale(pos, Matrix3.fromQuat(q), scale);
 	}
 
 	@Override
-	default ConvexCollision.CollisionResult collide(IShape shape, Vec3 relativeVelocity) {
-		AABB ext = getBoundingBox();
-		if (relativeVelocity != null) {
-			ext = ext.stretch(relativeVelocity);
-		}
-		if (!ext.intersects(shape.getBoundingBox())) {
-			return null;
-		}
+	AABB getBoundingBox();
 
-		ConvexCollision.CollisionResult cc = null;
-		final ConvexShape[] shapes = shape instanceof CompositeShape cs ? cs.simplify() : new ConvexShape[]{(ConvexShape) shape};
+
+	@Override
+	default Collision raytrace(Vec3 from, Vec3 to) {
+		ConvexShape[] shapes = simplify(AABB.fromTo(from, to));
+		if (shapes.length == 0) return null;
+		Collision nearest = null;
 		for (int i = 0; i < shapes.length; i++) {
-			final ConvexShape convexShape = shapes[i];
-			final AABB convexBound = convexShape.getBoundingBox();
-			if (!convexBound.intersects(ext)) {
-				continue;
-			}
-			final ConvexShape[] simples = simplify();
-			for (int j = 0; j < simples.length; j++) {
-				final ConvexShape myBox = simples[j];
-				if (myBox.getBoundingBox().intersects(convexBound)) {
-					ConvexCollision.CollisionResult cc2 = ConvexCollision.collide(convexShape, myBox, relativeVelocity);
-					if (cc2 != null) {
-						if (cc == null) {
-							cc = cc2;
-							cc.setShape(myBox);
-						} else if (cc2.distance < cc.distance) {
-							cc = cc2;
-							cc.setShape(myBox);
-						}
-					}
-				}
+			final ConvexShape subShape = shapes[i];
+			Collision c = subShape.raytrace(from, to);
+			if (c != null && c.compareTo(nearest) < 0) {
+				nearest = c;
 			}
 		}
-		return cc;
+		return nearest;
 	}
 
-	@Deprecated
-	default ConvexCollision.CollisionResult collideWithMoving(ConvexShape shape, Vec3 relativeVelocity) {
-		AABB ext = shape.getBoundingBox();
-		if (relativeVelocity != null) {
-			ext = ext.stretch(relativeVelocity);
+	static Collision collideConvex(CompositeShape composite, ConvexShape convex, Vec3 velocityBA) {
+		AABB convexAABB = convex.getBoundingBox();
+		ConvexShape[] shapes = composite.simplify(convexAABB);
+		if (shapes.length == 0) return null;
+		Collision nearest = null;
+		for (int i = 0; i < shapes.length; i++) {
+			final ConvexShape subShape = shapes[i];
+			Collision c = subShape.collide(convex, velocityBA);
+			if (c != null && c.compareTo(nearest) < 0) {
+				nearest = c;
+			}
 		}
-		if (!ext.intersects(getBoundingBox())) {
-			return null;
-		}
+		return nearest;
+	}
 
-		ConvexCollision.CollisionResult cc = null;
-		final ConvexShape[] simples = simplify();
-		for (int j = 0; j < simples.length; j++) {
-			final ConvexShape myBox = simples[j];
-			if (myBox.getBoundingBox().intersects(ext)) {
-				ConvexCollision.CollisionResult cc2 = ConvexCollision.collide(myBox, shape, relativeVelocity);
-				if (cc2 != null) {
-					if (cc == null) {
-						cc = cc2;
-						cc.setShape(myBox);
-					} else if (cc2.distance < cc.distance) {
-						cc = cc2;
-						cc.setShape(myBox);
+	static Collision collideComposite(CompositeShape shapeA, CompositeShape shapeB, Vec3 velocityBA) {
+		final AABB bAABB = shapeB.getBoundingBox();
+		final ConvexShape[] shapesA = shapeA.simplify(bAABB);
+		if (shapesA.length == 0) return null;
+		final AABB aAABB = shapeA.getBoundingBox();
+		final ConvexShape[] shapesB = shapeB.simplify(aAABB);
+		if (shapesB.length == 0) return null;
+
+		Collision nearest = null;
+		for (int i = 0; i < shapesA.length; i++) {
+			final ConvexShape subShapeA = shapesA[i];
+			final AABB subShapeAAABB = subShapeA.getBoundingBox();
+			for (int j = 0; j < shapesB.length; j++) {
+				final ConvexShape subShapeB = shapesB[i];
+				if (subShapeAAABB.intersects(subShapeB.getBoundingBox())) {
+					final Collision c = subShapeA.collide(subShapeB, velocityBA);
+					if (c != null && c.compareTo(nearest) < 0) {
+						nearest = c;
 					}
 				}
 			}
 		}
+		return nearest;
+	}
 
-		return cc;
+	@Override
+	default Collision collide(Shape shapeB, Vec3 velocityBA) {
+		if (shapeB instanceof ConvexShape convex) {
+			return collideConvex(this, convex, velocityBA);
+		} else if (shapeB instanceof CompositeShape composite) {
+			return collideComposite(this, composite, velocityBA.inverse());
+		}
+		throw new UnsupportedOperationException("Unable to collide \"%s\" with \"%s\"".formatted(this, shapeB));
+
 	}
 
 	default AABB createBounding() {
-		return new BoxBuilder(simplify()).build();
+		return new AABBBuilder(simplify(null)).build();
 	}
 }

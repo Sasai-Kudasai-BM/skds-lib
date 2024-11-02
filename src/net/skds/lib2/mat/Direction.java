@@ -1,8 +1,6 @@
-package net.skds.lib2.utils;
+package net.skds.lib2.mat;
 
-import net.skds.lib2.mat.FastMath;
-import net.skds.lib2.mat.Vec3;
-import net.skds.lib2.mat.Vec3I;
+import net.skds.lib2.utils.ArrayUtils;
 
 import java.util.function.Predicate;
 
@@ -63,7 +61,12 @@ public enum Direction implements Vec3 {
 	}
 
 	public Direction getOpposite() {
-		return Direction.byId(this.idOpposite);
+		return VALUES[this.idOpposite];
+	}
+
+	@Override
+	public Direction inverse() {
+		return getOpposite();
 	}
 
 	public Direction rotateClockwise(Axis axis) {
@@ -231,7 +234,7 @@ public enum Direction implements Vec3 {
 	}
 
 	public static Direction byId(int id) {
-		return VALUES[Math.abs(id % VALUES.length)];
+		return VALUES[ArrayUtils.loop(id, VALUES.length)];
 	}
 
 	public static Direction fromHorizontal(int value) {
@@ -385,8 +388,13 @@ public enum Direction implements Vec3 {
 			}
 
 			@Override
-			public Vec3 getNormal(boolean negative) {
-				return negative ? Vec3.XN : Vec3.XP;
+			public Direction getPositiveDirection() {
+				return LEFT;
+			}
+
+			@Override
+			public Direction getDirection(boolean positive) {
+				return positive ? Direction.XP : Direction.XN;
 			}
 		},
 		Y("yf") {
@@ -406,8 +414,13 @@ public enum Direction implements Vec3 {
 			}
 
 			@Override
-			public Vec3 getNormal(boolean negative) {
-				return negative ? Vec3.YN : Vec3.YP;
+			public Direction getPositiveDirection() {
+				return UP;
+			}
+
+			@Override
+			public Direction getDirection(boolean positive) {
+				return positive ? Direction.YP : Direction.YN;
 			}
 		},
 		Z("zf") {
@@ -427,8 +440,13 @@ public enum Direction implements Vec3 {
 			}
 
 			@Override
-			public Vec3 getNormal(boolean negative) {
-				return negative ? Vec3.ZN : Vec3.ZP;
+			public Direction getPositiveDirection() {
+				return FORWARD;
+			}
+
+			@Override
+			public Direction getDirection(boolean positive) {
+				return positive ? Direction.ZP : Direction.ZN;
 			}
 		};
 
@@ -466,11 +484,13 @@ public enum Direction implements Vec3 {
 
 		public abstract Direction getDirection(double value);
 
+		public abstract Direction getDirection(boolean positive);
+
+		public abstract Direction getPositiveDirection();
+
 		public double choose(Vec3 vec) {
 			return choose(vec.x(), vec.y(), vec.z());
 		}
-
-		public abstract Vec3 getNormal(boolean negative);
 
 		public Direction getDir(Vec3 vec) {
 			return getDirection(choose(vec));

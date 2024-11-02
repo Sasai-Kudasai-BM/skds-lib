@@ -1,8 +1,10 @@
 package net.skds.lib2.shapes;
 
-public interface ConvexShape extends IShape {
+import net.skds.lib2.mat.*;
 
-	default ProjPair getProjection(Vec3 axis) {
+public non-sealed interface ConvexShape extends Shape {
+
+	default Vec2D getProjection(Vec3 axis) {
 		final Vec3[] points = getPoints();
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
@@ -15,7 +17,7 @@ public interface ConvexShape extends IShape {
 				max = dot;
 			}
 		}
-		return new ProjPair(min, max);
+		return new Vec2D(min, max);
 	}
 
 	default double getProjectionMin(Vec3 axis) {
@@ -66,24 +68,55 @@ public interface ConvexShape extends IShape {
 		return max;
 	}
 
-	// TODO Direction
 	@Override
-	default ConvexCollision.SimpleCollisionResult raytrace(Vec3 from, Vec3 to) {
-		Vec3 dir = to.copy().sub(from);
-		Vec3 delta = from.copy().scale(-1);
+	ConvexShape move(Vec3 delta);
+
+	@Override
+	ConvexShape rotate(Matrix3 m3);
+
+	@Override
+	default ConvexShape rotate(Quat q) {
+		return rotate(Matrix3.fromQuat(q));
+	}
+
+	@Override
+	ConvexShape moveRotScale(Vec3 pos, Matrix3 m3, double scale);
+
+	@Override
+	default ConvexShape moveRotScale(Vec3 pos, Quat q, double scale) {
+		return moveRotScale(pos, Matrix3.fromQuat(q), scale);
+	}
+
+	@Override
+	ConvexShape scale(double scale);
+
+	@Override
+	default Collision collide(Shape shapeB, Vec3 velocityBA) {
+		if (shapeB instanceof ConvexShape convex) {
+			return ConvexCollision.collide(this, convex, velocityBA);
+		} else if (shapeB instanceof CompositeShape composite) {
+			return CompositeShape.collideConvex(composite, this, velocityBA.inverse());
+		}
+		throw new UnsupportedOperationException("Unable to collide \"%s\" with \"%s\"".formatted(this, shapeB));
+	}
+
+	@Override
+	default Collision raytrace(Vec3 from, Vec3 to) {
+		Vec3 dir = to.sub(from);
 
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
-		Vec3[] normals = getNormals();
-		int normal = 0;
+		Vec3 normal = null;
 		boolean inverse = false;
 
-		for (int i = 0; i < normals.length; i++) {
-			double nomLen = normals[i].dot(delta);
-			double denomLen = normals[i].dot(dir);
+		Vec3[] norms = getNormals();
+		for (int i = 0; i < norms.length; i++) {
+			Vec3 n = norms[i];
+			double nomLen = -n.dot(from);
+			double denomLen = n.dot(dir);
 
-			double a = (nomLen + getProjectionMax(normals[i])) / denomLen;
-			double b = (nomLen + getProjectionMin(normals[i])) / denomLen;
+			double a = (nomLen + getProjectionMax(n)) / denomLen;
+			double b = (nomLen + getProjectionMin(n)) / denomLen;
 			double min;
 			double max;
 			if (a < b) {
@@ -96,7 +129,7 @@ public interface ConvexShape extends IShape {
 
 			if (min > tMin) {
 				tMin = min;
-				normal = i;
+				normal = n;
 				inverse = a > b;
 			}
 			if (max < tMax) {
@@ -108,68 +141,21 @@ public interface ConvexShape extends IShape {
 			}
 
 		}
-		Vec3 n = normals[normal].copy();
 		if (inverse) {
-			n.inverse();
+			normal = normal.inverse();
 		}
-		Direction direction = switch (normal) {
-			case 0 -> inverse ? Direction.WEST : Direction.EAST;
-			case 1 -> inverse ? Direction.NORTH : Direction.SOUTH;
-			case 2 -> inverse ? Direction.DOWN : Direction.UP;
-			default -> null;
-		};
-		return new ConvexCollision.SimpleCollisionResult(tMin, n, direction, this);
-	}
-
-	@Override
-	default ConvexCollision.CollisionResult collide(IShape shape, Vec3 relativeVelocity) {
-		AABB ext = getBoundingBox();
-		if (relativeVelocity != null) {
-			ext = ext.stretch(relativeVelocity);
-		}
-		if (!ext.intersects(shape.getBoundingBox())) {
-			return null;
-		}
-
-		ConvexCollision.CollisionResult cc = null;
-		final ConvexShape[] shapes = shape instanceof CompositeShape cs ? cs.simplify() : new ConvexShape[]{(ConvexShape) shape};
-		for (int i = 0; i < shapes.length; i++) {
-			final ConvexShape convexShape = shapes[i];
-			final AABB convexBound = convexShape.getBoundingBox();
-			if (!convexBound.intersects(ext)) {
-				continue;
-			}
-			if (getBoundingBox().intersects(convexBound)) {
-				ConvexCollision.CollisionResult cc2 = ConvexCollision.collide(convexShape, this, relativeVelocity);
-				if (cc2 != null) {
-					if (cc == null) {
-						cc = cc2;
-						cc.setShape(this);
-					} else if (cc2.distance < cc.distance) {
-						cc = cc2;
-						cc.setShape(this);
-					}
-				}
-			}
-		}
-		return cc;
+		return new Collision(tMin, 0, normal, from.add(dir.normalizeScale(tMin)), null, this, null);
 	}
 
 	Vec3[] getNormals();
 
 	Vec3[] getPoints();
 
-	default Vec3[] getPointsNew() {
-		return getPoints();
-	}
-
 	@Override
 	default boolean isConvex() {
 		return true;
 	}
 
-	default AABB createBounding() {
-		return new BoxBuilder(getPoints()).build();
-	}
+	double surfaceArea();
 
 }

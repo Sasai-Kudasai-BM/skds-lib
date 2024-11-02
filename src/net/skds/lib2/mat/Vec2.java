@@ -1,6 +1,6 @@
 package net.skds.lib2.mat;
 
-public interface Vec2 extends IVec {
+public sealed interface Vec2 extends IVec permits Vec2D, Vec2F {
 
 	@Override
 	default int dimension() {
