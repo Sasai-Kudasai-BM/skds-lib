@@ -5,6 +5,6 @@ public final class SKDSLoggerFactory {
 	}
 
 	public static SKDSLogger getLogger(Class<?> c) {
-		return null; //TODO
+		return new SKDSLoggerImpl(c);
 	}
 }

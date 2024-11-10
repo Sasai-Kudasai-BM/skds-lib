@@ -1,6 +1,6 @@
 package net.skds.lib2.utils;
 
-import net.skds.lib.mat.FastMath;
+import net.skds.lib2.mat.FastMath;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;

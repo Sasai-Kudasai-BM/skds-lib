@@ -1,7 +1,7 @@
 package net.skds.lib2.unsafe;
 
 import lombok.Getter;
-import net.skds.lib.utils.collection.LongList;
+import net.skds.lib2.utils.collection.LongList;
 import sun.misc.Unsafe;
 
 import java.nio.charset.Charset;

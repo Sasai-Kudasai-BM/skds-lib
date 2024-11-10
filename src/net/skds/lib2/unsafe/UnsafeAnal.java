@@ -1,9 +1,11 @@
 package net.skds.lib2.unsafe;
 
+import lombok.experimental.UtilityClass;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
+@UtilityClass
 @SuppressWarnings("unused")
 public final class UnsafeAnal {
 
@@ -17,8 +19,6 @@ public final class UnsafeAnal {
 	public static final int LONG_ARRAY_BASE = UNSAFE.arrayBaseOffset(long[].class);
 	public static final int DOUBLE_ARRAY_BASE = UNSAFE.arrayBaseOffset(double[].class);
 
-	private UnsafeAnal() {
-	}
 
 	public static void setByte(long address, byte value) {
 		UNSAFE.putByte(address, value);

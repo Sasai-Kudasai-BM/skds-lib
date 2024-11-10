@@ -1,6 +1,6 @@
 package net.skds.lib2.utils.functester;
 
-import net.skds.lib.mat.FastMath;
+import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.functester.api.ITestFunction;
 import net.skds.lib2.utils.functester.gui.Frame;
 
@@ -17,25 +17,40 @@ public class FunctionTester {
 		tester.addFunction(new ITestFunction() {
 			@Override
 			public double calc(float input) {
-				input /= 5f;
-				return (FastMath.sinDegr(input) - Math.sin(Math.toRadians(input))) * 1_000_000;
-			}
-
-			@Override
-			public Color color() {
-				return Color.RED;
-			}
-		});
-		tester.addFunction(new ITestFunction() {
-			@Override
-			public double calc(float input) {
-				input /= 5f;
-				return FastMath.sinDegr(input) * 2;
+				if (input <= 0) return 0;
+				input /= 15f;
+				return FastMath.invSqrt(input) * 2;
 			}
 
 			@Override
 			public Color color() {
 				return Color.BLUE;
+			}
+		});
+		tester.addFunction(new ITestFunction() {
+			@Override
+			public double calc(float input) {
+				if (input <= 0) return 0;
+				input /= 15f;
+				return (float) (FastMath.invSqrt(input) - 1 / Math.sqrt(input)) * 100_000;
+			}
+
+			@Override
+			public Color color() {
+				return Color.MAGENTA;
+			}
+		});
+		tester.addFunction(new ITestFunction() {
+			@Override
+			public double calc(float input) {
+				if (input <= 0) return 0;
+				input /= 15f;
+				return (float) (FastMath.invSqrt((double) input) - 1 / Math.sqrt(input)) * 1_000_000_000;
+			}
+
+			@Override
+			public Color color() {
+				return Color.RED;
 			}
 		});
 		//tester.addFunction(new ITestFunction() {

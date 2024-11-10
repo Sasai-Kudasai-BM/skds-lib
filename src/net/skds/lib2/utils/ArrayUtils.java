@@ -7,6 +7,16 @@ import java.util.Collection;
 @SuppressWarnings("unused")
 public class ArrayUtils {
 
+	public static final byte[] EMPTY_BYTE = {};
+	public static final boolean[] EMPTY_BOOLEAN = {};
+	public static final char[] EMPTY_CHAR = {};
+	public static final short[] EMPTY_SHORT = {};
+	public static final int[] EMPTY_INT = {};
+	public static final float[] EMPTY_FLOAT = {};
+	public static final long[] EMPTY_LONG = {};
+	public static final double[] EMPTY_DOUBLE = {};
+	public static final Object[] EMPTY_OBJECT = {};
+
 	@SuppressWarnings("unchecked")
 	public static <T> T[] toArray(Collection<T> collection, Class<T> type) {
 		return collection.toArray((T[]) Array.newInstance(type, collection.size()));

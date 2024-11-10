@@ -10,12 +10,12 @@ public class FastMath {
 
 	public static final Random RANDOM = new Random();
 
-	public static final float Pi = (float) Math.PI;
-	public static final float TwoPi = Pi * 2;
-	public static final float Pi2 = Pi / 2;
+	public static final float PI = (float) Math.PI;
+	public static final float TWO_PI = PI * 2;
+	public static final float HALF_PI = PI / 2;
 
-	public static final float RAD_2_DEGREES = (180 / Pi);
-	public static final float DEGREES_2_RAD = (Pi / 180);
+	public static final float RAD_2_DGR = (180 / PI);
+	public static final float DGR_2_RAD = (PI / 180);
 
 	private static final float[] sinTable = new float[1024 * 4];
 
@@ -255,12 +255,11 @@ public class FastMath {
 		int b1 = ((int) pos) % sinTable.length;
 		int b2 = (b1 + 1) % sinTable.length;
 		float part = pos - b1;
-		b2 %= sinTable.length;
 		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
 	}
 
 	public static float sinRad(float a) {
-		return sinDegr(a * RAD_2_DEGREES);
+		return sinDegr(a * RAD_2_DGR);
 	}
 
 	public static float cosDegr(final float x) {
@@ -268,7 +267,7 @@ public class FastMath {
 	}
 
 	public static float cosRad(final float x) {
-		return sinRad(x + Pi2);
+		return sinRad(x + HALF_PI);
 	}
 
 	public static double sinDegr(double a) {
@@ -283,7 +282,7 @@ public class FastMath {
 	}
 
 	public static double sinRad(double a) {
-		return sinDegr(a * RAD_2_DEGREES);
+		return sinDegr(a * RAD_2_DGR);
 	}
 
 	public static double cosDegr(final double x) {
@@ -291,7 +290,7 @@ public class FastMath {
 	}
 
 	public static double cosRad(final double x) {
-		return sinRad(x + Pi2);
+		return sinRad(x + HALF_PI);
 	}
 
 
@@ -321,6 +320,7 @@ public class FastMath {
 		i = 0x5F3759DF - (i >> 1);
 		x = Float.intBitsToFloat(i);
 		x *= (1.5f - half * x * x);
+		x *= (1.5f - half * x * x);
 		return x;
 	}
 
@@ -329,6 +329,7 @@ public class FastMath {
 		long i = Double.doubleToRawLongBits(x);
 		i = 0x5FE6EC85E7DE30DAL - (i >> 1);
 		x = Double.longBitsToDouble(i);
+		x *= (1.5d - half * x * x);
 		x *= (1.5d - half * x * x);
 		x *= (1.5d - half * x * x);
 		return x;

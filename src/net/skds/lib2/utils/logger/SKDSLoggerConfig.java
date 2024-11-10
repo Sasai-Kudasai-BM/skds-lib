@@ -6,10 +6,10 @@ public final class SKDSLoggerConfig {
 	private SKDSLoggerConfig() {
 	}
 
-	private static EnumSet<LoggerLevel> levels = EnumSet.of(LoggerLevel.INFO, LoggerLevel.LOG, LoggerLevel.WARN, LoggerLevel.ERROR);
+	static EnumSet<LoggerLevel> LEVELS = EnumSet.of(LoggerLevel.INFO, LoggerLevel.LOG, LoggerLevel.WARN, LoggerLevel.ERROR);
 
 	public static void setLevels(LoggerLevel level, LoggerLevel... levels) {
-		SKDSLoggerConfig.levels = EnumSet.of(level, levels);
+		SKDSLoggerConfig.LEVELS = EnumSet.of(level, levels);
 	}
 
 	@SuppressWarnings("ManualArrayToCollectionCopy")
@@ -19,6 +19,6 @@ public final class SKDSLoggerConfig {
 		for (int i = level.ordinal() + 1; i < values.length; i++) {
 			newLevels.add(values[i]);
 		}
-		SKDSLoggerConfig.levels = newLevels;
+		SKDSLoggerConfig.LEVELS = newLevels;
 	}
 }

@@ -1,5 +1,6 @@
 package net.skds.lib2.shapes;
 
+import lombok.AllArgsConstructor;
 import net.skds.lib2.mat.Matrix3;
 import net.skds.lib2.mat.Quat;
 import net.skds.lib2.mat.Vec3;
@@ -125,7 +126,7 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		for (int i = 0; i < convexShapes.length; i++) {
 			Shape shape = shapes[i];
 			Vec3 od = shape.getCenter().sub(center);
-			PoseCallbackImpl pc = new PoseCallbackImpl();
+			PoseCallbackImpl pc = new PoseCallbackImpl(pos, rot, scale);
 
 			pf.applyPose(shape, pos, rot, scale, pc);
 
@@ -157,6 +158,7 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return old;
 	}
 
+	@AllArgsConstructor
 	private static final class PoseCallbackImpl implements PoseCallback {
 		Vec3 pos;
 		Quat rot;

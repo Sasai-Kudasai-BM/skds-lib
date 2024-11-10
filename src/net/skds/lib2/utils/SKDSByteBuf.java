@@ -1,10 +1,9 @@
 package net.skds.lib2.utils;
 
 import lombok.Getter;
-import net.skds.lib.collision.BlockPos;
-import net.skds.lib.mat.IVec3;
-import net.skds.lib.mat.Quat;
-import net.skds.lib.mat.VarInt;
+import net.skds.lib2.mat.Quat;
+import net.skds.lib2.mat.VarInt;
+import net.skds.lib2.mat.Vec3;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,19 +81,19 @@ public final class SKDSByteBuf {
 	}
 
 	public void writeFloatQuat(Quat q) {
-		buffer.putFloat((float) q.x);
-		buffer.putFloat((float) q.y);
-		buffer.putFloat((float) q.z);
-		buffer.putFloat((float) q.w);
+		buffer.putFloat((float) q.x());
+		buffer.putFloat((float) q.y());
+		buffer.putFloat((float) q.z());
+		buffer.putFloat((float) q.w());
 	}
 
-	public void writeDoubleVector(IVec3 vec) {
+	public void writeDoubleVector(Vec3 vec) {
 		buffer.putDouble(vec.x());
 		buffer.putDouble(vec.y());
 		buffer.putDouble(vec.z());
 	}
 
-	public void writeFloatVector(IVec3 vec) {
+	public void writeFloatVector(Vec3 vec) {
 		buffer.putFloat((float) vec.x());
 		buffer.putFloat((float) vec.y());
 		buffer.putFloat((float) vec.z());
@@ -176,6 +175,16 @@ public final class SKDSByteBuf {
 		}
 		writeVarInt(array.length);
 		buffer.put(array);
+	}
+
+	public byte[] readByteArray() {
+		int len = readVarInt();
+		if (len == 0) {
+			return ArrayUtils.EMPTY_BYTE;
+		}
+		byte[] arr = new byte[len];
+		buffer.get(arr);
+		return arr;
 	}
 
 	public int readUnsignedShort() {
@@ -595,12 +604,11 @@ public final class SKDSByteBuf {
 
 	}
 
-	public void writeBlockPos(BlockPos pos) {
-		buffer.putLong(pos.asLong());
-	}
-
-	public BlockPos readBlockPos() {
-		return BlockPos.fromLong(buffer.getLong());
-	}
+	//public void writeBlockPos(BlockPos pos) {
+	//	buffer.putLong(pos.asLong());
+	//}
+	//public BlockPos readBlockPos() {
+	//	return BlockPos.fromLong(buffer.getLong());
+	//}
 
 }
