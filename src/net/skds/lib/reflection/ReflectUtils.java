@@ -48,9 +48,12 @@ public class ReflectUtils {
 	}
 
 	public static void fillInstanceFields(Object instance, FillingFunction function) {
+		fillInstanceFields(instance, instance.getClass(), function);
+	}
 
-		for (Field f : instance.getClass().getDeclaredFields()) {
-			if ((f.getModifiers() & Modifier.STATIC) != 0) {
+	public static void fillInstanceFields(Object instance, Class<?> clazz, FillingFunction function) {
+		for (Field f : clazz.getDeclaredFields()) {
+			if (Modifier.isStatic(f.getModifiers())) {
 				continue;
 			}
 			function.accept(f, value -> {
@@ -74,6 +77,6 @@ public class ReflectUtils {
 
 	@FunctionalInterface
 	public interface FillingFunction {
-		public void accept(Field field, Consumer<Object> consumer);
+		void accept(Field field, Consumer<Object> consumer);
 	}
 }

@@ -87,7 +87,6 @@ public class CFGLoader {
 				public void write(JsonWriter out, File value) throws IOException {
 					out.value(value.getName());
 				}
-
 			});
 
 	@Getter
@@ -98,7 +97,7 @@ public class CFGLoader {
 	private static final TypeAdapter<JsonArray> JA_ADAPTER = GSON.getAdapter(JsonArray.class);
 	private static final TypeAdapter<JsonObject> JO_ADAPTER = GSON.getAdapter(JsonObject.class);
 
-	public static void addAdapter(Type type, TypeAdapter<?> adapter) {
+	public static void addAdapter(Type type, Object adapter) {
 		GSON_COMPACT = builder.registerTypeAdapter(type, adapter).create();
 		GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
 	}
