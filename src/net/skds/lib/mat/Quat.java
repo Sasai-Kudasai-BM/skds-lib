@@ -116,6 +116,25 @@ public class Quat {
 		return this;
 	}
 
+	public static Quat ofSpin(Vec3 spin) {
+		Quat q = new Quat();
+		double angle = spin.length();
+		if (angle < 1E-10) {
+			return q;
+		}
+
+		double axisX = spin.x / angle;
+		double axisY = spin.y / angle;
+		double axisZ = spin.z / angle;
+
+		double f0 = FastMath.sinRad(angle / 2.0);
+		q.x = axisX * f0;
+		q.y = axisY * f0;
+		q.z = axisZ * f0;
+		q.w = FastMath.cosRad(angle / 2.0);
+		return q;
+	}
+
 	public static Quat fromForward(Vec3 forward) {
 		return new Quat(Matrix3.fromForward(forward));
 	}

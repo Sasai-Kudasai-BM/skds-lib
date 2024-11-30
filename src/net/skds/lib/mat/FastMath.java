@@ -391,7 +391,7 @@ public class FastMath {
 
 	private FastMath() {
 	}
-
+	
 	static {
 		for (int i = 0; i < sinTable.length; i++) {
 			sinTable[i] = (float) Math.sin(2 * Math.PI * i / sinTable.length);

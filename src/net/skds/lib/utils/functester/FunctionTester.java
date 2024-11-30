@@ -1,17 +1,68 @@
 package net.skds.lib.utils.functester;
 
+import net.skds.lib.benchmark.Benchmark;
 import net.skds.lib.mat.FastMath;
 import net.skds.lib.utils.functester.api.ITestFunction;
 import net.skds.lib.utils.functester.gui.Frame;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 
 public class FunctionTester {
 
+
+	private static void test() {
+
+		var bm1 = new Benchmark(100, 20) {
+
+			Object[] arr = new Object[1024 * 128];
+
+			int r = 0;
+
+			@Override
+			protected void prepare() {
+				for (int i = 0; i < arr.length; i++) {
+					arr[i] = UUID.randomUUID();
+				}
+			}
+
+			@Override
+			protected void bench() {
+				// HashMap 2500/1600
+				// ConcurrentHashMap 3500/1900
+				// ConcurrentSkipListMap 17000/-1
+
+				// Object2ObjectArrayMap -1/-1
+				// Object2ObjectAVLTreeMap 9000/8500
+				// Object2ObjectRBTreeMap 9000/10000
+				// Object2ObjectLinkedOpenHashMap 3000/1300
+				// Object2ObjectOpenHashMap 1700/1000
+				Map<Object, Object> map = new HashMap<>();
+				for (int i = 0; i < arr.length; i++) {
+					Object u = arr[i];
+					map.put(u, u);
+				}
+				for (int j = 0; j < 10; j++) {
+					for (int i = 0; i < arr.length; i++) {
+						Object u = arr[i];
+						r += map.get(u).hashCode();
+					}
+				}
+			}
+		};
+
+		bm1.run();
+
+		System.out.println(bm1.result());
+		System.out.println(bm1.r);
+		System.exit(0);
+	}
+
 	//*
 	public static void main(String[] args) {
+		//test();
+
 		FunctionTester tester = new FunctionTester();
 		//*
 		tester.addFunction(new ITestFunction() {
