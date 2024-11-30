@@ -1,6 +1,7 @@
 package net.skds.lib.utils;
 
 import lombok.Getter;
+import net.libmerge.Lib2Merge;
 import net.skds.lib.collision.BlockPos;
 import net.skds.lib.mat.IVec3;
 import net.skds.lib.mat.Quat;
@@ -15,6 +16,8 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+// TODO DataInput DataOutput
+@Lib2Merge
 public final class SKDSByteBuf {
 
 	@Getter

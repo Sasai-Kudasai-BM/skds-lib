@@ -1,5 +1,7 @@
 package net.skds.lib.reflection;
 
+import net.libmerge.Lib2Merge;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -47,10 +49,12 @@ public class ReflectUtils {
 		return map;
 	}
 
+	@Lib2Merge
 	public static void fillInstanceFields(Object instance, FillingFunction function) {
 		fillInstanceFields(instance, instance.getClass(), function);
 	}
 
+	@Lib2Merge
 	public static void fillInstanceFields(Object instance, Class<?> clazz, FillingFunction function) {
 		for (Field f : clazz.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers())) {
