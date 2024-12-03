@@ -1,4 +1,4 @@
-package net.libmerge;
+package net.sdteam.libmerge;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

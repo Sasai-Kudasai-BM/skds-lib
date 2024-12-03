@@ -1,7 +1,7 @@
 package net.skds.lib.utils;
 
 import lombok.Getter;
-import net.libmerge.Lib2Merge;
+import net.sdteam.libmerge.Lib2Merge;
 import net.skds.lib.collision.BlockPos;
 import net.skds.lib.mat.IVec3;
 import net.skds.lib.mat.Quat;
@@ -29,7 +29,7 @@ public final class SKDSByteBuf {
 		this.buffer = buffer;
 		// this.capacity = buffer.capacity();
 	}
-	
+
 	public SKDSByteBuf(byte[] array) {
 		this.buffer = ByteBuffer.wrap(array);
 		// this.capacity = buffer.capacity();

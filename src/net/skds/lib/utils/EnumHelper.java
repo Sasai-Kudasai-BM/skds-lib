@@ -1,6 +1,6 @@
 package net.skds.lib.utils;
 
-import net.libmerge.Lib2Merge;
+import net.sdteam.libmerge.Lib2Merge;
 
 @Lib2Merge
 public interface EnumHelper<T extends Enum<T>> {

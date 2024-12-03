@@ -1,10 +1,12 @@
 package net.skds.lib.utils;
 
-import net.libmerge.Lib2Merge;
+import net.sdteam.libmerge.Lib2Merge;
+import net.skds.lib.mat.FastMath;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @Lib2Merge
 public class ArrayUtils {
@@ -77,6 +79,46 @@ public class ArrayUtils {
 
 	public static <T> T loop(int pos, T[] array) {
 		return array[loop(pos, array.length)];
+	}
+
+	public static <T> T getRandom(List<T> list) {
+		return list.get(FastMath.RANDOM.nextInt(list.size()));
+	}
+
+	public static <T> T getRandom(T[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static byte getRandom(byte[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static boolean getRandom(boolean[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static short getRandom(short[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static char getRandom(char[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static int getRandom(int[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static float getRandom(float[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static long getRandom(long[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static double getRandom(double[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
 	public static class ObjHashedArray {

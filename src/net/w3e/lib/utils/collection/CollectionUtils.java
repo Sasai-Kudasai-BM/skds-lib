@@ -1,6 +1,6 @@
 package net.w3e.lib.utils.collection;
 
-import net.libmerge.Lib2Merge;
+import net.sdteam.libmerge.Lib2Merge;
 
 import java.util.ArrayList;
 import java.util.List;

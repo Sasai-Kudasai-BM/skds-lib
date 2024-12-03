@@ -1,6 +1,6 @@
 package net.skds.lib.reflection;
 
-import net.libmerge.Lib2Merge;
+import net.sdteam.libmerge.Lib2Merge;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

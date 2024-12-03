@@ -1,6 +1,6 @@
 package net.w3e.lib.utils;
 
-import net.libmerge.Lib2Merge;
+import net.sdteam.libmerge.Lib2Merge;
 
 import java.io.File;
 import java.io.IOException;
