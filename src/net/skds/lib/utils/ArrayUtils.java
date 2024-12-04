@@ -81,6 +81,10 @@ public class ArrayUtils {
 		return array[loop(pos, array.length)];
 	}
 
+	public static <T> T loop(int pos, List<T> list) {
+		return list.get(loop(pos, list.size()));
+	}
+
 	public static <T> T getRandom(List<T> list) {
 		return list.get(FastMath.RANDOM.nextInt(list.size()));
 	}
