@@ -14,17 +14,18 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-public class NetServer {
+//TODO
+public class TCPServer {
 
 	protected boolean running = false;
 	public final Selector selector;
 	public final ServerSocketChannel server;
 	protected final Object acceptAttachment = new Object();
 	@Setter
-	private Function<SocketChannel, AbstractClientConnection> connectionFactory;
+	private Function<SocketChannel, AbstractClientConnection<?>> connectionFactory;
 	private final Executor inputExecutor, outputExecutor;
 
-	public NetServer(Function<SocketChannel, AbstractClientConnection> connectionFactory, Executor inputExecutor, Executor outputExecutor) {
+	public TCPServer(Function<SocketChannel, AbstractClientConnection<?>> connectionFactory, Executor inputExecutor, Executor outputExecutor) {
 		this.connectionFactory = connectionFactory;
 		this.outputExecutor = outputExecutor;
 		this.inputExecutor = inputExecutor;
@@ -71,18 +72,19 @@ public class NetServer {
 			}
 			try {
 				final SocketChannel sc = server.accept();
-				AbstractClientConnection connection = connectionFactory.apply(sc);
+				AbstractClientConnection<?> connection = connectionFactory.apply(sc);
 				sc.configureBlocking(false);
 				final Socket socket = sc.socket();
 				socket.setTcpNoDelay(true);
 				socket.setSoTimeout(connection.getTimeout());
 				outputExecutor.execute(() -> outputLoop(connection));
 				sc.register(selector, SelectionKey.OP_READ, connection);
+				connection.startEncryption();
 			} catch (IOException e) {
 				key.cancel();
 				e.printStackTrace();
 			}
-		} else if (key.isReadable() && (key.attachment() instanceof AbstractClientConnection cc)) {
+		} else if (key.isReadable() && (key.attachment() instanceof AbstractClientConnection<?> cc)) {
 			try {
 				cc.read();
 			} catch (IOException e) {
@@ -107,16 +109,12 @@ public class NetServer {
 		}
 	}
 
-	protected void outputLoop(AbstractClientConnection connection) {
+	protected void outputLoop(AbstractClientConnection<?> connection) {
 		while (running && connection.isAlive()) {
 			try {
 				connection.flushPackets();
 			} catch (IOException e) {
-				try {
-					connection.disconnect();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				connection.disconnect();
 			}
 		}
 	}

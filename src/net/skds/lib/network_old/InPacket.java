@@ -1,7 +1,7 @@
-package net.skds.lib.network;
+package net.skds.lib.network_old;
 
 public interface InPacket<T extends AbstractConnection<?>> {
-	void handle(T connection);
+	void applyPacket(T connection);
 
 	default boolean instantHandle(T connection) {
 		return false;

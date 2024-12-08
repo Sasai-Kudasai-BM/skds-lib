@@ -180,6 +180,17 @@ public final class SKDSByteBuf {
 		buffer.put(array);
 	}
 
+	public byte[] readByteArray() {
+		int len = readVarInt();
+		if (len == 0) {
+			return ArrayUtils.EMPTY_BYTE;
+		}
+		byte[] arr = new byte[len];
+		buffer.get(arr);
+		return arr;
+	}
+
+
 	public int readUnsignedShort() {
 		return buffer.getShort() & 0xFFFF;
 	}

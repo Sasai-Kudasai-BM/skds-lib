@@ -3,6 +3,7 @@ package net.skds.lib.utils;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Deprecated
 public class SKDSTimer {
 
 	private static final AtomicInteger idCounter = new AtomicInteger();

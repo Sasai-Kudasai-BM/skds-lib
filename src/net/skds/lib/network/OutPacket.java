@@ -1,7 +1,13 @@
 package net.skds.lib.network;
 
-public interface OutPacket<T extends AbstractConnection<?>, B> {
-	void writePacket(T connection, B buffer);
+import net.skds.lib.utils.SKDSByteBuf;
+
+public interface OutPacket {
+	void writePacket(SKDSByteBuf buffer);
 
 	int getPacketId();
+
+	default void send(AbstractConnection<?> connection) {
+		connection.sendPacket(this);
+	}
 }

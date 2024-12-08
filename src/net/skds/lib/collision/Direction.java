@@ -37,6 +37,33 @@ public enum Direction {
 	public static final Direction ZP = SOUTH;
 	public static final Direction ZN = NORTH;
 
+	private static final Direction[][] shuffleH = {
+			{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH},
+			{Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH},
+			{Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST},
+			{Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH},
+			{Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH},
+			{Direction.EAST, Direction.SOUTH, Direction.NORTH, Direction.WEST},
+			{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH},
+			{Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH},
+			{Direction.WEST, Direction.NORTH, Direction.SOUTH, Direction.EAST},
+			{Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH},
+			{Direction.WEST, Direction.SOUTH, Direction.EAST, Direction.NORTH},
+			{Direction.WEST, Direction.SOUTH, Direction.NORTH, Direction.EAST},
+			{Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH},
+			{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST},
+			{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST},
+			{Direction.NORTH, Direction.WEST, Direction.EAST, Direction.SOUTH},
+			{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST},
+			{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST},
+			{Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.NORTH},
+			{Direction.SOUTH, Direction.EAST, Direction.NORTH, Direction.WEST},
+			{Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.EAST},
+			{Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.NORTH},
+			{Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST},
+			{Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST},
+	};
+
 	Direction(int id, int idOpposite, int idHorizontal, String name, AxisDirection direction, Axis axis,
 			  BlockPos vector) {
 		this.id = id;
@@ -80,6 +107,11 @@ public enum Direction {
 			}
 			case Z -> this == NORTH || this == SOUTH ? this : this.rotateZClockwise();
 		};
+	}
+
+
+	public static Direction[] randomHorizontal() {
+		return shuffleH[FastMath.RANDOM.nextInt(shuffleH.length)];
 	}
 
 	public Direction rotateCounterclockwise(Axis axis) {

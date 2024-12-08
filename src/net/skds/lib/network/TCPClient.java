@@ -3,6 +3,7 @@ package net.skds.lib.network;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.sdteam.libmerge.Lib2Merge;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +14,11 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-public class NetClient<T extends AbstractServerConnection> {
+//TODO
+@Lib2Merge
+public class TCPClient<T extends AbstractServerConnection<?>> {
+
+	private static final ConnectResult SUCCESS = new ConnectResult(true, null);
 
 	public final Selector selector;
 	protected boolean running = false;
@@ -23,7 +28,7 @@ public class NetClient<T extends AbstractServerConnection> {
 	private Function<SocketChannel, T> connectionFactory;
 	private final Executor inputExecutor, outputExecutor;
 
-	public NetClient(Function<SocketChannel, T> connectionFactory, Executor inputExecutor, Executor outputExecutor) {
+	public TCPClient(Function<SocketChannel, T> connectionFactory, Executor inputExecutor, Executor outputExecutor) {
 		this.outputExecutor = outputExecutor;
 		this.inputExecutor = inputExecutor;
 		this.connectionFactory = connectionFactory;
@@ -42,11 +47,7 @@ public class NetClient<T extends AbstractServerConnection> {
 					try {
 						connection.read();
 					} catch (IOException e) {
-						try {
-							connection.disconnect();
-						} catch (IOException e2) {
-							e2.printStackTrace();
-						}
+						connection.disconnect();
 					}
 
 				});
@@ -62,11 +63,12 @@ public class NetClient<T extends AbstractServerConnection> {
 				connection.flushPackets();
 			} catch (Exception e) {
 				e.printStackTrace();
+				connection.disconnect();
 			}
 		}
 	}
 
-	public boolean connect(InetSocketAddress address) {
+	public ConnectResult connect(InetSocketAddress address) {
 		try {
 			if (this.connection != null && this.connection.isAlive()) {
 				running = false;
@@ -86,10 +88,13 @@ public class NetClient<T extends AbstractServerConnection> {
 			running = true;
 			inputExecutor.execute(this::inputLoop);
 			outputExecutor.execute(this::outputLoop);
-			return true;
+			return SUCCESS;
 		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
+			//e.printStackTrace();
+			return new ConnectResult(false, e);
 		}
+	}
+
+	public record ConnectResult(boolean success, Exception exception) {
 	}
 }
