@@ -1,5 +1,6 @@
 package net.skds.lib.collision;
 
+import net.sdteam.libmerge.Lib2Merge;
 import net.skds.lib.mat.FastMath;
 import net.skds.lib.mat.IVec3;
 import net.skds.lib.mat.Vec3;
@@ -254,9 +255,29 @@ public enum Direction {
 		return getFacing((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()));
 	}
 
+	@Lib2Merge
+	public static Direction getFacingFrom(IVec3 from, IVec3 to, Iterable<Direction> iterable) {
+		return getFacingFrom((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()), iterable);
+	}
+
+	@Lib2Merge
+	public static Direction getFacingFrom(float x, float y, float z, Iterable<Direction> iterable) {
+		Direction direction = null;
+		float f = Float.NEGATIVE_INFINITY;
+		for (Direction direction2 : iterable) {
+			float g = x * direction2.vector.x + y * direction2.vector.y + z * direction2.vector.z;
+			if (!(g > f))
+				continue;
+			f = g;
+			direction = direction2;
+		}
+		return direction;
+	}
+
+	@Lib2Merge
 	public static Direction getFacing(float x, float y, float z) {
 		Direction direction = NORTH;
-		float f = Float.MIN_VALUE;
+		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : VALUES) {
 			float g = x * direction2.vector.x + y * direction2.vector.y + z * direction2.vector.z;
 			if (!(g > f))

@@ -15,6 +15,12 @@ public final class Vec3PID extends AbstractPID {
 	public Vec3PID() {
 	}
 
+	@Override
+	public void reset() {
+		this.lastD.set(Vec3.ZERO());
+		this.sumI.set(Vec3.ZERO());
+	}
+
 	public Vec3 loop(Vec3 in) {
 		Vec3 d = in.copy().sub(this.lastD).scale(this.d);
 		this.lastD.set(in);

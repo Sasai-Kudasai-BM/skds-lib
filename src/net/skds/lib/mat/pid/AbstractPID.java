@@ -16,6 +16,8 @@ public abstract class AbstractPID implements Cloneable {
 		p = 1;
 	}
 
+	public abstract void reset();
+
 	@Override
 	public abstract AbstractPID clone();
 }

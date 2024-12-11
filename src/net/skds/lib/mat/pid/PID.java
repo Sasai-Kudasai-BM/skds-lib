@@ -13,6 +13,12 @@ public final class PID extends AbstractPID {
 	public PID() {
 	}
 
+	@Override
+	public void reset() {
+		this.lastD = 0;
+		this.sumI = 0;
+	}
+
 	public double loop(double in) {
 		double d = (in - this.lastD) * this.d;
 		this.lastD = in;
