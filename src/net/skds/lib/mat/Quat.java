@@ -1,5 +1,6 @@
 package net.skds.lib.mat;
 
+import net.sdteam.libmerge.Lib2Merge;
 import net.skds.lib.mat.graphics.Quatf;
 
 public class Quat {
@@ -86,6 +87,32 @@ public class Quat {
 			this.y = (m.m12 + m.m21) / s;
 			this.z = 0.25 * s;
 		}
+	}
+	
+	@Lib2Merge
+	public Quat rotateAxial(Vec3 axial, boolean degrees) {
+		if (axial.lengthSquared() < 1E-10) {
+			return this;
+		}
+		Vec3 myAxial = new Vec3(this.x, this.y, this.z);
+		double l = myAxial.length();
+		double myAngle = (Math.acos(this.w) + Math.asin(l)) * FastMath.RAD_2_DEGREES;
+		myAxial.scale(myAngle / l);
+
+		if (!degrees) {
+			axial = axial.copy().scale(FastMath.RAD_2_DEGREES);
+		}
+		myAxial.add(axial);
+		myAngle = myAxial.length();
+		myAxial.scale(1 / myAngle);
+
+		double f = FastMath.sinDegr(myAngle / 2.0F);
+		this.x = myAxial.x * f;
+		this.y = myAxial.y * f;
+		this.z = myAxial.z * f;
+		this.w = FastMath.cosDegr(myAngle / 2.0F);
+
+		return this;
 	}
 
 	public Quat rotate(Vec3 spin) {
