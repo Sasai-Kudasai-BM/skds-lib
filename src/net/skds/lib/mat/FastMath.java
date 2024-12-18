@@ -11,6 +11,9 @@ public class FastMath {
 	public static final float TwoPi = Pi * 2;
 	public static final float Pi2 = Pi / 2;
 
+	public static final float SQRT_2 = (float) Math.sqrt(2);
+	public static final float SQRT_3 = (float) Math.sqrt(3);
+
 	public static final float RAD_2_DEGREES = (180 / Pi);
 	public static final float DEGREES_2_RAD = (Pi / 180);
 
@@ -391,7 +394,7 @@ public class FastMath {
 
 	private FastMath() {
 	}
-	
+
 	static {
 		for (int i = 0; i < sinTable.length; i++) {
 			sinTable[i] = (float) Math.sin(2 * Math.PI * i / sinTable.length);
