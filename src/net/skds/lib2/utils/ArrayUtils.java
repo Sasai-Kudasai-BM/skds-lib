@@ -1,8 +1,11 @@
 package net.skds.lib2.utils;
 
+import net.skds.lib2.mat.FastMath;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class ArrayUtils {
@@ -46,40 +49,89 @@ public class ArrayUtils {
 		return ret;
 	}
 
-	public static byte loop(byte[] array, int pos) {
+	public static byte loop(int pos, byte[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static boolean loop(boolean[] array, int pos) {
+	public static boolean loop(int pos, boolean[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static short loop(short[] array, int pos) {
+	public static short loop(int pos, short[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static char loop(char[] array, int pos) {
+	public static char loop(int pos, char[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static int loop(int[] array, int pos) {
+	public static int loop(int pos, int[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static long loop(long[] array, int pos) {
+	public static long loop(int pos, long[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static float loop(float[] array, int pos) {
+	public static float loop(int pos, float[] array) {
 		return array[loop(pos, array.length)];
 	}
 
-	public static double loop(double[] array, int pos) {
+	public static double loop(int pos, double[] array) {
 		return array[loop(pos, array.length)];
 	}
 
+	@Deprecated
 	public static <T> T loop(T[] array, int pos) {
 		return array[loop(pos, array.length)];
+	}
+
+	public static <T> T loop(int pos, T[] array) {
+		return array[loop(pos, array.length)];
+	}
+
+	public static <T> T loop(int pos, List<T> list) {
+		return list.get(loop(pos, list.size()));
+	}
+
+	public static <T> T getRandom(List<T> list) {
+		return list.get(FastMath.RANDOM.nextInt(list.size()));
+	}
+
+	public static <T> T getRandom(T[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static byte getRandom(byte[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static boolean getRandom(boolean[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static short getRandom(short[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static char getRandom(char[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static int getRandom(int[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static float getRandom(float[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static long getRandom(long[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static double getRandom(double[] array) {
+		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
 	public static class ObjHashedArray {

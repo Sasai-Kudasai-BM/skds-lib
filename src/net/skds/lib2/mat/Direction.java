@@ -275,11 +275,31 @@ public enum Direction implements Vec3 {
 		return getFacing((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()));
 	}
 
+
+	public static Direction getFacingFrom(Vec3 from, Vec3 to, Iterable<Direction> iterable) {
+		return getFacingFrom((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()), iterable);
+	}
+
+
+	public static Direction getFacingFrom(float x, float y, float z, Iterable<Direction> iterable) {
+		Direction direction = null;
+		float f = Float.NEGATIVE_INFINITY;
+		for (Direction direction2 : iterable) {
+			float g = x * direction2.xf() + y * direction2.yf() + z * direction2.zf();
+			if (!(g > f))
+				continue;
+			f = g;
+			direction = direction2;
+		}
+		return direction;
+	}
+
+
 	public static Direction getFacing(float x, float y, float z) {
-		Direction direction = BACKWARD;
-		float f = Float.MIN_VALUE;
+		Direction direction = NORTH;
+		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : VALUES) {
-			float g = x * direction2.vector.xf() + y * direction2.vector.yf() + z * direction2.vector.zf();
+			float g = x * direction2.xf() + y * direction2.yf() + z * direction2.zf();
 			if (!(g > f))
 				continue;
 			f = g;

@@ -147,6 +147,63 @@ public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 		return new QuatF(x, y, z, w);
 	}
 
+	default Quat rotate(Vec3 axial, boolean degrees) {
+		double length = axial.length();
+		if (length < 1E-20) {
+			return this;
+		}
+		if (degrees) {
+			length *= FastMath.DGR_2_RAD;
+		}
+		double half = length * 0.5;
+		double sin = FastMath.sinRad(half);
+		double cos = FastMath.sinRad(half);
+
+		double x = axial.x() * sin;
+		double y = axial.y() * sin;
+		double z = axial.z() * sin;
+		double w = length * cos;
+
+		double x2 = x() + w() * x + x() * w + y() * z - z() * y;
+		double y2 = y() + w() * y - x() * z + y() * w + z() * x;
+		double z2 = z() + w() * z + x() * y - y() * x + z() * w;
+		double w2 = w() + w() * w - x() * x - y() * y - z() * z;
+
+
+		double f = x2 * x2 + y2 * y2 + z2 * z2 + w2 * w2;
+		double g = FastMath.invSqrt(f);
+		return new QuatD(x2 * g, y2 * g, z2 * g, w2 * g);
+	}
+
+	default Quat rotateF(Vec3 axial, boolean degrees) {
+		float length = axial.lengthF();
+		if (length < 1E-20F) {
+			return this;
+		}
+		if (degrees) {
+			length *= FastMath.DGR_2_RAD;
+		}
+		float half = length * 0.5f;
+		float sin = FastMath.sinRad(half);
+		float cos = FastMath.sinRad(half);
+
+		float x = axial.xf() * sin;
+		float y = axial.yf() * sin;
+		float z = axial.zf() * sin;
+		float w = length * cos;
+
+		// me + q * me
+		float x2 = xf() + wf() * x + xf() * w + yf() * z - zf() * y;
+		float y2 = yf() + wf() * y - xf() * z + yf() * w + zf() * x;
+		float z2 = zf() + wf() * z + xf() * y - yf() * x + zf() * w;
+		float w2 = wf() + wf() * w - xf() * x - yf() * y - zf() * z;
+
+		float f = x2 * x2 + y2 * y2 + z2 * z2 + w2 * w2;
+		float g = FastMath.invSqrt(f);
+		return new QuatF(x2 * g, y2 * g, z2 * g, w2 * g);
+	}
+
+	@Deprecated
 	default Quat rotate(Vec3 spin) {
 		double angle = spin.length();
 		if (angle < 1E-7) {
@@ -170,6 +227,7 @@ public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 		return new QuatD(x, y, z, w);
 	}
 
+	@Deprecated
 	default Quat rotateF(Vec3 spin) {
 		float angle = spin.lengthF();
 		if (angle < 1E-7) {

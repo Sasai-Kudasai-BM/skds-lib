@@ -1,5 +1,7 @@
 package net.skds.lib2.reflection;
 
+import net.sdteam.libmerge.Lib2Merge;
+
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.ByteArrayInputStream;
@@ -32,6 +34,29 @@ public class ReflectUtils {
 		throw new RuntimeException("No field found");
 	}
 
+	@Lib2Merge
+	public static void fillInstanceFields(Object instance, FillingFunction function) {
+		fillInstanceFields(instance, instance.getClass(), function);
+	}
+
+	@Lib2Merge
+	public static void fillInstanceFields(Object instance, Class<?> clazz, FillingFunction function) {
+		for (Field f : clazz.getDeclaredFields()) {
+			if (Modifier.isStatic(f.getModifiers())) {
+				continue;
+			}
+			function.accept(f, value -> {
+				f.setAccessible(true);
+				try {
+					f.set(instance, value);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			});
+		}
+	}
+
+
 	public static <T> Map<String, HiddenField<T>> getAllFields(Class<?> clazz, FindOptions options) {
 
 		Map<String, HiddenField<T>> map = new HashMap<>();
@@ -52,23 +77,6 @@ public class ReflectUtils {
 		return map;
 	}
 
-	public static void fillInstanceFields(Object instance, FillingFunction function) {
-
-		for (Field f : instance.getClass().getDeclaredFields()) {
-			if ((f.getModifiers() & Modifier.STATIC) != 0) {
-				continue;
-			}
-			function.accept(f, value -> {
-				f.setAccessible(true);
-				try {
-					f.set(instance, value);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
-		}
-	}
-
 	public static Type extractFieldType(Class<?> clazz, String fieldName) {
 		try {
 			return clazz.getDeclaredField(fieldName).getGenericType();
@@ -76,6 +84,7 @@ public class ReflectUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
 
 	@FunctionalInterface
 	public interface FillingFunction {

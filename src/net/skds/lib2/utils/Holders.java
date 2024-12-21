@@ -13,6 +13,72 @@ public final class Holders {
 
 	@NoArgsConstructor
 	@AllArgsConstructor
+	@Getter
+	@Setter
+	public static class Multi2Holder<A, B> {
+
+		protected A valueA;
+		protected B valueB;
+
+		@Override
+		public String toString() {
+			return "MultiHolder(" + valueA + ", " + valueB + ")";
+		}
+	}
+
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Getter
+	@Setter
+	public static class Multi3Holder<A, B, C> {
+
+		protected A valueA;
+		protected B valueB;
+		protected C valueC;
+
+		@Override
+		public String toString() {
+			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ")";
+		}
+	}
+
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Getter
+	@Setter
+	public static class Multi4Holder<A, B, C, D> {
+
+		protected A valueA;
+		protected B valueB;
+		protected C valueC;
+		protected D valueD;
+
+		@Override
+		public String toString() {
+			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ", " + valueD + ")";
+		}
+	}
+
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Getter
+	@Setter
+	public static class Multi5Holder<A, B, C, D, E> {
+
+		protected A valueA;
+		protected B valueB;
+		protected C valueC;
+		protected D valueD;
+		protected E valueE;
+
+		@Override
+		public String toString() {
+			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ", " + valueD + ", " + valueE + ")";
+		}
+	}
+
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class ObjectHolder<T> {
 
 		@Getter

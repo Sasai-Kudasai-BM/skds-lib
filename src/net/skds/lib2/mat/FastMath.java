@@ -17,6 +17,9 @@ public class FastMath {
 	public static final float RAD_2_DGR = (180 / PI);
 	public static final float DGR_2_RAD = (PI / 180);
 
+	public static final float SQRT_2 = (float) Math.sqrt(2);
+	public static final float SQRT_3 = (float) Math.sqrt(3);
+
 	private static final float[] sinTable = new float[1024 * 4];
 
 	public static boolean roll(double chance) {

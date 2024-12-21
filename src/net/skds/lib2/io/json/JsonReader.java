@@ -1,0 +1,42 @@
+package net.skds.lib2.io.json;
+
+import java.io.IOException;
+
+public interface JsonReader {
+
+	String readName() throws IOException;
+
+	void beginObject() throws IOException;
+
+	void endObject() throws IOException;
+
+	void beginList() throws IOException;
+
+	void endList() throws IOException;
+
+	JsonEntryType nextEntryType() throws IOException;
+
+	boolean readBoolean() throws IOException;
+
+	void skipNull() throws IOException;
+
+	Number readNumber() throws IOException;
+
+	default int readInt() throws IOException {
+		return readNumber().intValue();
+	}
+
+	default long readLong() throws IOException {
+		return readNumber().longValue();
+	}
+
+	default float readFloat() throws IOException {
+		return readNumber().floatValue();
+	}
+
+	default double readDouble() throws IOException {
+		return readNumber().doubleValue();
+	}
+
+	String readString() throws IOException;
+}
