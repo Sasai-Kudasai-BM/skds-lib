@@ -2,7 +2,6 @@ package net.skds.lib2.io.json;
 
 import net.skds.lib2.io.CharInput;
 import net.skds.lib2.io.EndOfInputException;
-import net.skds.lib2.io.StringCharInput;
 import net.skds.lib2.utils.Numbers;
 
 import java.io.IOException;
@@ -27,33 +26,6 @@ public class JsonReaderImpl implements JsonReader {
 		if (next != expected) {
 			throw new JsonReadException("Expected " + expected + " but next entry is " + next);
 		}
-	}
-
-	private static final String test = """
-			  {
-			   "aboba"  :  777.7 ,
-			   "ses"  :  0x7 ,
-			  }
-			""";
-
-	public static void main(String[] args) throws IOException {
-		JsonReaderImpl jr = new JsonReaderImpl(new StringCharInput(test));
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.readName());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.readFloat());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.readName());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.readInt());
-		System.out.println(jr.nextEntryType());
-		System.out.println(jr.nextEntryType());
 	}
 
 	private char readEscapeCharacter() throws IOException {

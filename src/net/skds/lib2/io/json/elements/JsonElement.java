@@ -1,7 +1,5 @@
 package net.skds.lib2.io.json.elements;
 
-import net.skds.lib2.io.json.JsonElementType;
-
 public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, JsonList, JsonNumber, JsonObject, JsonString {
 
 	JsonElement NULL = new JsonNull();
@@ -16,9 +14,7 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		throw new UnsupportedOperationException();
 	}
 
-	default String getAsString() {
-		throw new UnsupportedOperationException();
-	}
+	//String valueAsString();
 
 	default boolean getAsBoolean() {
 		throw new UnsupportedOperationException();
@@ -49,5 +45,10 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		public JsonElementType type() {
 			return JsonElementType.NULL;
 		}
+
+		//@Override
+		//public String valueAsString() {
+		//	return "null";
+		//}
 	}
 }

@@ -1,7 +1,5 @@
 package net.skds.lib2.io.json.elements;
 
-import net.skds.lib2.io.json.JsonElementType;
-
 import java.util.ArrayList;
 
 public final class JsonList extends ArrayList<JsonElement> implements JsonElement {
@@ -10,6 +8,12 @@ public final class JsonList extends ArrayList<JsonElement> implements JsonElemen
 	public JsonElementType type() {
 		return JsonElementType.LIST;
 	}
+
+	//@Override
+	//public String valueAsString() {
+	//	StringJoiner sj = ne
+	//	return null;
+	//}
 
 	public boolean add(Number value) {
 		return super.add(new JsonNumber(value));
