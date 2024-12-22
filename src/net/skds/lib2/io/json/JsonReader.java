@@ -10,9 +10,9 @@ public interface JsonReader {
 
 	void endObject() throws IOException;
 
-	void beginList() throws IOException;
+	void beginArray() throws IOException;
 
-	void endList() throws IOException;
+	void endArray() throws IOException;
 
 	JsonEntryType nextEntryType() throws IOException;
 

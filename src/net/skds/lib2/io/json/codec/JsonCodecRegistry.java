@@ -8,16 +8,12 @@ import java.util.function.Function;
 public class JsonCodecRegistry {
 
 	private final Map<Type, JsonCodec<?>> codecMap = new ConcurrentHashMap<>();
-	private final JsonCodecFactory codecFactory;
 	private final Function<? super Type, ? extends JsonCodec<?>> mappingFunction;
 
-	public JsonCodecRegistry(JsonCodecFactory codecFactory, Map<Type, JsonCodec<?>> basicCodecs) {
-		this.codecFactory = codecFactory;
-		this.mappingFunction = t -> codecFactory.createCodec(t, this);
-		if (basicCodecs != null && !basicCodecs.isEmpty()) {
-			codecMap.putAll(basicCodecs);
-		}
+	public JsonCodecRegistry(JsonCodecFactory builtinFactory) {
+		this.mappingFunction = t -> builtinFactory.createCodec(t, this);
 	}
+
 
 	@SuppressWarnings("unchecked")
 	public <T> JsonCodec<T> getCodec(Type type) {

@@ -1,0 +1,14 @@
+{
+	"a": "ass",
+	"b": ["gf", 23, null, "ff"],
+	"c": null,
+	"d": 7,
+	"e": true,
+	"f": false,
+	"g": {
+		"ab\"oba": 777.7,
+		"ses": 0x7,
+		"say": "gex",
+		"amogus": [1488, "aaa", -.3,],
+	}
+}

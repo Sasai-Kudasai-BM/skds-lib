@@ -5,6 +5,7 @@ import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.JsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,7 +29,25 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		if (!isEmpty()) {
+			forEach((k, v) -> sb.append('"').append(k.replace("\"", "\\\"")).append("\":").append(v).append(","));
+			sb.setLength(sb.length() - 1);
+		}
+		sb.append('}');
+		return sb.toString();
+	}
+
 	public static class Codec implements JsonCodec<JsonObject> {
+
+		private final JsonCodec<JsonElement> elementCodec;
+
+		public Codec(JsonCodecRegistry registry) {
+			this.elementCodec = registry.getCodec(JsonElement.class);
+		}
 
 		@Override
 		public void serialize(JsonObject value, JsonWriter writer) throws IOException {
@@ -45,8 +64,10 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					JsonObject jo = new JsonObject();
-					while ((type = reader.nextEntryType()) != JsonEntryType.END_OBJECT) {
-						
+					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+						String name = reader.readName();
+						JsonElement e = elementCodec.deserialize(reader);
+						jo.put(name, e);
 					}
 					reader.endObject();
 					return jo;

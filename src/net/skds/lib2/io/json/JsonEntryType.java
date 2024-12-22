@@ -4,14 +4,13 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum JsonEntryType {
-	BEGIN_OBJECT(true),
-	END_OBJECT(true),
-	BEGIN_LIST(false),
-	END_LIST(true),
-	STRING(true),
-	NUMBER(true),
-	BOOLEAN(false),
-	NULL(false);
+	BEGIN_OBJECT,
+	END_OBJECT,
+	BEGIN_ARRAY,
+	END_ARRAY,
+	STRING,
+	NUMBER,
+	BOOLEAN,
+	NULL;
 
-	public final boolean canNameFollow;
 }

@@ -18,7 +18,6 @@ public class JsonReaderImpl implements JsonReader {
 
 	public JsonReaderImpl(CharInput input) throws IOException {
 		this.input = input;
-		beginObject();
 	}
 
 	private void validateEntryType(JsonEntryType expected) throws IOException {
@@ -160,15 +159,15 @@ public class JsonReaderImpl implements JsonReader {
 	}
 
 	@Override
-	public void beginList() throws IOException {
-		validateEntryType(JsonEntryType.BEGIN_LIST);
+	public void beginArray() throws IOException {
+		validateEntryType(JsonEntryType.BEGIN_ARRAY);
 		pos++;
 		resetLastEntry();
 	}
 
 	@Override
-	public void endList() throws IOException {
-		validateEntryType(JsonEntryType.END_LIST);
+	public void endArray() throws IOException {
+		validateEntryType(JsonEntryType.END_ARRAY);
 		pos++;
 		resetLastEntry();
 	}
@@ -251,8 +250,8 @@ public class JsonReaderImpl implements JsonReader {
 			switch (next) {
 				case '{' -> rt = JsonEntryType.BEGIN_OBJECT;
 				case '}' -> rt = JsonEntryType.END_OBJECT;
-				case '[' -> rt = JsonEntryType.BEGIN_LIST;
-				case ']' -> rt = JsonEntryType.END_LIST;
+				case '[' -> rt = JsonEntryType.BEGIN_ARRAY;
+				case ']' -> rt = JsonEntryType.END_ARRAY;
 				case '"' -> rt = JsonEntryType.STRING;
 
 				case ',' -> {
