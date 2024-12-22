@@ -255,12 +255,12 @@ public enum Direction {
 		return getFacing((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()));
 	}
 
-	@Lib2Merge
+	@Lib2Merge(complete = true)
 	public static Direction getFacingFrom(IVec3 from, IVec3 to, Iterable<Direction> iterable) {
 		return getFacingFrom((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()), iterable);
 	}
 
-	@Lib2Merge
+	@Lib2Merge(complete = true)
 	public static Direction getFacingFrom(float x, float y, float z, Iterable<Direction> iterable) {
 		Direction direction = null;
 		float f = Float.NEGATIVE_INFINITY;
@@ -274,7 +274,7 @@ public enum Direction {
 		return direction;
 	}
 
-	@Lib2Merge
+	@Lib2Merge(complete = true)
 	public static Direction getFacing(float x, float y, float z) {
 		Direction direction = NORTH;
 		float f = Float.NEGATIVE_INFINITY;

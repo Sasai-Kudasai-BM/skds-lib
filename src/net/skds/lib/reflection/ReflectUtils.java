@@ -49,12 +49,12 @@ public class ReflectUtils {
 		return map;
 	}
 
-	@Lib2Merge
+	@Lib2Merge(complete = true)
 	public static void fillInstanceFields(Object instance, FillingFunction function) {
 		fillInstanceFields(instance, instance.getClass(), function);
 	}
 
-	@Lib2Merge
+	@Lib2Merge(complete = true)
 	public static void fillInstanceFields(Object instance, Class<?> clazz, FillingFunction function) {
 		for (Field f : clazz.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers())) {

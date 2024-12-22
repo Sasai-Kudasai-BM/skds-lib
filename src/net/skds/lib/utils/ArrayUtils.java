@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-@Lib2Merge
+@Lib2Merge(complete = true)
 public class ArrayUtils {
 
 	public static final byte[] EMPTY_BYTE = {};

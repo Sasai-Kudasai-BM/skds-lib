@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-@Lib2Merge
+@Lib2Merge(complete = true)
 public class FileUtils {
 
 	public static void save(File file, byte[] data) {

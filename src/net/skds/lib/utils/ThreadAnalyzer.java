@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
-@Lib2Merge
+@Lib2Merge(complete = true)
 public final class ThreadAnalyzer {
 
 	private long lastAnalyzeNanos;

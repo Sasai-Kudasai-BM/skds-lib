@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.sdteam.libmerge.Lib2Merge;
 
-@Lib2Merge
+@Lib2Merge(complete = true)
 public final class Holders {
 	private Holders() {
 
