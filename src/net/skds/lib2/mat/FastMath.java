@@ -297,9 +297,44 @@ public class FastMath {
 	}
 
 
-	public static int floor(double value) {
+	public static int round(double value) {
 		int i = (int) value;
-		return i <= value ? i : i - 1;
+		double d = value - i;
+		if (d >= 0) {
+			if (d >= 0.5) {
+				return i + 1;
+			} else {
+				return i;
+			}
+		} else {
+			if (d <= -0.5) {
+				return i - 1;
+			} else {
+				return i;
+			}
+		}
+	}
+
+	public static int round(float value) {
+		int i = (int) value;
+		float d = value - i;
+		if (d >= 0) {
+			if (d >= 0.5f) {
+				return i + 1;
+			} else {
+				return i;
+			}
+		} else {
+			if (d <= -0.5f) {
+				return i - 1;
+			} else {
+				return i;
+			}
+		}
+	}
+
+	public static int floor(double value) {
+		return (int) value;
 	}
 
 	public static int ceil(double value) {
@@ -308,8 +343,7 @@ public class FastMath {
 	}
 
 	public static int floor(float value) {
-		int i = (int) value;
-		return i <= value ? i : i - 1;
+		return (int) value;
 	}
 
 	public static int ceil(float value) {
