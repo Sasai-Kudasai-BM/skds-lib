@@ -58,10 +58,8 @@ public class OBB implements ConvexShape {
 	}
 
 	@Override
-	public Object setAttachment(Object attachment) {
-		Object old = this.attachment;
-		this.attachment = attachment;
-		return old;
+	public OBB withAttachment(Object attachment) {
+		return new OBB(center, normals, attachment);
 	}
 
 	@Override

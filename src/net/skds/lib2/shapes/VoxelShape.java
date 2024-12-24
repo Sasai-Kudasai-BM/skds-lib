@@ -168,10 +168,8 @@ public sealed class VoxelShape implements CompositeShape {
 	}
 
 	@Override
-	public Object setAttachment(Object attachment) {
-		Object old = this.attachment;
-		this.attachment = attachment;
-		return old;
+	public VoxelShape withAttachment(Object attachment) {
+		return new VoxelShape(boxes, center, attachment);
 	}
 
 	private static final class EmptyVoxelShape extends VoxelShape {

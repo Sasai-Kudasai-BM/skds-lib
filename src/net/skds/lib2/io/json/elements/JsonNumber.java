@@ -43,6 +43,7 @@ public record JsonNumber(Number value) implements JsonElement {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
+					reader.skipNull();
 					return ZERO;
 				}
 				case NUMBER -> {

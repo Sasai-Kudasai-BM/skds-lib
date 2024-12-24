@@ -6,6 +6,7 @@ import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
 
@@ -23,7 +24,7 @@ public record JsonString(String value) implements JsonElement {
 
 		@Override
 		public void serialize(JsonString value, JsonWriter writer) throws IOException {
-
+			writer.writeString(value.value);
 		}
 
 		@Override
@@ -31,6 +32,7 @@ public record JsonString(String value) implements JsonElement {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
+					reader.skipNull();
 					return null;
 				}
 				case STRING -> {
@@ -44,7 +46,7 @@ public record JsonString(String value) implements JsonElement {
 
 	@Override
 	public String toString() {
-		return "\"" + value.replace("\"", "\\\"") + "\"";
+		return StringUtils.quote(value);
 	}
 
 	//@Override

@@ -144,14 +144,14 @@ public final class AABB implements ConvexShape {
 	@Override
 	public OBB rotate(Matrix3 m3) {
 		OBB obb = new OBB(getCenter(), m3.scaleNS(sizeX(), sizeY(), sizeZ()));
-		obb.setAttachment(attachment);
+		obb.withAttachment(attachment);
 		return obb;
 	}
 
 	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
 		OBB obb = new OBB(getCenter().add(pos), m3.scaleNS(sizeX() * scale, sizeY() * scale, sizeZ() * scale));
-		obb.setAttachment(attachment);
+		obb.withAttachment(attachment);
 		return obb;
 	}
 
@@ -512,10 +512,8 @@ public final class AABB implements ConvexShape {
 	}
 
 	@Override
-	public Object setAttachment(Object attachment) {
-		Object old = this.attachment;
-		this.attachment = attachment;
-		return old;
+	public AABB withAttachment(Object attachment) {
+		return new AABB(minX, minY, minZ, maxX, maxY, maxZ, attachment);
 	}
 
 

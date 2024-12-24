@@ -61,6 +61,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
+					reader.skipNull();
 					return null;
 				}
 				case BEGIN_ARRAY -> {

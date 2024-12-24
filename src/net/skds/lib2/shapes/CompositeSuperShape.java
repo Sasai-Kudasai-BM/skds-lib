@@ -152,10 +152,8 @@ public sealed class CompositeSuperShape implements CompositeShape {
 	}
 
 	@Override
-	public Object setAttachment(Object attachment) {
-		Object old = this.attachment;
-		this.attachment = attachment;
-		return old;
+	public CompositeSuperShape withAttachment(Object attachment) {
+		return new CompositeSuperShape(shapes, center, attachment);
 	}
 
 	@AllArgsConstructor

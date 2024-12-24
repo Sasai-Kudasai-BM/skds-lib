@@ -37,6 +37,6 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Object getAttachment();
 
-	Object setAttachment(Object attachment);
+	Shape withAttachment(Object attachment);
 
 }

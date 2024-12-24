@@ -6,6 +6,7 @@ import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,7 +35,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 		if (!isEmpty()) {
-			forEach((k, v) -> sb.append('"').append(k.replace("\"", "\\\"")).append("\":").append(v).append(","));
+			forEach((k, v) -> sb.append(StringUtils.quote(k)).append(":").append(v).append(","));
 			sb.setLength(sb.length() - 1);
 		}
 		sb.append('}');
@@ -59,6 +60,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
+					reader.skipNull();
 					return null;
 				}
 				case BEGIN_OBJECT -> {

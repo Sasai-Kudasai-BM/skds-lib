@@ -79,7 +79,8 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
-					return null;
+					reader.skipNull();
+					return JsonElement.NULL;
 				}
 				case BEGIN_OBJECT -> {
 					JsonCodec<JsonObject> codec = registry.getCodec(JsonObject.class);

@@ -29,10 +29,8 @@ public final class Sphere implements ConvexShape {
 	}
 
 	@Override
-	public Object setAttachment(Object attachment) {
-		Object old = this.attachment;
-		this.attachment = attachment;
-		return old;
+	public Sphere withAttachment(Object attachment) {
+		return new Sphere(center, radius, attachment);
 	}
 
 	@Override

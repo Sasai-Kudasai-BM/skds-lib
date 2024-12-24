@@ -5,19 +5,30 @@ import net.skds.lib2.io.json.codec.JsonCodecFactory;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.elements.*;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.function.Function;
 
 public class JsonTest {
 
-	public static void main(String[] args) {
+
+	public static void main(String[] args) throws IOException, URISyntaxException {
 		String test = """
 				  {
-				   "ab\\"oba"  :  777.7 ,
-				   "ses"  :  0x7 ,
-				   "say"  :  "gex" ,
-				   "amogus"  :  [1488, "aaa", -.3,] ,
+				  	"a": "ass",
+				  	"b": ["gf", 23, null, "ff"],
+				  	"c": null,
+				  	"d": 7,
+				  	"e": true,
+				  	"f": false,
+				  	"g": {
+				  		"ab\\"oba": 777.7,
+				  		"ses": 0x7,
+				  		"say": "gex",
+				  		"amogus": [1488, "aaa", -.3,],
+				  	}
 				  }
 				""";
 
@@ -39,8 +50,28 @@ public class JsonTest {
 		};
 
 		JsonCodecRegistry registry = new JsonCodecRegistry(factory);
-
 		JsonObject jo = registry.getCodec(JsonObject.class).parse(test);
 		System.out.println(jo);
+
+		//kek("");
+		//kek2("", new ArrayList<>());
+
+
+		//CodeSource src = JsonTest.class.getProtectionDomain().getCodeSource();
+		//if (src != null) {
+		//	URL jar = src.getLocation();
+		//	ZipInputStream zip = new ZipInputStream(jar.openStream());
+		//	while (true) {
+		//		ZipEntry e = zip.getNextEntry();
+		//		if (e == null) {
+		//			System.out.println("end");
+		//			break;
+		//		}
+		//		String name = e.getName();
+		//		System.out.println(name);
+		//	}
+		//}
+
+		//kek("net/skds/lib2/io/json/");
 	}
 }
