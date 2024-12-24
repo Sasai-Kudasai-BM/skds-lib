@@ -1,19 +1,21 @@
 package net.w3e.lib.utils;
 
-import net.sdteam.libmerge.Lib2Merge;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-@Lib2Merge(complete = true)
+import net.sdteam.libmerge.Lib1Merge;
+
+@Lib1Merge
 public class FileUtils {
+
+	public static final File ABSOLUTE_ROOT = new File("").getAbsoluteFile();
 
 	public static void save(File file, byte[] data) {
 		try {
 			if (!file.exists()) {
-				new File(file.getAbsolutePath()).getParentFile().mkdirs(); // TODO replace with file.getAbsoluteFile() ???
+				createParentDirs(file);
 				Files.createFile(file.toPath());
 			}
 			Files.write(file.toPath(), data);
@@ -24,10 +26,20 @@ public class FileUtils {
 
 	public static void copy(File in, File out) {
 		try {
-			out.getAbsoluteFile().getParentFile().mkdirs();
+			createParentDirs(out);
 			Files.copy(in.toPath(), out.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static File getParentFile(File file) {
+		return file.getAbsoluteFile().getParentFile();
+	}
+
+	public static File createParentDirs(File file) {
+		file = getParentFile(file);
+		file.mkdirs();
+		return file;
 	}
 }

@@ -36,7 +36,6 @@ public enum Direction implements Vec3 {
 	public static final Direction ZP = SOUTH;
 	public static final Direction ZN = NORTH;
 
-
 	Direction(int id, int idOpposite, int idHorizontal, String name, AxisDirection direction, Axis axis,
 			  Vec3I vector) {
 		this.id = id;
@@ -55,6 +54,9 @@ public enum Direction implements Vec3 {
 	public int getHorizontal() {
 		return this.idHorizontal;
 	}
+	public boolean isHorizontal() {
+		return this.idHorizontal != -1;
+	}
 
 	public AxisDirection getDirection() {
 		return this.direction;
@@ -62,11 +64,6 @@ public enum Direction implements Vec3 {
 
 	public Direction getOpposite() {
 		return VALUES[this.idOpposite];
-	}
-
-	@Override
-	public Direction inverse() {
-		return getOpposite();
 	}
 
 	public Direction rotateClockwise(Axis axis) {
@@ -225,6 +222,21 @@ public enum Direction implements Vec3 {
 		return this.vector.ceilZ();
 	}
 
+	@Override
+	public int roundX() {
+		return this.vector.roundX();
+	}
+
+	@Override
+	public int roundY() {
+		return this.vector.roundY();
+	}
+
+	@Override
+	public int roundZ() {
+		return this.vector.roundZ();
+	}
+
 	public String getName() {
 		return this.name;
 	}
@@ -275,11 +287,9 @@ public enum Direction implements Vec3 {
 		return getFacing((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()));
 	}
 
-
 	public static Direction getFacingFrom(Vec3 from, Vec3 to, Iterable<Direction> iterable) {
 		return getFacingFrom((float) (to.x() - from.x()), (float) (to.y() - from.y()), (float) (to.z() - from.z()), iterable);
 	}
-
 
 	public static Direction getFacingFrom(float x, float y, float z, Iterable<Direction> iterable) {
 		Direction direction = null;
@@ -294,12 +304,24 @@ public enum Direction implements Vec3 {
 		return direction;
 	}
 
-
 	public static Direction getFacing(float x, float y, float z) {
 		Direction direction = NORTH;
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : VALUES) {
 			float g = x * direction2.xf() + y * direction2.yf() + z * direction2.zf();
+			if (!(g > f))
+				continue;
+			f = g;
+			direction = direction2;
+		}
+		return direction;
+	}
+	
+	public static Direction getFacing(int x, int y, int z) {
+		Direction direction = NORTH;
+		int f = Integer.MIN_VALUE;
+		for (Direction direction2 : VALUES) {
+			int g = x * direction2.xi() + y * direction2.yi() + z * direction2.zi();
 			if (!(g > f))
 				continue;
 			f = g;
@@ -550,4 +572,18 @@ public enum Direction implements Vec3 {
 		}
 	}
 
+	@Override
+	public Vec3I getAsIntVec() {
+		return this.vector;
+	}
+
+	@Override
+	public Vec3F getAsFloatVec() {
+		return this.vector.getAsFloatVec();
+	}
+
+	@Override
+	public Vec3D getAsDoubleVec() {
+		return this.vector.getAsDoubleVec();
+	}
 }

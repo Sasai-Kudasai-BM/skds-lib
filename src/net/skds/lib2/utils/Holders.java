@@ -99,8 +99,20 @@ public final class Holders {
 		@Setter
 		protected int value;
 
+		public int increment() {
+			return increment(1);
+		}
+		
 		public int increment(int inc) {
 			return value += inc;
+		}
+
+		public int decrement() {
+			return decrement(1);
+		}
+
+		public int decrement(int inc) {
+			return value -= inc;
 		}
 
 		@Override
@@ -117,8 +129,20 @@ public final class Holders {
 		@Setter
 		protected long value;
 
+		public long increment() {
+			return increment(1);
+		}
+		
 		public long increment(long inc) {
 			return value += inc;
+		}
+
+		public long decrement() {
+			return decrement(1);
+		}
+
+		public long decrement(long inc) {
+			return value -= inc;
 		}
 
 		@Override
@@ -135,8 +159,20 @@ public final class Holders {
 		@Setter
 		protected float value;
 
+		public float increment() {
+			return increment(1);
+		}
+		
 		public float increment(float inc) {
 			return value += inc;
+		}
+
+		public float decrement() {
+			return decrement(1);
+		}
+
+		public float decrement(float inc) {
+			return value -= inc;
 		}
 
 		@Override
@@ -153,8 +189,20 @@ public final class Holders {
 		@Setter
 		protected double value;
 
-		public double increment(double inc) {
+		public double increment() {
+			return increment(1);
+		}
+		
+		public double increment(float inc) {
 			return value += inc;
+		}
+
+		public double decrement() {
+			return decrement(1);
+		}
+
+		public double decrement(float inc) {
+			return value -= inc;
 		}
 
 		@Override
@@ -185,8 +233,20 @@ public final class Holders {
 		@Setter
 		protected byte value;
 
+		public byte increment() {
+			return increment((byte)1);
+		}
+		
 		public byte increment(byte inc) {
 			return value += inc;
+		}
+
+		public byte decrement() {
+			return decrement((byte)1);
+		}
+
+		public byte decrement(byte inc) {
+			return value -= inc;
 		}
 
 		@Override
@@ -203,10 +263,21 @@ public final class Holders {
 		@Setter
 		protected char value;
 
-		public char increment(char inc) {
+		public char increment() {
+			return increment(1);
+		}
+		
+		public char increment(int inc) {
 			return value += inc;
 		}
 
+		public char decrement() {
+			return decrement(1);
+		}
+
+		public char decrement(int inc) {
+			return value -= inc;
+		}
 		@Override
 		public String toString() {
 			return "Holder(" + value + ")";
@@ -221,8 +292,20 @@ public final class Holders {
 		@Setter
 		protected short value;
 
+		public short increment() {
+			return increment((short)1);
+		}
+		
 		public short increment(short inc) {
 			return value += inc;
+		}
+
+		public short decrement() {
+			return decrement((short)1);
+		}
+
+		public short decrement(short inc) {
+			return value -= inc;
 		}
 
 		@Override

@@ -2,6 +2,7 @@ package net.skds.lib2.mat;
 
 import java.util.Random;
 
+// TODO проверить гетеры
 @SuppressWarnings("unused")
 public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction {
 
@@ -25,66 +26,64 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 
 	double z();
 
-	static Vec3 of(double x, double y, double z) {
-		return new Vec3D(x, y, z);
+	default float xf() {
+		return (float) x();
 	}
 
-	static Vec3 of(float x, float y, float z) {
-		return new Vec3F(x, y, z);
+	default float yf() {
+		return (float) y();
 	}
 
-	static boolean equals(Vec3 v1, Vec3 v2) {
-		if (v1 == v2) {
-			return true;
-		} else if ((v1 == null) != (v2 == null)) {
-			return false;
-		} else {
-			if (Double.compare(v1.x(), v2.x()) != 0) {
-				return false;
-			} else if (Double.compare(v1.y(), v2.y()) != 0) {
-				return false;
-			} else {
-				return Double.compare(v1.z(), v2.z()) == 0;
-			}
-		}
+	default float zf() {
+		return (float) z();
 	}
 
-	static Vec3D randomNormal(Random r) {
-		return normalized(r.nextFloat() - .5, r.nextFloat() - .5, r.nextFloat() - .5);
+	default int xi() {
+		return (int) x();
 	}
 
-	static Vec3D normalized(double x, double y, double z) {
-		double x2 = x * x;
-		double y2 = y * y;
-		double z2 = z * z;
-		double k = FastMath.invSqrt(x2 + y2 + z2);
-		return new Vec3D(x * k, y * k, z * k);
+	default int yi() {
+		return (int) y();
 	}
 
-	static Vec3D randomizeGaussian(Random r, double fraction) {
-		double x = r.nextGaussian() * fraction;
-		double y = r.nextGaussian() * fraction;
-		double z = r.nextGaussian() * fraction;
-		return new Vec3D(x, y, z);
+	default int zi() {
+		return (int) z();
 	}
 
-	static Vec3F randomNormalF(Random r) {
-		return normalizedF(r.nextFloat() - .5f, r.nextFloat() - .5f, r.nextFloat() - .5f);
+	default int floorX() {
+		return FastMath.floor(x());
 	}
 
-	static Vec3F normalizedF(float x, float y, float z) {
-		float x2 = x * x;
-		float y2 = y * y;
-		float z2 = z * z;
-		float k = FastMath.invSqrt(x2 + y2 + z2);
-		return new Vec3F(x * k, y * k, z * k);
+	default int floorY() {
+		return FastMath.floor(y());
 	}
 
-	static Vec3F randomizeGaussianF(Random r, float fraction) {
-		float x = (float) (r.nextGaussian() * fraction);
-		float y = (float) (r.nextGaussian() * fraction);
-		float z = (float) (r.nextGaussian() * fraction);
-		return new Vec3F(x, y, z);
+	default int floorZ() {
+		return FastMath.floor(z());
+	}
+
+	default int ceilX() {
+		return FastMath.ceil(x());
+	}
+
+	default int ceilY() {
+		return FastMath.ceil(y());
+	}
+
+	default int ceilZ() {
+		return FastMath.ceil(z());
+	}
+
+	default int roundX() {
+		return FastMath.round(x());
+	}
+
+	default int roundY() {
+		return FastMath.round(y());
+	}
+
+	default int roundZ() {
+		return FastMath.round(z());
 	}
 
 	@Override
@@ -93,6 +92,16 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 			case 0 -> x();
 			case 1 -> y();
 			case 2 -> z();
+			default -> throw new ArrayIndexOutOfBoundsException(i);
+		};
+	}
+
+	@Override
+	default int getI(int i) {
+		return switch (i) {
+			case 0 -> xi();
+			case 1 -> yi();
+			case 2 -> zi();
 			default -> throw new ArrayIndexOutOfBoundsException(i);
 		};
 	}
@@ -127,42 +136,113 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 			default -> throw new ArrayIndexOutOfBoundsException(i);
 		};
 	}
-
-	default float xf() {
-		return (float) x();
+	
+	@Override
+	default int round(int i) {
+		return switch (i) {
+			case 0 -> roundX();
+			case 1 -> roundY();
+			case 2 -> roundZ();
+			default -> throw new ArrayIndexOutOfBoundsException(i);
+		};
 	}
 
-	default float yf() {
-		return (float) y();
+	static Vec3 of(double x, double y, double z) {
+		return new Vec3D(x, y, z);
 	}
 
-	default float zf() {
-		return (float) z();
+	static Vec3 of(float x, float y, float z) {
+		return new Vec3F(x, y, z);
 	}
 
-	default int floorX() {
-		return FastMath.floor(x());
+	static Vec3 of(int x, int y, int z) {
+		return new Vec3I(x, y, z);
 	}
 
-	default int floorY() {
-		return FastMath.floor(y());
+	static Vec3D randomNormal(Random r) {
+		return normalized(r.nextFloat() - .5, r.nextFloat() - .5, r.nextFloat() - .5);
 	}
 
-	default int floorZ() {
-		return FastMath.floor(z());
+	static Vec3D normalized(double x, double y, double z) {
+		double x2 = x * x;
+		double y2 = y * y;
+		double z2 = z * z;
+		double k = FastMath.invSqrt(x2 + y2 + z2);
+		return new Vec3D(x * k, y * k, z * k);
 	}
 
-
-	default int ceilX() {
-		return FastMath.ceil(x());
+	static Direction normalizedI(int x, int y, int z) {
+		return Direction.getFacing(x, y, z);
 	}
 
-	default int ceilY() {
-		return FastMath.ceil(y());
+	static Vec3F randomNormalF(Random r) {
+		return normalizedF(r.nextFloat() - .5f, r.nextFloat() - .5f, r.nextFloat() - .5f);
 	}
 
-	default int ceilZ() {
-		return FastMath.ceil(z());
+	static Vec3F normalizedF(float x, float y, float z) {
+		float x2 = x * x;
+		float y2 = y * y;
+		float z2 = z * z;
+		float k = FastMath.invSqrt(x2 + y2 + z2);
+		return new Vec3F(x * k, y * k, z * k);
+	}
+
+	default Vec3D normalize() {
+		double x = x();
+		double y = y();
+		double z = z();
+		double d0 = x * x + y * y + z * z;
+		d0 = FastMath.invSqrt(d0);
+		return new Vec3D(x * d0, y * d0, z * d0);
+	}
+	
+	default Direction normalizeI() {
+		return Direction.getFacing(xi(), yi(), zi());
+	}
+
+	default Vec3F normalizeF() {
+		float x = xf();
+		float y = yf();
+		float z = zf();
+		float d0 = x * x + y * y + z * z;
+		d0 = FastMath.invSqrt(d0);
+		return new Vec3F(x * d0, y * d0, z * d0);
+	}
+
+	default Vec3D normalizeScale(double scale) {
+		double x = x();
+		double y = y();
+		double z = z();
+		double d0 = x * x + y * y + z * z;
+		d0 = FastMath.invSqrt(d0) * scale;
+		return new Vec3D(x * d0, y * d0, z * d0);
+	}
+
+	default Vec3I normalizeScaleI(int scale) {
+		return Direction.getFacing(xi(), yi(), zi()).scaleI(scale);
+	}
+
+	default Vec3F normalizeScaleF(float scale) {
+		float x = xf();
+		float y = yf();
+		float z = zf();
+		float d0 = x * x + y * y + z * z;
+		d0 = FastMath.invSqrt(d0) * scale;
+		return new Vec3F(x * d0, y * d0, z * d0);
+	}
+
+	static Vec3D randomizeGaussian(Random r, double fraction) {
+		double x = r.nextGaussian() * fraction;
+		double y = r.nextGaussian() * fraction;
+		double z = r.nextGaussian() * fraction;
+		return new Vec3D(x, y, z);
+	}
+
+	static Vec3F randomizeGaussianF(Random r, float fraction) {
+		float x = (float) (r.nextGaussian() * fraction);
+		float y = (float) (r.nextGaussian() * fraction);
+		float z = (float) (r.nextGaussian() * fraction);
+		return new Vec3F(x, y, z);
 	}
 
 	default double length() {
@@ -178,6 +258,22 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 	}
 
 	static double lengthSquared(double x, double y, double z) {
+		return x * x + y * y + z * z;
+	}
+
+	default int lengthI() {
+		return (int)Math.sqrt(this.xi() * this.xi() + this.yi() * this.yi() + this.zi() * this.zi());
+	}
+
+	default int lengthSquaredI() {
+		return this.xi() * this.xi() + this.yi() * this.yi() + this.zi() * this.zi();
+	}
+
+	static int lengthI(int x, int y, int z) {
+		return (int)Math.sqrt(x * x + y * y + z * z);
+	}
+
+	static int lengthSquaredI(int x, int y, int z) {
 		return x * x + y * y + z * z;
 	}
 
@@ -197,8 +293,12 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		return this.xf() * this.xf() + this.yf() * this.yf() + this.zf() * this.zf();
 	}
 
-	default Vec3 inverse() {
+	default Vec3D inverse() {
 		return new Vec3D(-x(), -y(), -z());
+	}
+
+	default Vec3I inverseI() {
+		return new Vec3I(-xi(), -yi(), -zi());
 	}
 
 	default Vec3F inverseF() {
@@ -230,6 +330,34 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		dx -= x();
 		dy -= y();
 		dz -= z();
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	default int distanceToI(Vec3 vec) {
+		int dx = vec.xi() - xi();
+		int dy = vec.yi() - yi();
+		int dz = vec.zi() - zi();
+		return (int)Math.sqrt(dx * dx + dy * dy + dz * dz);
+	}
+
+	default int distanceToI(int x2, int y2, int z2) {
+		x2 -= xi();
+		y2 -= yi();
+		z2 -= zi();
+		return (int)Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2);
+	}
+
+	default int squareDistanceToI(Vec3 vec) {
+		int dx = vec.xi() - xi();
+		int dy = vec.yi() - yi();
+		int dz = vec.zi() - zi();
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	default int squareDistanceToI(int dx, int dy, int dz) {
+		dx -= xi();
+		dy -= yi();
+		dz -= zi();
 		return dx * dx + dy * dy + dz * dz;
 	}
 
@@ -270,6 +398,18 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 	}
 
 	static double dot(double x1, double y1, double z1, double x2, double y2, double z2) {
+		return x1 * x2 + y1 * y2 + z1 * z2;
+	}
+
+	default int dotI(Vec3 vec) {
+		return this.xi() * vec.xi() + this.yi() * vec.yi() + this.zi() * vec.zi();
+	}
+
+	default int dotI(int x2, int y2, int z2) {
+		return this.xi() * x2 + this.yi() * y2 + this.zi() * z2;
+	}
+
+	static int dotI(int x1, int y1, int z1, int x2, int y2, int z2) {
 		return x1 * x2 + y1 * y2 + z1 * z2;
 	}
 
@@ -337,160 +477,236 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		double l = vec.length();
 		double ret = this.x() * vec.x() + this.y() * vec.y() + this.z() * vec.z();
 		return l == 0 ? ret : ret / l;
-
 	}
 
 	default double projOn(double x2, double y2, double z2) {
 		double l = length(x2, y2, z2);
 		double ret = this.x() * x2 + this.y() * y2 + this.z() * z2;
 		return l == 0 ? ret : ret / l;
+	}
 
+	default int projOnI(Vec3 vec) {
+		int l = vec.lengthI();
+		int ret = this.xi() * vec.xi() + this.yi() * vec.yi() + this.zi() * vec.zi();
+		return l == 0 ? ret : ret / l;
+	}
+
+	default int projOn(int x2, int y2, int z2) {
+		int l = lengthI(x2, y2, z2);
+		int ret = this.xi() * x2 + this.yi() * y2 + this.zi() * z2;
+		return l == 0 ? ret : ret / l;
 	}
 
 	default float projOnF(Vec3 vec) {
 		float l = vec.lengthF();
 		float ret = this.xf() * vec.xf() + this.yf() * vec.yf() + this.zf() * vec.zf();
 		return l == 0 ? ret : ret / l;
-
 	}
 
 	default float projOnF(float x2, float y2, float z2) {
 		float l = lengthF(x2, y2, z2);
 		float ret = this.xf() * x2 + this.yf() * y2 + this.zf() * z2;
 		return l == 0 ? ret : ret / l;
-
 	}
 
 	default Vec3D add(Vec3 vec) {
 		return new Vec3D(
-				this.y() + vec.z(),
-				this.z() + vec.x(),
-				this.x() + vec.y()
+				this.x() + vec.x(),
+				this.y() + vec.y(),
+				this.z() + vec.z()
 		);
 	}
 
 	default Vec3D add(double x2, double y2, double z2) {
 		return new Vec3D(
-				this.y() + z2,
-				this.z() + x2,
-				this.x() + y2
+				this.x() + x2,
+				this.y() + y2,
+				this.z() + z2
+		);
+	}
+
+	default Vec3I addI(Vec3 vec) {
+		return new Vec3I(
+				this.xi() + vec.xi(),
+				this.yi() + vec.yi(),
+				this.zi() + vec.zi()
+		);
+	}
+
+	default Vec3I add(int x2, int y2, int z2) {
+		return new Vec3I(
+				this.xi() + x2,
+				this.yi() + y2,
+				this.zi() + z2
 		);
 	}
 
 	default Vec3F addF(Vec3 vec) {
 		return new Vec3F(
-				this.yf() + vec.zf(),
-				this.zf() + vec.xf(),
-				this.xf() + vec.yf()
+				this.xf() + vec.xf(),
+				this.yf() + vec.yf(),
+				this.zf() + vec.zf()
 		);
 	}
 
 	default Vec3F addF(float x2, float y2, float z2) {
 		return new Vec3F(
-				this.yf() + z2,
-				this.zf() + x2,
-				this.xf() + y2
+				this.xf() + x2,
+				this.yf() + y2,
+				this.zf() + z2
 		);
 	}
 
 	default Vec3D scale(Vec3 scale) {
 		return new Vec3D(
-				this.y() * scale.z(),
-				this.z() * scale.x(),
-				this.x() * scale.y()
+				this.x() * scale.x(),
+				this.y() * scale.y(),
+				this.z() * scale.z()
 		);
 	}
 
 	default Vec3D scale(double sx, double sy, double sz) {
 		return new Vec3D(
-				this.y() * sz,
-				this.z() * sx,
-				this.x() * sy
+				this.x() * sx,
+				this.y() * sy,
+				this.z() * sz
 		);
 	}
 
 	default Vec3D scale(double scale) {
 		return new Vec3D(
+				this.x() * scale,
 				this.y() * scale,
-				this.z() * scale,
-				this.x() * scale
+				this.z() * scale
+		);
+	}
+
+	default Vec3I scaleI(Vec3 scale) {
+		return new Vec3I(
+				this.xi() * scale.xi(),
+				this.yi() * scale.yi(),
+				this.zi() * scale.zi()
+		);
+	}
+
+	default Vec3I scaleI(int sx, int sy, int sz) {
+		return new Vec3I(
+				this.xi() * sx,
+				this.yi() * sy,
+				this.zi() * sz
+		);
+	}
+
+	default Vec3I scaleI(int scale) {
+		return new Vec3I(
+				this.xi() * scale,
+				this.yi() * scale,
+				this.zi() * scale
 		);
 	}
 
 	default Vec3F scaleF(Vec3 scale) {
 		return new Vec3F(
-				this.yf() * scale.zf(),
-				this.zf() * scale.xf(),
-				this.xf() * scale.yf()
+				this.xf() * scale.xf(),
+				this.yf() * scale.yf(),
+				this.zf() * scale.zf()
 		);
 	}
 
 	default Vec3F scaleF(float sx, float sy, float sz) {
 		return new Vec3F(
-				this.yf() * sz,
-				this.zf() * sx,
-				this.xf() * sy
+				this.xf() * sx,
+				this.yf() * sy,
+				this.zf() * sz
 		);
 	}
 
 	default Vec3F scaleF(float scale) {
 		return new Vec3F(
+				this.xf() * scale,
 				this.yf() * scale,
-				this.zf() * scale,
-				this.xf() * scale
+				this.zf() * scale
 		);
 	}
 
 	default Vec3D div(Vec3 div) {
 		return new Vec3D(
-				this.y() / div.z(),
-				this.z() / div.x(),
-				this.x() / div.y()
+				this.x() / div.x(),
+				this.y() / div.y(),
+				this.z() / div.z()
 		);
 	}
 
 	default Vec3D div(double sx, double sy, double sz) {
 		return new Vec3D(
-				this.y() / sz,
-				this.z() / sx,
-				this.x() / sy
+				this.x() / sx,
+				this.y() / sy,
+				this.z() / sz
 		);
 	}
 
 	default Vec3D div(double div) {
 		return new Vec3D(
+				this.x() / div,
 				this.y() / div,
-				this.z() / div,
-				this.x() / div
+				this.z() / div
+		);
+	}
+
+	default Vec3I divI(Vec3 div) {
+		return new Vec3I(
+				this.xi() / div.xi(),
+				this.yi() / div.yi(),
+				this.zi() / div.zi()
+		);
+	}
+
+	default Vec3I divI(int sx, int sy, int sz) {
+		return new Vec3I(
+				this.xi() / sx,
+				this.yi() / sy,
+				this.zi() / sz
+		);
+	}
+
+	default Vec3I divI(int div) {
+		return new Vec3I(
+				this.xi() / div,
+				this.yi() / div,
+				this.zi() / div
 		);
 	}
 
 	default Vec3F divF(Vec3 div) {
 		return new Vec3F(
-				this.yf() / div.zf(),
-				this.zf() / div.xf(),
-				this.xf() / div.yf()
+				this.xf() / div.xf(),
+				this.yf() / div.yf(),
+				this.zf() / div.zf()
 		);
 	}
 
 	default Vec3F divF(float sx, float sy, float sz) {
 		return new Vec3F(
-				this.yf() / sz,
-				this.zf() / sx,
-				this.xf() / sy
+				this.xf() / sx,
+				this.yf() / sy,
+				this.zf() / sz
 		);
 	}
 
 	default Vec3F divF(float div) {
 		return new Vec3F(
+				this.xf() / div,
 				this.yf() / div,
-				this.zf() / div,
-				this.xf() / div
+				this.zf() / div
 		);
 	}
 
 	static Vec3D add(double x1, double y1, double z1, double x2, double y2, double z2) {
 		return new Vec3D(x1 + x2, y1 + y2, z1 + z2);
+	}
+
+	static Vec3I addI(int x1, int y1, int z1, int x2, int y2, int z2) {
+		return new Vec3I(x1 + x2, y1 + y2, z1 + z2);
 	}
 
 	static Vec3F addF(float x1, float y1, float z1, float x2, float y2, float z2) {
@@ -499,82 +715,121 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 
 	default Vec3D addScale(Vec3 vec, double scale) {
 		return new Vec3D(
-				this.y() + vec.z() * scale,
-				this.z() + vec.x() * scale,
-				this.x() + vec.y() * scale
+				this.x() + vec.x() * scale,
+				this.y() + vec.y() * scale,
+				this.z() + vec.z() * scale
 		);
 	}
 
 	default Vec3D addScale(double x2, double y2, double z2, double scale) {
 		return new Vec3D(
-				this.y() + z2 * scale,
-				this.z() + x2 * scale,
-				this.x() + y2 * scale
+				this.x() + x2 * scale,
+				this.y() + y2 * scale,
+				this.z() + z2 * scale
+		);
+	}
+
+	default Vec3I addScaleI(Vec3 vec, int scale) {
+		return new Vec3I(
+				this.xi() + vec.xi() * scale,
+				this.yi() + vec.yi() * scale,
+				this.zi() + vec.zi() * scale
+		);
+	}
+
+	default Vec3I addScaleI(int x2, int y2, int z2, int scale) {
+		return new Vec3I(
+				this.xi() + x2 * scale,
+				this.yi() + y2 * scale,
+				this.zi() + z2 * scale
 		);
 	}
 
 	default Vec3F addScaleF(Vec3 vec, float scale) {
 		return new Vec3F(
-				this.yf() + vec.zf() * scale,
-				this.zf() + vec.xf() * scale,
-				this.xf() + vec.yf() * scale
+				this.xf() + vec.xf() * scale,
+				this.yf() + vec.yf() * scale,
+				this.zf() + vec.zf() * scale
 		);
 	}
 
 	default Vec3F addScaleF(float x2, float y2, float z2, float scale) {
 		return new Vec3F(
-				this.yf() + z2 * scale,
-				this.zf() + x2 * scale,
-				this.xf() + y2 * scale
+				this.xf() + x2 * scale,
+				this.yf() + y2 * scale,
+				this.zf() + z2 * scale
 		);
 	}
 
-
 	default Vec3D sub(Vec3 vec) {
 		return new Vec3D(
-				this.y() - vec.z(),
-				this.z() - vec.x(),
-				this.x() - vec.y()
+				this.x() - vec.x(),
+				this.y() - vec.y(),
+				this.z() - vec.z()
 		);
 	}
 
 	default Vec3D invSub(Vec3 vec) {
 		return new Vec3D(
-				-this.y() - vec.z(),
-				-this.z() - vec.x(),
-				-this.x() - vec.y()
+				-this.x() - vec.x(),
+				-this.y() - vec.y(),
+				-this.z() - vec.z()
 		);
 	}
 
 	default Vec3D sub(double x2, double y2, double z2) {
 		return new Vec3D(
-				this.y() - z2,
-				this.z() - x2,
-				this.x() - y2
+				this.x() - x2,
+				this.y() - y2,
+				this.z() - z2
+		);
+	}
+
+	default Vec3I subI(Vec3 vec) {
+		return new Vec3I(
+				this.xi() - vec.xi(),
+				this.yi() - vec.yi(),
+				this.zi() - vec.zi()
+		);
+	}
+
+	default Vec3I invSubI(Vec3 vec) {
+		return new Vec3I(
+				-this.xi() - vec.xi(),
+				-this.yi() - vec.yi(),
+				-this.zi() - vec.zi()
+		);
+	}
+
+	default Vec3I subI(int x2, int y2, int z2) {
+		return new Vec3I(
+				this.xi() - x2,
+				this.yi() - y2,
+				this.zi() - z2
 		);
 	}
 
 	default Vec3F subF(Vec3 vec) {
 		return new Vec3F(
-				this.yf() - vec.zf(),
-				this.zf() - vec.xf(),
-				this.xf() - vec.yf()
+				this.xf() - vec.xf(),
+				this.yf() - vec.yf(),
+				this.zf() - vec.zf()
 		);
 	}
 
 	default Vec3F invSubF(Vec3 vec) {
 		return new Vec3F(
-				-this.yf() - vec.zf(),
-				-this.zf() - vec.xf(),
-				-this.xf() - vec.yf()
+				-this.xf() - vec.xf(),
+				-this.yf() - vec.yf(),
+				-this.zf() - vec.zf()
 		);
 	}
 
 	default Vec3F subF(float x2, float y2, float z2) {
 		return new Vec3F(
-				this.yf() - z2,
-				this.zf() - x2,
-				this.xf() - y2
+				this.xf() - x2,
+				this.yf() - y2,
+				this.zf() - z2
 		);
 	}
 
@@ -582,10 +837,15 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		return new Vec3D(x1 - x2, y1 - y2, z1 - z2);
 	}
 
+	static Vec3I subI(int x1, int y1, int z1, int x2, int y2, int z2) {
+		return new Vec3I(x1 - x2, y1 - y2, z1 - z2);
+	}
+
 	static Vec3F subF(float x1, float y1, float z1, float x2, float y2, float z2) {
 		return new Vec3F(x1 - x2, y1 - y2, z1 - z2);
 	}
 
+	// TODO для Vec2
 	default Vec3D cross(Vec3 vec) {
 		return new Vec3D(
 				this.y() * vec.z() - this.z() * vec.y(),
@@ -599,6 +859,22 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 				this.y() * z2 - this.z() * y2,
 				this.z() * x2 - this.x() * z2,
 				this.x() * y2 - this.y() * x2
+		);
+	}
+
+	default Vec3I crossI(Vec3 vec) {
+		return new Vec3I(
+				this.yi() * vec.zi() - this.zi() * vec.yi(),
+				this.zi() * vec.xi() - this.xi() * vec.zi(),
+				this.xi() * vec.yi() - this.yi() * vec.xi()
+		);
+	}
+
+	default Vec3I crossI(int x2, int y2, int z2) {
+		return new Vec3I(
+				this.yi() * z2 - this.zi() * y2,
+				this.zi() * x2 - this.xi() * z2,
+				this.xi() * y2 - this.yi() * x2
 		);
 	}
 
@@ -618,14 +894,6 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		);
 	}
 
-	static Vec3F crossF(float x1, float y1, float z1, float x2, float y2, float z2) {
-		return new Vec3F(
-				y1 * z2 - z1 * y2,
-				z1 * x2 - x1 * z2,
-				x1 * y2 - y1 * x2
-		);
-	}
-
 	static Vec3D cross(double x1, double y1, double z1, double x2, double y2, double z2) {
 		return new Vec3D(
 				y1 * z2 - z1 * y2,
@@ -634,7 +902,23 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		);
 	}
 
-	default Vec3D lerp(Vec3D to, double part) {
+	static Vec3I crossI(int x1, int y1, int z1, int x2, int y2, int z2) {
+		return new Vec3I(
+				y1 * z2 - z1 * y2,
+				z1 * x2 - x1 * z2,
+				x1 * y2 - y1 * x2
+		);
+	}
+
+	static Vec3F crossF(float x1, float y1, float z1, float x2, float y2, float z2) {
+		return new Vec3F(
+				y1 * z2 - z1 * y2,
+				z1 * x2 - x1 * z2,
+				x1 * y2 - y1 * x2
+		);
+	}
+
+	default Vec3D lerp(Vec3 to, double part) {
 		final double x = this.x() + (to.x() - this.x()) * part;
 		final double y = this.y() + (to.y() - this.y()) * part;
 		final double z = this.z() + (to.z() - this.z()) * part;
@@ -648,7 +932,7 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		return new Vec3D(x, y, z);
 	}
 
-	default Vec3F lerpF(Vec3D to, float part) {
+	default Vec3F lerpF(Vec3 to, float part) {
 		final float x = this.xf() + (to.xf() - this.xf()) * part;
 		final float y = this.yf() + (to.yf() - this.yf()) * part;
 		final float z = this.zf() + (to.zf() - this.zf()) * part;
@@ -660,42 +944,6 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		final float y = this.yf() + (toY - this.yf()) * part;
 		final float z = this.zf() + (toZ - this.zf()) * part;
 		return new Vec3F(x, y, z);
-	}
-
-	default Vec3D normalize() {
-		double x = x();
-		double y = y();
-		double z = z();
-		double d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0);
-		return new Vec3D(x * d0, y * d0, z * d0);
-	}
-
-	default Vec3F normalizeF() {
-		float x = xf();
-		float y = yf();
-		float z = zf();
-		float d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0);
-		return new Vec3F(x * d0, y * d0, z * d0);
-	}
-
-	default Vec3D normalizeScale(double scale) {
-		double x = x();
-		double y = y();
-		double z = z();
-		double d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0) * scale;
-		return new Vec3D(x * d0, y * d0, z * d0);
-	}
-
-	default Vec3F normalizeScaleF(float scale) {
-		float x = xf();
-		float y = yf();
-		float z = zf();
-		float d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0) * scale;
-		return new Vec3F(x * d0, y * d0, z * d0);
 	}
 
 	default Vec3D transform(Matrix3 matrixIn) {
@@ -792,6 +1040,28 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		return new Vec3D(x, y, z);
 	}
 
+	default Vec3I clampI(int min, int max) {
+		int x = this.xi();
+		int y = this.yi();
+		int z = this.zi();
+		if (x > max) {
+			x = max;
+		} else if (x < min) {
+			x = min;
+		}
+		if (y > max) {
+			y = max;
+		} else if (y < min) {
+			y = min;
+		}
+		if (z > max) {
+			z = max;
+		} else if (z < min) {
+			z = min;
+		}
+		return new Vec3I(x, y, z);
+	}
+
 	default Vec3F clampF(float min, float max) {
 		float x = this.xf();
 		float y = this.yf();
@@ -823,7 +1093,6 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		);
 	}
 
-
 	default Vec3F flipF() {
 		return new Vec3F(
 				1f / this.xf(),
@@ -846,6 +1115,22 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 			z = -z;
 		}
 		return new Vec3D(x, y, z);
+	}
+
+	default Vec3I absI() {
+		int x = this.xi();
+		int y = this.yi();
+		int z = this.zi();
+		if (x < 0) {
+			x = -x;
+		}
+		if (y < 0) {
+			y = -y;
+		}
+		if (z < 0) {
+			z = -z;
+		}
+		return new Vec3I(x, y, z);
 	}
 
 	default Vec3F absF() {
@@ -880,6 +1165,22 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		return new Vec3D(x, y, z);
 	}
 
+	default Vec3I greaterI(int d) {
+		int x = this.xi();
+		int y = this.yi();
+		int z = this.zi();
+		if (x < d) {
+			x = d;
+		}
+		if (y < d) {
+			y = d;
+		}
+		if (z < d) {
+			z = d;
+		}
+		return new Vec3I(x, y, z);
+	}
+
 	default Vec3F greaterF(float d) {
 		float x = this.xf();
 		float y = this.yf();
@@ -910,6 +1211,22 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 			z = d;
 		}
 		return new Vec3D(x, y, z);
+	}
+	
+	default Vec3I lessI(int d) {
+		int x = this.xi();
+		int y = this.yi();
+		int z = this.zi();
+		if (x > d) {
+			x = d;
+		}
+		if (y > d) {
+			y = d;
+		}
+		if (z > d) {
+			z = d;
+		}
+		return new Vec3I(x, y, z);
 	}
 
 	default Vec3F lessF(float d) {
@@ -994,6 +1311,22 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		}
 
 		return new Vec3D(x / c, y / c, z / c);
+	}
+
+	static boolean equals(Vec3 v1, Vec3 v2) {
+		if (v1 == v2) {
+			return true;
+		} else if ((v1 == null) != (v2 == null)) {
+			return false;
+		} else {
+			if (Double.compare(v1.x(), v2.x()) != 0) {
+				return false;
+			} else if (Double.compare(v1.y(), v2.y()) != 0) {
+				return false;
+			} else {
+				return Double.compare(v1.z(), v2.z()) == 0;
+			}
+		}
 	}
 
 
@@ -1093,4 +1426,16 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		return new Vec2F(zf(), yf());
 	}
 
+	@Override
+	default Vec3I getAsIntVec() {
+		return new Vec3I(this.xi(), this.yi(), this.zi());
+	}
+	@Override
+	default Vec3F getAsFloatVec() {
+		return new Vec3F(this.xf(), this.yf(), this.zf());
+	}
+	@Override
+	default Vec3D getAsDoubleVec() {
+		return new Vec3D(this.x(), this.y(), this.z());
+	}
 }

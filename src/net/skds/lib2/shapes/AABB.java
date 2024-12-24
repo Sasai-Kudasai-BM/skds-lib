@@ -493,7 +493,7 @@ public final class AABB implements ConvexShape {
 
 		}
 		if (inverse) {
-			normal = normal.inverse();
+			normal = normal.getOpposite();
 		}
 		return new Collision(tMin, 0, normal, from.add(dir.normalizeScale(tMin)), normal, this, null);
 	}

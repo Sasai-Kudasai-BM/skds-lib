@@ -27,6 +27,20 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 		return zf;
 	}
 
+	@Override
+	public int xi() {
+		return (int) xf;
+	}
+
+	@Override
+	public int yi() {
+		return (int) yf;
+	}
+
+	@Override
+	public int zi() {
+		return (int) zf;
+	}
 
 	public Vec3F(Vec3 vec) {
 		this(vec.xf(), vec.yf(), vec.zf());
@@ -46,9 +60,16 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
+		// TODO
 		int i = Float.floatToIntBits(this.xf);
 		i = 31 * i + Float.floatToIntBits(this.yf);
 		return 31 * i + Float.floatToIntBits(this.zf);
+	}
+
+	@Override
+	public Vec3F getAsFloatVec() {
+		return this;
 	}
 }

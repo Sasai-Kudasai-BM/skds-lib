@@ -173,7 +173,7 @@ public class ConvexCollision {
 
 		assert minTerm != null : "nan or infinite values";
 		if (nInv) {
-			minTerm = minTerm.inverse();
+			minTerm = minTerm.getOpposite();
 		}
 		if (distance > 0) {
 			termLen = 0;

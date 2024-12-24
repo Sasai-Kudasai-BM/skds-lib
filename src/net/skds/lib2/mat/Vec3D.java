@@ -11,7 +11,7 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	public static final Vec3D ZP = new Vec3D(0.0D, 0.0D, 1.0D);
 	public static final Vec3D SINGLE = new Vec3D(1.0D, 1.0D, 1.0D);
 	public static final Vec3D ZERO = new Vec3D(0.0D, 0.0D, 0.0D);
-	
+
 	public Vec3D(Vec3 vec) {
 		this(vec.x(), vec.y(), vec.z());
 	}
@@ -19,7 +19,6 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	public Vec3D(double size) {
 		this(size, size, size);
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -31,9 +30,16 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
+		// TODO
 		int i = Float.floatToIntBits((float) this.x);
 		i = 31 * i + Float.floatToIntBits((float) this.y);
 		return 31 * i + Float.floatToIntBits((float) this.z);
+	}
+
+	@Override
+	public Vec3D getAsDoubleVec() {
+		return this;
 	}
 }

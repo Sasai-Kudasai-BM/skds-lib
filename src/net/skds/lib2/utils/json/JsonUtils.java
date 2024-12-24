@@ -5,8 +5,10 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import lombok.Getter;
+import net.sdteam.libmerge.Lib1Merge;
 import net.skds.lib2.mat.Vec3;
 import net.skds.lib2.mat.Vec3D;
+import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 
 public class JsonUtils {
 
@@ -90,20 +93,35 @@ public class JsonUtils {
 				}
 
 			});
-
 	@Getter
 	private static Gson GSON_COMPACT = builder.create();
 	@Getter
-	private static Gson GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
+	@Lib1Merge
+	private static Gson GSON_NULL_COMPACT;
+	@Getter
+	private static Gson GSON;
+
+	static {
+		updateGson();
+	}
+
 	private static final TypeAdapter<JsonElement> JE_ADAPTER = GSON.getAdapter(JsonElement.class);
 	private static final TypeAdapter<JsonArray> JA_ADAPTER = GSON.getAdapter(JsonArray.class);
 	private static final TypeAdapter<JsonObject> JO_ADAPTER = GSON.getAdapter(JsonObject.class);
 
+	@Lib1Merge
 	public static void addAdapter(Type type, TypeAdapter<?> adapter) {
 		GSON_COMPACT = builder.registerTypeAdapter(type, adapter).create();
-		GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
+		updateGson();
 	}
 
+	@Lib1Merge
+	public static void addAdapter(Type type, Object adapter) {
+		GSON_COMPACT = builder.registerTypeAdapter(type, adapter).create();
+		updateGson();
+	}
+
+	@Lib1Merge
 	public static <AT, CT extends AT, E extends Enum<E> & ConfigType<CT>> void addTypedAdapter(Class<AT> type, Class<E> typeClass) {
 		GSON_COMPACT = builder.registerTypeAdapter(type, new TypeAdapter<CT>() {
 
@@ -130,12 +148,12 @@ public class JsonUtils {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void write(JsonWriter out, CT value) throws IOException {
-				if (!(value instanceof TypedConfig<?> tc)) {
+				if (!(value instanceof TypedConfig tc)) {
 					throw new UnsupportedOperationException("Value is not a TypedConfig");
 				}
 				out.beginObject();
 				E type = (E) tc.getConfigType();
-				out.name(type.name());
+				out.name(type.keyName());
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				if (value instanceof JsonSerializeCall jps) {
 					jps.jsonPreSerialize();
@@ -145,7 +163,62 @@ public class JsonUtils {
 			}
 
 		}).create();
+		updateGson();
+	}
+
+	@Lib1Merge
+	public static <AT, CT extends AT> void addTypedAdapter(Class<AT> type, Map<String, ? extends ConfigType<?>> typeMap) {
+		GSON_COMPACT = builder.registerTypeAdapter(type, new TypeAdapter<CT>() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public CT read(JsonReader in) throws IOException {
+				JsonToken peek = in.peek();
+				if (peek == JsonToken.NULL) {
+					in.nextNull();
+					return null;
+				}
+				in.beginObject();
+				String typeName = in.nextName();
+				ConfigType<CT> type = (ConfigType<CT>) typeMap.get(typeName);
+				if (type == null) {
+					throw new NullPointerException("type is null \"" + typeName + "\" " + typeMap.keySet());
+				}
+
+				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
+				CT value = adapter.read(in);
+				if (value instanceof JsonDeserializeCall jpi) {
+					jpi.jsonDeserialized();
+				}
+				in.endObject();
+				return value;
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void write(JsonWriter out, CT value) throws IOException {
+				if (!(value instanceof TypedConfig tc)) {
+					throw new UnsupportedOperationException("Value is not a TypedConfig");
+				}
+				out.beginObject();
+				ConfigType<CT> type = (ConfigType<CT>)tc.getConfigType();
+				out.name(type.keyName());
+				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
+				if (value instanceof JsonSerializeCall jps) {
+					jps.jsonPreSerialize();
+				}
+				adapter.write(out, value);
+				out.endObject();
+			}
+
+		}).create();
+		updateGson();
+	}
+
+	@Lib1Merge
+	private static void updateGson() {
 		GSON = GSON_COMPACT.newBuilder().setPrettyPrinting().create();
+		GSON_NULL_COMPACT = GSON_COMPACT.newBuilder().serializeNulls().create();
 	}
 
 	public static <T> T readConfig(File file, Class<T> clazz) {
@@ -219,6 +292,14 @@ public class JsonUtils {
 		return GSON_COMPACT.toJson(cfg);
 	}
 
+	@Lib1Merge
+	public static String toJsonCompactNull(Object cfg) {
+		if (cfg instanceof JsonSerializeCall pre) {
+			pre.jsonPreSerialize();
+		}
+		return GSON_NULL_COMPACT.toJson(cfg);
+	}
+
 	public static String toJson(Object cfg) {
 		if (cfg instanceof JsonSerializeCall pre) {
 			pre.jsonPreSerialize();
@@ -233,10 +314,7 @@ public class JsonUtils {
 	public static boolean saveConfig(File file, Object cfg) {
 		try {
 			String text = toJson(cfg);
-			File parent = file.getParentFile();
-			if (parent != null) {
-				parent.mkdirs();
-			}
+			FileUtils.createParentDirs(file);
 			Files.writeString(file.toPath(), text, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 			return true;
 		} catch (Exception e) {
@@ -248,10 +326,7 @@ public class JsonUtils {
 	public static boolean saveConfigCompact(File file, Object cfg) {
 		try {
 			String text = toJsonCompact(cfg);
-			File parent = file.getParentFile();
-			if (parent != null) {
-				parent.mkdirs();
-			}
+			FileUtils.createParentDirs(file);
 			Files.writeString(file.toPath(), text, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 			return true;
 		} catch (Exception e) {

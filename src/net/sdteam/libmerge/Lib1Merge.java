@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE})
 public @interface Lib1Merge {
 	boolean complete() default false;
+	int version() default -1;
 }

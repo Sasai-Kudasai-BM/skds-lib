@@ -1,7 +1,5 @@
 package net.skds.lib2.utils;
 
-import net.sdteam.libmerge.Lib2Merge;
-
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -10,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
-@Lib2Merge
 public final class ThreadAnalyzer {
 
 	private long lastAnalyzeNanos;

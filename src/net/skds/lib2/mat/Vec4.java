@@ -16,6 +16,38 @@ public interface Vec4 extends IVec {
 
 	double w();
 
+	default float xf() {
+		return (float) x();
+	}
+
+	default float yf() {
+		return (float) y();
+	}
+
+	default float zf() {
+		return (float) z();
+	}
+
+	default float wf() {
+		return (float) w();
+	}
+
+	default int xi() {
+		return (int) x();
+	}
+
+	default int yi() {
+		return (int) y();
+	}
+
+	default int zi() {
+		return (int) z();
+	}
+
+	default int wi() {
+		return (int) z();
+	}
+
 	@Override
 	default double get(int i) {
 		return switch (i) {
@@ -23,6 +55,17 @@ public interface Vec4 extends IVec {
 			case 1 -> y();
 			case 2 -> z();
 			case 3 -> w();
+			default -> throw new ArrayIndexOutOfBoundsException(i);
+		};
+	}
+
+	@Override
+	default int getI(int i) {
+		return switch (i) {
+			case 0 -> xi();
+			case 1 -> yi();
+			case 2 -> zi();
+			case 3 -> wi();
 			default -> throw new ArrayIndexOutOfBoundsException(i);
 		};
 	}
@@ -61,20 +104,16 @@ public interface Vec4 extends IVec {
 		};
 	}
 
-	default float xf() {
-		return (float) x();
-	}
-
-	default float yf() {
-		return (float) y();
-	}
-
-	default float zf() {
-		return (float) z();
-	}
-
-	default float wf() {
-		return (float) w();
+	
+	@Override
+	default int round(int i) {
+		return switch (i) {
+			case 0 -> roundX();
+			case 1 -> roundY();
+			case 2 -> roundZ();
+			case 3 -> roundW();
+			default -> throw new ArrayIndexOutOfBoundsException(i);
+		};
 	}
 
 	default int floorX() {
@@ -93,7 +132,6 @@ public interface Vec4 extends IVec {
 		return FastMath.floor(w());
 	}
 
-
 	default int ceilX() {
 		return FastMath.ceil(x());
 	}
@@ -108,6 +146,22 @@ public interface Vec4 extends IVec {
 
 	default int ceilW() {
 		return FastMath.ceil(w());
+	}
+
+	default int roundX() {
+		return FastMath.round(x());
+	}
+
+	default int roundY() {
+		return FastMath.round(y());
+	}
+
+	default int roundZ() {
+		return FastMath.round(z());
+	}
+
+	default int roundW() {
+		return FastMath.round(w());
 	}
 
 	default double length() {
@@ -142,4 +196,16 @@ public interface Vec4 extends IVec {
 		return this.xf() * this.xf() + this.yf() * this.yf() + this.zf() * this.zf() + this.wf() * this.wf();
 	}
 
+	@Override
+	default Vec4I getAsIntVec() {
+		return new Vec4I(this.xi(), this.yi(), this.zi(), this.wi());
+	}
+	@Override
+	default Vec4 getAsFloatVec() {
+		throw new UnsupportedOperationException("Unimplemented method 'getAsFloatVec'");
+	}
+	@Override
+	default Vec4 getAsDoubleVec() {
+		throw new UnsupportedOperationException("Unimplemented method 'getAsDoubleVec'");
+	}
 }

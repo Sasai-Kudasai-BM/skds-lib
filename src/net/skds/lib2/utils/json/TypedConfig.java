@@ -1,5 +1,8 @@
 package net.skds.lib2.utils.json;
 
-public interface TypedConfig<ET extends Enum<? extends ConfigType<?>>> {
-	ET getConfigType();
+import net.sdteam.libmerge.Lib1Merge;
+
+@Lib1Merge
+public interface TypedConfig {
+	ConfigType<?> getConfigType();
 }

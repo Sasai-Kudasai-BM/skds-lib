@@ -72,6 +72,21 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 		return zi;
 	}
 
+	@Override
+	public int roundX() {
+		return xi;
+	}
+
+	@Override
+	public int roundY() {
+		return yi;
+	}
+
+	@Override
+	public int roundZ() {
+		return zi;
+	}
+
 	public Vec3I(Vec3 vec) {
 		this(vec.floorX(), vec.floorY(), vec.floorZ());
 	}
@@ -90,9 +105,16 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
+		// TODO
 		int i = xi;
 		i = 31 * i + yi;
 		return 31 * i + zi;
+	}
+
+	@Override
+	public Vec3I getAsIntVec() {
+		return this;
 	}
 }
