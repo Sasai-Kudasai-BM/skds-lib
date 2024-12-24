@@ -17,18 +17,23 @@ public record JsonString(String value) implements JsonElement {
 		return JsonElementType.STRING;
 	}
 
-	public static final class Codec implements JsonCodec<JsonString> {
+	public static final class Codec extends JsonCodec<JsonString> {
 
 		public Codec(JsonCodecRegistry registry) {
+			super(registry);
 		}
 
 		@Override
-		public void serialize(JsonString value, JsonWriter writer) throws IOException {
+		public void write(JsonString value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
 			writer.writeString(value.value);
 		}
 
 		@Override
-		public JsonString deserialize(JsonReader reader) throws IOException {
+		public JsonString read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
@@ -49,8 +54,4 @@ public record JsonString(String value) implements JsonElement {
 		return StringUtils.quote(value);
 	}
 
-	//@Override
-	//public String valueAsString() {
-	//	return "\"" + value.replace("\"", "\\\"") + "\"";
-	//}
 }

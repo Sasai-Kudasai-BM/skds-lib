@@ -42,21 +42,32 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return sb.toString();
 	}
 
-	public static class Codec implements JsonCodec<JsonObject> {
+	public static class Codec extends JsonCodec<JsonObject> {
 
 		private final JsonCodec<JsonElement> elementCodec;
 
 		public Codec(JsonCodecRegistry registry) {
+			super(registry);
 			this.elementCodec = registry.getCodec(JsonElement.class);
 		}
 
 		@Override
-		public void serialize(JsonObject value, JsonWriter writer) throws IOException {
-
+		public void write(JsonObject value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginObject();
+			writer.setLineBreakEnable(true);
+			for (var me : value.entrySet()) {
+				writer.writeName(me.getKey());
+				elementCodec.write(me.getValue(), writer);
+			}
+			writer.endObject();
 		}
 
 		@Override
-		public JsonObject deserialize(JsonReader reader) throws IOException {
+		public JsonObject read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
@@ -68,7 +79,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 					JsonObject jo = new JsonObject();
 					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
 						String name = reader.readName();
-						JsonElement e = elementCodec.deserialize(reader);
+						JsonElement e = elementCodec.read(reader);
 						jo.put(name, e);
 					}
 					reader.endObject();

@@ -27,18 +27,23 @@ public record JsonBoolean(boolean value) implements JsonElement {
 		return value;
 	}
 
-	public static final class Codec implements JsonCodec<JsonBoolean> {
+	public static final class Codec extends JsonCodec<JsonBoolean> {
 
 		public Codec(JsonCodecRegistry registry) {
+			super(registry);
 		}
 
 		@Override
-		public void serialize(JsonBoolean value, JsonWriter writer) throws IOException {
-
+		public void write(JsonBoolean value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeBoolean(false);
+				return;
+			}
+			writer.writeBoolean(value.getAsBoolean());
 		}
 
 		@Override
-		public JsonBoolean deserialize(JsonReader reader) throws IOException {
+		public JsonBoolean read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			if (Objects.requireNonNull(type) == JsonEntryType.BOOLEAN) {
 				boolean b = reader.readBoolean();

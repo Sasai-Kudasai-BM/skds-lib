@@ -43,21 +43,31 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		return super.add(JsonElement.NULL);
 	}
 
-	public static class Codec implements JsonCodec<JsonArray> {
+	public static class Codec extends JsonCodec<JsonArray> {
 
 		private final JsonCodec<JsonElement> elementCodec;
 
 		public Codec(JsonCodecRegistry registry) {
+			super(registry);
 			this.elementCodec = registry.getCodec(JsonElement.class);
 		}
 
 		@Override
-		public void serialize(JsonArray value, JsonWriter writer) throws IOException {
-
+		public void write(JsonArray value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginArray();
+			writer.setLineBreakEnable(true);
+			for (var e : value) {
+				elementCodec.write(e, writer);
+			}
+			writer.endArray();
 		}
 
 		@Override
-		public JsonArray deserialize(JsonReader reader) throws IOException {
+		public JsonArray read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
@@ -68,7 +78,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 					reader.beginArray();
 					JsonArray ja = new JsonArray();
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						JsonElement e = elementCodec.deserialize(reader);
+						JsonElement e = elementCodec.read(reader);
 						ja.add(e);
 					}
 					reader.endArray();

@@ -50,28 +50,12 @@ public class JsonTest {
 		};
 
 		JsonCodecRegistry registry = new JsonCodecRegistry(factory);
-		JsonObject jo = registry.getCodec(JsonObject.class).parse(test);
+		JsonCodec<JsonObject> codec = registry.getCodec(JsonObject.class);
+		JsonObject jo = codec.parse(test);
+		
 		System.out.println(jo);
-
-		//kek("");
-		//kek2("", new ArrayList<>());
+		System.out.println(codec.toJson(jo));
 
 
-		//CodeSource src = JsonTest.class.getProtectionDomain().getCodeSource();
-		//if (src != null) {
-		//	URL jar = src.getLocation();
-		//	ZipInputStream zip = new ZipInputStream(jar.openStream());
-		//	while (true) {
-		//		ZipEntry e = zip.getNextEntry();
-		//		if (e == null) {
-		//			System.out.println("end");
-		//			break;
-		//		}
-		//		String name = e.getName();
-		//		System.out.println(name);
-		//	}
-		//}
-
-		//kek("net/skds/lib2/io/json/");
 	}
 }

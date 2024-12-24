@@ -28,18 +28,24 @@ public record JsonNumber(Number value) implements JsonElement {
 		return value;
 	}
 
-	public static final class Codec implements JsonCodec<JsonNumber> {
+	public static final class Codec extends JsonCodec<JsonNumber> {
 
 		public Codec(JsonCodecRegistry registry) {
+			super(registry);
 		}
 
 		@Override
-		public void serialize(JsonNumber value, JsonWriter writer) throws IOException {
-
+		public void write(JsonNumber value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeInt(0);
+				return;
+			}
+			Number n = value.getAsNumber();
+			writer.writeRaw(n.toString());
 		}
 
 		@Override
-		public JsonNumber deserialize(JsonReader reader) throws IOException {
+		public JsonNumber read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {

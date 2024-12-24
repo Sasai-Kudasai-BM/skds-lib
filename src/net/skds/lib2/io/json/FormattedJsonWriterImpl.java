@@ -8,14 +8,16 @@ import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
 
-public final class FlatJsonWriterImpl implements JsonWriter {
+public final class FormattedJsonWriterImpl implements JsonWriter {
 
 	private final CharOutput output;
+	private final String tab;
 
 	private StackEntry stack;
 
-	public FlatJsonWriterImpl(CharOutput output) {
+	public FormattedJsonWriterImpl(CharOutput output, String tab) {
 		this.output = output;
+		this.tab = tab;
 	}
 
 	@Override
@@ -51,7 +53,7 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	public void writeName(String name) throws IOException {
 		pushName();
 		output.append(StringUtils.quote(name));
-		output.append(':');
+		output.append(": ");
 	}
 
 	@Override
@@ -106,15 +108,36 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void setLineBreakEnable(boolean separate) throws EndOfOutputException {
+	public void setLineBreakEnable(boolean lineBreak) throws EndOfOutputException {
+		StackEntry e = this.stack;
+		if (e == null) throw new StackUnderflowException();
+		e.lineBreak = lineBreak;
+	}
+
+	private void writeTabs(StackEntry e) throws EndOfOutputException {
+		if (tab != null && !tab.isEmpty()) {
+			while (e != null) {
+				output.append(tab);
+				e = e.parent;
+			}
+		}
 	}
 
 	private void pushName() throws IOException {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		if (!e.isList) {
+			boolean lb = e.lineBreak;
 			if (e.n++ > 0) {
-				output.append(',');
+				if (lb) {
+					output.append(',');
+				} else {
+					output.append(", ");
+				}
+			}
+			if (lb) {
+				output.append('\n');
+				writeTabs(e);
 			}
 		}
 	}
@@ -123,8 +146,17 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		if (e.isList) {
+			boolean lb = e.lineBreak;
 			if (e.n++ > 0) {
-				output.append(',');
+				if (lb) {
+					output.append(',');
+				} else {
+					output.append(", ");
+				}
+			}
+			if (lb) {
+				output.append('\n');
+				writeTabs(e);
 			}
 		}
 	}
@@ -133,9 +165,13 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 		this.stack = new StackEntry(this.stack, isList);
 	}
 
-	private void popStack() {
+	private void popStack() throws EndOfOutputException {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
+		if (e.lineBreak) {
+			output.append('\n');
+			writeTabs(e.parent);
+		}
 		this.stack = e.parent;
 	}
 
@@ -143,6 +179,7 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 		int n;
 		final StackEntry parent;
 		final boolean isList;
+		boolean lineBreak;
 
 		private StackEntry(StackEntry parent, boolean isList) {
 			this.parent = parent;

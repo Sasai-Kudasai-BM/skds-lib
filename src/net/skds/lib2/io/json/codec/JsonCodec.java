@@ -3,29 +3,43 @@ package net.skds.lib2.io.json.codec;
 import net.skds.lib2.io.CharInput;
 import net.skds.lib2.io.Codec;
 import net.skds.lib2.io.StringCharInput;
+import net.skds.lib2.io.StringCharOutput;
+import net.skds.lib2.io.json.FormattedJsonWriterImpl;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonReaderImpl;
 import net.skds.lib2.io.json.JsonWriter;
 
 import java.io.IOException;
 
-public interface JsonCodec<T> extends Codec<T, JsonWriter, JsonReader> {
+public abstract class JsonCodec<T> implements Codec<T, JsonWriter, JsonReader> {
 
-	//default String toJson(T value) {
-	//
-	//}
+	protected final JsonCodecRegistry registry;
 
-	default T parse(CharInput charInput) {
+	public JsonCodec(JsonCodecRegistry registry) {
+		this.registry = registry;
+	}
+
+	public T parse(CharInput charInput) {
 		try {
-			return deserialize(new JsonReaderImpl(charInput));
+			return read(new JsonReaderImpl(charInput));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	default T parse(String json) {
+	public T parse(String json) {
 		try {
-			return deserialize(new JsonReaderImpl(new StringCharInput(json)));
+			return read(new JsonReaderImpl(new StringCharInput(json))); // TODO
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public String toJson(T value) {
+		try {
+			StringCharOutput co = new StringCharOutput();
+			write(value, new FormattedJsonWriterImpl(co, "\t")); // TODO
+			return co.toString();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
