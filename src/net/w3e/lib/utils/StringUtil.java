@@ -2,6 +2,10 @@ package net.w3e.lib.utils;
 
 import net.sdteam.libmerge.Lib1Merge;
 
+/**
+ * @deprecated use {@link net.skds.lib2.utils.StringUtils}
+ */
+@Deprecated
 @Lib1Merge
 public class StringUtil {
 

@@ -1,27 +1,16 @@
 package net.w3e.lib.utils;
 
+import net.sdteam.libmerge.Lib1Merge;
+import net.skds.lib2.io.json.JsonTest;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.nio.file.*;
+import java.util.*;
 import java.util.stream.Stream;
-
-import net.sdteam.libmerge.Lib1Merge;
-import net.skds.lib2.io.json.JsonTest;
 
 @Lib1Merge
 public class ResourceUtil {
@@ -35,11 +24,12 @@ public class ResourceUtil {
 
 		Path path = null;
 		try {
-			URI uri = resource.toURI();
+			URI uri = Objects.requireNonNull(resource).toURI();
 			if (!uri.getScheme().equals("jar")) {
 				path = Paths.get(resource.toURI());
 			}
-		} catch (Exception e) {}
+		} catch (Exception ignored) {
+		}
 		rootPath = path;
 		System.out.println(rootPath);
 	}

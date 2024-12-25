@@ -14,7 +14,6 @@ public class StringUtils {
 	}
 
 	public static String unquote(String s) {
-
 		return s.substring(1, s.length() - 1).replace("\\\"", "\"");
 	}
 
