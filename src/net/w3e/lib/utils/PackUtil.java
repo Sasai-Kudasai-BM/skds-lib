@@ -1,8 +1,10 @@
 package net.w3e.lib.utils;
 
+import lombok.experimental.UtilityClass;
 import net.sdteam.libmerge.Lib1Merge;
 
 @Lib1Merge
+@UtilityClass
 public class PackUtil {
 
 	public static String toString(byte b) {

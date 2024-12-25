@@ -12,7 +12,10 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import lombok.experimental.UtilityClass;
+
 @Lib1Merge
+@UtilityClass
 public class ResourceUtil {
 
 	private static final Path rootPath;

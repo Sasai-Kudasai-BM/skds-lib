@@ -1,5 +1,8 @@
 package net.w3e.lib.mat;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class OpenSimplex2S {
 
 	private static final long PRIME_X = 0x5205402B9270C86FL;

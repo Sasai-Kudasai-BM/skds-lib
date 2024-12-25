@@ -1,7 +1,10 @@
 package net.w3e.lib.mat;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class NoiseUtil {
-	public static final float octave(int octaves, INoise2 noise, float fx, float fy, float persistence) {
+	public static float octave(int octaves, INoise2 noise, float fx, float fy, float persistence) {
 		float amplitude = 1;
 		float max = 0;
 		float result = 0;
@@ -17,11 +20,11 @@ public class NoiseUtil {
 		return result/max;
 	}
 
-	public static interface INoise2 {
+	public interface INoise2 {
 		float noise(float x, float y);
 	}
 
-	public static final float octave(int octaves, INoise3 noise, float fx, float fy, float fz, float persistence) {
+	public static float octave(int octaves, INoise3 noise, float fx, float fy, float fz, float persistence) {
 		float amplitude = 1;
 		float max = 0;
 		float result = 0;
@@ -38,7 +41,7 @@ public class NoiseUtil {
 		return result/max;
 	}
 
-	public static interface INoise3 {
+	public interface INoise3 {
 		float noise(float x, float y, float z);
 	}
 }
