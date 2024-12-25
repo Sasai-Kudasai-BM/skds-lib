@@ -8,7 +8,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
-public class ThreadUtil {
+public class ThreadUtils {
 
 	public static final ThreadGroup MAIN_GROUP = new ThreadGroup("Main");
 	public static final ThreadGroup UTIL_GROUP = new ThreadGroup("Util");
@@ -41,11 +41,11 @@ public class ThreadUtil {
 			int j = i;
 			EXECUTOR.execute(() -> {
 				System.out.println(Thread.currentThread());
-				ThreadUtil.await(10_000);
+				ThreadUtils.await(10_000);
 			});
 		}
 
-		ThreadUtil.await(10_000);
+		ThreadUtils.await(10_000);
 	}
 
 	public static void runTaskNewThread(Runnable runnable) {

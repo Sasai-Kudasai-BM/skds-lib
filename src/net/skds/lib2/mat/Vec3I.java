@@ -107,10 +107,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 
 	@Override
 	public int hashCode() {
-		// TODO
-		int i = xi;
-		i = 31 * i + yi;
-		return 31 * i + zi;
+		return Vec3.hashCode(this);
 	}
 
 	@Override

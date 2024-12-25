@@ -57,7 +57,7 @@ public class Console {
 			throw new RuntimeException("This console has been already started!");
 		}
 		started = true;
-		ThreadUtil.runNewThreadMainGroupDaemon(() -> {
+		ThreadUtils.runNewThreadMainGroupDaemon(() -> {
 			while (true) {
 				try {
 					processLine(scanner.nextLine());

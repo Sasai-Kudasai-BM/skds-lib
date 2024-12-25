@@ -4,7 +4,7 @@ import java.util.Random;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")
-public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction {
+public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 
 	Vec3 XN = Vec3D.XN;
 	Vec3 XP = Vec3D.XP;
@@ -136,7 +136,7 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 			default -> throw new ArrayIndexOutOfBoundsException(i);
 		};
 	}
-	
+
 	@Override
 	default int round(int i) {
 		return switch (i) {
@@ -195,7 +195,7 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		d0 = FastMath.invSqrt(d0);
 		return new Vec3D(x * d0, y * d0, z * d0);
 	}
-	
+
 	default Direction normalizeI() {
 		return Direction.getFacing(xi(), yi(), zi());
 	}
@@ -262,7 +262,7 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 	}
 
 	default int lengthI() {
-		return (int)Math.sqrt(this.xi() * this.xi() + this.yi() * this.yi() + this.zi() * this.zi());
+		return (int) Math.sqrt(this.xi() * this.xi() + this.yi() * this.yi() + this.zi() * this.zi());
 	}
 
 	default int lengthSquaredI() {
@@ -270,7 +270,7 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 	}
 
 	static int lengthI(int x, int y, int z) {
-		return (int)Math.sqrt(x * x + y * y + z * z);
+		return (int) Math.sqrt(x * x + y * y + z * z);
 	}
 
 	static int lengthSquaredI(int x, int y, int z) {
@@ -337,14 +337,14 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		int dx = vec.xi() - xi();
 		int dy = vec.yi() - yi();
 		int dz = vec.zi() - zi();
-		return (int)Math.sqrt(dx * dx + dy * dy + dz * dz);
+		return (int) Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
 	default int distanceToI(int x2, int y2, int z2) {
 		x2 -= xi();
 		y2 -= yi();
 		z2 -= zi();
-		return (int)Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2);
+		return (int) Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2);
 	}
 
 	default int squareDistanceToI(Vec3 vec) {
@@ -1212,7 +1212,7 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		}
 		return new Vec3D(x, y, z);
 	}
-	
+
 	default Vec3I lessI(int d) {
 		int x = this.xi();
 		int y = this.yi();
@@ -1319,16 +1319,21 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 		} else if ((v1 == null) != (v2 == null)) {
 			return false;
 		} else {
-			if (Double.compare(v1.x(), v2.x()) != 0) {
+			if (v1.x() != v2.x()) {
 				return false;
-			} else if (Double.compare(v1.y(), v2.y()) != 0) {
+			} else if (v1.y() != v2.y()) {
 				return false;
 			} else {
-				return Double.compare(v1.z(), v2.z()) == 0;
+				return v1.z() == v2.z();
 			}
 		}
 	}
 
+	static int hashCode(Vec3 vec) {
+		int i = Double.hashCode(vec.x());
+		i = 31 * i + Double.hashCode(vec.y());
+		return 31 * i + Double.hashCode(vec.z());
+	}
 
 	default double[] asArray() {
 		return new double[]{x(), y(), z()};
@@ -1430,10 +1435,12 @@ public sealed interface Vec3 extends IVec permits Vec3D, Vec3F, Vec3I, Direction
 	default Vec3I getAsIntVec() {
 		return new Vec3I(this.xi(), this.yi(), this.zi());
 	}
+
 	@Override
 	default Vec3F getAsFloatVec() {
 		return new Vec3F(this.xf(), this.yf(), this.zf());
 	}
+
 	@Override
 	default Vec3D getAsDoubleVec() {
 		return new Vec3D(this.x(), this.y(), this.z());

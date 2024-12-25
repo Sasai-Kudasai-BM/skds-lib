@@ -32,10 +32,7 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 
 	@Override
 	public int hashCode() {
-		// TODO
-		int i = Float.floatToIntBits((float) this.x);
-		i = 31 * i + Float.floatToIntBits((float) this.y);
-		return 31 * i + Float.floatToIntBits((float) this.z);
+		return Vec3.hashCode(this);
 	}
 
 	@Override

@@ -95,6 +95,16 @@ public class FastMath {
 		return a - (div * b);
 	}
 
+	public static float mod1(float a) {
+		int div = (int) a;
+		return a - div;
+	}
+
+	public static double mod1(double a) {
+		int div = (int) a;
+		return a - div;
+	}
+
 	public static double sinOld(double x) {
 		x = aprSinDegr(x);
 		double a;
@@ -352,7 +362,8 @@ public class FastMath {
 	}
 
 	public static int floor(double value) {
-		return (int) value;
+		int i = (int) value;
+		return i <= value ? i : i - 1;
 	}
 
 	public static int ceil(double value) {
@@ -361,7 +372,8 @@ public class FastMath {
 	}
 
 	public static int floor(float value) {
-		return (int) value;
+		int i = (int) value;
+		return i <= value ? i : i - 1;
 	}
 
 	public static int ceil(float value) {

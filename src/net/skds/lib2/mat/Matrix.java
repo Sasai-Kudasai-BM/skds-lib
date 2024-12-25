@@ -1,6 +1,6 @@
 package net.skds.lib2.mat;
 
-public interface IMatrix {
+public interface Matrix {
 
 	int width();
 
@@ -14,11 +14,11 @@ public interface IMatrix {
 
 	float[] getRowF(int row);
 
-	IVec getRowV(int row);
+	Vector getRowV(int row);
 
 	double[] getCol(int row);
 
 	float[] getColF(int row);
 
-	IVec getColV(int row);
+	Vector getColV(int row);
 }

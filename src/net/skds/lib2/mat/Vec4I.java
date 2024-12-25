@@ -81,4 +81,19 @@ public record Vec4I(int xi, int yi, int zi, int wi) implements Vec4 {
 	public int roundW() {
 		return this.wi;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj instanceof Vec4 vec) {
+			return Vec4.equals(this, vec);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Vec4.hashCode(this);
+	}
 }

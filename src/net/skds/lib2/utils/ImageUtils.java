@@ -1,6 +1,6 @@
 package net.skds.lib2.utils;
 
-import net.skds.lib2.mat.FastMath;
+import lombok.experimental.UtilityClass;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -9,12 +9,14 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageInputStreamSpi;
 import javax.imageio.spi.ImageReaderSpi;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Set;
 
+@UtilityClass
 @SuppressWarnings("unused")
 public class ImageUtils {
 
@@ -54,52 +56,6 @@ public class ImageUtils {
 		}
 	}
 
-	public static int packARGB(int r, int g, int b, int a) {
-		return (((0xff & a) << 8 | (0xff & r)) << 8 | (0xff & g)) << 8 | (0xff & b);
-	}
-
-	public static int packRGB(int r, int g, int b) {
-		return ((0xff & r) << 8 | (0xff & g)) << 8 | (0xff & b);
-	}
-
-	public static int packARGB(byte r, byte g, byte b, byte a) {
-		return ((a << 8 | r) << 8 | g) << 8 | b;
-	}
-
-	public static int packRGB(byte r, byte g, byte b) {
-		return (r << 8 | g) << 8 | b;
-	}
-
-	public static int packARGB(float r, float g, float b, float a) {
-		return (((0xff & FastMath.floor(a * 255)) << 8 |
-				(0xff & FastMath.floor(r * 255))) << 8 |
-				(0xff & FastMath.floor(g * 255))) << 8 |
-				(0xff & FastMath.floor(b * 255));
-	}
-
-	public static int packRGB(float r, float g, float b) {
-		return ((0xff & FastMath.floor(r * 255)) << 8 |
-				(0xff & FastMath.floor(g * 255))) << 8 |
-				(0xff & FastMath.floor(b * 255));
-	}
-
-	public static byte unpackR(int argb) {
-		return (byte) (argb >> 16 & 0xff);
-	}
-
-	public static byte unpackG(int argb) {
-		return (byte) (argb >> 8 & 0xff);
-	}
-
-	public static byte unpackB(int argb) {
-		return (byte) (argb & 0xff);
-	}
-
-	public static byte unpackA(int argb) {
-		return (byte) (argb >> 24);
-	}
-
-
 	public static byte[] writeImageToArrayPng(final BufferedImage image) {
 		return writeImageToArray(image, "png");
 	}
@@ -116,6 +72,26 @@ public class ImageUtils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static BufferedImage drawPerPixel(int w, int h, PerPixelDraw draw) {
+		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		WritableRaster raster = image.getRaster();
+		int[] buf = new int[1];
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				int c = draw.draw(x, y);
+				if (c != 0) {
+					buf[0] = c;
+					raster.setDataElements(x, y, buf);
+				}
+			}
+		}
+		return image;
+	}
+
+	public interface PerPixelDraw {
+		int draw(int x, int y);
 	}
 
 	static {

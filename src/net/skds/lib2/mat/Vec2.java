@@ -2,7 +2,8 @@ package net.skds.lib2.mat;
 
 import java.util.Random;
 
-public sealed interface Vec2 extends IVec permits Vec2D, Vec2F, Vec2I {
+@SuppressWarnings("unused")
+public sealed interface Vec2 extends Vector permits Vec2D, Vec2F, Vec2I {
 
 	Vec2 ZERO = Vec2D.ZERO;
 
@@ -248,7 +249,7 @@ public sealed interface Vec2 extends IVec permits Vec2D, Vec2F, Vec2I {
 	}
 
 	default int lengthI() {
-		return (int)Math.sqrt(this.xi() * this.xi() + this.yi() * this.yi());
+		return (int) Math.sqrt(this.xi() * this.xi() + this.yi() * this.yi());
 	}
 
 	default int lengthSquaredI() {
@@ -256,7 +257,7 @@ public sealed interface Vec2 extends IVec permits Vec2D, Vec2F, Vec2I {
 	}
 
 	static int lengthI(int x, int y) {
-		return (int)Math.sqrt(x * x + y * y);
+		return (int) Math.sqrt(x * x + y * y);
 	}
 
 	static int lengthSquaredI(int x, int y) {
@@ -318,13 +319,13 @@ public sealed interface Vec2 extends IVec permits Vec2D, Vec2F, Vec2I {
 	default int distanceToI(Vec2 vec) {
 		int dx = vec.xi() - xi();
 		int dy = vec.yi() - yi();
-		return (int)Math.sqrt(dx * dx + dy * dy);
+		return (int) Math.sqrt(dx * dx + dy * dy);
 	}
 
 	default int distanceToI(int x2, int y2) {
 		x2 -= xi();
 		y2 -= yi();
-		return (int)Math.sqrt(x2 * x2 + y2 * y2);
+		return (int) Math.sqrt(x2 * x2 + y2 * y2);
 	}
 
 	default int squareDistanceToI(Vec2 vec) {
@@ -954,14 +955,18 @@ public sealed interface Vec2 extends IVec permits Vec2D, Vec2F, Vec2I {
 		} else if ((v1 == null) != (v2 == null)) {
 			return false;
 		} else {
-			if (Double.compare(v1.x(), v2.x()) != 0) {
+			if (v1.x() != v2.x()) {
 				return false;
 			} else {
-				return Double.compare(v1.y(), v2.y()) != 0;
+				return v1.y() == v2.y();
 			}
 		}
 	}
 
+	static int hashCode(Vec2 vec) {
+		int i = Double.hashCode(vec.x());
+		return 31 * i + Double.hashCode(vec.y());
+	}
 
 	default double[] asArray() {
 		return new double[]{x(), y()};
@@ -991,10 +996,12 @@ public sealed interface Vec2 extends IVec permits Vec2D, Vec2F, Vec2I {
 	default Vec2I getAsIntVec() {
 		return new Vec2I(this.xi(), this.yi());
 	}
+
 	@Override
 	default Vec2F getAsFloatVec() {
 		return new Vec2F(this.xf(), this.yf());
 	}
+
 	@Override
 	default Vec2D getAsDoubleVec() {
 		return new Vec2D(this.x(), this.y());

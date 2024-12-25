@@ -70,9 +70,7 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 
 	@Override
 	public int hashCode() {
-		// TODO
-		int i = xi;
-		return 31 * i + yi;
+		return Vec2.hashCode(this);
 	}
 
 	@Override

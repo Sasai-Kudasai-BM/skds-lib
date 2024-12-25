@@ -15,9 +15,7 @@ public record Vec2D(double x, double y) implements Vec2 {
 
 	@Override
 	public int hashCode() {
-		// TODO
-		int i = Float.floatToIntBits((float) this.x);
-		return 31 * i + Float.floatToIntBits((float) this.y);
+		return Vec2.hashCode(this);
 	}
 
 	@Override

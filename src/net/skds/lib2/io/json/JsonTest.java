@@ -52,10 +52,9 @@ public class JsonTest {
 		JsonCodecRegistry registry = new JsonCodecRegistry(factory);
 		JsonCodec<JsonObject> codec = registry.getCodec(JsonObject.class);
 		JsonObject jo = codec.parse(test);
-		
+
 		System.out.println(jo);
 		System.out.println(codec.toJson(jo));
-
 
 	}
 }

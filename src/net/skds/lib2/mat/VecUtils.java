@@ -6,11 +6,11 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public final class VecUtils {
 
-	public static double dist2Line(Vec3D start, Vec3D direction, Vec3D point) {
+	public static double dist2Line(Vec3 start, Vec3 direction, Vec3 point) {
 		return perpendicularPoint(start, direction, point).distanceTo(point);
 	}
 
-	public static double dist2LineLimited(Vec3D start, Vec3D direction, Vec3D point) {
+	public static double dist2LineLimited(Vec3 start, Vec3 direction, Vec3 point) {
 		Vec3D p = perpendicularPointLimited(start, direction, point);
 		if (p == null) {
 			return -1;
@@ -18,12 +18,12 @@ public final class VecUtils {
 		return p.distanceTo(point);
 	}
 
-	public static Vec3D perpendicularPoint(Vec3D start, Vec3D direction, Vec3D point) {
+	public static Vec3D perpendicularPoint(Vec3 start, Vec3 direction, Vec3 point) {
 		double dot = point.sub(start).projOn(direction);
 		return start.add(direction.normalizeScale(dot));
 	}
 
-	public static Vec3D perpendicularPointLimited(Vec3D start, Vec3D direction, Vec3D point) {
+	public static Vec3D perpendicularPointLimited(Vec3 start, Vec3 direction, Vec3 point) {
 		double proj = point.sub(start).projOn(direction);
 		if (proj > direction.length()) {
 			return null;
@@ -31,7 +31,7 @@ public final class VecUtils {
 		return start.add(direction.normalizeScale(proj));
 	}
 
-	public static Vec3D sphereContactPointLimited(Vec3D start, Vec3D direction, Vec3D center, double radius) {
+	public static Vec3D sphereContactPointLimited(Vec3 start, Vec3 direction, Vec3 center, double radius) {
 		double proj = center.sub(start).projOn(direction);
 		if (proj > direction.length() + radius) {
 			return null;

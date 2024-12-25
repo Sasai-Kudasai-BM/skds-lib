@@ -25,7 +25,7 @@ public final class ThreadAnalyzer {
 	}
 
 	public ThreadAnalyzer(long periodMs, Consumer<ThreadLoad[]> listener) {
-		this.thread = new ThreadUtil.SKDSThread("Thread-Analyzer") {
+		this.thread = new ThreadUtils.SKDSThread("Thread-Analyzer") {
 			@Override
 			public void run() {
 				while (running) {

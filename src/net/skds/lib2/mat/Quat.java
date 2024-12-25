@@ -5,24 +5,6 @@ public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 
 	Quat ONE = QuatD.ONE;
 
-	static boolean equals(Quat q1, Quat q2) {
-		if (q1 == q2) {
-			return true;
-		} else if ((q1 == null) != (q2 == null)) {
-			return false;
-		} else {
-			if (Double.compare(q1.x(), q2.x()) != 0) {
-				return false;
-			} else if (Double.compare(q1.y(), q2.y()) != 0) {
-				return false;
-			} else if (Double.compare(q1.z(), q2.z()) != 0) {
-				return false;
-			} else {
-				return Double.compare(q1.w(), q2.w()) == 0;
-			}
-		}
-	}
-
 	static QuatD fromAxisDegrees(Vec3 axis, double angle) {
 		if (Math.abs(angle) < 1E-30) {
 			return QuatD.ONE;

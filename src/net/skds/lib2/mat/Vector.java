@@ -1,12 +1,14 @@
 package net.skds.lib2.mat;
 
 @SuppressWarnings("unused")
-public interface IVec {
+public interface Vector {
 
 	int dimension();
 
 	double get(int i);
+
 	int getI(int i);
+
 	float getF(int i);
 
 	int floor(int i);
@@ -15,7 +17,9 @@ public interface IVec {
 
 	int round(int i);
 
-	IVec getAsIntVec();
-	IVec getAsFloatVec();
-	IVec getAsDoubleVec();
+	Vector getAsIntVec();
+
+	Vector getAsFloatVec();
+
+	Vector getAsDoubleVec();
 }

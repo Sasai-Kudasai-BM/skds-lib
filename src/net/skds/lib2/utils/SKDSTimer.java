@@ -52,7 +52,7 @@ public class SKDSTimer {
 	}
 
 	static {
-		ThreadUtil.runNewThreadMainGroupDaemon(() -> {
+		ThreadUtils.runNewThreadMainGroupDaemon(() -> {
 			while (true) {
 				try {
 					check();

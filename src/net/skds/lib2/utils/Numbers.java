@@ -19,4 +19,20 @@ public class Numbers {
 		}
 		return Long.parseLong(stringValue);
 	}
+
+	public int leftBytes(long l) {
+		return (int) (l >> 32);
+	}
+
+	public int rightBytes(long l) {
+		return (int) (l & 0xFFFFFFFFL);
+	}
+
+	public int leftBytes(double d) {
+		return (int) (Double.doubleToLongBits(d) >> 32);
+	}
+
+	public int rightBytes(double d) {
+		return (int) (Double.doubleToLongBits(d) & 0xFFFFFFFFL);
+	}
 }

@@ -25,20 +25,19 @@ public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 		return wf;
 	}
 
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (obj instanceof Quat quat) {
-			return Quat.equals(this, quat);
+		} else if (obj instanceof Vec4 vec) {
+			return Vec4.equals(this, vec);
 		}
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
-		int i = Float.floatToIntBits(this.xf);
-		i = 31 * i + Float.floatToIntBits(this.yf);
-		i = 31 * i + Float.floatToIntBits(this.zf);
-		return 31 * i + Float.floatToIntBits(this.wf);
+		return Vec4.hashCode(this);
 	}
 }

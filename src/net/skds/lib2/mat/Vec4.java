@@ -1,7 +1,7 @@
 package net.skds.lib2.mat;
 
 @SuppressWarnings("unused")
-public interface Vec4 extends IVec {
+public interface Vec4 extends Vector {
 
 	@Override
 	default int dimension() {
@@ -104,7 +104,7 @@ public interface Vec4 extends IVec {
 		};
 	}
 
-	
+
 	@Override
 	default int round(int i) {
 		return switch (i) {
@@ -115,6 +115,32 @@ public interface Vec4 extends IVec {
 			default -> throw new ArrayIndexOutOfBoundsException(i);
 		};
 	}
+
+	static boolean equals(Vec4 v1, Vec4 v2) {
+		if (v1 == v2) {
+			return true;
+		} else if ((v1 == null) != (v2 == null)) {
+			return false;
+		} else {
+			if (v1.x() != v2.x()) {
+				return false;
+			} else if (v1.y() != v2.y()) {
+				return false;
+			} else if (v1.z() != v2.z()) {
+				return false;
+			} else {
+				return v1.w() == v2.w();
+			}
+		}
+	}
+
+	static int hashCode(Vec4 vec) {
+		int i = Double.hashCode(vec.x());
+		i = 31 * i + Double.hashCode(vec.y());
+		i = 31 * i + Double.hashCode(vec.z());
+		return 31 * i + Double.hashCode(vec.w());
+	}
+
 
 	default int floorX() {
 		return FastMath.floor(x());
@@ -200,10 +226,12 @@ public interface Vec4 extends IVec {
 	default Vec4I getAsIntVec() {
 		return new Vec4I(this.xi(), this.yi(), this.zi(), this.wi());
 	}
+
 	@Override
 	default Vec4 getAsFloatVec() {
 		throw new UnsupportedOperationException("Unimplemented method 'getAsFloatVec'");
 	}
+
 	@Override
 	default Vec4 getAsDoubleVec() {
 		throw new UnsupportedOperationException("Unimplemented method 'getAsDoubleVec'");

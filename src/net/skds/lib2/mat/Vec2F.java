@@ -2,6 +2,7 @@ package net.skds.lib2.mat;
 
 public record Vec2F(float xf, float yf) implements Vec2 {
 	public static final Vec2F ZERO = new Vec2F(0.0F, 0.0F);
+
 	@Override
 	public double x() {
 		return xf;
@@ -34,9 +35,7 @@ public record Vec2F(float xf, float yf) implements Vec2 {
 
 	@Override
 	public int hashCode() {
-		// TODO
-		int i = Float.floatToIntBits((float) this.xf);
-		return 31 * i + Float.floatToIntBits((float) this.yf);
+		return Vec2.hashCode(this);
 	}
 
 	@Override
