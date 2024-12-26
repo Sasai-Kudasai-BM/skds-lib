@@ -7,35 +7,44 @@ public class Noise {
 
 	//private static final int HASH = "jop00a".hashCode();
 
+	private final float weightCorrection;
+	private final float periodScale;
 	private final float[] amplitudes;
 	private final StateFuncRandom[] layers;
 	private final int layerCount;
 
-	public Noise(long seed, float[] amplitudes) {
+	public Noise(long seed, float[] amplitudes, float periodScale) {
 		int layerCount = amplitudes.length;
+		this.periodScale = periodScale;
 		this.layerCount = layerCount;
 		this.amplitudes = amplitudes;
 		this.layers = new StateFuncRandom[layerCount];
 
 		StateFuncRandom layer0 = new StateFuncRandom(seed);
 		layers[0] = layer0;
+		float weight = amplitudes[0];
 		for (int i = 1; i < layerCount; i++) {
+			if (amplitudes[i] == 0) continue;
+			weight += amplitudes[i] / (1 + i);
 			layers[i] = new StateFuncRandom((seed ^ i) + 37);
 		}
+		this.weightCorrection = 1 / weight;
 	}
 
 	public float getValueInPoint(double x, double y) {
 		float value = 0;
-		for (int i = layerCount - 1; i >= 0; i--) {
-			float amp0 = amplitudes[i];
-			if (amp0 == 0) {
+		float ps = 1;
+		for (int i = 0; i < layerCount; i++) {
+			ps += periodScale;
+			StateFuncRandom sfr = layers[i];
+			if (sfr == null) {
 				continue;
 			}
 			int n = i + 1;
-			float amp = amp0 / n;
+			float amp = amplitudes[i] / n;
 
-			double xi = x * n;
-			double yi = y * n;
+			double xi = x * ps;
+			double yi = y * ps;
 
 			int x0 = FastMath.floor(xi);
 			int x1 = FastMath.ceil(xi);
@@ -44,7 +53,6 @@ public class Noise {
 			int y1 = FastMath.ceil(yi);
 			float ky = (float) (yi - y0);
 
-			StateFuncRandom sfr = layers[i];
 
 			float v00 = sfr.randomize(x0, y0);
 			float v10 = sfr.randomize(x1, y0);
@@ -57,22 +65,24 @@ public class Noise {
 			value += FastMath.lerp(kx, s0, s1) * amp;
 		}
 
-		return value;
+		return value * weightCorrection;
 	}
 
 	public float getValueInPoint(double x, double y, double z) {
 		float value = 0;
-		for (int i = layerCount - 1; i >= 0; i--) {
-			float amp0 = amplitudes[i];
-			if (amp0 == 0) {
+		float ps = 1;
+		for (int i = 0; i < layerCount; i++) {
+			ps += periodScale;
+			StateFuncRandom sfr = layers[i];
+			if (sfr == null) {
 				continue;
 			}
 			int n = i + 1;
-			float amp = amp0 / n;
+			float amp = amplitudes[i] / n;
 
-			double xi = x * n;
-			double yi = y * n;
-			double zi = z * n;
+			double xi = x * ps;
+			double yi = y * ps;
+			double zi = z * ps;
 
 			int x0 = FastMath.floor(xi);
 			int x1 = FastMath.ceil(xi);
@@ -83,8 +93,6 @@ public class Noise {
 			int z0 = FastMath.floor(zi);
 			int z1 = FastMath.ceil(zi);
 			float kz = (float) (zi - z0);
-
-			StateFuncRandom sfr = layers[i];
 
 			float v000 = sfr.randomize(x0, y0, z0);
 			float v100 = sfr.randomize(x1, y0, z0);
@@ -106,7 +114,7 @@ public class Noise {
 			value += FastMath.lerp(kx, s0, s1) * amp;
 		}
 
-		return value;
+		return value * weightCorrection;
 	}
 
 }

@@ -31,13 +31,13 @@ public class NoiseFrame extends JFrame {
 			new ColorScheme() {
 				@Override
 				public int getColor(float value) {
-					int hue = ColorUtils.hueRGB(FastMath.clamp(value * 0.667f, 0, 0.667f));
-					return ColorUtils.packARGB(hue, 255);
+					int br = FastMath.clamp((int) ((1 - value) * 255), 0, 255);
+					return ColorUtils.packARGB(br, br, br, 255);
 				}
 
 				@Override
 				public String toString() {
-					return "HUE INVERTED";
+					return "GRAY INVERTED";
 				}
 			},
 			new ColorScheme() {
@@ -51,6 +51,18 @@ public class NoiseFrame extends JFrame {
 				public String toString() {
 					return "HUE";
 				}
+			},
+			new ColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int hue = ColorUtils.hueRGB(FastMath.clamp(value * 0.667f, 0, 0.667f));
+					return ColorUtils.packARGB(hue, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "HUE INVERTED";
+				}
 			}
 	};
 
@@ -63,8 +75,10 @@ public class NoiseFrame extends JFrame {
 	private float cy = 0;
 	private float depth = 0;
 
-	private float colorScale = 1;
-	private float colorBias = -.5f;
+	private float periodScale = 1;
+
+	private float colorScale = 1.5f;
+	private float colorBias = -.25f;
 
 	private ColorScheme colorScheme = schemes[0];
 	private long seed = 0;
@@ -107,6 +121,14 @@ public class NoiseFrame extends JFrame {
 			});
 			add(slider);
 
+			add(new JLabel("Period scale"));
+			JSlider psSlider = new JSlider(100, 2000, 1000);
+			psSlider.addChangeListener(e -> {
+				periodScale = psSlider.getValue() * 1e-3f;
+				recreateNoise();
+			});
+			add(psSlider);
+
 			add(new JLabel("Seed"));
 			JSlider sliderSeed = new JSlider(0, 50, 0);
 			sliderSeed.addChangeListener(e -> {
@@ -116,7 +138,7 @@ public class NoiseFrame extends JFrame {
 			add(sliderSeed);
 
 			add(new JLabel("Color bias"));
-			JSlider slider2 = new JSlider(-2000, 2000, -500);
+			JSlider slider2 = new JSlider(-2000, 2000, (int) (colorBias * 1000));
 			slider2.addChangeListener(e -> {
 				colorBias = slider2.getValue() * 1E-3f;
 				noisePanel.repaint();
@@ -125,7 +147,7 @@ public class NoiseFrame extends JFrame {
 
 
 			add(new JLabel("Color scale"));
-			JSlider slider3 = new JSlider(100, 2000, 1000);
+			JSlider slider3 = new JSlider(100, 3000, (int) (colorScale * 1000));
 			slider3.addChangeListener(e -> {
 				colorScale = slider3.getValue() * 1E-3f;
 				noisePanel.repaint();
@@ -144,7 +166,7 @@ public class NoiseFrame extends JFrame {
 
 			ampPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
 
-			JSlider ampCount = new JSlider(1, 10, 5);
+			JSlider ampCount = new JSlider(1, 15, 5);
 			ampCount.addChangeListener(e -> {
 				setAmpSliders(ampSliders, ampPanel, ampCount.getValue());
 				noisePanel.repaint();
@@ -154,7 +176,7 @@ public class NoiseFrame extends JFrame {
 			int dc = ampCount.getValue() - ampSliders.size();
 			for (int i = 0; i < dc; i++) {
 				JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
-				amp.setPreferredSize(new Dimension(22, 200));
+				amp.setPreferredSize(new Dimension(22, 160));
 				ampPanel.add(amp);
 				ampSliders.add(amp);
 				amp.addChangeListener(e -> recreateNoise());
@@ -170,7 +192,7 @@ public class NoiseFrame extends JFrame {
 			if (dc > 0) {
 				for (int i = 0; i < dc; i++) {
 					JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
-					amp.setPreferredSize(new Dimension(20, 200));
+					amp.setPreferredSize(new Dimension(20, 160));
 					ampPanel.add(amp);
 					ampSliders.add(amp);
 					amp.addChangeListener(e -> recreateNoise());
@@ -193,7 +215,7 @@ public class NoiseFrame extends JFrame {
 		for (int i = 0; i < amps.length; i++) {
 			amps[i] = ampSliders.get(i).getValue() * 1e-2f;
 		}
-		this.noise = new Noise(seed, amps);
+		this.noise = new Noise(seed, amps, periodScale);
 		noisePanel.repaint();
 	}
 
