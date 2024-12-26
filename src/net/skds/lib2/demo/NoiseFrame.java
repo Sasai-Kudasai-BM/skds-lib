@@ -10,54 +10,191 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NoiseFrame extends JFrame {
 
-	private final NoisePanel noisePanel;
-	private final ControlPanel controlPanel;
+	private static final ColorScheme[] schemes = {
+			new ColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int br = FastMath.clamp((int) (value * 255), 0, 255);
+					return ColorUtils.packARGB(br, br, br, 255);
+				}
 
-	private float scale = 1;
+				@Override
+				public String toString() {
+					return "GRAY";
+				}
+			},
+			new ColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int hue = ColorUtils.hueRGB(FastMath.clamp(value * 0.667f, 0, 0.667f));
+					return ColorUtils.packARGB(hue, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "HUE INVERTED";
+				}
+			},
+			new ColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int hue = ColorUtils.hueRGB(FastMath.clamp((1 - value) * 0.667f, 0, 0.667f));
+					return ColorUtils.packARGB(hue, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "HUE";
+				}
+			}
+	};
+
+	private final List<JSlider> ampSliders = new ArrayList<>();
+
+	private final NoisePanel noisePanel;
+
+	private float scale = 15;
 	private float cx = 0;
 	private float cy = 0;
-
 	private float depth = 0;
 
+	private float colorScale = 1;
+	private float colorBias = -.5f;
+
+	private ColorScheme colorScheme = schemes[0];
+	private long seed = 0;
 
 	private Noise noise;
 
-	private static final float[] amps = {1, 1, 1, 0, 1, 1, 0, 1};
+
+	//private static final float[] amps = {1, 1, 1, 0, 1, 1, 0, 1};
 
 	NoiseFrame() {
 		super("Noise demo");
 
 		this.noisePanel = new NoisePanel();
-		this.controlPanel = new ControlPanel();
+		ControlPanel controlPanel = new ControlPanel();
 
-		this.noise = new Noise(0, amps);
+		//this.noise = new Noise(0, amps);
 
 		setLayout(new BorderLayout());
-		add(controlPanel, BorderLayout.NORTH);
-		add(noisePanel, BorderLayout.CENTER);
+		add(controlPanel, BorderLayout.EAST);
+		add(noisePanel, BorderLayout.WEST);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
 		setLocation(-getWidth() / 2, -getHeight() / 2);
 		setLocationRelativeTo(null);
+		setResizable(false);
 		setVisible(true);
 	}
 
 	private class ControlPanel extends JPanel {
 		ControlPanel() {
+			setPreferredSize(new Dimension(400, 400));
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
 			add(new JLabel("Z-Axis"));
-			JSlider slider = new JSlider(0, 1000, 0);
+			JSlider slider = new JSlider(0, 200, 0);
 			slider.addChangeListener(e -> {
-				depth = slider.getValue() / 100f;
+				depth = slider.getValue() * 1e-2f;
 				noisePanel.repaint();
 			});
 			add(slider);
+
+			add(new JLabel("Seed"));
+			JSlider sliderSeed = new JSlider(0, 50, 0);
+			sliderSeed.addChangeListener(e -> {
+				seed = sliderSeed.getValue();
+				recreateNoise();
+			});
+			add(sliderSeed);
+
+			add(new JLabel("Color bias"));
+			JSlider slider2 = new JSlider(-2000, 2000, -500);
+			slider2.addChangeListener(e -> {
+				colorBias = slider2.getValue() * 1E-3f;
+				noisePanel.repaint();
+			});
+			add(slider2);
+
+
+			add(new JLabel("Color scale"));
+			JSlider slider3 = new JSlider(100, 2000, 1000);
+			slider3.addChangeListener(e -> {
+				colorScale = slider3.getValue() * 1E-3f;
+				noisePanel.repaint();
+			});
+			add(slider3);
+
+			add(new JLabel("Color scheme"));
+			JComboBox<ColorScheme> schemeSelector = new JComboBox<>(schemes);
+			schemeSelector.addActionListener(e -> {
+				colorScheme = (ColorScheme) schemeSelector.getSelectedItem();
+				noisePanel.repaint();
+			});
+			add(schemeSelector);
+
+			JPanel ampPanel = new JPanel();
+
+			ampPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
+
+			JSlider ampCount = new JSlider(1, 10, 5);
+			ampCount.addChangeListener(e -> {
+				setAmpSliders(ampSliders, ampPanel, ampCount.getValue());
+				noisePanel.repaint();
+			});
+			ampCount.setSnapToTicks(true);
+
+			int dc = ampCount.getValue() - ampSliders.size();
+			for (int i = 0; i < dc; i++) {
+				JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
+				amp.setPreferredSize(new Dimension(22, 200));
+				ampPanel.add(amp);
+				ampSliders.add(amp);
+				amp.addChangeListener(e -> recreateNoise());
+			}
+
+			add(ampPanel);
+			add(ampCount);
+			recreateNoise();
 		}
 
+		private void setAmpSliders(List<JSlider> ampSliders, JPanel ampPanel, int count) {
+			int dc = count - ampSliders.size();
+			if (dc > 0) {
+				for (int i = 0; i < dc; i++) {
+					JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
+					amp.setPreferredSize(new Dimension(20, 200));
+					ampPanel.add(amp);
+					ampSliders.add(amp);
+					amp.addChangeListener(e -> recreateNoise());
+				}
+				ampPanel.revalidate();
+				recreateNoise();
+			} else if (dc < 0) {
+				for (int i = 0; i > dc; i--) {
+					JSlider amp = ampSliders.removeLast();
+					ampPanel.remove(amp);
+				}
+				ampPanel.repaint();
+				recreateNoise();
+			}
+		}
+	}
+
+	private void recreateNoise() {
+		float[] amps = new float[ampSliders.size()];
+		for (int i = 0; i < amps.length; i++) {
+			amps[i] = ampSliders.get(i).getValue() * 1e-2f;
+		}
+		this.noise = new Noise(seed, amps);
+		noisePanel.repaint();
 	}
 
 	private class NoisePanel extends JPanel {
@@ -112,14 +249,14 @@ public class NoiseFrame extends JFrame {
 				float vx = (x - w2) / scale - cx;
 				float vy = (y - h2) / scale - cy;
 				float value = noise.getValueInPoint(vx, vy, depth);
-				int br = FastMath.clamp((int) (value * 255 / 2), 0, 255);
-				//float br = FastMath.clamp(value / 2 - .2f, 0, 1);
-				//int rgb = ColorUtils.scaleRGB(200, ColorUtils.hueRGB(br));
-				int rgb = ColorUtils.grayRGB(br);
-				return ColorUtils.packARGB(rgb, 255);
+				return colorScheme.getColor(value * colorScale + colorBias);
 			});
 
 			g2d.drawImage(image, 0, 0, w, h, null);
 		}
+	}
+
+	private interface ColorScheme {
+		int getColor(float value);
 	}
 }

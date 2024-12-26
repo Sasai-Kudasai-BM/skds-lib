@@ -1,6 +1,6 @@
 package net.skds.lib2.misc.random;
 
-public class StateFuncRandom {
+public final class StateFuncRandom {
 
 	private static final long multiplier = 0x5DEECE66DL;
 	private static final long addend = 0xBL;
@@ -17,27 +17,38 @@ public class StateFuncRandom {
 		this.seed = System.nanoTime();
 	}
 
-	private long next(long previous) {
+	private static long next(long previous) {
 		return (previous * multiplier + addend) & mask;
 	}
-
-	//public float randomize(Object first, Object... sequenceSeeds) {
-	//	long s = next(first.hashCode());
-	//	if (sequenceSeeds != null) {
-	//		for (int i = 0; i < sequenceSeeds.length; i++) {
-	//			s = next(s + sequenceSeeds[i].hashCode());
-	//		}
-	//	}
-	//	return (s >>> (48 - Float.PRECISION)) * FLOAT_UNIT;
-	//}
 
 	public float randomize(int first, int... sequenceSeeds) {
 		long s = next(next(first) ^ seed);
 		if (sequenceSeeds != null) {
 			for (int i = 0; i < sequenceSeeds.length; i++) {
-				s = next(s ^ next(sequenceSeeds[i]) & mask);
+				s = next(s ^ next(sequenceSeeds[i]));
 			}
 		}
+		return (s >>> (48 - Float.PRECISION)) * FLOAT_UNIT;
+	}
+
+	public float randomize(int first, int second) {
+		long s = next(next(first) ^ seed);
+		s = next(s ^ next(second));
+		return (s >>> (48 - Float.PRECISION)) * FLOAT_UNIT;
+	}
+
+	public float randomize(int first, int second, int third) {
+		long s = next(next(first) ^ seed);
+		s = next(s ^ next(second));
+		s = next(s ^ next(third));
+		return (s >>> (48 - Float.PRECISION)) * FLOAT_UNIT;
+	}
+
+	public float randomize(int first, int second, int third, int fourth) {
+		long s = next(next(first) ^ seed);
+		s = next(s ^ next(second));
+		s = next(s ^ next(third));
+		s = next(s ^ next(fourth));
 		return (s >>> (48 - Float.PRECISION)) * FLOAT_UNIT;
 	}
 
@@ -54,23 +65,23 @@ public class StateFuncRandom {
 		long sequenceState;
 
 		private Sequence(Object... sequenceSeeds) {
-			long s = seed;
+			long s = next(seed);
 			for (int i = 0; i < sequenceSeeds.length; i++) {
-				s = next(s ^ sequenceSeeds[i].hashCode());
+				s = next(s ^ next(sequenceSeeds[i].hashCode()));
 			}
 			this.sequenceState = s;
 		}
 
 		private Sequence(long... sequenceSeeds) {
-			long s = seed;
+			long s = next(seed);
 			for (int i = 0; i < sequenceSeeds.length; i++) {
-				s = next(s ^ sequenceSeeds[i]);
+				s = next(s ^ next(sequenceSeeds[i]));
 			}
 			this.sequenceState = s;
 		}
 
 		private Sequence(long sequenceSeed) {
-			this.sequenceState = next(seed ^ sequenceSeed);
+			this.sequenceState = next(seed ^ next(sequenceSeed));
 		}
 
 		public int nextInt() {
