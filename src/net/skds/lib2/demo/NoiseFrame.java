@@ -78,7 +78,7 @@ public class NoiseFrame extends JFrame {
 	private float periodScale = 1;
 
 	private float colorScale = 1.5f;
-	private float colorBias = -.25f;
+	private float colorBias = -.2f;
 
 	private ColorScheme colorScheme = schemes[0];
 	private long seed = 0;
@@ -138,7 +138,7 @@ public class NoiseFrame extends JFrame {
 			add(sliderSeed);
 
 			add(new JLabel("Color bias"));
-			JSlider slider2 = new JSlider(-2000, 2000, (int) (colorBias * 1000));
+			JSlider slider2 = new JSlider(-1000, 1000, (int) (colorBias * 1000));
 			slider2.addChangeListener(e -> {
 				colorBias = slider2.getValue() * 1E-3f;
 				noisePanel.repaint();
@@ -271,7 +271,7 @@ public class NoiseFrame extends JFrame {
 				float vx = (x - w2) / scale - cx;
 				float vy = (y - h2) / scale - cy;
 				float value = noise.getValueInPoint(vx, vy, depth);
-				return colorScheme.getColor(value * colorScale + colorBias);
+				return colorScheme.getColor((value + colorBias) * colorScale);
 			});
 
 			g2d.drawImage(image, 0, 0, w, h, null);
