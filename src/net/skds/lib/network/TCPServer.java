@@ -14,7 +14,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-//TODO
+// TODO
 public class TCPServer {
 
 	protected boolean running = false;

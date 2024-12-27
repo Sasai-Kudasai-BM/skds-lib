@@ -1,8 +1,5 @@
 package net.skds.lib.utils;
 
-import net.sdteam.libmerge.Lib2Merge;
-
-@Lib2Merge(complete = true)
 public interface EnumHelper<T extends Enum<T>> {
 
 	@SuppressWarnings("unchecked")

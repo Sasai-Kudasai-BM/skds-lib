@@ -1,7 +1,5 @@
 package net.skds.lib.reflection;
 
-import net.sdteam.libmerge.Lib2Merge;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -12,7 +10,6 @@ import java.util.function.Consumer;
 public class ReflectUtils {
 
 	public static <T> HiddenField<T> getField(Class<?> clazz, FindOptions options) {
-
 		final Field[] fields = clazz.getDeclaredFields();
 		int currentOrdinal = 0;
 		for (int i = 0; i < fields.length; i++) {
@@ -30,7 +27,6 @@ public class ReflectUtils {
 	}
 
 	public static <T> Map<String, HiddenField<T>> getAllFields(Class<?> clazz, FindOptions options) {
-
 		Map<String, HiddenField<T>> map = new HashMap<>();
 
 		final Field[] fields = clazz.getDeclaredFields();
@@ -49,12 +45,10 @@ public class ReflectUtils {
 		return map;
 	}
 
-	@Lib2Merge(complete = true)
 	public static void fillInstanceFields(Object instance, FillingFunction function) {
 		fillInstanceFields(instance, instance.getClass(), function);
 	}
 
-	@Lib2Merge(complete = true)
 	public static void fillInstanceFields(Object instance, Class<?> clazz, FillingFunction function) {
 		for (Field f : clazz.getDeclaredFields()) {
 			if (Modifier.isStatic(f.getModifiers())) {
@@ -82,5 +76,15 @@ public class ReflectUtils {
 	@FunctionalInterface
 	public interface FillingFunction {
 		void accept(Field field, Consumer<Object> consumer);
+	}
+
+	public static final Field accessField(Class<?> cl, String key) {
+		try {
+			Field field = cl.getDeclaredField(key);
+			field.setAccessible(true);
+			return field;
+		} catch (NoSuchFieldException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

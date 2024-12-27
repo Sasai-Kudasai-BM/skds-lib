@@ -1,6 +1,5 @@
 package net.skds.lib.utils;
 
-import net.sdteam.libmerge.Lib2Merge;
 import net.skds.lib.mat.FastMath;
 
 import java.lang.reflect.Array;
@@ -8,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-@Lib2Merge(complete = true)
+@SuppressWarnings("unused")
 public class ArrayUtils {
 
 	public static final byte[] EMPTY_BYTE = {};

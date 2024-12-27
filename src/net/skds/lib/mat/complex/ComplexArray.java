@@ -1,6 +1,6 @@
 package net.skds.lib.mat.complex;
 
-@Deprecated//TODO
+@Deprecated // TODO
 public final class ComplexArray {
 
 	private final float[] re;

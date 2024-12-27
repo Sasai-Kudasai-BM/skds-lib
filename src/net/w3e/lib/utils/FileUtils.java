@@ -1,19 +1,16 @@
 package net.w3e.lib.utils;
 
-import net.sdteam.libmerge.Lib2Merge;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-@Lib2Merge(complete = true)
 public class FileUtils {
 
 	public static void save(File file, byte[] data) {
 		try {
 			if (!file.exists()) {
-				new File(file.getAbsolutePath()).getParentFile().mkdirs();
+				file.getAbsoluteFile().getParentFile().mkdirs();
 				Files.createFile(file.toPath());
 			}
 			Files.write(file.toPath(), data);

@@ -34,7 +34,7 @@ public class ConvexCollision {
 		return intersectionMoving(s1, s2, terminators, velocity21);
 	}
 
-	//TODO correct normals
+	// TODO correct normals
 	private static CollisionResult intersectionMoving(ConvexShape a, ConvexShape b, List<Vec3> terminators, Vec3 velocityBA) {
 
 		ProjPair projInterval = new ProjPair(0, 1);

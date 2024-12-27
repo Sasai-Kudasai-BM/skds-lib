@@ -4,17 +4,17 @@ class SKDSLoggerImpl implements SKDSLogger {
 
 	@Override
 	public void log(LoggerLevel level, String msg) {
-		//TODO
+		// TODO
 	}
 
 	@Override
 	public void log(LoggerLevel level, Object msg) {
-		//TODO
+		// TODO
 	}
 
 	private boolean isLoggingLevel(LoggerLevel level) {
 		return true;
-		//TODO
+		// TODO
 	}
 
 }
