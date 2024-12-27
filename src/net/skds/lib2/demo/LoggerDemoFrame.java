@@ -2,7 +2,6 @@ package net.skds.lib2.demo;
 
 import lombok.CustomLog;
 import net.skds.lib2.utils.logger.SKDSLogger;
-import net.skds.lib2.utils.logger.SKDSLoggerConfig;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,11 +22,6 @@ public class LoggerDemoFrame extends JFrame {
 		});
 		add(btn);
 
-		btn = new JButton("reload");
-		btn.addActionListener(e -> {
-			SKDSLoggerConfig.load();
-		});
-		add(btn);
 
 		btn = new JButton("log");
 		btn.addActionListener(e -> {

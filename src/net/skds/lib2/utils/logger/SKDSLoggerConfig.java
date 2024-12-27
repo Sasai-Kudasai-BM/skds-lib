@@ -14,21 +14,21 @@ public final class SKDSLoggerConfig {
 
 	@Getter
 	private static SKDSLoggerConfig instance;
+	@Getter(AccessLevel.PACKAGE)
+	private static EnumSet<LoggerLevel> levels = EnumSet.of(LoggerLevel.INFO, LoggerLevel.LOG, LoggerLevel.WARN, LoggerLevel.ERROR);
 
 	@Getter(AccessLevel.PACKAGE)
-	private EnumSet<LoggerLevel> levels = EnumSet.of(LoggerLevel.INFO, LoggerLevel.LOG, LoggerLevel.WARN, LoggerLevel.ERROR);
+	private final SimpleDateFormat timeFormat;
 	@Getter(AccessLevel.PACKAGE)
-	private SimpleDateFormat timeFormat;
+	private final SimpleDateFormat dateFormat;
 	@Getter(AccessLevel.PACKAGE)
-	private SimpleDateFormat dateFormat;
+	private final boolean logThread;
 	@Getter(AccessLevel.PACKAGE)
-	private boolean logThread;
+	private final boolean logStackTop;
 	@Getter(AccessLevel.PACKAGE)
-	private boolean logStackTop;
+	private final boolean includeLoggerClass;
 	@Getter(AccessLevel.PACKAGE)
-	private boolean includeLoggerClass;
-	@Getter(AccessLevel.PACKAGE)
-	private String logDir;
+	private final String logDir;
 
 	private SKDSLoggerConfig(Cfg cfg) {
 		this.dateFormat = new SimpleDateFormat(cfg.dateFormat, Locale.ENGLISH);
@@ -50,7 +50,7 @@ public final class SKDSLoggerConfig {
 		private boolean includeStackTop = true;
 	}
 
-	public static void load() {
+	private static void load() {
 		Cfg cfg = null;
 		try (InputStream is = SKDSLoggerConfig.class.getClassLoader().getResourceAsStream("SKDSLog.json")) {
 			if (is != null) {
@@ -64,7 +64,7 @@ public final class SKDSLoggerConfig {
 	}
 
 	public static void setLevels(LoggerLevel level, LoggerLevel... levels) {
-		instance.levels = EnumSet.of(level, levels);
+		SKDSLoggerConfig.levels = EnumSet.of(level, levels);
 	}
 
 	@SuppressWarnings("ManualArrayToCollectionCopy")
@@ -74,7 +74,7 @@ public final class SKDSLoggerConfig {
 		for (int i = level.ordinal() + 1; i < values.length; i++) {
 			newLevels.add(values[i]);
 		}
-		instance.levels = newLevels;
+		levels = newLevels;
 	}
 
 	static {
