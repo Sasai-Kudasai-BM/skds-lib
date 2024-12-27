@@ -75,8 +75,8 @@ class LogWriter extends Thread {
 
 		String decoratedMsg = logMsg.toString();
 		switch (le.level()) {
-			case WARN, ERROR -> le.backLogErr(decoratedMsg);
-			default -> le.backLogInfo(decoratedMsg);
+			case WARN, ERROR -> SKDSLogger.ORIGINAL_ERR.print(decoratedMsg);
+			default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
 		}
 
 		String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
