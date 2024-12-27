@@ -348,25 +348,6 @@ public class SKDSUtils {
 		}
 	}
 
-	public static String cutStringBefore(String str, char split) {
-		int i = str.indexOf(split);
-		if (i == -1) {
-			return str;
-		}
-		return str.substring(0, i);
-	}
-
-	public static String cutStringAfter(String str, char split) {
-		int i = str.indexOf(split);
-		if (i == -1) {
-			return str;
-		}
-		if (i + 1 == str.length()) {
-			return "";
-		}
-		return str.substring(i + 1);
-	}
-
 	public static boolean truePredicate(Object o) {
 		return true;
 	}

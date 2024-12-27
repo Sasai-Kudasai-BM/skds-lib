@@ -13,15 +13,15 @@ public class DemoFrame extends JFrame {
 
 		setLayout(new FlowLayout());
 		JButton button = new JButton("Color");
-		button.addActionListener(e -> {
-			new ColorDemoFrame();
-		});
+		button.addActionListener(e -> new ColorDemoFrame());
 		add(button);
 
 		button = new JButton("Perlin");
-		button.addActionListener(e -> {
-			new NoiseFrame();
-		});
+		button.addActionListener(e -> new NoiseFrame());
+		add(button);
+
+		button = new JButton("Logger");
+		button.addActionListener(e -> new LoggerDemoFrame());
 		add(button);
 
 		button = new JButton("floor");

@@ -4,7 +4,6 @@ package net.skds.lib2.utils.logger;
 final class SKDSLoggerImpl extends SKDSLogger {
 
 	private final Class<?> loggingClass;
-	private final StringBuffer stringBuffer = new StringBuffer(256);
 
 	public SKDSLoggerImpl(Class<?> loggingClass) {
 		this.loggingClass = loggingClass;
@@ -12,24 +11,34 @@ final class SKDSLoggerImpl extends SKDSLogger {
 
 	@Override
 	public void log0(LoggerLevel level, Object msg) {
+		if (!isLoggingLevel(level)) return;
 		String message = String.valueOf(msg);
 		long time = System.currentTimeMillis();
-		String thread = Thread.currentThread().getName();
-		var trace = Thread.currentThread().getStackTrace();
+		String thread = null;
+		StackTraceElement stackTop = null;
+		Class<?> loggingClass = null;
 
-		StackTraceElement e = trace[3];
+		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
 
-		System.out.println(e.getClassName() + "." + e.getMethodName() + ":" + e.getLineNumber());
+		if (config.isLogThread()) {
+			thread = Thread.currentThread().getName();
+		}
+		if (config.isIncludeLoggerClass()) {
+			loggingClass = this.loggingClass;
+		}
+		if (config.isLogStackTop()) {
+			var trace = Thread.currentThread().getStackTrace();
+			stackTop = trace[3];
+		}
+
+		LogEntry e = new LogEntry(message, time, level, thread, stackTop, loggingClass);
+
+		LogWriter.INSTANCE.add(e);
 
 	}
 
 	private boolean isLoggingLevel(LoggerLevel level) {
-		return SKDSLoggerConfig.LEVELS.contains(level);
+		return SKDSLoggerConfig.getInstance().getLevels().contains(level);
 	}
 
-	public static void main(String[] args) {
-		SKDSLogger log = SKDSLoggerFactory.getLogger(SKDSLoggerImpl.class);
-
-		log.log("kek");
-	}
 }

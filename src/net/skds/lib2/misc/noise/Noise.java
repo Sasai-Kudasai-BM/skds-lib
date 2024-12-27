@@ -5,8 +5,6 @@ import net.skds.lib2.misc.random.StateFuncRandom;
 
 public class Noise {
 
-	//private static final int HASH = "jop00a".hashCode();
-
 	private final float weightCorrection;
 	private final float periodScale;
 	private final float[] amplitudes;

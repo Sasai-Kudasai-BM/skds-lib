@@ -17,6 +17,50 @@ public class StringUtils {
 		return s.substring(1, s.length() - 1).replace("\\\"", "\"");
 	}
 
+	public static String cutStringBefore(String str, char split) {
+		int i = str.indexOf(split);
+		if (i == -1) {
+			return str;
+		}
+		return str.substring(0, i);
+	}
+
+	public static String cutStringAfter(String str, char split) {
+		int i = str.indexOf(split);
+		if (i == -1) {
+			return str;
+		}
+		if (i + 1 == str.length()) {
+			return "";
+		}
+		return str.substring(i + 1);
+	}
+
+	public static String cutStringBeforeFromEnd(String str, char split) {
+		int i = str.lastIndexOf(split);
+		if (i == -1) {
+			return str;
+		}
+		if (i == str.length() - 1) {
+			return str;
+		}
+		return str.substring(0, i + 1);
+	}
+
+	public static String cutStringAfterFromEnd(String str, char split) {
+		int i = str.lastIndexOf(split);
+		if (i == -1) {
+			return str;
+		}
+		if (i == str.length() - 1) {
+			return str;
+		}
+		if (i + 1 == str.length()) {
+			return "";
+		}
+		return str.substring(i + 1);
+	}
+
 	public static String readQuoted(CharInput input, char quote) throws IOException {
 		StringBuilder builder = null;
 		while (true) {

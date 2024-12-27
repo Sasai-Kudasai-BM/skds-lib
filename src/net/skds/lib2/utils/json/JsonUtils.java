@@ -12,8 +12,10 @@ import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -201,7 +203,7 @@ public class JsonUtils {
 					throw new UnsupportedOperationException("Value is not a TypedConfig");
 				}
 				out.beginObject();
-				ConfigType<CT> type = (ConfigType<CT>)tc.getConfigType();
+				ConfigType<CT> type = (ConfigType<CT>) tc.getConfigType();
 				out.name(type.keyName());
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				if (value instanceof JsonSerializeCall jps) {
@@ -261,28 +263,18 @@ public class JsonUtils {
 		return null;
 	}
 
+	public static <T> T readConfig(InputStream is, Class<T> clazz) {
+		try {
+			String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+			return parseConfig(text, clazz);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public static <T> T readConfig(String file, Class<T> clazz) {
 		return readConfig(Path.of(file), clazz);
-	}
-
-	private static final byte[] emptyBytes = {};
-
-	public static byte[] readBytes(File file) {
-		try {
-			return Files.readAllBytes(file.toPath());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return emptyBytes;
-	}
-
-	public static String readText(File file) {
-		try {
-			return Files.readString(file.toPath());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return "";
 	}
 
 	public static String toJsonCompact(Object cfg) {

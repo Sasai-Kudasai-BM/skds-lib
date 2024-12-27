@@ -125,7 +125,7 @@ public class NoiseFrame extends JFrame {
 			JSlider psSlider = new JSlider(100, 2000, 1000);
 			psSlider.addChangeListener(e -> {
 				periodScale = psSlider.getValue() * 1e-3f;
-				recreateNoise();
+				updateNoise();
 			});
 			add(psSlider);
 
@@ -133,7 +133,7 @@ public class NoiseFrame extends JFrame {
 			JSlider sliderSeed = new JSlider(0, 50, 0);
 			sliderSeed.addChangeListener(e -> {
 				seed = sliderSeed.getValue();
-				recreateNoise();
+				updateNoise();
 			});
 			add(sliderSeed);
 
@@ -179,12 +179,12 @@ public class NoiseFrame extends JFrame {
 				amp.setPreferredSize(new Dimension(22, 160));
 				ampPanel.add(amp);
 				ampSliders.add(amp);
-				amp.addChangeListener(e -> recreateNoise());
+				amp.addChangeListener(e -> updateNoise());
 			}
 
 			add(ampPanel);
 			add(ampCount);
-			recreateNoise();
+			updateNoise();
 		}
 
 		private void setAmpSliders(List<JSlider> ampSliders, JPanel ampPanel, int count) {
@@ -195,22 +195,22 @@ public class NoiseFrame extends JFrame {
 					amp.setPreferredSize(new Dimension(20, 160));
 					ampPanel.add(amp);
 					ampSliders.add(amp);
-					amp.addChangeListener(e -> recreateNoise());
+					amp.addChangeListener(e -> updateNoise());
 				}
 				ampPanel.revalidate();
-				recreateNoise();
+				updateNoise();
 			} else if (dc < 0) {
 				for (int i = 0; i > dc; i--) {
 					JSlider amp = ampSliders.removeLast();
 					ampPanel.remove(amp);
 				}
 				ampPanel.repaint();
-				recreateNoise();
+				updateNoise();
 			}
 		}
 	}
 
-	private void recreateNoise() {
+	private void updateNoise() {
 		float[] amps = new float[ampSliders.size()];
 		for (int i = 0; i < amps.length; i++) {
 			amps[i] = ampSliders.get(i).getValue() * 1e-2f;
