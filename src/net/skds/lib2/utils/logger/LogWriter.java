@@ -74,16 +74,22 @@ class LogWriter extends Thread {
 		logMsg.append(le.message()).append('\n');
 
 		String decoratedMsg = logMsg.toString();
-		switch (le.level()) {
-			case WARN, ERROR -> SKDSLogger.ORIGINAL_ERR.print(decoratedMsg);
-			default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
-		}
 
 		String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
 		Path path = Path.of(logName);
 
-		FileUtils.createParentDirs(path.toFile());
-		Files.writeString(path, decoratedMsg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-
+		try {
+			if (!Files.exists(path)) {
+				FileUtils.createParentDirs(path.toFile());
+			}
+			Files.writeString(path, decoratedMsg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			switch (le.level()) {
+				case WARN, ERROR -> SKDSLogger.ORIGINAL_ERR.print(decoratedMsg);
+				default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
+			}
+		} catch (Exception e) {
+			e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
+			entries.add(le);
+		}
 	}
 }

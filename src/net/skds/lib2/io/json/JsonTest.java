@@ -2,6 +2,7 @@ package net.skds.lib2.io.json;
 
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecFactory;
+import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.elements.*;
 
@@ -49,7 +50,10 @@ public class JsonTest {
 			return null;
 		};
 
-		JsonCodecRegistry registry = new JsonCodecRegistry(factory);
+		JsonCodecOptions options = new JsonCodecOptions();
+		options.setDecorationType(JsonCodecOptions.DecorationType.FANCY);
+
+		JsonCodecRegistry registry = new JsonCodecRegistry(options, factory);
 		JsonCodec<JsonObject> codec = registry.getCodec(JsonObject.class);
 		JsonObject jo = codec.parse(test);
 

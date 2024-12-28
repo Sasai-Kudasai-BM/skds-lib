@@ -17,7 +17,7 @@ public final class JsonReaderImpl implements JsonReader {
 	private int valueEnd;
 
 
-	public JsonReaderImpl(CharInput input) throws IOException {
+	public JsonReaderImpl(CharInput input) {
 		this.input = input;
 	}
 
