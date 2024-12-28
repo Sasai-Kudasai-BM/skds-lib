@@ -4,6 +4,7 @@ import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.ThreadUtils;
 import net.w3e.lib.utils.FileUtils;
 
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -51,7 +52,7 @@ class LogWriter extends Thread {
 	private void write(LogEntry le) {
 		Date date = new Date(le.time());
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
-		StringBuilder logMsg = new StringBuilder(le.level().color);
+		StringBuilder logMsg = new StringBuilder(le.level().getColor());
 		logMsg.append(config.getTimeFormat().format(date)).append(' ');
 		if (le.loggingClass() != null) {
 			logMsg.append('[').append(le.loggingClass().getSimpleName()).append("] ");
@@ -71,24 +72,27 @@ class LogWriter extends Thread {
 		}
 		logMsg.append('[').append(le.level().msg).append("] ");
 		logMsg.append(le.message()).append('\n');
-
 		String decoratedMsg = logMsg.toString();
 
 		String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
 		Path path = Path.of(logName);
 
 		try {
+			if (le.useGlobalPrintStream()) {
+				switch (le.level()) {
+					case WARN, ERROR, SYSTEM_ERR -> SKDSLogger.ORIGINAL_ERR.print(decoratedMsg);
+					default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
+				}
+			}
+			for (PrintStream ps : le.attachedPrintStreams()) {
+				ps.print(decoratedMsg);
+			}
 			if (!Files.exists(path)) {
 				FileUtils.createParentDirs(path.toFile());
 			}
 			Files.writeString(path, decoratedMsg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-			switch (le.level()) {
-				case WARN, ERROR -> SKDSLogger.ORIGINAL_ERR.print(decoratedMsg);
-				default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
-			}
 		} catch (Exception e) {
 			e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
-			entries.add(le);
 		}
 	}
 }

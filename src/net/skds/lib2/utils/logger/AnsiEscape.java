@@ -1,13 +1,9 @@
 package net.skds.lib2.utils.logger;
 
-import java.util.Locale;
-import java.util.stream.Stream;
-
+@SuppressWarnings("unused")
 public enum AnsiEscape {
-	/**
-     * Bright general attribute.
-     */
-    BRIGHT("1"),
+
+	BRIGHT("1"),
 	BLACK("30"),
 	RED("31"),
 	GREEN("32"),
@@ -33,15 +29,16 @@ public enum AnsiEscape {
 	BRIGHT_BLUE("94"),
 	BRIGHT_MAGENTA("95"),
 	BRIGHT_CYAN("96"),
-	BRIGHT_WHITE("97")
-	;
+	BRIGHT_WHITE("97");
 
 	private static final String DEFAULT_STYLE = "\u001b[m";
 
-	private final String code;
+	public final String code;
+	public final String sequence;
 
 	AnsiEscape(final String code) {
 		this.code = code;
+		this.sequence = "\u001b[" + code + "m";
 	}
 
 	public static String getDefaultStyle() {
@@ -50,14 +47,6 @@ public enum AnsiEscape {
 
 	public String getCode() {
 		return code;
-	}
-
-	public static String createSequence(final String... names) {
-		return createSequence(Stream.of(names).map(name -> Enum.valueOf(AnsiEscape.class, name.toUpperCase(Locale.ENGLISH))).toArray(AnsiEscape[]::new));
-	}
-
-	public static String createSequence(final AnsiEscape escape) {
-		return "\u001b[" + escape.getCode() + "m";
 	}
 
 	public static String createSequence(final AnsiEscape... escapes) {
@@ -73,8 +62,7 @@ public enum AnsiEscape {
 				}
 				first = false;
 				sb.append(escape.getCode());
-			} catch (final Exception ex) {
-				// Ignore the error.
+			} catch (final Exception ignored) {
 			}
 		}
 		sb.append("m");

@@ -1,9 +1,15 @@
 package net.skds.lib2.utils.logger;
 
 
+import java.io.PrintStream;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 final class SKDSLoggerImpl extends SKDSLogger {
 
+	private final ConcurrentLinkedQueue<PrintStream> attachedPrintStreams = new ConcurrentLinkedQueue<>();
 	private final Class<?> loggingClass;
+
+	private boolean useGlobalPrintStream = true;
 
 	public SKDSLoggerImpl(Class<?> loggingClass) {
 		this.loggingClass = loggingClass;
@@ -31,10 +37,25 @@ final class SKDSLoggerImpl extends SKDSLogger {
 			stackTop = trace[depth];
 		}
 
-		LogEntry e = new LogEntry(message, time, level, thread, stackTop, loggingClass);
+		LogEntry e = new LogEntry(message, time, level, thread, stackTop, loggingClass, useGlobalPrintStream, attachedPrintStreams);
 
 		LogWriter.INSTANCE.add(e);
 
+	}
+
+	@Override
+	public boolean attachPrintStream(PrintStream ps) {
+		return attachedPrintStreams.offer(ps);
+	}
+
+	@Override
+	public boolean detachPrintStream(PrintStream ps) {
+		return attachedPrintStreams.remove(ps);
+	}
+
+	@Override
+	public void setAttachToGlobal(boolean attached) {
+		this.useGlobalPrintStream = attached;
 	}
 
 	private boolean isLoggingLevel(LoggerLevel level) {

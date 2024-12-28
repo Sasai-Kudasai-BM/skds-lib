@@ -1,25 +1,23 @@
 package net.skds.lib2.utils.logger;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 public enum LoggerLevel {
-	SYSTEM_OUT("OUT", AnsiEscape.createSequence(AnsiEscape.GREEN)),
-	DEBUG("DEBUG", AnsiEscape.createSequence(AnsiEscape.CYAN)),
-	INFO("INFO", AnsiEscape.createSequence(AnsiEscape.BRIGHT_MAGENTA)),
-	LOG("LOG", AnsiEscape.createSequence(AnsiEscape.BLUE)),
-	WARN("WARN", AnsiEscape.createSequence(AnsiEscape.YELLOW)),
-	SYSTEM_ERR("SYSTEM_ERR", AnsiEscape.createSequence(AnsiEscape.BRIGHT_RED)),
-	ERROR("ERROR", AnsiEscape.createSequence(AnsiEscape.BRIGHT_RED));
+	SYSTEM_OUT("OUT", AnsiEscape.GREEN.sequence),
+	DEBUG("DEBUG", AnsiEscape.CYAN.sequence),
+	INFO("INFO", AnsiEscape.BRIGHT_MAGENTA.sequence),
+	LOG("LOG", AnsiEscape.BLUE.sequence),
+	WARN("WARN", AnsiEscape.YELLOW.sequence),
+	SYSTEM_ERR("SYSTEM_ERR", AnsiEscape.BRIGHT_RED.sequence),
+	ERROR("ERROR", AnsiEscape.BRIGHT_RED.sequence);
 
 	final String msg;
-	String color;
+	@Getter
+	private String color;
 
-	void setColor(AnsiEscape name) {
-		this.color = AnsiEscape.createSequence(name);
-	}
-
-	void setColor(AnsiEscape... names) {
-		this.color = AnsiEscape.createSequence(names);
+	void setColor(AnsiEscape ansi) {
+		this.color = ansi.sequence;
 	}
 }

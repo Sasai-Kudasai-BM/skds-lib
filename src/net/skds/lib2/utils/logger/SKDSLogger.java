@@ -30,6 +30,12 @@ public abstract class SKDSLogger {
 		log0(LoggerLevel.ERROR, DEPTH, msg);
 	}
 
+	public abstract boolean attachPrintStream(PrintStream ps);
+
+	public abstract boolean detachPrintStream(PrintStream ps);
+
+	public abstract void setAttachToGlobal(boolean attached);
+
 	public static void replaceOuts() {
 		System.setOut(new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT));
 		System.setErr(new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR));
