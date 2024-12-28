@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @AllArgsConstructor
 public enum LoggerLevel {
-	SYSTEM_OUT("OUT", AnsiEscape.GREEN.sequence),
+	SYSTEM_OUT("SYS_OUT", AnsiEscape.GREEN.sequence),
 	DEBUG("DEBUG", AnsiEscape.CYAN.sequence),
 	INFO("INFO", AnsiEscape.BRIGHT_MAGENTA.sequence),
 	LOG("LOG", AnsiEscape.BLUE.sequence),
 	WARN("WARN", AnsiEscape.YELLOW.sequence),
-	SYSTEM_ERR("SYSTEM_ERR", AnsiEscape.BRIGHT_RED.sequence),
+	SYSTEM_ERR("SYS_ERR", AnsiEscape.BRIGHT_RED.sequence),
 	ERROR("ERROR", AnsiEscape.BRIGHT_RED.sequence);
 
 	final String msg;
