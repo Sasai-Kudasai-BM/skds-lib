@@ -36,6 +36,8 @@ public abstract class SKDSLogger {
 
 	public abstract void setAttachToGlobal(boolean attached);
 
+	public abstract void setAttachToFile(boolean attached);
+
 	public static void replaceOuts() {
 		System.setOut(new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT));
 		System.setErr(new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR));

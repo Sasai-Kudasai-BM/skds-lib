@@ -87,10 +87,12 @@ class LogWriter extends Thread {
 			for (PrintStream ps : le.attachedPrintStreams()) {
 				ps.print(decoratedMsg);
 			}
-			if (!Files.exists(path)) {
-				FileUtils.createParentDirs(path.toFile());
+			if (le.useFileOut()) {
+				if (!Files.exists(path)) {
+					FileUtils.createParentDirs(path.toFile());
+				}
+				Files.writeString(path, decoratedMsg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 			}
-			Files.writeString(path, decoratedMsg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (Exception e) {
 			e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
 		}

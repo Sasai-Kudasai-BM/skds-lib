@@ -10,6 +10,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 	private final Class<?> loggingClass;
 
 	private boolean useGlobalPrintStream = true;
+	private boolean useFileOut = true;
 
 	public SKDSLoggerImpl(Class<?> loggingClass) {
 		this.loggingClass = loggingClass;
@@ -37,7 +38,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 			stackTop = trace[depth];
 		}
 
-		LogEntry e = new LogEntry(message, time, level, thread, stackTop, loggingClass, useGlobalPrintStream, attachedPrintStreams);
+		LogEntry e = new LogEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreams, useGlobalPrintStream, useFileOut);
 
 		LogWriter.INSTANCE.add(e);
 
@@ -56,6 +57,11 @@ final class SKDSLoggerImpl extends SKDSLogger {
 	@Override
 	public void setAttachToGlobal(boolean attached) {
 		this.useGlobalPrintStream = attached;
+	}
+
+	@Override
+	public void setAttachToFile(boolean attached) {
+		this.useFileOut = attached;
 	}
 
 	private boolean isLoggingLevel(LoggerLevel level) {
