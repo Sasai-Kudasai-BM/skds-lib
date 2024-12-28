@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class SKDSLogger {
 
 	static final ConcurrentLinkedQueue<PrintStream> attachedPrintStreams = new ConcurrentLinkedQueue<>();
+	protected static boolean useGlobalPrintStream = true;
+	protected static boolean useFileOut = true;
+
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
 	private static final int DEPTH = 3;
@@ -40,9 +43,13 @@ public abstract class SKDSLogger {
 		return attachedPrintStreams.remove(ps);
 	}
 
-	public abstract void setAttachToGlobal(boolean attached);
+	public static void setAttachToGlobal(boolean attached) {
+		useGlobalPrintStream = attached;
+	}
 
-	public abstract void setAttachToFile(boolean attached);
+	public static void setAttachToFile(boolean attached) {
+		useFileOut = attached;
+	}
 
 	public static void replaceOuts() {
 		System.setOut(new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT));
