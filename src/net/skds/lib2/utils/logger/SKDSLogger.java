@@ -11,6 +11,8 @@ public abstract class SKDSLogger {
 
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
+	public static final PrintStream REPLACED_OUT = new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT);
+	public static final PrintStream REPLACED_ERR = new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR);
 	private static final int DEPTH = 3;
 
 	protected abstract void log0(LoggerLevel level, int depth, Object msg);
@@ -31,7 +33,7 @@ public abstract class SKDSLogger {
 		log0(LoggerLevel.WARN, DEPTH, msg);
 	}
 
-	public void err(Object msg) {
+	public void error(Object msg) {
 		log0(LoggerLevel.ERROR, DEPTH, msg);
 	}
 
@@ -52,10 +54,9 @@ public abstract class SKDSLogger {
 	}
 
 	public static void replaceOuts() {
-		System.setOut(new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT));
-		System.setErr(new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR));
+		System.setOut(REPLACED_OUT);
+		System.setErr(REPLACED_ERR);
 	}
-
 
 	static void printLn(LoggerLevel level) {
 		if (!SKDSLoggerConfig.getLevels().contains(level)) return;

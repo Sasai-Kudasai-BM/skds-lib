@@ -3,18 +3,18 @@ package net.skds.lib2.utils.logger;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-class CustomPrintStream extends PrintStream {
+public class CustomPrintStream extends PrintStream {
 
 	private static final SKDSLogger log = SKDSLoggerFactory.getLogger(CustomPrintStream.class);
 
-	private final Type type;
+	protected final Type type;
 
 	public CustomPrintStream(Type t, OutputStream out) {
 		super(out);
 		this.type = t;
 	}
 
-	private void logLine(String x) {
+	protected void logLine(String x) {
 		switch (this.type) {
 			case OUT -> log.log0(LoggerLevel.SYSTEM_OUT, 4, x);
 			case ERR -> log.log0(LoggerLevel.SYSTEM_ERR, 4, x);
