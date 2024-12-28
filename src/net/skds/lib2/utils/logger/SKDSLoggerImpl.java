@@ -38,7 +38,6 @@ final class SKDSLoggerImpl extends SKDSLogger {
 
 	}
 
-
 	private boolean isLoggingLevel(LoggerLevel level) {
 		return SKDSLoggerConfig.getLevels().contains(level);
 	}

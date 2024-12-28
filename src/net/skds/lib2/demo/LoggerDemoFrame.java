@@ -49,6 +49,12 @@ public class LoggerDemoFrame extends JFrame {
 		});
 		add(btn);
 
+		btn = new JButton("println");
+		btn.addActionListener(e -> {
+			System.out.println();
+		});
+		add(btn);
+
 
 		setMinimumSize(new Dimension(300, 50));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);

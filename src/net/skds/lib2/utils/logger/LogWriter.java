@@ -1,6 +1,5 @@
 package net.skds.lib2.utils.logger;
 
-import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.ThreadUtils;
 import net.w3e.lib.utils.FileUtils;
 
@@ -17,7 +16,7 @@ class LogWriter extends Thread {
 
 	private boolean wait = true;
 
-	private final LinkedBlockingQueue<LogEntry> entries = new LinkedBlockingQueue<>();
+	private final LinkedBlockingQueue<LogWriteable> entries = new LinkedBlockingQueue<>();
 
 	public LogWriter() {
 		super("SKDS-LogWriter");
@@ -36,65 +35,46 @@ class LogWriter extends Thread {
 		while (true) {
 			try {
 				wait = true;
-				LogEntry le = entries.take();
+				LogWriteable le = entries.take();
 				wait = false;
-				write(le);
+				le.write();
 			} catch (Exception e) {
 				e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
 			}
 		}
 	}
 
-	public void add(LogEntry le) {
-		entries.offer(le);
-	}
-
-	private void write(LogEntry le) {
-		Date date = new Date(le.time());
+	static void write(Date date, String msg, LoggerLevel level, boolean useGlobalPrintStream, boolean useFileOut) {
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
-		StringBuilder logMsg = new StringBuilder(le.level().getColor());
-		logMsg.append(config.getTimeFormat().format(date)).append(' ');
-		if (le.loggingClass() != null) {
-			logMsg.append('[').append(le.loggingClass().getSimpleName()).append("] ");
-		}
-		if (le.thread() != null) {
-			logMsg.append('[').append(le.thread()).append("] ");
-		}
-		StackTraceElement trace = le.trace();
-		if (trace != null) {
-			logMsg.append('[')
-					.append(StringUtils.cutStringAfterFromEnd(trace.getClassName(), '.'))
-					.append(':')
-					.append(trace.getMethodName())
-					.append('.')
-					.append(trace.getLineNumber())
-					.append("] ");
-		}
-		logMsg.append('[').append(le.level().msg).append("] ");
-		logMsg.append(le.message()).append('\n');
-		String decoratedMsg = logMsg.toString();
-
-		String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
-		Path path = Path.of(logName);
-
 		try {
-			if (le.useGlobalPrintStream()) {
-				switch (le.level()) {
-					case WARN, ERROR, SYSTEM_ERR -> SKDSLogger.ORIGINAL_ERR.print(decoratedMsg);
-					default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
+			if (useGlobalPrintStream) {
+				switch (level) {
+					case WARN, ERROR, SYSTEM_ERR -> SKDSLogger.ORIGINAL_ERR.print(msg);
+					default -> SKDSLogger.ORIGINAL_OUT.print(msg);
 				}
 			}
 			for (PrintStream ps : SKDSLogger.attachedPrintStreams) {
-				ps.print(decoratedMsg);
+				ps.print(msg);
 			}
-			if (le.useFileOut()) {
+			if (useFileOut) {
+				String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
+				Path path = Path.of(logName);
 				if (!Files.exists(path)) {
 					FileUtils.createParentDirs(path.toFile());
 				}
-				Files.writeString(path, decoratedMsg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+				Files.writeString(path, msg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 			}
 		} catch (Exception e) {
 			e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
 		}
 	}
+
+	public void add(LogWriteable le) {
+		entries.offer(le);
+	}
+
+	interface LogWriteable {
+		void write();
+	}
+
 }

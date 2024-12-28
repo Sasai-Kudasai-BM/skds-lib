@@ -56,4 +56,12 @@ public abstract class SKDSLogger {
 		System.setErr(new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR));
 	}
 
+
+	static void printLn(LoggerLevel level) {
+		if (!SKDSLoggerConfig.getLevels().contains(level)) return;
+		long time = System.currentTimeMillis();
+		LogPrintln e = new LogPrintln(time, level, useGlobalPrintStream, useFileOut);
+		LogWriter.INSTANCE.add(e);
+	}
+
 }

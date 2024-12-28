@@ -26,6 +26,14 @@ class CustomPrintStream extends PrintStream {
 	}
 
 	@Override
+	public void println() {
+		switch (this.type) {
+			case OUT -> SKDSLogger.printLn(LoggerLevel.SYSTEM_OUT);
+			case ERR -> SKDSLogger.printLn(LoggerLevel.SYSTEM_ERR);
+		}
+	}
+
+	@Override
 	public final void println(boolean x) {
 		this.logLine(String.valueOf(x));
 	}
@@ -104,6 +112,6 @@ class CustomPrintStream extends PrintStream {
 	public final void print(Object x) {
 		this.logLine(String.valueOf(x));
 	}
-	
+
 
 }
