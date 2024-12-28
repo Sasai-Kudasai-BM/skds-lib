@@ -84,7 +84,7 @@ class LogWriter extends Thread {
 					default -> SKDSLogger.ORIGINAL_OUT.print(decoratedMsg);
 				}
 			}
-			for (PrintStream ps : le.attachedPrintStreams()) {
+			for (PrintStream ps : SKDSLogger.attachedPrintStreams) {
 				ps.print(decoratedMsg);
 			}
 			if (le.useFileOut()) {

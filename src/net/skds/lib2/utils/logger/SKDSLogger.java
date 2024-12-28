@@ -1,9 +1,11 @@
 package net.skds.lib2.utils.logger;
 
 import java.io.PrintStream;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class SKDSLogger {
 
+	static final ConcurrentLinkedQueue<PrintStream> attachedPrintStreams = new ConcurrentLinkedQueue<>();
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
 	private static final int DEPTH = 3;
@@ -30,9 +32,13 @@ public abstract class SKDSLogger {
 		log0(LoggerLevel.ERROR, DEPTH, msg);
 	}
 
-	public abstract boolean attachPrintStream(PrintStream ps);
+	public static boolean attachPrintStream(PrintStream ps) {
+		return attachedPrintStreams.offer(ps);
+	}
 
-	public abstract boolean detachPrintStream(PrintStream ps);
+	public static boolean detachPrintStream(PrintStream ps) {
+		return attachedPrintStreams.remove(ps);
+	}
 
 	public abstract void setAttachToGlobal(boolean attached);
 
