@@ -248,6 +248,18 @@ public class FastMath {
 		return diff;
 	}
 
+	public static double cosInterpolate(double t, double min, double max) {
+		double ft = t * 180;
+		double f = (1 - cosDegr(ft)) * .5;
+		return min * (1 - f) + max * f;
+	}
+
+	public static float cosInterpolate(float t, float min, float max) {
+		float ft = t * 180;
+		float f = (1 - cosDegr(ft)) * .5f;
+		return min * (1 - f) + max * f;
+	}
+
 	public static double lerp(double t, double min, double max) {
 		return (max - min) * t + min;
 	}
@@ -421,6 +433,10 @@ public class FastMath {
 		return Math.abs(a - b) < eps;
 	}
 
+	@FunctionalInterface
+	public interface FloatInterpolation {
+		float interpolate(float t, float min, float max);
+	}
 
 	static {
 		for (int i = 0; i < sinTable.length; i++) {

@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class NoiseFrame extends JFrame {
 
@@ -66,6 +67,18 @@ public class NoiseFrame extends JFrame {
 			}
 	};
 
+	private static final InterpolationHolder[] interpolations = {
+			new InterpolationHolder(FastMath::cosInterpolate, "cos"),
+			new InterpolationHolder(FastMath::lerp, "lerp")
+	};
+
+	private record InterpolationHolder(FastMath.FloatInterpolation interpolation, String name) {
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
 	private final List<JSlider> ampSliders = new ArrayList<>();
 
 	private final NoisePanel noisePanel;
@@ -80,6 +93,7 @@ public class NoiseFrame extends JFrame {
 	private float colorScale = 1.5f;
 	private float colorBias = -.2f;
 
+	private FastMath.FloatInterpolation interpolation = interpolations[0].interpolation;
 	private ColorScheme colorScheme = schemes[0];
 	private long seed = 0;
 
@@ -162,6 +176,14 @@ public class NoiseFrame extends JFrame {
 			});
 			add(schemeSelector);
 
+			add(new JLabel("Interpolation"));
+			JComboBox<InterpolationHolder> interpolationSelector = new JComboBox<>(interpolations);
+			interpolationSelector.addActionListener(e -> {
+				interpolation = ((InterpolationHolder) Objects.requireNonNull(interpolationSelector.getSelectedItem())).interpolation;
+				updateNoise();
+			});
+			add(interpolationSelector);
+
 			JPanel ampPanel = new JPanel();
 
 			ampPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
@@ -176,7 +198,7 @@ public class NoiseFrame extends JFrame {
 			int dc = ampCount.getValue() - ampSliders.size();
 			for (int i = 0; i < dc; i++) {
 				JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
-				amp.setPreferredSize(new Dimension(22, 160));
+				amp.setPreferredSize(new Dimension(22, 120));
 				ampPanel.add(amp);
 				ampSliders.add(amp);
 				amp.addChangeListener(e -> updateNoise());
@@ -192,7 +214,7 @@ public class NoiseFrame extends JFrame {
 			if (dc > 0) {
 				for (int i = 0; i < dc; i++) {
 					JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
-					amp.setPreferredSize(new Dimension(20, 160));
+					amp.setPreferredSize(new Dimension(20, 120));
 					ampPanel.add(amp);
 					ampSliders.add(amp);
 					amp.addChangeListener(e -> updateNoise());
@@ -215,7 +237,7 @@ public class NoiseFrame extends JFrame {
 		for (int i = 0; i < amps.length; i++) {
 			amps[i] = ampSliders.get(i).getValue() * 1e-2f;
 		}
-		this.noise = new Noise(seed, amps, periodScale);
+		this.noise = new Noise(seed, amps, periodScale, interpolation);
 		noisePanel.repaint();
 	}
 

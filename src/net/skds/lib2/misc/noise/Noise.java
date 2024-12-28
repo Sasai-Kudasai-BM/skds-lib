@@ -10,12 +10,14 @@ public class Noise {
 	private final float[] amplitudes;
 	private final StateFuncRandom[] layers;
 	private final int layerCount;
+	private final FastMath.FloatInterpolation interpolation;
 
-	public Noise(long seed, float[] amplitudes, float periodScale) {
+	public Noise(long seed, float[] amplitudes, float periodScale, FastMath.FloatInterpolation interpolation) {
 		int layerCount = amplitudes.length;
 		this.periodScale = periodScale;
 		this.layerCount = layerCount;
 		this.amplitudes = amplitudes;
+		this.interpolation = interpolation;
 		this.layers = new StateFuncRandom[layerCount];
 
 		StateFuncRandom layer0 = new StateFuncRandom(seed);
@@ -57,10 +59,10 @@ public class Noise {
 			float v01 = sfr.randomize(x0, y1);
 			float v11 = sfr.randomize(x1, y1);
 
-			float s0 = FastMath.lerp(ky, v00, v01);
-			float s1 = FastMath.lerp(ky, v10, v11);
+			float s0 = interpolation.interpolate(ky, v00, v01);
+			float s1 = interpolation.interpolate(ky, v10, v11);
 
-			value += FastMath.lerp(kx, s0, s1) * amp;
+			value += interpolation.interpolate(kx, s0, s1) * amp;
 		}
 
 		return value * weightCorrection;
@@ -101,15 +103,15 @@ public class Noise {
 			float v011 = sfr.randomize(x0, y1, z1);
 			float v111 = sfr.randomize(x1, y1, z1);
 
-			float b00 = FastMath.lerp(kz, v000, v001);
-			float b10 = FastMath.lerp(kz, v100, v101);
-			float b01 = FastMath.lerp(kz, v010, v011);
-			float b11 = FastMath.lerp(kz, v110, v111);
+			float b00 = interpolation.interpolate(kz, v000, v001);
+			float b10 = interpolation.interpolate(kz, v100, v101);
+			float b01 = interpolation.interpolate(kz, v010, v011);
+			float b11 = interpolation.interpolate(kz, v110, v111);
 
-			float s0 = FastMath.lerp(ky, b00, b01);
-			float s1 = FastMath.lerp(ky, b10, b11);
+			float s0 = interpolation.interpolate(ky, b00, b01);
+			float s1 = interpolation.interpolate(ky, b10, b11);
 
-			value += FastMath.lerp(kx, s0, s1) * amp;
+			value += interpolation.interpolate(kx, s0, s1) * amp;
 		}
 
 		return value * weightCorrection;

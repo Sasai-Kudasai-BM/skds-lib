@@ -5,7 +5,6 @@ final class SKDSLoggerImpl extends SKDSLogger {
 
 	private final Class<?> loggingClass;
 
-
 	public SKDSLoggerImpl(Class<?> loggingClass) {
 		this.loggingClass = loggingClass;
 	}
