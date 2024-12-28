@@ -62,6 +62,9 @@ class LogWriter extends Thread {
 				if (!Files.exists(path)) {
 					FileUtils.createParentDirs(path.toFile());
 				}
+				if (msg.length() > 3) {
+					msg = msg.substring(level.getColor().length());
+				}
 				Files.writeString(path, msg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 			}
 		} catch (Exception e) {
