@@ -10,7 +10,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 	}
 
 	@Override
-	public void log0(LoggerLevel level, Object msg) {
+	public void log0(LoggerLevel level, int depth, Object msg) {
 		if (!isLoggingLevel(level)) return;
 		String message = String.valueOf(msg);
 		long time = System.currentTimeMillis();
@@ -28,7 +28,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 		}
 		if (config.isLogStackTop()) {
 			var trace = Thread.currentThread().getStackTrace();
-			stackTop = trace[3];
+			stackTop = trace[depth];
 		}
 
 		LogEntry e = new LogEntry(message, time, level, thread, stackTop, loggingClass);

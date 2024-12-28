@@ -16,8 +16,8 @@ class CustomPrintStream extends PrintStream {
 
 	private void logLine(String x) {
 		switch (this.type) {
-			case OUT -> log.info(x);
-			case ERR -> log.err(x);
+			case OUT -> log.log0(LoggerLevel.SYSTEM_OUT, 4, x);
+			case ERR -> log.log0(LoggerLevel.SYSTEM_ERR, 4, x);
 		}
 	}
 

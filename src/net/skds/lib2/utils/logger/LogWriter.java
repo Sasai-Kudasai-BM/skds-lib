@@ -4,7 +4,6 @@ import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.ThreadUtils;
 import net.w3e.lib.utils.FileUtils;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -49,10 +48,10 @@ class LogWriter extends Thread {
 		entries.offer(le);
 	}
 
-	private void write(LogEntry le) throws IOException {
+	private void write(LogEntry le) {
 		Date date = new Date(le.time());
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
-		StringBuilder logMsg = new StringBuilder();
+		StringBuilder logMsg = new StringBuilder(le.level().color);
 		logMsg.append(config.getTimeFormat().format(date)).append(' ');
 		if (le.loggingClass() != null) {
 			logMsg.append('[').append(le.loggingClass().getSimpleName()).append("] ");

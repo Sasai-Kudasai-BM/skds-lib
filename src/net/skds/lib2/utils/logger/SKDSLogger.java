@@ -6,27 +6,28 @@ public abstract class SKDSLogger {
 
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
+	private static final int DEPTH = 3;
 
-	protected abstract void log0(LoggerLevel level, Object msg);
+	protected abstract void log0(LoggerLevel level, int depth, Object msg);
 
 	public void debug(Object msg) {
-		log0(LoggerLevel.DEBUG, msg);
+		log0(LoggerLevel.DEBUG, DEPTH, msg);
 	}
 
 	public void info(Object msg) {
-		log0(LoggerLevel.INFO, msg);
+		log0(LoggerLevel.INFO, DEPTH, msg);
 	}
 
 	public void log(Object msg) {
-		log0(LoggerLevel.LOG, msg);
+		log0(LoggerLevel.LOG, DEPTH, msg);
 	}
 
 	public void warn(Object msg) {
-		log0(LoggerLevel.WARN, msg);
+		log0(LoggerLevel.WARN, DEPTH, msg);
 	}
 
 	public void err(Object msg) {
-		log0(LoggerLevel.ERROR, msg);
+		log0(LoggerLevel.ERROR, DEPTH, msg);
 	}
 
 	public static void replaceOuts() {

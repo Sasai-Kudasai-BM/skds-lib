@@ -6,7 +6,6 @@ import net.skds.lib2.utils.logger.SKDSLogger;
 import javax.swing.*;
 import java.awt.*;
 
-
 @CustomLog
 public class LoggerDemoFrame extends JFrame {
 

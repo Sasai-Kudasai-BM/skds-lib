@@ -7,15 +7,17 @@ import net.skds.lib2.utils.json.JsonUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Locale;
+import java.util.Map.Entry;
 
 public final class SKDSLoggerConfig {
 
 	@Getter
 	private static SKDSLoggerConfig instance;
 	@Getter(AccessLevel.PACKAGE)
-	private static EnumSet<LoggerLevel> levels = EnumSet.of(LoggerLevel.INFO, LoggerLevel.LOG, LoggerLevel.WARN, LoggerLevel.ERROR);
+	private static EnumSet<LoggerLevel> levels = EnumSet.allOf(LoggerLevel.class);
 
 	@Getter(AccessLevel.PACKAGE)
 	private final SimpleDateFormat timeFormat;
@@ -37,8 +39,10 @@ public final class SKDSLoggerConfig {
 		this.logStackTop = cfg.includeStackTop;
 		this.includeLoggerClass = cfg.includeLoggerClass;
 		this.logDir = cfg.logDir;
+		for (Entry<LoggerLevel, AnsiEscape> entry : cfg.ansiColors.entrySet()) {
+			entry.getKey().setColor(entry.getValue());
+		}
 	}
-
 
 	@SuppressWarnings("FieldMayBeFinal")
 	private static final class Cfg {
@@ -48,6 +52,7 @@ public final class SKDSLoggerConfig {
 		private boolean includeThread = true;
 		private boolean includeLoggerClass = false;
 		private boolean includeStackTop = true;
+		private EnumMap<LoggerLevel, AnsiEscape> ansiColors = new EnumMap<>(LoggerLevel.class);
 	}
 
 	private static void load() {
