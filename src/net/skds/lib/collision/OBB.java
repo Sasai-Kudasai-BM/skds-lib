@@ -9,8 +9,8 @@ public class OBB implements ConvexShape {
 	public final Vec3 pos;
 	public final Vec3 dimensions;
 
-	private Vec3[] vertexCash = null;
-	private Box boundingCash = null;
+	private Vec3[] vertexCache = null;
+	private Box boundingCache = null;
 
 	private Object attachment = null;
 
@@ -25,8 +25,8 @@ public class OBB implements ConvexShape {
 		this.pos = obb.pos.copy();
 		this.baseMatrix = obb.baseMatrix.copy();
 		this.dimensions = obb.dimensions.copy();
-		this.vertexCash = obb.vertexCash;
-		this.boundingCash = obb.boundingCash;
+		this.vertexCache = obb.vertexCache;
+		this.boundingCache = obb.boundingCache;
 	}
 
 	public OBB(Vec3 dimensions) {
@@ -90,34 +90,39 @@ public class OBB implements ConvexShape {
 	}
 
 	public void update() {
-		this.vertexCash = null;
-		this.boundingCash = null;
+		this.vertexCache = null;
+		this.boundingCache = null;
 	}
 
 	@Override
 	public Box getBoundingBox() {
-		if (boundingCash == null) {
-			boundingCash = createBounding();
+		Box cache = boundingCache;
+		if (cache == null) {
+			cache = createBounding();
+			this.boundingCache = cache;
 		}
-		return boundingCash;
+		return boundingCache;
 	}
 
 	@Override
 	public Vec3[] getPoints() {
-		if (vertexCash == null) {
+		Vec3[] cache = vertexCache;
+		if (cache == null) {
 			Vec3 hd = dimensions.copy().transform(baseMatrix).scale(.5);
-			vertexCash = new Vec3[8];
-			vertexCash[0] = pos.copy().sub(hd);
-			vertexCash[1] = baseMatrix.left().scale(dimensions.x).add(vertexCash[0]);
-			vertexCash[2] = baseMatrix.up().scale(dimensions.y).add(vertexCash[0]);
-			vertexCash[3] = baseMatrix.forward().scale(dimensions.z).add(vertexCash[0]);
-			vertexCash[4] = pos.copy().add(hd);
-			vertexCash[5] = baseMatrix.left().scale(-dimensions.x).add(vertexCash[4]);
-			vertexCash[6] = baseMatrix.up().scale(-dimensions.y).add(vertexCash[4]);
-			vertexCash[7] = baseMatrix.forward().scale(-dimensions.z).add(vertexCash[4]);
+			cache = new Vec3[8];
+			cache[0] = pos.copy().sub(hd);
+			cache[1] = baseMatrix.left().scale(dimensions.x).add(cache[0]);
+			cache[2] = baseMatrix.up().scale(dimensions.y).add(cache[0]);
+			cache[3] = baseMatrix.forward().scale(dimensions.z).add(cache[0]);
+			cache[4] = pos.copy().add(hd);
+			cache[5] = baseMatrix.left().scale(-dimensions.x).add(cache[4]);
+			cache[6] = baseMatrix.up().scale(-dimensions.y).add(cache[4]);
+			cache[7] = baseMatrix.forward().scale(-dimensions.z).add(cache[4]);
+
+			this.vertexCache = cache;
 		}
 
-		return vertexCash;
+		return cache;
 	}
 
 	public Vec3[] getLines() {

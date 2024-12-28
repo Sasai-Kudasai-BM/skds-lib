@@ -21,7 +21,7 @@ public final class Box implements ConvexShape {
 
 	private static final Vec3[] normals = {Vec3.XP, Vec3.YP, Vec3.ZP};
 
-	private Vec3[] pointsCash;
+	private Vec3[] pointsCache;
 
 	/**
 	 * Creates a box of the given positions as corners.
@@ -674,8 +674,9 @@ public final class Box implements ConvexShape {
 
 	@Override
 	public Vec3[] getPoints() {
-		if (pointsCash == null) {
-			pointsCash = new Vec3[]{
+		Vec3[] cache = pointsCache;
+		if (cache == null) {
+			cache = new Vec3[]{
 					new Vec3(minX, minY, minZ),
 					new Vec3(minX, minY, maxZ),
 					new Vec3(minX, maxY, minZ),
@@ -685,8 +686,9 @@ public final class Box implements ConvexShape {
 					new Vec3(maxX, maxY, minZ),
 					new Vec3(maxX, maxY, maxZ)
 			};
+			this.pointsCache = cache;
 		}
-		return pointsCash;
+		return cache;
 	}
 
 	@Override
