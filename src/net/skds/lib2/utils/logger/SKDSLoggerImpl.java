@@ -10,7 +10,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 	}
 
 	@Override
-	public void log0(LoggerLevel level, int depth, Object msg) {
+	protected void log0(LoggerLevel level, int depth, Object msg) {
 		if (!isLoggingLevel(level)) return;
 		String message = String.valueOf(msg);
 		long time = System.currentTimeMillis();
