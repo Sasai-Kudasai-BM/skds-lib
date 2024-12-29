@@ -17,6 +17,14 @@ public class StringUtils {
 		return s.substring(1, s.length() - 1).replace("\\\"", "\"");
 	}
 
+	public static String unicodeCharUC(int c) {
+		return "\\u%04X".formatted(c);
+	}
+
+	public static String unicodeCharLC(int c) {
+		return "\\u%04x".formatted(c);
+	}
+
 	public static String cutStringBefore(String str, char split) {
 		int i = str.indexOf(split);
 		if (i == -1) {

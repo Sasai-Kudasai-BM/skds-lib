@@ -8,6 +8,7 @@ import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
@@ -47,7 +48,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 
 		private final JsonCodec<JsonElement> elementCodec;
 
-		public Codec(JsonCodecRegistry registry) {
+		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);
 			this.elementCodec = registry.getCodec(JsonElement.class);
 		}

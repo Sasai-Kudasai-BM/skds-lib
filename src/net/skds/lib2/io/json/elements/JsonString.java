@@ -9,6 +9,7 @@ import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public record JsonString(String value) implements JsonElement {
 
@@ -19,7 +20,7 @@ public record JsonString(String value) implements JsonElement {
 
 	public static final class Codec extends JsonCodec<JsonString> {
 
-		public Codec(JsonCodecRegistry registry) {
+		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);
 		}
 

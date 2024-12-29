@@ -1,6 +1,8 @@
 package net.skds.lib2.io.json.codec;
 
 import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.function.Function;
 
 @FunctionalInterface
 public interface JsonCodecFactory {
@@ -15,5 +17,20 @@ public interface JsonCodecFactory {
 			}
 			return c;
 		};
+	}
+
+	class MapJsonFactory implements JsonCodecFactory {
+
+		private final Map<Type, Function<JsonCodecRegistry, JsonCodec<?>>> map;
+
+		public MapJsonFactory(Map<Type, Function<JsonCodecRegistry, JsonCodec<?>>> map) {
+			this.map = map;
+		}
+
+		@Override
+		public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+			Function<JsonCodecRegistry, JsonCodec<?>> fac = map.get(type);
+			return fac == null ? null : fac.apply(registry);
+		}
 	}
 }

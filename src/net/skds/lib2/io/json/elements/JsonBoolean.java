@@ -8,6 +8,7 @@ import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Objects;
 
 public record JsonBoolean(boolean value) implements JsonElement {
@@ -29,7 +30,7 @@ public record JsonBoolean(boolean value) implements JsonElement {
 
 	public static final class Codec extends JsonCodec<JsonBoolean> {
 
-		public Codec(JsonCodecRegistry registry) {
+		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);
 		}
 

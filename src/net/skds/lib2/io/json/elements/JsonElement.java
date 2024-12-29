@@ -8,6 +8,7 @@ import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, JsonArray, JsonNumber, JsonObject, JsonString {
 
@@ -64,7 +65,7 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 	class Codec extends JsonCodec<JsonElement> {
 
 
-		public Codec(JsonCodecRegistry registry) {
+		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);
 		}
 

@@ -384,4 +384,164 @@ public class ArrayUtils {
 			return hash;
 		}
 	}
+
+	public static final class ByteGrowingArray {
+		private int pos = 0;
+		private byte[] array;
+
+		public ByteGrowingArray(int initialSize) {
+			this.array = new byte[initialSize];
+		}
+
+		public void add(byte value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public byte[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class BooleanGrowingArray {
+		private int pos = 0;
+		private boolean[] array;
+
+		public BooleanGrowingArray(int initialSize) {
+			this.array = new boolean[initialSize];
+		}
+
+		public void add(boolean value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public boolean[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class ShortGrowingArray {
+		private int pos = 0;
+		private short[] array;
+
+		public ShortGrowingArray(int initialSize) {
+			this.array = new short[initialSize];
+		}
+
+		public void add(short value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public short[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class CharGrowingArray {
+		private int pos = 0;
+		private char[] array;
+
+		public CharGrowingArray(int initialSize) {
+			this.array = new char[initialSize];
+		}
+
+		public void add(char value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public char[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class IntGrowingArray {
+		private int pos = 0;
+		private int[] array;
+
+		public IntGrowingArray(int initialSize) {
+			this.array = new int[initialSize];
+		}
+
+		public void add(int value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public int[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class LongGrowingArray {
+		private int pos = 0;
+		private long[] array;
+
+		public LongGrowingArray(int initialSize) {
+			this.array = new long[initialSize];
+		}
+
+		public void add(long value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public long[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class FloatGrowingArray {
+		private int pos = 0;
+		private float[] array;
+
+		public FloatGrowingArray(int initialSize) {
+			this.array = new float[initialSize];
+		}
+
+		public void add(float value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public float[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
+
+	public static final class DoubleGrowingArray {
+		private int pos = 0;
+		private double[] array;
+
+		public DoubleGrowingArray(int initialSize) {
+			this.array = new double[initialSize];
+		}
+
+		public void add(double value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public double[] getArray() {
+			return Arrays.copyOf(array, pos);
+		}
+	}
 }

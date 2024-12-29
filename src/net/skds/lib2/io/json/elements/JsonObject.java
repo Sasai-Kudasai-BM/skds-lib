@@ -9,6 +9,7 @@ import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 public final class JsonObject extends HashMap<String, JsonElement> implements JsonElement {
@@ -46,7 +47,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 
 		private final JsonCodec<JsonElement> elementCodec;
 
-		public Codec(JsonCodecRegistry registry) {
+		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);
 			this.elementCodec = registry.getCodec(JsonElement.class);
 		}
