@@ -22,7 +22,6 @@ class LogWriter extends Thread {
 	private final LinkedBlockingQueue<LogWriteable> entries = new LinkedBlockingQueue<>();
 	private final FileLogWriter fileWriter;
 
-	private final Object busyMonitor = new Object();
 
 	public LogWriter() {
 		super("SKDS-LogWriter");
@@ -42,21 +41,10 @@ class LogWriter extends Thread {
 		return getState() == State.RUNNABLE || !entries.isEmpty() || fileWriter.isBusy();
 	}
 
-	void waitForBusy() throws InterruptedException {
-		while (!entries.isEmpty() || fileWriter.isBusy()) {
-			synchronized (busyMonitor) {
-				busyMonitor.wait(1000);
-			}
-		}
-	}
-
 	@Override
 	public void run() {
 		while (running) {
 			try {
-				synchronized (busyMonitor) {
-					busyMonitor.notify();
-				}
 				LogWriteable le = entries.take();
 				le.write();
 			} catch (Exception e) {
@@ -65,7 +53,7 @@ class LogWriter extends Thread {
 		}
 	}
 
-	static void write(Date date, String msg, LoggerLevel level, boolean useGlobalPrintStream, boolean useFileOut) {
+	static void write(Date date, String msg, LoggerLevel level, PrintStream[] attachedStreams, boolean useGlobalPrintStream, boolean useFileOut) {
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
 		try {
 			if (useGlobalPrintStream) {
@@ -131,9 +119,6 @@ class LogWriter extends Thread {
 						if (!sb.isEmpty()) {
 							writeFile(path, sb);
 						}
-					}
-					synchronized (busyMonitor) {
-						busyMonitor.notify();
 					}
 					if (buffers.isEmpty()) synchronized (this) {
 						wait(1000);

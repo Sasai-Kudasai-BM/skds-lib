@@ -2,10 +2,11 @@ package net.skds.lib2.utils.logger;
 
 import net.skds.lib2.utils.StringUtils;
 
+import java.io.PrintStream;
 import java.util.Date;
 
 record LogEntry(long time, String message, LoggerLevel level, String thread, StackTraceElement trace,
-				Class<?> loggingClass, boolean useGlobalPrintStream,
+				Class<?> loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
 				boolean useFileOut) implements LogWriter.LogWriteable {
 
 	@Override
@@ -34,6 +35,6 @@ record LogEntry(long time, String message, LoggerLevel level, String thread, Sta
 		logMsg.append(message).append('\n');
 		String decoratedMsg = logMsg.toString();
 
-		LogWriter.write(date, decoratedMsg, level, useGlobalPrintStream, useFileOut);
+		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, useFileOut);
 	}
 }

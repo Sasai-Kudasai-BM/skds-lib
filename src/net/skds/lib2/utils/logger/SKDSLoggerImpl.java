@@ -17,9 +17,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 		String thread = null;
 		StackTraceElement stackTop = null;
 		Class<?> loggingClass = null;
-
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
-
 		if (config.isLogThread()) {
 			thread = Thread.currentThread().getName();
 		}
@@ -30,11 +28,18 @@ final class SKDSLoggerImpl extends SKDSLogger {
 			var trace = Thread.currentThread().getStackTrace();
 			stackTop = trace[depth];
 		}
-
-		LogEntry e = new LogEntry(time, message, level, thread, stackTop, loggingClass, useGlobalPrintStream, useFileOut);
-
+		LogEntry e = new LogEntry(
+				time,
+				message,
+				level,
+				thread,
+				stackTop,
+				loggingClass,
+				attachedPrintStreams.toArray(printStreamArray),
+				useGlobalPrintStream,
+				useFileOut
+		);
 		LogWriter.INSTANCE.add(e);
-
 	}
 
 	private boolean isLoggingLevel(LoggerLevel level) {

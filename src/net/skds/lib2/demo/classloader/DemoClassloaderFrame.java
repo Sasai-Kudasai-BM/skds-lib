@@ -2,7 +2,6 @@ package net.skds.lib2.demo.classloader;
 
 import lombok.CustomLog;
 import net.skds.lib2.utils.classloader.JarClassLoader;
-import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,12 +62,6 @@ public class DemoClassloaderFrame extends JFrame {
 			} catch (IOException ex) {
 				throw new RuntimeException(ex);
 			}
-			try {
-				SKDSLogger.waitForBusy();
-			} catch (InterruptedException ex) {
-				throw new RuntimeException(ex);
-			}
-			log.info("NOT_BUSY");
 		});
 		add(button);
 

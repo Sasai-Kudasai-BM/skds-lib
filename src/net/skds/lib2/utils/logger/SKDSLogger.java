@@ -14,6 +14,7 @@ public abstract class SKDSLogger {
 	public static final PrintStream REPLACED_OUT = new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT);
 	public static final PrintStream REPLACED_ERR = new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR);
 	private static final int DEPTH = 3;
+	static final PrintStream[] printStreamArray = {};
 
 	protected abstract void log0(LoggerLevel level, int depth, Object msg);
 
@@ -53,9 +54,6 @@ public abstract class SKDSLogger {
 		useFileOut = attached;
 	}
 
-	public static void waitForBusy() throws InterruptedException {
-		LogWriter.INSTANCE.waitForBusy();
-	}
 
 	public static void replaceOuts() {
 		System.setOut(REPLACED_OUT);
@@ -65,7 +63,7 @@ public abstract class SKDSLogger {
 	static void printLn(LoggerLevel level) {
 		if (!SKDSLoggerConfig.getLevels().contains(level)) return;
 		long time = System.currentTimeMillis();
-		LogPrintln e = new LogPrintln(time, level, useGlobalPrintStream, useFileOut);
+		LogPrintln e = new LogPrintln(time, level, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut);
 		LogWriter.INSTANCE.add(e);
 	}
 
