@@ -1,7 +1,6 @@
 package net.skds.lib2.io.json.elements;
 
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.JsonCodec;
@@ -48,17 +47,12 @@ public record JsonNumber(Number value) implements JsonElement {
 		@Override
 		public JsonNumber read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return ZERO;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return new JsonNumber(n);
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return ZERO;
 			}
+			Number n = reader.readNumber();
+			return new JsonNumber(n);
 		}
 	}
 }

@@ -17,6 +17,10 @@ public abstract class JsonCodec<T> implements Codec<T, JsonWriter, JsonReader> {
 		this.registry = registry;
 	}
 
+	public String valueAsKeyString(T val) {
+		return String.valueOf(val);
+	}
+
 	public T parse(CharInput charInput) {
 		try {
 			return read(registry.createReader(charInput));

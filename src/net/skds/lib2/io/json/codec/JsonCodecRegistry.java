@@ -14,15 +14,15 @@ public class JsonCodecRegistry {
 	private final JsonCodecOptions options;
 	private final Map<Type, JsonCodec<?>> codecMap = new ConcurrentHashMap<>();
 	private final Function<? super Type, ? extends JsonCodec<?>> mappingFunction;
-	private static final JsonCodecFactory builtIn = new BuiltInCodecFactory();
+	private static final JsonCodecFactory builtin = new BuiltinCodecFactory();
 
 	public JsonCodecRegistry(JsonCodecOptions options, JsonCodecFactory extraFactory) {
 		this.options = options.clone();
 		JsonCodecFactory combined;
 		if (extraFactory != null) {
-			combined = builtIn.orElse(extraFactory);
+			combined = builtin.orElse(extraFactory);
 		} else {
-			combined = builtIn;
+			combined = builtin;
 		}
 		// TODO orElse reflective
 		this.mappingFunction = t -> combined.createCodec(t, this);

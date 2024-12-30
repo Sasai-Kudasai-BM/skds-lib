@@ -60,7 +60,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 				return;
 			}
 			writer.beginArray();
-			writer.setLineBreakEnable(true);
+			writer.lineBreakEnable(true);
 			for (var e : value) {
 				elementCodec.write(e, writer);
 			}

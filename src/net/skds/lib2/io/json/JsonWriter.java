@@ -81,6 +81,6 @@ public interface JsonWriter {
 
 	void writeComment(String comment) throws IOException;
 
-	void setLineBreakEnable(boolean lineBreak) throws IOException;
+	void lineBreakEnable(boolean lineBreak) throws IOException;
 
 }

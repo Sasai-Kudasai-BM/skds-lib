@@ -108,7 +108,7 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void setLineBreakEnable(boolean lineBreak) throws EndOfOutputException {
+	public void lineBreakEnable(boolean lineBreak) throws EndOfOutputException {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		e.lineBreak = lineBreak;

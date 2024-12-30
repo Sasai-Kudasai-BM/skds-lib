@@ -6,6 +6,8 @@ public interface JsonReader {
 
 	JsonEntryType nextEntryType() throws IOException;
 
+	void readDotDot() throws IOException;
+
 	String readName() throws IOException;
 
 	void beginObject() throws IOException;

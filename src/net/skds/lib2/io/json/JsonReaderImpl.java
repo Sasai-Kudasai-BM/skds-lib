@@ -67,11 +67,7 @@ public final class JsonReaderImpl implements JsonReader {
 			throw unexpectedCharacter(next, input.getPos() - 1);
 		}
 		String name = StringUtils.readQuoted(input, '"');
-		skipWhitespaces();
-		next = input.getCurrentCharAntInc();
-		if (next != ':') {
-			throw unexpectedCharacter(next, input.getPos() - 1);
-		}
+		readDotDot();
 		resetLastEntry();
 		return name;
 	}
@@ -89,10 +85,18 @@ public final class JsonReaderImpl implements JsonReader {
 
 	@Override
 	public Number readNumber() throws IOException {
-		validateEntryType(JsonEntryType.NUMBER);
-		input.setPos(valueEnd);
-		Number n = (Number) cachedValue;
-		resetLastEntry();
+		Number n;
+		switch (nextEntryType()) {
+			case NUMBER -> {
+				input.setPos(valueEnd);
+				n = (Number) cachedValue;
+				resetLastEntry();
+			}
+			case STRING -> {
+				return Numbers.parseNumber(readString());
+			}
+			default -> throw new JsonReadException("Expected STRING or NUMBER but next entry is " + nextEntryType());
+		}
 		return n;
 	}
 
@@ -126,17 +130,36 @@ public final class JsonReaderImpl implements JsonReader {
 
 	@Override
 	public void skipNull() throws IOException {
-		validateEntryType(JsonEntryType.NULL);
-		input.setPos(valueEnd);
-		resetLastEntry();
+		switch (nextEntryType()) {
+			case NULL -> {
+				validateEntryType(JsonEntryType.NULL);
+				input.setPos(valueEnd);
+				resetLastEntry();
+			}
+			case STRING -> {
+				String s = readString();
+				if (!s.equalsIgnoreCase("null")) {
+					throw new JsonReadException("Expected \"null\" string but got \"" + s + "\"");
+				}
+			}
+			default -> throw new JsonReadException("Expected STRING or NULL but next entry is " + nextEntryType());
+		}
 	}
 
 	@Override
 	public boolean readBoolean() throws IOException {
-		validateEntryType(JsonEntryType.BOOLEAN);
-		input.setPos(valueEnd);
-		Boolean b = (Boolean) cachedValue;
-		resetLastEntry();
+		Boolean b;
+		switch (nextEntryType()) {
+			case BOOLEAN -> {
+				input.setPos(valueEnd);
+				b = (Boolean) cachedValue;
+				resetLastEntry();
+			}
+			case STRING -> {
+				return Boolean.parseBoolean(readString());
+			}
+			default -> throw new JsonReadException("Expected STRING or BOOLEAN but next entry is " + nextEntryType());
+		}
 		return b;
 	}
 
@@ -198,6 +221,15 @@ public final class JsonReaderImpl implements JsonReader {
 		}
 		lastReadEntryType = rt;
 		return rt;
+	}
+
+	@Override
+	public void readDotDot() throws IOException {
+		skipWhitespaces();
+		char next = input.getCurrentCharAntInc();
+		if (next != ':') {
+			throw unexpectedCharacter(next, input.getPos() - 1);
+		}
 	}
 
 }

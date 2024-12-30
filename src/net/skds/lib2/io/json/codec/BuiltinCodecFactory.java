@@ -1,5 +1,6 @@
 package net.skds.lib2.io.json.codec;
 
+import lombok.CustomLog;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
@@ -10,12 +11,12 @@ import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.function.Supplier;
 
-class BuiltInCodecFactory implements JsonCodecFactory {
+@CustomLog
+class BuiltinCodecFactory implements JsonCodecFactory {
 
 	final Map<Type, JsonCodecFactory> map = new ImmutableArrayHashMap<>(
 			JsonObject.class, (JsonCodecFactory) JsonObject.Codec::new,
@@ -81,9 +82,179 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 					return new ArrayCodec(cle, codec, registry);
 				}
 			}
+		} else if (type instanceof ParameterizedType pt) {
+			if (!(pt.getRawType() instanceof Class<?> cl))
+				throw new UnsupportedOperationException("Unsupported or wildcard type \"" + pt + "\"");
+
+			if (Map.class.isAssignableFrom(cl)) {
+				return new MapCodec(cl, pt.getActualTypeArguments(), registry);
+			} else if (List.class.isAssignableFrom(cl)) {
+				return new ListCodec(cl, pt.getActualTypeArguments(), registry);
+			}
 		}
+
 		JsonCodecFactory fac = map.get(type);
 		return fac == null ? null : fac.createCodec(type, registry);
+	}
+
+	public static final class MapCodec extends JsonCodec<Map<Object, Object>> {
+
+		//final Class<?> tClass;
+		final Supplier<Map<Object, Object>> constructor;
+		final JsonCodec<Object> keyCodec;
+		final JsonCodec<Object> elementCodec;
+
+		@SuppressWarnings({"unchecked", "rawTypes"})
+		public MapCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
+			super(registry);
+			//this.tClass = tClass;
+			this.keyCodec = registry.getCodec(parameters[0]);
+			this.elementCodec = registry.getCodec(parameters[1]);
+			Supplier<Map<Object, Object>> tmpC;
+			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
+				tmpC = HashMap::new;
+			} else if (EnumMap.class.isAssignableFrom(tClass)) {
+				tmpC = () -> {
+					Map map = new EnumMap<>((Class) parameters[0]);
+					return (Map<Object, Object>) map;
+				};
+			} else {
+				try {
+					Constructor<?> c = tClass.getConstructor();
+					if (!c.canAccess(null)) {
+						log.warn("Class \"" + tClass.getName() + "\" have no assessable empty constructor! HashMap will be used instead");
+						tmpC = HashMap::new;
+					} else {
+						tmpC = () -> {
+							try {
+								return (Map<Object, Object>) c.newInstance();
+							} catch (Exception e) {
+								throw new RuntimeException(e);
+							}
+						};
+					}
+				} catch (NoSuchMethodException e) {
+					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! HashMap will be used instead");
+					tmpC = HashMap::new;
+				}
+			}
+			this.constructor = tmpC;
+		}
+
+		@Override
+		public void write(Map<Object, Object> value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginObject();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (Map.Entry<Object, Object> entry : value.entrySet()) {
+				writer.writeName(keyCodec.valueAsKeyString(entry.getKey()));
+				elementCodec.write(entry.getValue(), writer);
+			}
+			writer.endObject();
+		}
+
+		@Override
+		public Map<Object, Object> read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					Map<Object, Object> map = constructor.get();
+					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+						Object key = keyCodec.read(reader);
+						reader.readDotDot();
+						Object value = elementCodec.read(reader);
+						map.put(key, value);
+					}
+					reader.endObject();
+					return map;
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+	}
+
+	public static final class ListCodec extends JsonCodec<List<Object>> {
+
+		final Supplier<List<Object>> constructor;
+		final JsonCodec<Object> elementCodec;
+
+		@SuppressWarnings("unchecked")
+		public ListCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
+			super(registry);
+			this.elementCodec = registry.getCodec(parameters[0]);
+			Supplier<List<Object>> tmpC;
+			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
+				tmpC = ArrayList::new;
+			} else try {
+				Constructor<?> c = tClass.getConstructor();
+				if (!c.canAccess(null)) {
+					log.warn("Class \"" + tClass.getName() + "\" have no assessable empty constructor! ArrayList will be used instead");
+					tmpC = ArrayList::new;
+				} else {
+					tmpC = () -> {
+						try {
+							return (List<Object>) c.newInstance();
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+					};
+				}
+			} catch (NoSuchMethodException e) {
+				log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! ArrayList will be used instead");
+				tmpC = ArrayList::new;
+			}
+			this.constructor = tmpC;
+		}
+
+		@Override
+		public void write(List<Object> value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginObject();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (Object v : value) {
+				elementCodec.write(v, writer);
+			}
+			writer.endObject();
+		}
+
+		@Override
+		public List<Object> read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					List<Object> list = constructor.get();
+					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
+						Object value = elementCodec.read(reader);
+						list.add(value);
+					}
+					reader.endArray();
+					return list;
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
 	}
 
 	public static final class ArrayCodec extends JsonCodec<Object> {
@@ -108,7 +279,7 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 			writer.beginArray();
 			int size = Array.getLength(value);
 			if (size > 1) {
-				writer.setLineBreakEnable(true);
+				writer.lineBreakEnable(true);
 			}
 			for (int i = 0; i < size; i++) {
 				elementCodec.write(Array.get(value, i), writer);
@@ -557,6 +728,11 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
+		public String valueAsKeyString(E val) {
+			return val.name();
+		}
+
+		@Override
 		public void write(E value, JsonWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
@@ -610,17 +786,12 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Integer read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return 0;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return n.intValue();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
 			}
+			Number n = reader.readNumber();
+			return n.intValue();
 		}
 	}
 
@@ -642,17 +813,12 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Byte read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return 0;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return n.byteValue();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
 			}
+			Number n = reader.readNumber();
+			return n.byteValue();
 		}
 	}
 
@@ -675,16 +841,11 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Boolean read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return false;
-				}
-				case NUMBER -> {
-					return reader.readBoolean();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return false;
 			}
+			return reader.readBoolean();
 		}
 	}
 
@@ -746,17 +907,12 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Short read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return 0;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return n.shortValue();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
 			}
+			Number n = reader.readNumber();
+			return n.shortValue();
 		}
 	}
 
@@ -778,17 +934,12 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Long read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return 0L;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return n.longValue();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0L;
 			}
+			Number n = reader.readNumber();
+			return n.longValue();
 		}
 	}
 
@@ -810,17 +961,12 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Float read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return 0f;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return n.floatValue();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0f;
 			}
+			Number n = reader.readNumber();
+			return n.floatValue();
 		}
 	}
 
@@ -842,17 +988,12 @@ class BuiltInCodecFactory implements JsonCodecFactory {
 		@Override
 		public Double read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return 0d;
-				}
-				case NUMBER -> {
-					Number n = reader.readNumber();
-					return n.doubleValue();
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0d;
 			}
+			Number n = reader.readNumber();
+			return n.doubleValue();
 		}
 	}
 }

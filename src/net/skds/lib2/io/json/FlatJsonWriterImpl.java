@@ -106,7 +106,7 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void setLineBreakEnable(boolean separate) throws EndOfOutputException {
+	public void lineBreakEnable(boolean separate) throws EndOfOutputException {
 	}
 
 	private void pushName() throws IOException {

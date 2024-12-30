@@ -59,7 +59,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 				return;
 			}
 			writer.beginObject();
-			writer.setLineBreakEnable(true);
+			writer.lineBreakEnable(true);
 			for (var me : value.entrySet()) {
 				writer.writeName(me.getKey());
 				elementCodec.write(me.getValue(), writer);

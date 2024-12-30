@@ -1,7 +1,6 @@
 package net.skds.lib2.io.json.elements;
 
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.JsonCodec;
@@ -9,9 +8,11 @@ import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 public record JsonBoolean(boolean value) implements JsonElement {
+
+	public static final JsonBoolean TRUE = new JsonBoolean(true);
+	public static final JsonBoolean FALSE = new JsonBoolean(false);
 
 	@Override
 	public JsonElementType type() {
@@ -26,6 +27,10 @@ public record JsonBoolean(boolean value) implements JsonElement {
 	@Override
 	public boolean getAsBoolean() {
 		return value;
+	}
+
+	public static JsonBoolean valueOf(boolean b) {
+		return b ? TRUE : FALSE;
 	}
 
 	public static final class Codec extends JsonCodec<JsonBoolean> {
@@ -46,11 +51,12 @@ public record JsonBoolean(boolean value) implements JsonElement {
 		@Override
 		public JsonBoolean read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
-			if (Objects.requireNonNull(type) == JsonEntryType.BOOLEAN) {
-				boolean b = reader.readBoolean();
-				return new JsonBoolean(b);
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return FALSE;
 			}
-			throw new JsonReadException("Unexpected token " + type);
+			boolean b = reader.readBoolean();
+			return valueOf(b);
 		}
 	}
 }

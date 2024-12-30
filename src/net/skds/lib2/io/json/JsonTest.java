@@ -3,10 +3,11 @@ package net.skds.lib2.io.json;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.utils.Types;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.List;
 
 public class JsonTest {
 
@@ -36,14 +37,22 @@ public class JsonTest {
 				  ]]
 				""";
 
+		String test3 = """
+				  {
+				  "3":1,
+				  "34":2,
+				  "35":3
+				  }
+				""";
+
 
 		JsonCodecOptions options = new JsonCodecOptions();
 		options.setDecorationType(JsonCodecOptions.DecorationType.FANCY);
 
 		JsonCodecRegistry registry = new JsonCodecRegistry(options, null);
-		JsonCodec<String[][][]> codec = registry.getCodec(String[][][].class);
+		JsonCodec<List<String>> codec = registry.getCodec(Types.parameterizedType(List.class, String.class));
 
-		System.out.println(Arrays.deepToString(codec.parse(test2)));
+		System.out.println(codec.parse(test2));
 
 	}
 }
