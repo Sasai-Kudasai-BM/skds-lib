@@ -1,6 +1,8 @@
 package net.skds.lib2.demo;
 
+import net.skds.lib2.demo.classloader.DemoClassloaderFrame;
 import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +12,7 @@ public class DemoFrame extends JFrame {
 
 	DemoFrame() {
 		super("SKDS Lib v2 demo");
+		SKDSLogger.replaceOuts();
 
 		setLayout(new FlowLayout());
 		JButton button = new JButton("Color");
@@ -22,6 +25,10 @@ public class DemoFrame extends JFrame {
 
 		button = new JButton("Logger");
 		button.addActionListener(e -> new LoggerDemoFrame());
+		add(button);
+
+		button = new JButton("Classloader");
+		button.addActionListener(e -> new DemoClassloaderFrame(this));
 		add(button);
 
 		button = new JButton("floor");

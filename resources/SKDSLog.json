@@ -4,5 +4,8 @@
 	"logDir": "logs",
 	"includeThread": true,
 	"includeLoggerClass": false,
-	"includeStackTop": true
+	"includeStackTop": true,
+	"ansiColors": {
+		"DEBUG": "BRIGHT_BLACK"
+	}
 }

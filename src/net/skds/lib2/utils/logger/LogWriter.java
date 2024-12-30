@@ -3,40 +3,61 @@ package net.skds.lib2.utils.logger;
 import net.skds.lib2.utils.ThreadUtils;
 import net.w3e.lib.utils.FileUtils;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 class LogWriter extends Thread {
 
 	public static final LogWriter INSTANCE = new LogWriter();
 
-	private boolean wait = true;
+	private boolean running = true;
 
 	private final LinkedBlockingQueue<LogWriteable> entries = new LinkedBlockingQueue<>();
+	private final FileLogWriter fileWriter;
+
+	private final Object busyMonitor = new Object();
 
 	public LogWriter() {
 		super("SKDS-LogWriter");
+		this.fileWriter = new FileLogWriter();
 		setDaemon(true);
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			while (!entries.isEmpty() || !wait) {
+			while (isBusy()) {
 				ThreadUtils.await(100);
 			}
-		}));
+			running = false;
+		}, "LogWriter-Finalizer"));
 		start();
+		fileWriter.start();
 	}
 
+	boolean isBusy() {
+		return getState() == State.RUNNABLE || !entries.isEmpty() || fileWriter.isBusy();
+	}
+
+	void waitForBusy() throws InterruptedException {
+		while (!entries.isEmpty() || fileWriter.isBusy()) {
+			synchronized (busyMonitor) {
+				busyMonitor.wait(1000);
+			}
+		}
+	}
 
 	@Override
 	public void run() {
-		while (true) {
+		while (running) {
 			try {
-				wait = true;
+				synchronized (busyMonitor) {
+					busyMonitor.notify();
+				}
 				LogWriteable le = entries.take();
-				wait = false;
 				le.write();
 			} catch (Exception e) {
 				e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
@@ -59,13 +80,10 @@ class LogWriter extends Thread {
 			if (useFileOut) {
 				String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
 				Path path = Path.of(logName);
-				if (!Files.exists(path)) {
-					FileUtils.createParentDirs(path.toFile());
-				}
 				if (msg.length() > 3) {
 					msg = msg.substring(level.getColor().length());
 				}
-				Files.writeString(path, msg, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+				INSTANCE.fileWriter.addMsg(path, msg);
 			}
 		} catch (Exception e) {
 			e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
@@ -78,6 +96,60 @@ class LogWriter extends Thread {
 
 	interface LogWriteable {
 		void write();
+	}
+
+	private class FileLogWriter extends Thread {
+
+		private final Map<Path, StringBuffer> buffers = new ConcurrentHashMap<>();
+
+		FileLogWriter() {
+			super("SKDS-FileLogWriter");
+			setDaemon(true);
+		}
+
+		void addMsg(Path path, String msg) {
+			StringBuffer sb = buffers.computeIfAbsent(path, p -> new StringBuffer(64));
+			sb.append(msg);
+			synchronized (this) {
+				notify();
+			}
+		}
+
+		private boolean isBusy() {
+			return getState() == State.RUNNABLE || !entries.isEmpty();
+		}
+
+		@Override
+		public void run() {
+			while (running) {
+				try {
+					for (var itr = buffers.entrySet().iterator(); itr.hasNext(); ) {
+						var e = itr.next();
+						Path path = e.getKey();
+						StringBuffer sb = e.getValue();
+						itr.remove();
+						if (!sb.isEmpty()) {
+							writeFile(path, sb);
+						}
+					}
+					synchronized (busyMonitor) {
+						busyMonitor.notify();
+					}
+					if (buffers.isEmpty()) synchronized (this) {
+						wait(1000);
+					}
+				} catch (Exception e) {
+					e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
+				}
+			}
+		}
+
+		private void writeFile(Path path, StringBuffer sb) throws IOException {
+			if (!Files.exists(path)) {
+				FileUtils.createParentDirs(path.toFile());
+			}
+			Files.writeString(path, sb.toString(), StandardOpenOption.CREATE, StandardOpenOption.APPEND, StandardOpenOption.WRITE);
+		}
 	}
 
 }

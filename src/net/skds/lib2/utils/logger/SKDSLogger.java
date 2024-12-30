@@ -53,6 +53,10 @@ public abstract class SKDSLogger {
 		useFileOut = attached;
 	}
 
+	public static void waitForBusy() throws InterruptedException {
+		LogWriter.INSTANCE.waitForBusy();
+	}
+
 	public static void replaceOuts() {
 		System.setOut(REPLACED_OUT);
 		System.setErr(REPLACED_ERR);
