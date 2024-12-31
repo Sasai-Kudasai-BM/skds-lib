@@ -6,17 +6,23 @@ import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.elements.*;
+import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 
 import java.io.IOException;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Supplier;
 
 @CustomLog
 class BuiltinCodecFactory implements JsonCodecFactory {
+
+	final ReflectiveJsonCodecFactory reflectiveFactory = new ReflectiveJsonCodecFactory();
 
 	final Map<Type, JsonCodecFactory> map = new ImmutableArrayHashMap<>(
 			JsonObject.class, (JsonCodecFactory) JsonObject.Codec::new,
@@ -28,6 +34,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 
 			String.class, (JsonCodecFactory) StringCodec::new,
 
+			Number.class, (JsonCodecFactory) NumberCodec::new,
 			Byte.class, (JsonCodecFactory) ByteCodec::new,
 			Boolean.class, (JsonCodecFactory) BooleanCodec::new,
 			Short.class, (JsonCodecFactory) ShortCodec::new,
@@ -94,7 +101,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 
 		JsonCodecFactory fac = map.get(type);
-		return fac == null ? null : fac.createCodec(type, registry);
+		return fac == null ? reflectiveFactory.createCodec(type, registry) : fac.createCodec(type, registry);
 	}
 
 	public static final class MapCodec extends JsonCodec<Map<Object, Object>> {
@@ -119,21 +126,8 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 					return (Map<Object, Object>) map;
 				};
 			} else {
-				try {
-					Constructor<?> c = tClass.getConstructor();
-					if (!c.canAccess(null)) {
-						log.warn("Class \"" + tClass.getName() + "\" have no assessable empty constructor! HashMap will be used instead");
-						tmpC = HashMap::new;
-					} else {
-						tmpC = () -> {
-							try {
-								return (Map<Object, Object>) c.newInstance();
-							} catch (Exception e) {
-								throw new RuntimeException(e);
-							}
-						};
-					}
-				} catch (NoSuchMethodException e) {
+				tmpC = (Supplier<Map<Object, Object>>) ReflectUtils.getConstructor(tClass);
+				if (tmpC == null) {
 					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! HashMap will be used instead");
 					tmpC = HashMap::new;
 				}
@@ -196,23 +190,12 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 			Supplier<List<Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				tmpC = ArrayList::new;
-			} else try {
-				Constructor<?> c = tClass.getConstructor();
-				if (!c.canAccess(null)) {
-					log.warn("Class \"" + tClass.getName() + "\" have no assessable empty constructor! ArrayList will be used instead");
+			} else {
+				tmpC = (Supplier<List<Object>>) ReflectUtils.getConstructor(tClass);
+				if (tmpC == null) {
+					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! ArrayList will be used instead");
 					tmpC = ArrayList::new;
-				} else {
-					tmpC = () -> {
-						try {
-							return (List<Object>) c.newInstance();
-						} catch (Exception e) {
-							throw new RuntimeException(e);
-						}
-					};
 				}
-			} catch (NoSuchMethodException e) {
-				log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! ArrayList will be used instead");
-				tmpC = ArrayList::new;
 			}
 			this.constructor = tmpC;
 		}
@@ -819,6 +802,32 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 			}
 			Number n = reader.readNumber();
 			return n.byteValue();
+		}
+	}
+
+	public static final class NumberCodec extends JsonCodec<Number> {
+
+		public NumberCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Number value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeInt(0);
+				return;
+			}
+			writer.writeRaw(value.toString());
+		}
+
+		@Override
+		public Number read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
+			}
+			return reader.readNumber();
 		}
 	}
 

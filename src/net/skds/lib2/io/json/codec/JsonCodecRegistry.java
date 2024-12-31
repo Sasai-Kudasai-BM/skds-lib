@@ -4,6 +4,7 @@ import net.skds.lib2.io.CharInput;
 import net.skds.lib2.io.CharOutput;
 import net.skds.lib2.io.json.*;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,11 +21,10 @@ public class JsonCodecRegistry {
 		this.options = options.clone();
 		JsonCodecFactory combined;
 		if (extraFactory != null) {
-			combined = builtin.orElse(extraFactory);
+			combined = extraFactory.orElse(builtin);
 		} else {
 			combined = builtin;
 		}
-		// TODO orElse reflective
 		this.mappingFunction = t -> combined.createCodec(t, this);
 	}
 
@@ -41,12 +41,42 @@ public class JsonCodecRegistry {
 
 	@SuppressWarnings("unchecked")
 	public <T> JsonCodec<T> getCodec(Type type) {
-		return (JsonCodec<T>) codecMap.computeIfAbsent(type, mappingFunction);
+		JsonCodec<?> codec = codecMap.computeIfAbsent(type, mappingFunction);
+		if (codec == null) {
+			throw new RuntimeException("Unable to get json codec for \"" + type + "\"");
+		}
+		return (JsonCodec<T>) codec;
 	}
 
-
-	@SuppressWarnings("unchecked")
 	public <T> JsonCodec<T> getCodec(Class<T> type) {
-		return (JsonCodec<T>) codecMap.computeIfAbsent(type, mappingFunction);
+		return getCodec((Type) type);
 	}
+
+	public <T> JsonCodec<T> getCodecIndirect(Type type) {
+		return new JsonCodec<>(this) {
+
+			JsonCodec<T> codec;
+
+			@Override
+			public void write(T value, JsonWriter writer) throws IOException {
+				JsonCodec<T> c = codec;
+				if (c == null) {
+					c = getCodec(type);
+					codec = c;
+				}
+				c.write(value, writer);
+			}
+
+			@Override
+			public T read(JsonReader reader) throws IOException {
+				JsonCodec<T> c = codec;
+				if (c == null) {
+					c = getCodec(type);
+					codec = c;
+				}
+				return c.read(reader);
+			}
+		};
+	}
+
 }

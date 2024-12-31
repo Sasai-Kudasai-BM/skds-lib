@@ -92,10 +92,14 @@ public final class JsonReaderImpl implements JsonReader {
 				n = (Number) cachedValue;
 				resetLastEntry();
 			}
+			case NULL -> {
+				return Numbers.ZERO;
+			}
 			case STRING -> {
 				return Numbers.parseNumber(readString());
 			}
-			default -> throw new JsonReadException("Expected STRING or NUMBER but next entry is " + nextEntryType());
+			default ->
+					throw new JsonReadException("Expected NUMBER, STRING or NULL but next entry is " + nextEntryType());
 		}
 		return n;
 	}

@@ -5,6 +5,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Numbers {
 
+	public static final Number ZERO = 0;
+
 	public static Number parseNumber(String stringValue) {
 		if (stringValue.length() > 2) {
 			char c0 = stringValue.charAt(0);

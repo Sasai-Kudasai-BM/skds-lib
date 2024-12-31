@@ -1,13 +1,41 @@
 package net.skds.lib2.reflection;
 
+import lombok.experimental.UtilityClass;
+import sun.reflect.ReflectionFactory;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+@UtilityClass
 public class ReflectUtils {
+
+	@SuppressWarnings("unchecked")
+	public static <T> Supplier<T> getConstructor(Class<T> tClass) {
+		Constructor<?> c = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(tClass);
+		if (c == null) {
+			try {
+				c = tClass.getDeclaredConstructor();
+				c.setAccessible(true);
+			} catch (NoSuchMethodException e) {
+				return null;
+			}
+		}
+		c.setAccessible(true);
+		Constructor<?> finalC = c;
+		return () -> {
+			try {
+				return (T) finalC.newInstance();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		};
+	}
 
 	public static <T> HiddenField<T> getField(Class<?> clazz, FindOptions options) {
 		final Field[] fields = clazz.getDeclaredFields();
