@@ -1,11 +1,12 @@
 package net.w3e.lib.utils;
 
+import net.sdteam.libmerge.Lib1Merge;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-
-import net.sdteam.libmerge.Lib1Merge;
 
 @Lib1Merge
 public class FileUtils {
@@ -37,9 +38,18 @@ public class FileUtils {
 		return file.getAbsoluteFile().getParentFile();
 	}
 
+	public static File getParentFile(Path path) {
+		return path.toFile().getAbsoluteFile();
+	}
+
 	public static File createParentDirs(File file) {
 		file = getParentFile(file);
 		file.mkdirs();
 		return file;
+	}
+	
+	public static boolean createParentDirs(Path path) {
+		File file = getParentFile(path);
+		return file.mkdirs();
 	}
 }

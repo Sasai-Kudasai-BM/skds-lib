@@ -6,6 +6,8 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import lombok.Getter;
 import net.sdteam.libmerge.Lib1Merge;
+import net.skds.lib2.io.json.JsonPostDeserializeCall;
+import net.skds.lib2.io.json.JsonPreSerializeCall;
 import net.skds.lib2.mat.Vec3;
 import net.skds.lib2.mat.Vec3D;
 import net.w3e.lib.utils.FileUtils;
@@ -140,8 +142,8 @@ public class JsonUtils {
 
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				CT value = adapter.read(in);
-				if (value instanceof JsonDeserializeCall jpi) {
-					jpi.jsonDeserialized();
+				if (value instanceof JsonPostDeserializeCall jpi) {
+					jpi.postDeserializedJson();
 				}
 				in.endObject();
 				return value;
@@ -157,8 +159,8 @@ public class JsonUtils {
 				E type = (E) tc.getConfigType();
 				out.name(type.keyName());
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
-				if (value instanceof JsonSerializeCall jps) {
-					jps.jsonPreSerialize();
+				if (value instanceof JsonPreSerializeCall jps) {
+					jps.preSerializeJson();
 				}
 				adapter.write(out, value);
 				out.endObject();
@@ -189,8 +191,8 @@ public class JsonUtils {
 
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
 				CT value = adapter.read(in);
-				if (value instanceof JsonDeserializeCall jpi) {
-					jpi.jsonDeserialized();
+				if (value instanceof JsonPostDeserializeCall jpi) {
+					jpi.postDeserializedJson();
 				}
 				in.endObject();
 				return value;
@@ -206,8 +208,8 @@ public class JsonUtils {
 				ConfigType<CT> type = (ConfigType<CT>) tc.getConfigType();
 				out.name(type.keyName());
 				TypeAdapter<CT> adapter = GSON.getAdapter(type.getTypeClass());
-				if (value instanceof JsonSerializeCall jps) {
-					jps.jsonPreSerialize();
+				if (value instanceof JsonPreSerializeCall jps) {
+					jps.preSerializeJson();
 				}
 				adapter.write(out, value);
 				out.endObject();
@@ -230,8 +232,8 @@ public class JsonUtils {
 	public static <T> T parseConfig(String text, Class<T> clazz) {
 		try {
 			T cfg = GSON.fromJson(text, clazz);
-			if (cfg instanceof JsonDeserializeCall post) {
-				post.jsonDeserialized();
+			if (cfg instanceof JsonPostDeserializeCall post) {
+				post.postDeserializedJson();
 			}
 			return cfg;
 		} catch (Exception e) {
@@ -243,8 +245,8 @@ public class JsonUtils {
 	public static <T> T parseConfig(JsonElement json, Class<T> clazz) {
 		try {
 			T cfg = GSON.fromJson(json, clazz);
-			if (cfg instanceof JsonDeserializeCall post) {
-				post.jsonDeserialized();
+			if (cfg instanceof JsonPostDeserializeCall post) {
+				post.postDeserializedJson();
 			}
 			return cfg;
 		} catch (Exception e) {
@@ -278,23 +280,23 @@ public class JsonUtils {
 	}
 
 	public static String toJsonCompact(Object cfg) {
-		if (cfg instanceof JsonSerializeCall pre) {
-			pre.jsonPreSerialize();
+		if (cfg instanceof JsonPreSerializeCall pre) {
+			pre.preSerializeJson();
 		}
 		return GSON_COMPACT.toJson(cfg);
 	}
 
 	@Lib1Merge
 	public static String toJsonCompactNull(Object cfg) {
-		if (cfg instanceof JsonSerializeCall pre) {
-			pre.jsonPreSerialize();
+		if (cfg instanceof JsonPreSerializeCall pre) {
+			pre.preSerializeJson();
 		}
 		return GSON_NULL_COMPACT.toJson(cfg);
 	}
 
 	public static String toJson(Object cfg) {
-		if (cfg instanceof JsonSerializeCall pre) {
-			pre.jsonPreSerialize();
+		if (cfg instanceof JsonPreSerializeCall pre) {
+			pre.preSerializeJson();
 		}
 		return GSON.toJson(cfg);
 	}

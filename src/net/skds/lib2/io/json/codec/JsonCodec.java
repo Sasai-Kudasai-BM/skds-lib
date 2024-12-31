@@ -6,6 +6,7 @@ import net.skds.lib2.io.StringCharInput;
 import net.skds.lib2.io.StringCharOutput;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.elements.JsonElement;
 
 import java.io.IOException;
 
@@ -32,6 +33,14 @@ public abstract class JsonCodec<T> implements Codec<T, JsonWriter, JsonReader> {
 	public T parse(String json) {
 		try {
 			return read(registry.createReader(new StringCharInput(json)));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public T parse(JsonElement json) {
+		try {
+			return read(registry.createReader(new StringCharInput(json.toString()))); // TODO
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

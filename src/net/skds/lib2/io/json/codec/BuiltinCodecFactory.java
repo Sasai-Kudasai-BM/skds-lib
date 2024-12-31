@@ -5,6 +5,7 @@ import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.elements.*;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.ArrayUtils;
@@ -88,6 +89,11 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 					JsonCodec<Object> codec = registry.getCodec((Type) cle);
 					return new ArrayCodec(cle, codec, registry);
 				}
+			} else {
+				JsonCodec<?> codec = getDefaultCodec(cl, registry);
+				if (codec != null) {
+					return codec;
+				}
 			}
 		} else if (type instanceof ParameterizedType pt) {
 			if (!(pt.getRawType() instanceof Class<?> cl))
@@ -102,6 +108,24 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 
 		JsonCodecFactory fac = map.get(type);
 		return fac == null ? reflectiveFactory.createCodec(type, registry) : fac.createCodec(type, registry);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static JsonCodec<?> getDefaultCodec(Class<?> tClass, JsonCodecRegistry registry) {
+		DefaultJsonCodec defaultCodec = tClass.getAnnotation(DefaultJsonCodec.class);
+		if (defaultCodec == null) return null;
+		Supplier<JsonCodecFactory> constructor = (Supplier<JsonCodecFactory>) ReflectUtils.getConstructor(defaultCodec.value());
+		if (constructor != null) {
+			JsonCodecFactory factory = constructor.get();
+			if (factory != null) {
+				JsonCodec<?> codec = factory.createCodec(tClass, registry);
+				if (codec != null) {
+					return codec;
+				}
+			}
+		}
+		log.error("Invalid @DefaultJsonCodec on \"" + tClass + "\"");
+		return null;
 	}
 
 	public static final class MapCodec extends JsonCodec<Map<Object, Object>> {

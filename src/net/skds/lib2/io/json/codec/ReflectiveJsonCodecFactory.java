@@ -1,9 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.reflection.ReflectUtils;
@@ -81,6 +79,9 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				writer.writeNull();
 				return;
 			}
+			if (value instanceof JsonPreSerializeCall psc) {
+				psc.preSerializeJson();
+			}
 			writer.beginObject();
 			if (writers.length > 1) {
 				writer.lineBreakEnable(true);
@@ -115,6 +116,9 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 			}
 			reader.endObject();
+			if (o instanceof JsonPostDeserializeCall pdc) {
+				pdc.postDeserializedJson();
+			}
 			return o;
 		}
 	}
@@ -128,7 +132,11 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	private static void collectFields(Class<?> c, JsonCodecRegistry registry, List<FieldCodec> list) {
 		if (c == Object.class) return;
 
+		JsonCodecOptions options = registry.options;
 		for (Field f : c.getDeclaredFields()) {
+			if ((f.getModifiers() & options.getExcludeFieldModifiers()) != 0) {
+				continue;
+			}
 			Class<?> ct = f.getType();
 			if (ct.isPrimitive()) {
 				if (ct == int.class) {

@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public class JsonCodecRegistry {
 
-	private final JsonCodecOptions options;
+	final JsonCodecOptions options;
 	private final Map<Type, JsonCodec<?>> codecMap = new ConcurrentHashMap<>();
 	private final Function<? super Type, ? extends JsonCodec<?>> mappingFunction;
 	private static final JsonCodecFactory builtin = new BuiltinCodecFactory();

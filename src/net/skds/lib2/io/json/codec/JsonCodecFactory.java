@@ -2,7 +2,7 @@ package net.skds.lib2.io.json.codec;
 
 import java.lang.reflect.Type;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.concurrent.ConcurrentHashMap;
 
 @FunctionalInterface
 public interface JsonCodecFactory {
@@ -19,18 +19,26 @@ public interface JsonCodecFactory {
 		};
 	}
 
-	class MapJsonFactory implements JsonCodecFactory {
+	static MapJsonFactory newMapFactory() {
+		return new MapJsonFactory(new ConcurrentHashMap<>());
+	}
 
-		private final Map<Type, Function<JsonCodecRegistry, JsonCodec<?>>> map;
+	final class MapJsonFactory implements JsonCodecFactory {
 
-		public MapJsonFactory(Map<Type, Function<JsonCodecRegistry, JsonCodec<?>>> map) {
+		private final Map<Type, JsonCodecFactory> map;
+
+		private MapJsonFactory(Map<Type, JsonCodecFactory> map) {
 			this.map = map;
+		}
+		
+		public void addFactory(Type type, JsonCodecFactory factory) {
+			map.put(type, factory);
 		}
 
 		@Override
 		public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
-			Function<JsonCodecRegistry, JsonCodec<?>> fac = map.get(type);
-			return fac == null ? null : fac.apply(registry);
+			JsonCodecFactory fac = map.get(type);
+			return fac == null ? null : fac.createCodec(type, registry);
 		}
 	}
 }
