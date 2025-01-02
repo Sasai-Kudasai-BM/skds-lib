@@ -31,6 +31,10 @@ public class DemoFrame extends JFrame {
 		button.addActionListener(e -> new DemoClassloaderFrame(this));
 		add(button);
 
+		button = new JButton("WeightedPool");
+		button.addActionListener(e -> new WeightedPoolDemoFrame());
+		add(button);
+
 		button = new JButton("floor");
 		button.addActionListener(e -> {
 			var list = List.of(0.1, 0.8, -0.1, -0.8, 0d);
