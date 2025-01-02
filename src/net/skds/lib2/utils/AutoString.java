@@ -100,13 +100,13 @@ public interface AutoString {
 	}
 
 	public static class InnerAutoString implements AutoString {
-		public String objectValue;
-		public int doubleValue;
+		public String stringValue;
+		public int intValue;
 		public InnerAutoString_1 c = new InnerAutoString_1();
 	}
 
 	public static class InnerAutoString_1 implements AutoString {
-		public boolean value = true;
+		public boolean booleanValue = true;
 		public InnerAutoString_2 test = new InnerAutoString_2();
 	}
 
@@ -115,6 +115,6 @@ public interface AutoString {
 		public int c2 = 1;
 		public String c3;
 		public String[] array1;
-		public String[] array2 = new String[]{"i","objectValue"};
+		public String[] array2 = new String[]{"i","a"};
 	}*/
 }

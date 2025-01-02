@@ -153,7 +153,7 @@ public class JsonUtils {
 			@Override
 			public void write(JsonWriter out, CT value) throws IOException {
 				if (!(value instanceof TypedConfig tc)) {
-					throw new UnsupportedOperationException("Value is not objectValue TypedConfig");
+					throw new UnsupportedOperationException("Value is not a TypedConfig");
 				}
 				out.beginObject();
 				E type = (E) tc.getConfigType();
@@ -202,7 +202,7 @@ public class JsonUtils {
 			@Override
 			public void write(JsonWriter out, CT value) throws IOException {
 				if (!(value instanceof TypedConfig tc)) {
-					throw new UnsupportedOperationException("Value is not objectValue TypedConfig");
+					throw new UnsupportedOperationException("Value is not a TypedConfig");
 				}
 				out.beginObject();
 				ConfigType<CT> type = (ConfigType<CT>) tc.getConfigType();

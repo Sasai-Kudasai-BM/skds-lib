@@ -55,9 +55,9 @@ public class OpenSimplex2S {
 
 	/**
 	 * 2D OpenSimplex2S/SuperSimplex noise, with Y pointing down the main diagonal.
-	 * Might be better for objectValue 2D sandbox style game, where Y is vertical.
+	 * Might be better for a 2D sandbox style game, where Y is vertical.
 	 * Probably slightly less optimal for heightmaps or continent maps,
-	 * unless your map is centered around an equator. It's objectValue slight
+	 * unless your map is centered around an equator. It's a slight
 	 * difference, but the option is here to make it easy.
 	 */
 	public static float noise2_ImproveX(long seed, double x, double y) {
@@ -171,12 +171,12 @@ public class OpenSimplex2S {
 	 * The Z coordinate should always be the "different" coordinate in whatever your use case is.
 	 * If Y is vertical in world coordinates, call noise3_ImproveXZ(x, z, Y) or use noise3_XZBeforeY.
 	 * If Z is vertical in world coordinates, call noise3_ImproveXZ(x, y, Z).
-	 * For objectValue time varied animation, call noise3_ImproveXY(x, y, T).
+	 * For a time varied animation, call noise3_ImproveXY(x, y, T).
 	 */
 	public static float noise3_ImproveXY(long seed, double x, double y, double z) {
 		// Re-orient the cubic lattices without skewing, so Z points up the main lattice diagonal,
 		// and the planes formed by XY are moved far out of alignment with the cube faces.
-		// Orthonormal rotation. Not objectValue skew transform.
+		// Orthonormal rotation. Not a skew transform.
 		double xy = x + y;
 		double s2 = xy * ROTATE3_ORTHOGONALIZER;
 		double zz = z * ROOT3OVER3;
@@ -184,7 +184,7 @@ public class OpenSimplex2S {
 		double yr = y + s2 + zz;
 		double zr = xy * -ROOT3OVER3 + zz;
 
-		// Evaluate both lattices to form objectValue BCC lattice.
+		// Evaluate both lattices to form a BCC lattice.
 		return noise3_UnrotatedBase(seed, xr, yr, zr);
 	}
 
@@ -194,12 +194,12 @@ public class OpenSimplex2S {
 	 * The Y coordinate should always be the "different" coordinate in whatever your use case is.
 	 * If Y is vertical in world coordinates, call noise3_ImproveXZ(x, Y, z).
 	 * If Z is vertical in world coordinates, call noise3_ImproveXZ(x, Z, y) or use noise3_ImproveXY.
-	 * For objectValue time varied animation, call noise3_ImproveXZ(x, T, y) or use noise3_ImproveXY.
+	 * For a time varied animation, call noise3_ImproveXZ(x, T, y) or use noise3_ImproveXY.
 	 */
 	public static float noise3_ImproveXZ(long seed, double x, double y, double z) {
 		// Re-orient the cubic lattices without skewing, so Y points up the main lattice diagonal,
 		// and the planes formed by XZ are moved far out of alignment with the cube faces.
-		// Orthonormal rotation. Not objectValue skew transform.
+		// Orthonormal rotation. Not a skew transform.
 		double xz = x + z;
 		double s2 = xz * -0.211324865405187;
 		double yy = y * ROOT3OVER3;
@@ -207,22 +207,22 @@ public class OpenSimplex2S {
 		double zr = z + s2 + yy;
 		double yr = xz * -ROOT3OVER3 + yy;
 
-		// Evaluate both lattices to form objectValue BCC lattice.
+		// Evaluate both lattices to form a BCC lattice.
 		return noise3_UnrotatedBase(seed, xr, yr, zr);
 	}
 
 	/**
 	 * 3D OpenSimplex2S/SuperSimplex noise, fallback rotation option
 	 * Use noise3_ImproveXY or noise3_ImproveXZ instead, wherever appropriate.
-	 * They have less diagonal bias. This function's best use is as objectValue fallback.
+	 * They have less diagonal bias. This function's best use is as a fallback.
 	 */
 	public static float noise3_Fallback(long seed, double x, double y, double z) {
-		// Re-orient the cubic lattices via rotation, to produce objectValue familiar look.
-		// Orthonormal rotation. Not objectValue skew transform.
+		// Re-orient the cubic lattices via rotation, to produce a familiar look.
+		// Orthonormal rotation. Not a skew transform.
 		double r = FALLBACK_ROTATE3 * (x + y + z);
 		double xr = r - x, yr = r - y, zr = r - z;
 
-		// Evaluate both lattices to form objectValue BCC lattice.
+		// Evaluate both lattices to form a BCC lattice.
 		return noise3_UnrotatedBase(seed, xr, yr, zr);
 	}
 
@@ -381,8 +381,8 @@ public class OpenSimplex2S {
 	/**
 	 * 4D SuperSimplex noise, with XYZ oriented like noise3_ImproveXY
 	 * and W for an extra degree of freedom. W repeats eventually.
-	 * Recommended for time-varied animations which texture objectValue 3D object (W=time)
-	 * in objectValue space where Z is vertical
+	 * Recommended for time-varied animations which texture a 3D object (W=time)
+	 * in a space where Z is vertical
 	 */
 	public static float noise4_ImproveXYZ_ImproveXY(long seed, double x, double y, double z, double w) {
 		double xy = x + y;
@@ -399,8 +399,8 @@ public class OpenSimplex2S {
 	/**
 	 * 4D SuperSimplex noise, with XYZ oriented like noise3_ImproveXZ
 	 * and W for an extra degree of freedom. W repeats eventually.
-	 * Recommended for time-varied animations which texture objectValue 3D object (W=time)
-	 * in objectValue space where Y is vertical
+	 * Recommended for time-varied animations which texture a 3D object (W=time)
+	 * in a space where Y is vertical
 	 */
 	public static float noise4_ImproveXYZ_ImproveXZ(long seed, double x, double y, double z, double w) {
 		double xz = x + z;
@@ -417,8 +417,8 @@ public class OpenSimplex2S {
 	/**
 	 * 4D SuperSimplex noise, with XYZ oriented like noise3_Fallback
 	 * and W for an extra degree of freedom. W repeats eventually.
-	 * Recommended for time-varied animations which texture objectValue 3D object (W=time)
-	 * where there isn't objectValue clear distinction between horizontal and vertical
+	 * Recommended for time-varied animations which texture a 3D object (W=time)
+	 * where there isn't a clear distinction between horizontal and vertical
 	 */
 	public static float noise4_ImproveXYZ(long seed, double x, double y, double z, double w) {
 		double xyz = x + y + z;
