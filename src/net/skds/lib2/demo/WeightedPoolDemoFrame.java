@@ -100,6 +100,21 @@ public class WeightedPoolDemoFrame extends JFrame {
 		});
 		add(btn);
 
+		btn = new JButton("size 1000 R");
+		btn.addActionListener(e -> {
+			List<String> list = new ArrayList<>();
+			for (int i = 0; i < 1000; i++) {
+				list.add(String.valueOf(i));
+			}
+			WeightedPool<String> wp = new WeightedPool<>(list, String::hashCode);
+
+			log.debug("========= size 1000 R ==========");
+			for (int i = 0; i < 12; i++) {
+				log.debug(wp.get(i / 10f));
+			}
+		});
+		add(btn);
+
 		btn = new JButton("size 10 Fail");
 		btn.addActionListener(e -> {
 			List<String> list = new ArrayList<>();

@@ -24,7 +24,6 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 			if (w <= 0) throw new IllegalArgumentException("Invalid weightGetter: Return values must be positive");
 			ws += w;
 		}
-		if (c == 0) throw new IllegalArgumentException("For empty inputs use WeightedPool.empty()");
 		float w = 0;
 		@SuppressWarnings("unchecked") Entry[] entries = ArrayUtils.createGenericArray(Entry.class, c);
 		int i = 0;
@@ -47,7 +46,6 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 			if (w <= 0) throw new IllegalArgumentException("Invalid weightGetter: Return values must be positive");
 			ws += w;
 		}
-		if (c == 0) throw new IllegalArgumentException("For empty inputs use WeightedPool.empty()");
 		float w = 0;
 		@SuppressWarnings("unchecked") Entry[] entries = ArrayUtils.createGenericArray(Entry.class, c);
 		int i = 0;
