@@ -54,6 +54,7 @@ public class WeightedPoolDemoFrame extends JFrame {
 			}
 		});
 		add(btn);
+
 		btn = new JButton("size 10");
 		btn.addActionListener(e -> {
 			List<String> list = new ArrayList<>();
@@ -68,6 +69,7 @@ public class WeightedPoolDemoFrame extends JFrame {
 			}
 		});
 		add(btn);
+
 		btn = new JButton("size 15");
 		btn.addActionListener(e -> {
 			List<String> list = new ArrayList<>();
@@ -110,6 +112,22 @@ public class WeightedPoolDemoFrame extends JFrame {
 			for (int i = 0; i < 11; i++) {
 				log.debug(wp.get(i / 10f));
 			}
+		});
+		add(btn);
+
+		btn = new JButton("size 10 remove");
+		btn.addActionListener(e -> {
+			List<String> list = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+				list.add(String.valueOf(i));
+			}
+			WeightedPool<String> wp = new WeightedPool<>(list, s -> 1);
+
+			log.debug("========= size 10 remove ==========");
+			for (int i = 0; i < 11; i++) {
+				log.debug(wp.getAndRemove(.5f));
+			}
+
 		});
 		add(btn);
 

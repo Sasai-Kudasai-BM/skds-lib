@@ -41,7 +41,7 @@ public class DemoFrame extends JFrame {
 			for (double d : list) {
 				System.out.println("==========");
 				System.out.println(d);
-				System.out.println("f: " + FastMath.floor(d) + " " + (int) Math.floor(d));
+				System.out.println("floatValue: " + FastMath.floor(d) + " " + (int) Math.floor(d));
 				System.out.println("c: " + FastMath.ceil(d) + " " + (int) Math.ceil(d));
 				System.out.println("r: " + FastMath.round(d) + " " + (int) Math.round(d));
 			}

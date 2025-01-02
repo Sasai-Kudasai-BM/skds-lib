@@ -1,11 +1,11 @@
 package net.skds.lib2.utils;
 
+import net.sdteam.libmerge.Lib1Merge;
+import net.skds.lib2.utils.json.JsonUtils;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Iterator;
-
-import net.sdteam.libmerge.Lib1Merge;
-import net.skds.lib2.utils.json.JsonUtils;
 
 @Lib1Merge
 public interface AutoString {
@@ -22,7 +22,7 @@ public interface AutoString {
 		builder.append(",");
 
 		builder.append("\"fields\":{");
-		
+
 		Iterator<Field> iterator = Arrays.asList(getClass().getFields()).iterator();
 		while (iterator.hasNext()) {
 			Field field = iterator.next();
@@ -66,7 +66,7 @@ public interface AutoString {
 		builder.append(",");
 
 		builder.append("\"fields\":{");
-		
+
 		Iterator<Field> iterator = Arrays.asList(object.getClass().getFields()).iterator();
 		while (iterator.hasNext()) {
 			Field field = iterator.next();
@@ -100,8 +100,8 @@ public interface AutoString {
 	}
 
 	public static class InnerAutoString implements AutoString {
-		public String a;
-		public int b;
+		public String objectValue;
+		public int doubleValue;
 		public InnerAutoString_1 c = new InnerAutoString_1();
 	}
 
@@ -115,6 +115,6 @@ public interface AutoString {
 		public int c2 = 1;
 		public String c3;
 		public String[] array1;
-		public String[] array2 = new String[]{"i","a"};
+		public String[] array2 = new String[]{"i","objectValue"};
 	}*/
 }

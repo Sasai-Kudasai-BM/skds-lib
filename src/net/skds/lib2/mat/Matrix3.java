@@ -1,7 +1,7 @@
 package net.skds.lib2.mat;
 
-import net.skds.lib2.utils.linkiges.Obj2DoublePair;
-import net.skds.lib2.utils.linkiges.Obj2FloatPair;
+import net.skds.lib2.utils.linkiges.Obj2DoublePairRecord;
+import net.skds.lib2.utils.linkiges.Obj2FloatPairRecord;
 
 @SuppressWarnings("unused")
 public sealed interface Matrix3 permits Matrix3D, Matrix3F {
@@ -324,7 +324,7 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		);
 	}
 
-	default Obj2DoublePair<Matrix3D> adjugateAndDet() {
+	default Obj2DoublePairRecord<Matrix3D> adjugateAndDet() {
 		double f = this.m11() * this.m22() - this.m12() * this.m21();
 		double f1 = -(this.m10() * this.m22() - this.m12() * this.m20());
 		double f2 = this.m10() * this.m21() - this.m11() * this.m20();
@@ -346,10 +346,10 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 				f7,
 				f8
 		);
-		return new Obj2DoublePair<>(m, det);
+		return new Obj2DoublePairRecord<>(m, det);
 	}
 
-	default Obj2FloatPair<Matrix3F> adjugateAndDetF() {
+	default Obj2FloatPairRecord<Matrix3F> adjugateAndDetF() {
 		float f = this.m11f() * this.m22f() - this.m12f() * this.m21f();
 		float f1 = -(this.m10f() * this.m22f() - this.m12f() * this.m20f());
 		float f2 = this.m10f() * this.m21f() - this.m11f() * this.m20f();
@@ -371,7 +371,7 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 				f7,
 				f8
 		);
-		return new Obj2FloatPair<>(m, det);
+		return new Obj2FloatPairRecord<>(m, det);
 	}
 
 	default double det() {

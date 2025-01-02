@@ -1,5 +1,8 @@
 package net.skds.lib2.utils.linkiges;
 
-@SuppressWarnings("unused")
-public record Obj2DoublePair<A>(A a, double b) {
+public interface Obj2DoublePair<T> {
+
+	T objectValue();
+
+	double doubleValue();
 }
