@@ -59,6 +59,12 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	@SuppressWarnings("unchecked")
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> cl) {
+			{
+				JsonCodec<?> codec = getDefaultCodec(cl, registry);
+				if (codec != null) {
+					return codec;
+				}
+			}
 			if (cl.isEnum()) {
 				return new EnumCodec<>(type, registry);
 			} else if (cl.isArray()) {
@@ -88,11 +94,6 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 				} else {
 					JsonCodec<Object> codec = registry.getCodec((Type) cle);
 					return new ArrayCodec(cle, codec, registry);
-				}
-			} else {
-				JsonCodec<?> codec = getDefaultCodec(cl, registry);
-				if (codec != null) {
-					return codec;
 				}
 			}
 		} else if (type instanceof ParameterizedType pt) {

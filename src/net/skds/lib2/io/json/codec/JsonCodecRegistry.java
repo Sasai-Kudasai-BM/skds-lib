@@ -29,7 +29,7 @@ public class JsonCodecRegistry {
 	}
 
 	public JsonReader createReader(CharInput input) {
-		return new JsonReaderImpl(input);
+		return new JsonReaderImpl(input, this);
 	}
 
 	public JsonWriter createWriter(CharOutput output) {

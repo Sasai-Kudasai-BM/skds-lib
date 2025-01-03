@@ -64,20 +64,31 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 
 	class Codec extends JsonCodec<JsonElement> {
 
+		private final JsonCodec<JsonObject> objectCodec;
+		private final JsonCodec<JsonArray> arrayCodec;
+		private final JsonCodec<JsonString> stringCodec;
+		private final JsonCodec<JsonBoolean> booleanCodec;
+		private final JsonCodec<JsonNumber> numberCodec;
 
 		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);
+
+			this.objectCodec = registry.getCodecIndirect(JsonObject.class);
+			this.arrayCodec = registry.getCodecIndirect(JsonArray.class);
+			this.stringCodec = registry.getCodecIndirect(JsonString.class);
+			this.booleanCodec = registry.getCodecIndirect(JsonBoolean.class);
+			this.numberCodec = registry.getCodecIndirect(JsonNumber.class);
 		}
 
 		@Override
 		public void write(JsonElement value, JsonWriter writer) throws IOException {
 			switch (value.type()) {
 
-				case BOOLEAN -> writer.writeBoolean(value.getAsBoolean());
-				case OBJECT -> registry.getCodec(JsonObject.class).write((JsonObject) value, writer);
-				case LIST -> registry.getCodec(JsonArray.class).write((JsonArray) value, writer);
-				case NUMBER -> registry.getCodec(JsonNumber.class).write((JsonNumber) value, writer);
-				case STRING -> registry.getCodec(JsonString.class).write((JsonString) value, writer);
+				case BOOLEAN -> booleanCodec.write((JsonBoolean) value, writer);
+				case OBJECT -> objectCodec.write((JsonObject) value, writer);
+				case ARRAY -> arrayCodec.write((JsonArray) value, writer);
+				case NUMBER -> numberCodec.write((JsonNumber) value, writer);
+				case STRING -> stringCodec.write((JsonString) value, writer);
 				case NULL -> writer.writeNull();
 			}
 		}
@@ -91,24 +102,19 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 					return JsonElement.NULL;
 				}
 				case BEGIN_OBJECT -> {
-					JsonCodec<JsonObject> codec = registry.getCodec(JsonObject.class);
-					return codec.read(reader);
+					return objectCodec.read(reader);
 				}
 				case BEGIN_ARRAY -> {
-					JsonCodec<JsonArray> codec = registry.getCodec(JsonArray.class);
-					return codec.read(reader);
+					return arrayCodec.read(reader);
 				}
 				case STRING -> {
-					JsonCodec<JsonString> codec = registry.getCodec(JsonString.class);
-					return codec.read(reader);
+					return stringCodec.read(reader);
 				}
 				case BOOLEAN -> {
-					JsonCodec<JsonBoolean> codec = registry.getCodec(JsonBoolean.class);
-					return codec.read(reader);
+					return booleanCodec.read(reader);
 				}
 				case NUMBER -> {
-					JsonCodec<JsonNumber> codec = registry.getCodec(JsonNumber.class);
-					return codec.read(reader);
+					return numberCodec.read(reader);
 				}
 
 				default -> throw new JsonReadException("Unexpected token " + type);

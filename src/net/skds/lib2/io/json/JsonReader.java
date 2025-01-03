@@ -22,6 +22,8 @@ public interface JsonReader {
 
 	void skipNull() throws IOException;
 
+	void skipValue() throws IOException;
+
 	Number readNumber() throws IOException;
 
 	default int readInt() throws IOException {

@@ -4,7 +4,7 @@ import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.function.Object2FloatFunction;
 import net.skds.lib2.utils.linkiges.Obj2FloatPair;
 
-import java.util.Arrays;
+import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -136,7 +136,8 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 	private void remove(int pos) {
 		var ers = entries;
 		if (ers.length == 0) return;
-		Entry[] newEntries = Arrays.copyOf(ers, ers.length - 1);
+		@SuppressWarnings("unchecked")
+		Entry[] newEntries = (Entry[]) Array.newInstance(Entry.class, ers.length - 1);
 		float ws = 0;
 		for (int i = 0; i < pos; i++) {
 			Entry e = ers[i];

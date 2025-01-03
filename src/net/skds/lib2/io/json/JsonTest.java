@@ -4,7 +4,7 @@ import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.mat.Vec3I;
+import net.skds.lib2.mat.Vec3D;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -54,7 +54,7 @@ public class JsonTest {
 		JsonCodec<Amogus> codec = registry.getCodec(Amogus.class);
 
 		Amogus amogus = new Amogus();
-		amogus.vec = new Vec3I(0, 100, 0);
+		amogus.vec = new Vec3D(0, 100, 0);
 		amogus.amogus = new Amogus();
 		amogus.amogus.vec = null;
 		amogus.amogus.a = 1488;
@@ -77,7 +77,7 @@ public class JsonTest {
 		private final int b = 2;
 		@JsonAlias("C-Gay")
 		private final int c = 3;
-		private Vec3I vec = new Vec3I(1, -1, 2);
+		private Vec3D vec = new Vec3D(1, -1, 2);
 		int d = 3;
 
 		private Map<Float, Amogus> meps;

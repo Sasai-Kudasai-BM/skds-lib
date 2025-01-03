@@ -1,6 +1,7 @@
 package net.skds.lib2.reflection;
 
 import lombok.experimental.UtilityClass;
+import net.skds.lib2.utils.function.MultiSupplier;
 import sun.reflect.ReflectionFactory;
 
 import java.lang.reflect.Constructor;
@@ -35,6 +36,22 @@ public class ReflectUtils {
 				throw new RuntimeException(e);
 			}
 		};
+	}
+
+	public static <T> MultiSupplier<T> getMultiConstructor(Class<T> tClass, Class<?>... args) {
+		try {
+			Constructor<T> c = tClass.getDeclaredConstructor(args);
+			c.setAccessible(true);
+			return (arg) -> {
+				try {
+					return (T) c.newInstance(arg);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			};
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
 	}
 
 	public static <T> HiddenField<T> getField(Class<?> clazz, FindOptions options) {

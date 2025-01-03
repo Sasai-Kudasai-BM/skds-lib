@@ -16,7 +16,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 
 	@Override
 	public JsonElementType type() {
-		return JsonElementType.LIST;
+		return JsonElementType.ARRAY;
 	}
 
 	@Override

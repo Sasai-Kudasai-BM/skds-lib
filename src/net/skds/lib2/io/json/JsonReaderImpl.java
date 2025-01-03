@@ -2,6 +2,9 @@ package net.skds.lib2.io.json;
 
 import net.skds.lib2.io.CharInput;
 import net.skds.lib2.io.EndOfInputException;
+import net.skds.lib2.io.json.codec.JsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.StringUtils;
 
@@ -10,6 +13,7 @@ import java.io.IOException;
 public final class JsonReaderImpl implements JsonReader {
 
 	private final CharInput input;
+	private final JsonCodec<JsonElement> skipCodec;
 
 	//private int pos;
 	private JsonEntryType lastReadEntryType;
@@ -17,8 +21,9 @@ public final class JsonReaderImpl implements JsonReader {
 	private int valueEnd;
 
 
-	public JsonReaderImpl(CharInput input) {
+	public JsonReaderImpl(CharInput input, JsonCodecRegistry registry) {
 		this.input = input;
+		this.skipCodec = registry.getCodec(JsonElement.class);
 	}
 
 	private void validateEntryType(JsonEntryType expected) throws IOException {
@@ -136,7 +141,6 @@ public final class JsonReaderImpl implements JsonReader {
 	public void skipNull() throws IOException {
 		switch (nextEntryType()) {
 			case NULL -> {
-				validateEntryType(JsonEntryType.NULL);
 				input.setPos(valueEnd);
 				resetLastEntry();
 			}
@@ -148,6 +152,11 @@ public final class JsonReaderImpl implements JsonReader {
 			}
 			default -> throw new JsonReadException("Expected STRING or NULL but next entry is " + nextEntryType());
 		}
+	}
+
+	@Override
+	public void skipValue() throws IOException {
+		skipCodec.read(this);
 	}
 
 	@Override

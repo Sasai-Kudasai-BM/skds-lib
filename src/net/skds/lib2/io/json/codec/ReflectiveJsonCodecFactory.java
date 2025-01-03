@@ -5,16 +5,15 @@ import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.reflection.ReflectUtils;
+import net.skds.lib2.utils.function.MultiSupplier;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @CustomLog
@@ -26,6 +25,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			checkForInnerClass(c);
+
+			if (c.isRecord()) {
+				return new RecordCodec(c, registry);
+			}
 			return new ReflectiveCodec(c, registry);
 		} else if (type instanceof ParameterizedType pt) {
 			if (pt.getRawType() instanceof Class<?> c) {
@@ -108,7 +111,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
 				String name = reader.readName();
 				FieldCodec fc = readers.get(name);
-				if (fc == null) continue;
+				if (fc == null) {
+					reader.skipValue();
+					continue;
+				}
 				try {
 					fc.read(reader, o);
 				} catch (IllegalAccessException e) {
@@ -116,6 +122,111 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 			}
 			reader.endObject();
+			if (o instanceof JsonPostDeserializeCall pdc) {
+				pdc.postDeserializedJson();
+			}
+			return o;
+		}
+	}
+
+	public static class RecordCodec extends JsonCodec<Object> {
+
+		final MultiSupplier<Object> constructor;
+		final JsonCodec<Object>[] codecs;
+		final String[] names;
+		final Function<Object, Object>[] accessors;
+		final Map<String, Integer> readers;
+
+		@SuppressWarnings("unchecked")
+		public RecordCodec(Class<?> tClass, JsonCodecRegistry registry) {
+			super(registry);
+			MultiSupplier<Object> tmpC;
+			var rcs = tClass.getRecordComponents();
+			Class<?>[] args = new Class[rcs.length];
+			JsonCodec<Object>[] codecs1 = new JsonCodec[rcs.length];
+			String[] names = new String[rcs.length];
+			Function<Object, Object>[] accessors = new Function[rcs.length];
+			Map<String, Integer> readers = new HashMap<>();
+			for (int i = 0; i < rcs.length; i++) {
+				RecordComponent rc = rcs[i];
+				args[i] = rc.getType();
+				JsonCodec<Object> codec = getDefaultCodec(rc, rc.getGenericType(), registry);
+				if (codec == null) {
+					codec = registry.getCodecIndirect(rc.getGenericType());
+				}
+				codecs1[i] = codec;
+				String name = rc.getName();
+				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
+				if (alias != null) {
+					name = alias.value();
+				}
+				Method m = rc.getAccessor();
+				accessors[i] = r -> {
+					try {
+						return m.invoke(r);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				};
+				names[i] = name;
+				readers.put(name, i);
+			}
+
+			tmpC = ReflectUtils.getMultiConstructor((Class<Object>) tClass, args);
+			if (tmpC == null) {
+				throw new IllegalArgumentException("Record \"" +
+						tClass.getName() +
+						"\" have no available canonical constructor and can not be created by ReflectiveCodec");
+			}
+
+			this.constructor = tmpC;
+			this.codecs = codecs1;
+			this.readers = readers;
+			this.names = names;
+			this.accessors = accessors;
+		}
+
+		@Override
+		public void write(Object value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			if (value instanceof JsonPreSerializeCall psc) {
+				psc.preSerializeJson();
+			}
+			writer.beginObject();
+			if (codecs.length > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (int i = 0; i < codecs.length; i++) {
+				JsonCodec<Object> w = codecs[i];
+				writer.writeName(names[i]);
+				w.write(accessors[i].apply(value), writer);
+			}
+			writer.endObject();
+		}
+
+		@Override
+		public Object read(JsonReader reader) throws IOException {
+			if (reader.nextEntryType() == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			reader.beginObject();
+			Object[] args = new Object[names.length];
+			while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+				String name = reader.readName();
+				Integer index = readers.get(name);
+				if (index == null) {
+					reader.skipValue();
+					continue;
+				}
+				int i = index;
+				args[i] = codecs[i].read(reader);
+			}
+			reader.endObject();
+			Object o = constructor.get(args);
 			if (o instanceof JsonPostDeserializeCall pdc) {
 				pdc.postDeserializedJson();
 			}
@@ -334,7 +445,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		private ObjFieldCodec(Field field, JsonCodecRegistry registry) {
 			super(field);
-			JsonCodec<Object> c = getDefaultCodec(field, registry);
+			JsonCodec<Object> c = getDefaultCodec(field, field.getGenericType(), registry);
 			if (c == null) {
 				c = registry.getCodecIndirect(field.getGenericType());
 			}
@@ -353,19 +464,19 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JsonCodec<Object> getDefaultCodec(Field field, JsonCodecRegistry registry) {
-		DefaultJsonCodec defaultCodec = field.getAnnotation(DefaultJsonCodec.class);
+	private static JsonCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, JsonCodecRegistry registry) {
+		DefaultJsonCodec defaultCodec = annotatedElement.getAnnotation(DefaultJsonCodec.class);
 		if (defaultCodec == null) return null;
 		Supplier<JsonCodecFactory> constructor = (Supplier<JsonCodecFactory>) ReflectUtils.getConstructor(defaultCodec.value());
 		if (constructor != null) {
 			JsonCodecFactory factory = constructor.get();
 			if (factory != null) {
-				JsonCodec<Object> codec = (JsonCodec<Object>) factory.createCodec(field.getGenericType(), registry);
+				JsonCodec<Object> codec = (JsonCodec<Object>) factory.createCodec(type, registry);
 				if (codec != null) return codec;
 			}
 		}
 
-		log.error("Invalid @DefaultJsonCodec on \"" + field + "\"");
+		log.error("Invalid @DefaultJsonCodec on \"" + annotatedElement + "\"");
 		return null;
 	}
 
