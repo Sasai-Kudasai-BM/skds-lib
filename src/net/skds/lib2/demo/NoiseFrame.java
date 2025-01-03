@@ -10,8 +10,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class NoiseFrame extends JFrame {
@@ -68,8 +66,34 @@ public class NoiseFrame extends JFrame {
 	};
 
 	private static final InterpolationHolder[] interpolations = {
-			new InterpolationHolder(FastMath::cosInterpolate, "cos"),
-			new InterpolationHolder(FastMath::lerp, "lerp")
+			new InterpolationHolder(FastMath::cosInterpolate, "COS"),
+			new InterpolationHolder(FastMath::lerp, "LERP")
+	};
+
+
+	private static final AmplitudeFuncHolder[] amplitudeFunctions = {
+			new AmplitudeFuncHolder((l, e) -> {
+				float amp = e;
+				for (int i = 1; i < l; i++) {
+					amp *= e;
+				}
+				return 1 / amp;
+			}, "EXPONENT"),
+			new AmplitudeFuncHolder((l, e) -> {
+				float a = (l + 1) * e;
+				return 1f / (a * a);
+			}, "SQUARE"),
+			new AmplitudeFuncHolder((l, e) -> 1f / (l + 1), "LINEAR"),
+			new AmplitudeFuncHolder((l, e) -> {
+				float a = 1;
+				float a0 = 1;
+				for (int i = 1; i < l; i++) {
+					float b = a;
+					a += a0;
+					a0 = b;
+				}
+				return 1f / a;
+			}, "FIBONACCI"),
 	};
 
 	private record InterpolationHolder(FastMath.FloatInterpolation interpolation, String name) {
@@ -79,20 +103,30 @@ public class NoiseFrame extends JFrame {
 		}
 	}
 
-	private final List<JSlider> ampSliders = new ArrayList<>();
+	private record AmplitudeFuncHolder(Noise.AmplitudeFunction af, String name) {
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
+	//private final List<JSlider> ampSliders = new ArrayList<>();
 
 	private final NoisePanel noisePanel;
 
-	private float scale = 15;
+	private float scale = 1;
 	private float cx = 0;
 	private float cy = 0;
 	private float depth = 0;
 
-	private float periodScale = 1;
+	private float exponent = 2;
+
+	private int harmonics = 7;
 
 	private float colorScale = 1.5f;
 	private float colorBias = -.2f;
 
+	private Noise.AmplitudeFunction amplitudeFunction = amplitudeFunctions[0].af;
 	private FastMath.FloatInterpolation interpolation = interpolations[0].interpolation;
 	private ColorScheme colorScheme = schemes[0];
 	private long seed = 0;
@@ -127,46 +161,65 @@ public class NoiseFrame extends JFrame {
 			setPreferredSize(new Dimension(400, 400));
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-			add(new JLabel("Z-Axis"));
+			JLabel zAx = new JLabel("Z-Axis: %.2f".formatted(depth));
+			add(zAx);
 			JSlider slider = new JSlider(0, 200, 0);
 			slider.addChangeListener(e -> {
-				depth = slider.getValue() * 1e-2f;
+				depth = slider.getValue();
+				zAx.setText("Z-Axis: %.2f".formatted(depth));
 				noisePanel.repaint();
 			});
 			add(slider);
 
-			add(new JLabel("Period scale"));
-			JSlider psSlider = new JSlider(100, 2000, 1000);
+			JLabel exp = new JLabel("Exponent: %.2f".formatted(exponent));
+			add(exp);
+			JSlider psSlider = new JSlider(1100, 3000, 2000);
 			psSlider.addChangeListener(e -> {
-				periodScale = psSlider.getValue() * 1e-3f;
+				exponent = psSlider.getValue() * 1e-3f;
+				exp.setText("Exponent: %.2f".formatted(exponent));
 				updateNoise();
 			});
 			add(psSlider);
 
-			add(new JLabel("Seed"));
+			JLabel seedL = new JLabel("Seed: " + seed);
+			add(seedL);
 			JSlider sliderSeed = new JSlider(0, 50, 0);
 			sliderSeed.addChangeListener(e -> {
 				seed = sliderSeed.getValue();
+				seedL.setText("Seed: " + seed);
 				updateNoise();
 			});
 			add(sliderSeed);
 
-			add(new JLabel("Color bias"));
+			var cb = new JLabel("Color bias: %.2f".formatted(colorBias));
+			add(cb);
 			JSlider slider2 = new JSlider(-1000, 1000, (int) (colorBias * 1000));
 			slider2.addChangeListener(e -> {
 				colorBias = slider2.getValue() * 1E-3f;
+				cb.setText("Color bias: %.2f".formatted(colorBias));
 				noisePanel.repaint();
 			});
 			add(slider2);
 
-
-			add(new JLabel("Color scale"));
+			var cs = new JLabel("Color scale: %.2f".formatted(colorScale));
+			add(cs);
 			JSlider slider3 = new JSlider(100, 3000, (int) (colorScale * 1000));
 			slider3.addChangeListener(e -> {
 				colorScale = slider3.getValue() * 1E-3f;
+				cs.setText("Color scale: %.2f".formatted(colorScale));
 				noisePanel.repaint();
 			});
 			add(slider3);
+
+			var harms = new JLabel("Harmonics: " + harmonics);
+			add(harms);
+			JSlider slider5 = new JSlider(1, 15, harmonics);
+			slider5.addChangeListener(e -> {
+				harmonics = slider5.getValue();
+				harms.setText("Harmonics: " + harmonics);
+				updateNoise();
+			});
+			add(slider5);
 
 			add(new JLabel("Color scheme"));
 			JComboBox<ColorScheme> schemeSelector = new JComboBox<>(schemes);
@@ -184,17 +237,23 @@ public class NoiseFrame extends JFrame {
 			});
 			add(interpolationSelector);
 
+			add(new JLabel("AmplitudeFunction"));
+			JComboBox<AmplitudeFuncHolder> amplitudeFuncSelector = new JComboBox<>(amplitudeFunctions);
+			amplitudeFuncSelector.addActionListener(e -> {
+				amplitudeFunction = ((AmplitudeFuncHolder) Objects.requireNonNull(amplitudeFuncSelector.getSelectedItem())).af;
+				updateNoise();
+			});
+			add(amplitudeFuncSelector);
+
+			/*
 			JPanel ampPanel = new JPanel();
-
 			ampPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
-
 			JSlider ampCount = new JSlider(1, 15, 5);
 			ampCount.addChangeListener(e -> {
 				setAmpSliders(ampSliders, ampPanel, ampCount.getValue());
 				noisePanel.repaint();
 			});
 			ampCount.setSnapToTicks(true);
-
 			int dc = ampCount.getValue() - ampSliders.size();
 			for (int i = 0; i < dc; i++) {
 				JSlider amp = new JSlider(JSlider.VERTICAL, 0, 200, 100);
@@ -203,12 +262,14 @@ public class NoiseFrame extends JFrame {
 				ampSliders.add(amp);
 				amp.addChangeListener(e -> updateNoise());
 			}
-
 			add(ampPanel);
 			add(ampCount);
+			 */
+
 			updateNoise();
 		}
 
+		/*
 		private void setAmpSliders(List<JSlider> ampSliders, JPanel ampPanel, int count) {
 			int dc = count - ampSliders.size();
 			if (dc > 0) {
@@ -230,14 +291,15 @@ public class NoiseFrame extends JFrame {
 				updateNoise();
 			}
 		}
+		 */
 	}
 
 	private void updateNoise() {
-		float[] amps = new float[ampSliders.size()];
-		for (int i = 0; i < amps.length; i++) {
-			amps[i] = ampSliders.get(i).getValue() * 1e-2f;
-		}
-		this.noise = new Noise(seed, amps, periodScale, interpolation);
+		//float[] amps = new float[ampSliders.size()];
+		//for (int i = 0; i < amps.length; i++) {
+		//	amps[i] = ampSliders.get(i).getValue() * 1e-2f;
+		//}
+		this.noise = new Noise(seed, harmonics, amplitudeFunction, exponent, interpolation);
 		noisePanel.repaint();
 	}
 
@@ -254,8 +316,10 @@ public class NoiseFrame extends JFrame {
 				public void mouseWheelMoved(MouseWheelEvent e) {
 					int dw = e.getWheelRotation();
 					scale *= 1 - (dw * .1f);
-					if (scale < 1) {
-						scale = 1;
+					if (scale < 0.1) {
+						scale = .1f;
+					} else if (scale > 10) {
+						scale = 10;
 					}
 					noisePanel.repaint();
 				}

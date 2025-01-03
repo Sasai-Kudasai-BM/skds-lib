@@ -1,5 +1,6 @@
 package net.skds.lib2.utils.collection;
 
+import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.function.Object2FloatFunction;
 import net.skds.lib2.utils.linkiges.Obj2FloatPair;
@@ -71,6 +72,14 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 	@SuppressWarnings("unchecked")
 	public static <T> WeightedPool<T> empty() {
 		return (WeightedPool<T>) EMPTY;
+	}
+
+	public T getRandom() {
+		return get(FastMath.RANDOM.nextFloat());
+	}
+
+	public T getAndRemoveRandom() {
+		return getAndRemove(FastMath.RANDOM.nextFloat());
 	}
 
 	public T get(float f) {
