@@ -260,6 +260,14 @@ public class FastMath {
 		return min * (1 - f) + max * f;
 	}
 
+	public static double nearest(double t, double min, double max) {
+		return (t >= .5) ? max : min;
+	}
+
+	public static float nearest(float t, float min, float max) {
+		return (t >= .5f) ? max : min;
+	}
+
 	public static double lerp(double t, double min, double max) {
 		return (max - min) * t + min;
 	}

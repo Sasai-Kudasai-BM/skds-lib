@@ -4,6 +4,7 @@ import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
@@ -44,7 +45,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		return super.add(JsonElement.NULL);
 	}
 
-	public static class Codec extends JsonCodec<JsonArray> {
+	public static class Codec extends AbstractJsonCodec<JsonArray> {
 
 		private final JsonCodec<JsonElement> elementCodec;
 

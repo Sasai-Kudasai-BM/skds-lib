@@ -1,6 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
+import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
@@ -11,12 +12,10 @@ import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
+import net.skds.lib2.utils.function.MultiSupplier;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -60,7 +59,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> cl) {
 			{
-				JsonCodec<?> codec = getDefaultCodec(cl, registry);
+				JsonCodec<?> codec = getDefaultCodec(cl, cl, registry);
 				if (codec != null) {
 					return codec;
 				}
@@ -112,24 +111,45 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JsonCodec<?> getDefaultCodec(Class<?> tClass, JsonCodecRegistry registry) {
-		DefaultJsonCodec defaultCodec = tClass.getAnnotation(DefaultJsonCodec.class);
+	public static JsonCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, JsonCodecRegistry registry) {
+		DefaultJsonCodec defaultCodec = annotatedElement.getAnnotation(DefaultJsonCodec.class);
 		if (defaultCodec == null) return null;
-		Supplier<JsonCodecFactory> constructor = (Supplier<JsonCodecFactory>) ReflectUtils.getConstructor(defaultCodec.value());
-		if (constructor != null) {
-			JsonCodecFactory factory = constructor.get();
-			if (factory != null) {
-				JsonCodec<?> codec = factory.createCodec(tClass, registry);
-				if (codec != null) {
-					return codec;
-				}
+		Class<?> factoryClass = defaultCodec.value();
+		JsonCodecFactory factory = null;
+		if (JsonCodecFactory.class.isAssignableFrom(factoryClass)) {
+			Supplier<JsonCodecFactory> constructor = (Supplier<JsonCodecFactory>) ReflectUtils.getConstructor(factoryClass);
+			if (constructor != null) {
+				factory = constructor.get();
+			}
+		} else {
+			MultiSupplier<JsonCodec<?>> constructor =
+					(MultiSupplier<JsonCodec<?>>) ReflectUtils.getMultiConstructor(factoryClass, Type.class, JsonCodecRegistry.class);
+			if (constructor != null) {
+				factory = new JsonCodecFactory() {
+
+					@Override
+					public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+						return constructor.get(type, registry);
+					}
+
+					@Override
+					public CodecRole getCodecRole() {
+						return defaultCodec.codecRole();
+					}
+				};
 			}
 		}
-		log.error("Invalid @DefaultJsonCodec on \"" + tClass + "\"");
+
+		if (factory != null) {
+			JsonCodec<Object> codec = (JsonCodec<Object>) factory.createCodec(type, registry);
+			if (codec != null) return codec;
+		}
+
+		log.error("Invalid @DefaultJsonCodec on \"" + annotatedElement + "\"");
 		return null;
 	}
 
-	public static final class MapCodec extends JsonCodec<Map<Object, Object>> {
+	public static final class MapCodec extends AbstractJsonCodec<Map<Object, Object>> {
 
 		//final Class<?> tClass;
 		final Supplier<Map<Object, Object>> constructor;
@@ -203,7 +223,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ListCodec extends JsonCodec<List<Object>> {
+	public static final class ListCodec extends AbstractJsonCodec<List<Object>> {
 
 		final Supplier<List<Object>> constructor;
 		final JsonCodec<Object> elementCodec;
@@ -265,7 +285,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ArrayCodec extends JsonCodec<Object> {
+	public static final class ArrayCodec extends AbstractJsonCodec<Object> {
 
 		final Class<?> tClass;
 		final JsonCodec<Object> elementCodec;
@@ -317,7 +337,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class IntArrayCodec extends JsonCodec<int[]> {
+	public static final class IntArrayCodec extends AbstractJsonCodec<int[]> {
 
 		public IntArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -359,7 +379,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ByteArrayCodec extends JsonCodec<byte[]> {
+	public static final class ByteArrayCodec extends AbstractJsonCodec<byte[]> {
 
 		public ByteArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -401,7 +421,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class BooleanArrayCodec extends JsonCodec<boolean[]> {
+	public static final class BooleanArrayCodec extends AbstractJsonCodec<boolean[]> {
 
 		public BooleanArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -443,7 +463,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ShortArrayCodec extends JsonCodec<short[]> {
+	public static final class ShortArrayCodec extends AbstractJsonCodec<short[]> {
 
 		public ShortArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -485,7 +505,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class CharArrayCodec extends JsonCodec<char[]> {
+	public static final class CharArrayCodec extends AbstractJsonCodec<char[]> {
 
 		public CharArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -549,7 +569,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class LongArrayCodec extends JsonCodec<long[]> {
+	public static final class LongArrayCodec extends AbstractJsonCodec<long[]> {
 
 		public LongArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -592,7 +612,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	}
 
 
-	public static final class FloatArrayCodec extends JsonCodec<float[]> {
+	public static final class FloatArrayCodec extends AbstractJsonCodec<float[]> {
 
 		public FloatArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -634,7 +654,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class DoubleArrayCodec extends JsonCodec<double[]> {
+	public static final class DoubleArrayCodec extends AbstractJsonCodec<double[]> {
 
 		public DoubleArrayCodec(JsonCodecRegistry registry) {
 			super(registry);
@@ -677,7 +697,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	}
 
 
-	public static final class StringCodec extends JsonCodec<String> {
+	public static final class StringCodec extends AbstractJsonCodec<String> {
 
 		final JsonCodec<JsonObject> joc;
 		final JsonCodec<JsonArray> jac;
@@ -725,7 +745,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class EnumCodec<E extends Enum<E>> extends JsonCodec<E> {
+	public static final class EnumCodec<E extends Enum<E>> extends AbstractJsonCodec<E> {
 
 		private final Class<E> eClass;
 
@@ -776,7 +796,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class IntCodec extends JsonCodec<Integer> {
+	public static final class IntCodec extends AbstractJsonCodec<Integer> {
 
 		public IntCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -803,7 +823,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ByteCodec extends JsonCodec<Byte> {
+	public static final class ByteCodec extends AbstractJsonCodec<Byte> {
 
 		public ByteCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -830,7 +850,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class NumberCodec extends JsonCodec<Number> {
+	public static final class NumberCodec extends AbstractJsonCodec<Number> {
 
 		public NumberCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -857,7 +877,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	}
 
 
-	public static final class BooleanCodec extends JsonCodec<Boolean> {
+	public static final class BooleanCodec extends AbstractJsonCodec<Boolean> {
 
 		public BooleanCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -883,7 +903,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class CharCodec extends JsonCodec<Character> {
+	public static final class CharCodec extends AbstractJsonCodec<Character> {
 
 		public CharCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -923,7 +943,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ShortCodec extends JsonCodec<Short> {
+	public static final class ShortCodec extends AbstractJsonCodec<Short> {
 
 		public ShortCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -950,7 +970,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class LongCodec extends JsonCodec<Long> {
+	public static final class LongCodec extends AbstractJsonCodec<Long> {
 
 		public LongCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -977,7 +997,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class FloatCodec extends JsonCodec<Float> {
+	public static final class FloatCodec extends AbstractJsonCodec<Float> {
 
 		public FloatCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
@@ -1004,7 +1024,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class DoubleCodec extends JsonCodec<Double> {
+	public static final class DoubleCodec extends AbstractJsonCodec<Double> {
 
 		public DoubleCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);

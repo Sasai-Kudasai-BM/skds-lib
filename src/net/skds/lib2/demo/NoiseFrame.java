@@ -67,9 +67,9 @@ public class NoiseFrame extends JFrame {
 
 	private static final InterpolationHolder[] interpolations = {
 			new InterpolationHolder(FastMath::cosInterpolate, "COS"),
-			new InterpolationHolder(FastMath::lerp, "LERP")
+			new InterpolationHolder(FastMath::lerp, "LERP"),
+			new InterpolationHolder(FastMath::nearest, "NEAREST")
 	};
-
 
 	private static final AmplitudeFuncHolder[] amplitudeFunctions = {
 			new AmplitudeFuncHolder((l, e) -> {

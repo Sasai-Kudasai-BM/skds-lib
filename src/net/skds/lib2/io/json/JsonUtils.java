@@ -2,7 +2,6 @@ package net.skds.lib2.io.json;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecFactory;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
@@ -44,11 +43,6 @@ public class JsonUtils {
 
 	public static void addFactory(Type type, JsonCodecFactory factory) {
 		userCodecFactory.addFactory(type, factory);
-		rebuild();
-	}
-
-	public static void addCodec(Type type, JsonCodec<?> codec) {
-		userCodecFactory.addFactory(type, (t, r) -> codec);
 		rebuild();
 	}
 

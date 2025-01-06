@@ -1,6 +1,9 @@
 package net.skds.lib2.io.json;
 
+import lombok.AllArgsConstructor;
+import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.annotation.JsonAlias;
+import net.skds.lib2.io.json.annotation.JsonCodecRole;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
@@ -71,6 +74,11 @@ public class JsonTest {
 
 	}
 
+	@JsonCodecRole(CodecRole.SERIALIZE)
+	@AllArgsConstructor
+	private static class Pizdun {
+		private String s;
+	}
 
 	private static class Amogus {
 		private int a = 1;
@@ -78,6 +86,7 @@ public class JsonTest {
 		@JsonAlias("C-Gay")
 		private final int c = 3;
 		private Vec3D vec = new Vec3D(1, -1, 2);
+		//private Pizdun p = new Pizdun("u");
 		int d = 3;
 
 		private Map<Float, Amogus> meps;

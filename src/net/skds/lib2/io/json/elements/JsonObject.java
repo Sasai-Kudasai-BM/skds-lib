@@ -4,6 +4,7 @@ import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.utils.StringUtils;
@@ -43,7 +44,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return sb.toString();
 	}
 
-	public static class Codec extends JsonCodec<JsonObject> {
+	public static class Codec extends AbstractJsonCodec<JsonObject> {
 
 		private final JsonCodec<JsonElement> elementCodec;
 

@@ -1,5 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
+import net.skds.lib2.io.CodecRole;
+
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,6 +10,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public interface JsonCodecFactory {
 
 	JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry);
+
+	default JsonCodecFactory combine(JsonCodecFactory other) {
+		if (getCodecRole() == other.getCodecRole()) return other;
+		return switch (other.getCodecRole()) {
+			case BOTH -> other;
+
+			case SERIALIZE ->
+					(t, r) -> new CombinedJsonCodec<>(other.createCodec(t, r), JsonCodecFactory.this.createCodec(t, r));
+
+			case DESERIALIZE ->
+					(t, r) -> new CombinedJsonCodec<>(JsonCodecFactory.this.createCodec(t, r), other.createCodec(t, r));
+
+		};
+	}
+
+	default CodecRole getCodecRole() {
+		return CodecRole.BOTH;
+	}
 
 	default JsonCodecFactory orElse(JsonCodecFactory other) {
 		return (t, r) -> {
@@ -30,9 +50,14 @@ public interface JsonCodecFactory {
 		private MapJsonFactory(Map<Type, JsonCodecFactory> map) {
 			this.map = map;
 		}
-		
+
 		public void addFactory(Type type, JsonCodecFactory factory) {
-			map.put(type, factory);
+			map.compute(type, (t, f) -> {
+				if (f == null) {
+					return factory;
+				}
+				return f.combine(factory);
+			});
 		}
 
 		@Override

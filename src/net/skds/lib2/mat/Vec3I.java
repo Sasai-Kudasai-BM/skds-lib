@@ -6,15 +6,13 @@ import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecFactory;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Vec3I.JCodecFactory.class)
+@DefaultJsonCodec(Vec3I.JCodec.class)
 public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 
 	public static final Vec3I XN = new Vec3I(-1, 0, 0);
@@ -129,14 +127,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 		return this;
 	}
 
-	public static final class JCodecFactory implements JsonCodecFactory {
-		@Override
-		public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
-			return new JCodec(registry);
-		}
-	}
-
-	private static final class JCodec extends JsonCodec<Vec3I> {
+	static final class JCodec extends AbstractJsonCodec<Vec3I> {
 
 		public JCodec(JsonCodecRegistry registry) {
 			super(registry);

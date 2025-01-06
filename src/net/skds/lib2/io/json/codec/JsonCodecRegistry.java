@@ -53,7 +53,7 @@ public class JsonCodecRegistry {
 	}
 
 	public <T> JsonCodec<T> getCodecIndirect(Type type) {
-		return new JsonCodec<>(this) {
+		return new AbstractJsonCodec<>(this) {
 
 			JsonCodec<T> codec;
 

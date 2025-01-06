@@ -4,6 +4,7 @@ import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
@@ -62,7 +63,7 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		}
 	}
 
-	class Codec extends JsonCodec<JsonElement> {
+	class Codec extends AbstractJsonCodec<JsonElement> {
 
 		private final JsonCodec<JsonObject> objectCodec;
 		private final JsonCodec<JsonArray> arrayCodec;

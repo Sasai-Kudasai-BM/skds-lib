@@ -3,7 +3,7 @@ package net.skds.lib2.io.json.elements;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.codec.JsonCodec;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public record JsonNumber(Number value) implements JsonElement {
 		return value;
 	}
 
-	public static final class Codec extends JsonCodec<JsonNumber> {
+	public static final class Codec extends AbstractJsonCodec<JsonNumber> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {
 			super(registry);

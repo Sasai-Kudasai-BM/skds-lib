@@ -7,11 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DefaultJsonCodec {
+public @interface JsonCodecRole {
 
-	Class<?> value();
-
-	CodecRole codecRole() default CodecRole.BOTH;
+	CodecRole value();
 }
