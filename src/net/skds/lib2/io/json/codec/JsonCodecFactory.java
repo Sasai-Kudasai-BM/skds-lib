@@ -25,6 +25,34 @@ public interface JsonCodecFactory {
 		};
 	}
 
+	static JsonCodecFactory asDeserializer(JsonCodecFactory factory) {
+		return new JsonCodecFactory() {
+			@Override
+			public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+				return factory.createCodec(type, registry);
+			}
+
+			@Override
+			public CodecRole getCodecRole() {
+				return CodecRole.DESERIALIZE;
+			}
+		};
+	}
+
+	static JsonCodecFactory asSerializer(JsonCodecFactory factory) {
+		return new JsonCodecFactory() {
+			@Override
+			public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+				return factory.createCodec(type, registry);
+			}
+
+			@Override
+			public CodecRole getCodecRole() {
+				return CodecRole.SERIALIZE;
+			}
+		};
+	}
+
 	default CodecRole getCodecRole() {
 		return CodecRole.BOTH;
 	}
