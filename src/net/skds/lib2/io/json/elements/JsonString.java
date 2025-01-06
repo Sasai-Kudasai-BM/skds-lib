@@ -21,7 +21,7 @@ public record JsonString(String value) implements JsonElement {
 	public static final class Codec extends AbstractJsonCodec<JsonString> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {
-			super(registry);
+			super(type, registry);
 		}
 
 		@Override

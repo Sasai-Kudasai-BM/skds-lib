@@ -45,6 +45,16 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> JsonSerializer<T> getReflectiveSerializer(Class<T> tClass, JsonCodecRegistry registry) {
+		return (JsonSerializer<T>) new ReflectiveSerializer(tClass, registry);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> JsonDeserializer<T> getReflectiveDeserializer(Class<T> tClass, JsonCodecRegistry registry) {
+		return (JsonDeserializer<T>) new ReflectiveDeserializer(tClass, registry);
+	}
+
 	private JsonCodec<Object> getReflectiveCodec(Class<?> tClass, JsonCodecRegistry registry) {
 		JsonCodecRole codecRole = tClass.getAnnotation(JsonCodecRole.class);
 		if (codecRole != null) {
@@ -67,7 +77,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings("unchecked")
 		public ReflectiveDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
-			super(registry);
+			super(tClass, registry);
 			Supplier<Object> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				throw new IllegalArgumentException("Class \"" + tClass.getName() + "\" is abstract type and can not be created by ReflectiveCodec");
@@ -123,7 +133,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		final FieldCodec[] writers;
 
 		public ReflectiveSerializer(Class<?> tClass, JsonCodecRegistry registry) {
-			super(registry);
+			super(tClass, registry);
 			this.writers = collectFields(tClass, registry);
 		}
 
@@ -162,7 +172,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings("unchecked")
 		public RecordCodec(Class<?> tClass, JsonCodecRegistry registry) {
-			super(registry);
+			super(tClass, registry);
 			MultiSupplier<Object> tmpC;
 			var rcs = tClass.getRecordComponents();
 			Class<?>[] args = new Class[rcs.length];

@@ -36,7 +36,7 @@ public record JsonBoolean(boolean value) implements JsonElement {
 	public static final class Codec extends AbstractJsonCodec<JsonBoolean> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {
-			super(registry);
+			super(type, registry);
 		}
 
 		@Override

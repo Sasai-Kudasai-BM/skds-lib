@@ -50,7 +50,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		private final JsonCodec<JsonElement> elementCodec;
 
 		public Codec(Type type, JsonCodecRegistry registry) {
-			super(registry);
+			super(type, registry);
 			this.elementCodec = registry.getCodec(JsonElement.class);
 		}
 

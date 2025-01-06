@@ -22,7 +22,9 @@ import java.util.function.Supplier;
 @CustomLog
 class BuiltinCodecFactory implements JsonCodecFactory {
 
-	final ReflectiveJsonCodecFactory reflectiveFactory = new ReflectiveJsonCodecFactory();
+	public static final BuiltinCodecFactory INSTANCE = new BuiltinCodecFactory();
+
+	public final ReflectiveJsonCodecFactory reflectiveFactory = new ReflectiveJsonCodecFactory();
 
 	final Map<Type, JsonCodecFactory> map = new ImmutableArrayHashMap<>(
 			JsonObject.class, (JsonCodecFactory) JsonObject.Codec::new,
@@ -158,7 +160,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings({"unchecked", "rawTypes"})
 		public MapCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
-			super(registry);
+			super(tClass, registry);
 			//this.tClass = tClass;
 			this.keyCodec = registry.getCodec(parameters[0]);
 			this.elementCodec = registry.getCodec(parameters[1]);
@@ -230,7 +232,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings("unchecked")
 		public ListCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
-			super(registry);
+			super(tClass, registry);
 			this.elementCodec = registry.getCodec(parameters[0]);
 			Supplier<List<Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
@@ -292,7 +294,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		final Object[] array;
 
 		public ArrayCodec(Class<?> tClass, JsonCodec<Object> elementCodec, JsonCodecRegistry registry) {
-			super(registry);
+			super(tClass, registry);
 			this.tClass = tClass;
 			this.elementCodec = elementCodec;
 			this.array = (Object[]) Array.newInstance(tClass, 0);

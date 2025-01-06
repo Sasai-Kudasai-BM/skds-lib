@@ -31,7 +31,7 @@ public record JsonNumber(Number value) implements JsonElement {
 	public static final class Codec extends AbstractJsonCodec<JsonNumber> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {
-			super(registry);
+			super(type, registry);
 		}
 
 		@Override

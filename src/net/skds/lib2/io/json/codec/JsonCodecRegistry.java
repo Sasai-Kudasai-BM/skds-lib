@@ -16,7 +16,7 @@ public class JsonCodecRegistry {
 	final JsonCodecOptions options;
 	private final Map<Type, JsonCodec<?>> codecMap = new ConcurrentHashMap<>();
 	private final Function<? super Type, ? extends JsonCodec<?>> mappingFunction;
-	private static final JsonCodecFactory builtin = new BuiltinCodecFactory();
+	private static final JsonCodecFactory builtin = BuiltinCodecFactory.INSTANCE;
 
 	public JsonCodecRegistry(JsonCodecOptions options, JsonCodecFactory extraFactory) {
 		this.options = options.clone();
