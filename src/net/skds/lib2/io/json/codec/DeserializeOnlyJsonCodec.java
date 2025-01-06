@@ -11,7 +11,7 @@ public abstract class DeserializeOnlyJsonCodec<T> extends AbstractJsonCodec<T> {
 	}
 
 	@Override
-	public void write(T value, JsonWriter writer) throws IOException {
+	public final void write(T value, JsonWriter writer) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 }

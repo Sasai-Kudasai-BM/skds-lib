@@ -11,7 +11,7 @@ public abstract class SerializeOnlyJsonCodec<T> extends AbstractJsonCodec<T> {
 	}
 
 	@Override
-	public T read(JsonReader reader) throws IOException {
+	public final T read(JsonReader reader) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 }
