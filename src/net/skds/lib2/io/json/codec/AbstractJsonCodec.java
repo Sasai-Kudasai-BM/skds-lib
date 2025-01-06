@@ -9,7 +9,7 @@ public abstract class AbstractJsonCodec<T> implements JsonCodec<T> {
 	}
 
 	@Override
-	public JsonCodecRegistry getRegistry() {
+	public final JsonCodecRegistry getRegistry() {
 		return registry;
 	}
 }

@@ -66,7 +66,6 @@ public final class AABB implements ConvexShape {
 		return ONE.move(pos);
 	}
 
-
 	public static AABB fromPos(int x, int y, int z) {
 		return ONE.move(x, y, z);
 	}

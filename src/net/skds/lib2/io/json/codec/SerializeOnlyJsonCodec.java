@@ -4,19 +4,11 @@ import net.skds.lib2.io.json.JsonReader;
 
 import java.io.IOException;
 
-public abstract class SerializeOnlyJsonCodec<T> implements JsonCodec<T> {
-
-	protected final JsonCodecRegistry registry;
+public abstract class SerializeOnlyJsonCodec<T> extends AbstractJsonCodec<T> {
 
 	public SerializeOnlyJsonCodec(JsonCodecRegistry registry) {
-		this.registry = registry;
+		super(registry);
 	}
-
-	@Override
-	public JsonCodecRegistry getRegistry() {
-		return registry;
-	}
-
 
 	@Override
 	public T read(JsonReader reader) throws IOException {

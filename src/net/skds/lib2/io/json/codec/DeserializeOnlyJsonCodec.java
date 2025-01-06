@@ -4,17 +4,10 @@ import net.skds.lib2.io.json.JsonWriter;
 
 import java.io.IOException;
 
-public abstract class DeserializeOnlyJsonCodec<T> implements JsonCodec<T> {
-
-	protected final JsonCodecRegistry registry;
+public abstract class DeserializeOnlyJsonCodec<T> extends AbstractJsonCodec<T> {
 
 	public DeserializeOnlyJsonCodec(JsonCodecRegistry registry) {
-		this.registry = registry;
-	}
-
-	@Override
-	public JsonCodecRegistry getRegistry() {
-		return registry;
+		super(registry);
 	}
 
 	@Override
