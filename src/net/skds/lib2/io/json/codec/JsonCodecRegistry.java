@@ -5,6 +5,7 @@ import net.skds.lib2.io.CharOutput;
 import net.skds.lib2.io.json.*;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,9 @@ public class JsonCodecRegistry {
 	public <T> JsonCodec<T> getCodec(Type type) {
 		JsonCodec<?> codec = codecMap.computeIfAbsent(type, mappingFunction);
 		if (codec == null) {
+			if (type instanceof ParameterizedType pt) {
+				return getCodec(pt.getRawType());
+			}
 			throw new RuntimeException("Unable to get json codec for \"" + type + "\"");
 		}
 		return (JsonCodec<T>) codec;
