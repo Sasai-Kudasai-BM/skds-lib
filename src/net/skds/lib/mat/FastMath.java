@@ -334,6 +334,60 @@ public class FastMath {
 		return sinRad(x + Pi2);
 	}
 
+	public static int round(double value) {
+		int i = (int) value;
+		double d = value - i;
+		if (d >= 0) {
+			if (d >= 0.5) {
+				return i + 1;
+			} else {
+				return i;
+			}
+		} else {
+			if (d <= -0.5) {
+				return i - 1;
+			} else {
+				return i;
+			}
+		}
+	}
+
+	public static long roundLong(double value) {
+		long i = (long) value;
+		double d = value - i;
+		if (d >= 0) {
+			if (d >= 0.5) {
+				return i + 1;
+			} else {
+				return i;
+			}
+		} else {
+			if (d <= -0.5) {
+				return i - 1;
+			} else {
+				return i;
+			}
+		}
+	}
+
+
+	public static int round(float value) {
+		int i = (int) value;
+		float d = value - i;
+		if (d >= 0) {
+			if (d >= 0.5f) {
+				return i + 1;
+			} else {
+				return i;
+			}
+		} else {
+			if (d <= -0.5f) {
+				return i - 1;
+			} else {
+				return i;
+			}
+		}
+	}
 
 	public static int floor(double value) {
 		int i = (int) value;
