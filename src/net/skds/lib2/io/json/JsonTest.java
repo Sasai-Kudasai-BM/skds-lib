@@ -1,21 +1,23 @@
 package net.skds.lib2.io.json;
 
 import lombok.AllArgsConstructor;
-import net.skds.lib2.io.CodecRole;
+import lombok.NoArgsConstructor;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
-import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.typed.ConfigType;
+import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.Vec3D;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -94,18 +96,92 @@ public class JsonTest {
 		A1 a = cdk.parse(test4);
 		System.out.println(cdk.toJson(a));
 
+		Map<String, YupCT> map = Map.of(
+				y1.key, y1,
+				y2.key, y2,
+				y3.key, y3
+		);
+
+		JsonUtils.addTypedAdapter(Yup.class, map);
+
+		Pizdun p = new Pizdun();
+		p.yup.add(new Yup1());
+		p.yup.add(new Yup1());
+		p.yup.add(new Yup2());
+		p.yup.add(new Yup3());
+		System.out.println(JsonUtils.toJson(p));
 	}
 
-	@JsonCodecRoleConstrains(CodecRole.SERIALIZE)
+	static final YupCT y1 = new YupCT(Yup1.class, "e");
+	static final YupCT y2 = new YupCT(Yup2.class, "e2");
+	static final YupCT y3 = new YupCT(Yup3.class, "e3");
+
 	@AllArgsConstructor
-	private static class Pizdun {
-		private String s;
+	private static class YupCT implements ConfigType<Yup> {
+
+		final Class<? extends Yup> tClass;
+		final String key;
+
+		@Override
+		public Class<Yup> getTypeClass() {
+			return (Class<Yup>) tClass;
+		}
+
+		@Override
+		public String keyName() {
+			return key;
+		}
+	}
+
+	private static abstract class Yup implements TypedConfig {
+		transient int arab = 0;
+	}
+
+	private static class Yup1 extends Yup {
+		int sex = 1;
+
+		@Override
+		public ConfigType<?> getConfigType() {
+			return y1;
+		}
+	}
+
+	private static class Yup2 extends Yup {
+		int sex2 = 2;
+
+		@Override
+		public ConfigType<?> getConfigType() {
+			return y2;
+		}
+	}
+
+	private static class Yup3 extends Yup {
+
+		@Override
+		public ConfigType<?> getConfigType() {
+			return y3;
+		}
+	}
+
+	@NoArgsConstructor
+	private static class Pizdun extends PizdunAss {
+		private String s = "s";
+		private transient String s2 = "s2";
+
+		private LinkedList<Yup> yup = new LinkedList<>();
+	}
+
+	private static class PizdunAss {
+		private transient String sPizdunAss = "a";
+		private transient String s2PizdunAss = "b";
 	}
 
 	private static class Amogus {
 
 		//private Set<Anus> anusis2 = null;
 		//private Set<Integer> ints = Set.of(1, 2, 3);
+
+		//private Pizdun ssss = new Pizdun();
 
 		private List<Anus> anusis = null;
 		private List<Amogus> lol = null;
@@ -123,7 +199,7 @@ public class JsonTest {
 		private Amogus amogus = null;
 	}
 
-	public record A1(int a, @TransientComponent char b, boolean c) {
+	public record A1(int a, @TransientComponent char b, @TransientComponent boolean c) {
 	}
 
 	@DefaultJsonCodec(AnusCodec.class)

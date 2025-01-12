@@ -354,6 +354,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		final JsonCodecRegistry registry;
 		final JsonSerializer<Object>[] serializers;
+		final int nonNullSerializers;
 		final String[] names;
 		final Function<Object, Object>[] accessors;
 
@@ -364,11 +365,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
 			String[] names = new String[rcs.length];
 			Function<Object, Object>[] accessors = new Function[rcs.length];
+			int c = 0;
 			for (int i = 0; i < rcs.length; i++) {
 				RecordComponent rc = rcs[i];
 				if (rc.isAnnotationPresent(TransientComponent.class)) {
 					continue;
 				}
+				c++;
 				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
 				if (codec instanceof JsonSerializer<?> js) {
 					ser[i] = js;
@@ -391,6 +394,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				names[i] = name;
 			}
 
+			this.nonNullSerializers = c;
 			this.serializers = (JsonSerializer<Object>[]) ser;
 			this.names = names;
 			this.accessors = accessors;
@@ -406,14 +410,16 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				psc.preSerializeJson();
 			}
 			writer.beginObject();
-			if (serializers.length > 1) {
-				writer.lineBreakEnable(true);
-			}
-			for (int i = 0; i < serializers.length; i++) {
-				JsonSerializer<Object> w = serializers[i];
-				if (w == null) continue;
-				writer.writeName(names[i]);
-				w.write(accessors[i].apply(value), writer);
+			if (nonNullSerializers > 0) {
+				if (nonNullSerializers > 1) {
+					writer.lineBreakEnable(true);
+				}
+				for (int i = 0; i < serializers.length; i++) {
+					JsonSerializer<Object> w = serializers[i];
+					if (w == null) continue;
+					writer.writeName(names[i]);
+					w.write(accessors[i].apply(value), writer);
+				}
 			}
 			writer.endObject();
 		}
