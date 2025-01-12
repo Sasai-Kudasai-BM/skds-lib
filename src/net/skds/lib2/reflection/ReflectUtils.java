@@ -4,10 +4,7 @@ import lombok.experimental.UtilityClass;
 import net.skds.lib2.utils.function.MultiSupplier;
 import sun.reflect.ReflectionFactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,12 +19,16 @@ public class ReflectUtils {
 		if (c == null) {
 			try {
 				c = tClass.getDeclaredConstructor();
-				c.setAccessible(true);
 			} catch (NoSuchMethodException e) {
 				return null;
 			}
 		}
-		c.setAccessible(true);
+		try {
+			c.setAccessible(true);
+		} catch (InaccessibleObjectException exception) {
+			exception.printStackTrace(System.err);
+			return null;
+		}
 		Constructor<?> finalC = c;
 		return () -> {
 			try {

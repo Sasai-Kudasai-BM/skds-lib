@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 @CustomLog
-class BuiltinCodecFactory implements JsonCodecFactory {
+public class BuiltinCodecFactory implements JsonCodecFactory {
 
 	public static final BuiltinCodecFactory INSTANCE = new BuiltinCodecFactory();
 
@@ -107,9 +107,15 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		return fac == null ? ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) : fac.createCodec(type, registry);
 	}
 
+	private static boolean isFinal(Type type) {
+		if (type instanceof Class<?> cl) {
+			return Modifier.isFinal(cl.getModifiers()) || cl.isRecord() || cl.isEnum();
+		}
+		return false;
+	}
+
 	public static JsonSerializer<Object> getUniversalSerializer(Type type, JsonCodecRegistry registry) {
-		if (type instanceof Class<?> cl && (Modifier.isFinal(cl.getModifiers()) || cl.isRecord() || cl.isEnum())
-				|| type instanceof ParameterizedType) {
+		if (isFinal(type) || type instanceof ParameterizedType) {
 			return registry.getSerializerIndirect(type);
 		}
 		return new AbstractJsonSerializer<>(registry) {
@@ -168,7 +174,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		return null;
 	}
 
-	public static final class MapCodec extends AbstractJsonCodec<Map<Object, Object>> {
+	public static class MapCodec extends AbstractJsonCodec<Map<Object, Object>> {
 
 		//final Class<?> tClass;
 		final Supplier<Map<Object, Object>> constructor;
@@ -249,7 +255,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ListCodec extends AbstractJsonCodec<List<Object>> {
+	public static class ListCodec extends AbstractJsonCodec<List<Object>> {
 
 		final Supplier<List<Object>> constructor;
 		final JsonDeserializer<Object> deserializer;
