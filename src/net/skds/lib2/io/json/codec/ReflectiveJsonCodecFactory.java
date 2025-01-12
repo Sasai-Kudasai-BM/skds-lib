@@ -4,7 +4,9 @@ import lombok.CustomLog;
 import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
+import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.reflection.ReflectUtils;
+import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.function.MultiSupplier;
 
 import java.io.IOException;
@@ -254,6 +256,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		final JsonDeserializer<Object>[] deserializers;
 		final String[] names;
 		final Map<String, Integer> readers;
+		final Class<?>[] components;
 
 		@SuppressWarnings("unchecked")
 		public RecordDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
@@ -268,11 +271,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				RecordComponent rc = rcs[i];
 				args[i] = rc.getType();
 				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
+				JsonDeserializer<Object> deserializer;
 				if (codec instanceof JsonDeserializer<?> jd) {
-					des[i] = (JsonDeserializer<Object>) jd;
+					deserializer = (JsonDeserializer<Object>) jd;
 				} else {
-					des[i] = registry.getDeserializerIndirect(rc.getGenericType());
+					deserializer = registry.getDeserializerIndirect(rc.getGenericType());
 				}
+				des[i] = deserializer;
 				String name = rc.getName();
 				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
 				if (alias != null) {
@@ -289,6 +294,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 						"\" have no available canonical constructor and can not be created by ReflectiveCodec");
 			}
 
+			this.components = args;
 			this.constructor = tmpC;
 			this.deserializers = des;
 			this.readers = readers;
@@ -314,6 +320,8 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				args[i] = deserializers[i].read(reader);
 			}
 			reader.endObject();
+
+			wrapPrimitives(components, args);
 			Object o = constructor.get(args);
 			if (o instanceof JsonPostDeserializeCall pdc) {
 				pdc.postDeserializedJson();
@@ -324,6 +332,21 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		@Override
 		public JsonCodecRegistry getRegistry() {
 			return registry;
+		}
+	}
+
+	private static void wrapPrimitives(Class<?>[] components, Object[] args) {
+		for (int i = 0; i < components.length; i++) {
+			Class<?> cl = components[i];
+			if (cl.isPrimitive() && args[i] == null) {
+				if (cl == boolean.class) {
+					args[i] = Boolean.FALSE;
+				} else if (cl == char.class) {
+					args[i] = (char) 0;
+				} else {
+					args[i] = Numbers.ZERO;
+				}
+			}
 		}
 	}
 
@@ -343,6 +366,9 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			Function<Object, Object>[] accessors = new Function[rcs.length];
 			for (int i = 0; i < rcs.length; i++) {
 				RecordComponent rc = rcs[i];
+				if (rc.isAnnotationPresent(TransientComponent.class)) {
+					continue;
+				}
 				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
 				if (codec instanceof JsonSerializer<?> js) {
 					ser[i] = js;
@@ -385,6 +411,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			}
 			for (int i = 0; i < serializers.length; i++) {
 				JsonSerializer<Object> w = serializers[i];
+				if (w == null) continue;
 				writer.writeName(names[i]);
 				w.write(accessors[i].apply(value), writer);
 			}

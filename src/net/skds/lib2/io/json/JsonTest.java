@@ -5,6 +5,7 @@ import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
+import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
@@ -54,6 +55,10 @@ public class JsonTest {
 				  "35":3
 				  }
 				""";
+		String test4 = """
+				  {
+				  }
+				""";
 
 
 		JsonCodecOptions options = new JsonCodecOptions();
@@ -85,6 +90,10 @@ public class JsonTest {
 
 		System.out.println(json2.equals(json));
 
+		JsonCodec<A1> cdk = registry.getCodec(A1.class);
+		A1 a = cdk.parse(test4);
+		System.out.println(cdk.toJson(a));
+
 	}
 
 	@JsonCodecRoleConstrains(CodecRole.SERIALIZE)
@@ -112,6 +121,9 @@ public class JsonTest {
 		private Map<Float, Amogus> meps;
 
 		private Amogus amogus = null;
+	}
+
+	public record A1(int a, @TransientComponent char b, boolean c) {
 	}
 
 	@DefaultJsonCodec(AnusCodec.class)
