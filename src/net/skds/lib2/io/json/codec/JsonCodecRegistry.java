@@ -14,8 +14,10 @@ import java.util.function.Function;
 public class JsonCodecRegistry {
 
 	final JsonCodecOptions options;
+	private final Map<Type, JsonCodec<?>> codecMap = new ConcurrentHashMap<>();
 	private final Map<Type, JsonSerializer<?>> serializerMap = new ConcurrentHashMap<>();
 	private final Map<Type, JsonDeserializer<?>> deserializerMap = new ConcurrentHashMap<>();
+	private final Function<? super Type, ? extends JsonCodec<?>> codecMappingFunction;
 	private final Function<? super Type, ? extends JsonSerializer<?>> serializerMappingFunction;
 	private final Function<? super Type, ? extends JsonDeserializer<?>> deserializerMappingFunction;
 	private static final JsonCodecFactory builtin = BuiltinCodecFactory.INSTANCE;
@@ -28,15 +30,21 @@ public class JsonCodecRegistry {
 		} else {
 			combined = builtin;
 		}
-		this.serializerMappingFunction = t -> {
-			JsonSerializer<?> s = combined.createSerializer(t, this);
-			if (s instanceof JsonCodec<?> jc) deserializerMap.putIfAbsent(t, jc);
-			return s;
-		};
-		this.deserializerMappingFunction = t -> {
-			JsonDeserializer<?> d = combined.createDeserializer(t, this);
-			if (d instanceof JsonCodec<?> jc) serializerMap.putIfAbsent(t, jc);
-			return d;
+		this.serializerMappingFunction = t -> combined.createSerializer(t, this);
+		this.deserializerMappingFunction = t -> combined.createDeserializer(t, this);
+		this.codecMappingFunction = t -> {
+			JsonSerializer<?> serializer = serializerMap.computeIfAbsent(t, serializerMappingFunction);
+			if (serializer instanceof JsonCodec<?>) {
+				return (JsonCodec<?>) serializer;
+			}
+			JsonDeserializer<?> deserializer = deserializerMap.computeIfAbsent(t, deserializerMappingFunction);
+			if (deserializer instanceof JsonCodec<?>) {
+				return (JsonCodec<?>) deserializer;
+			} else if (serializer != null && deserializer != null) {
+				JsonCodec<?> codec = new CombinedJsonCodec<>(serializer, deserializer);
+				return (JsonCodec<?>) codec;
+			}
+			return combined.createCodec(t, this);
 		};
 	}
 
@@ -53,22 +61,9 @@ public class JsonCodecRegistry {
 
 	@SuppressWarnings("unchecked")
 	public <T> JsonCodec<T> getCodec(Type type) {
-		JsonSerializer<?> serializer = serializerMap.computeIfAbsent(type, serializerMappingFunction);
-		if (serializer instanceof JsonCodec<?>) {
-			return (JsonCodec<T>) serializer;
-		}
-		JsonDeserializer<?> deserializer = deserializerMap.computeIfAbsent(type, deserializerMappingFunction);
-		if (deserializer instanceof JsonCodec<?>) {
-			return (JsonCodec<T>) deserializer;
-		} else if (serializer != null && deserializer != null) {
-			JsonCodec<?> codec = new CombinedJsonCodec<>(serializer, deserializer);
-			serializerMap.put(type, codec);
-			deserializerMap.put(type, codec);
-			return (JsonCodec<T>) codec;
-		} else if (type instanceof ParameterizedType pt) {
-			return getCodec(pt.getRawType());
-		}
-		throw new RuntimeException("Unable to get codec for \"" + type + "\"");
+		JsonCodec<T> codec = (JsonCodec<T>) codecMap.computeIfAbsent(type, codecMappingFunction);
+		if (codec == null) throw new RuntimeException("Unable to get codec for \"" + type + "\"");
+		return codec;
 	}
 
 
