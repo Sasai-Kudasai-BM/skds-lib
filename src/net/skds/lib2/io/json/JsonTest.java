@@ -74,6 +74,7 @@ public class JsonTest {
 				return super.hashCode();
 			}
 		});
+		amogus.lol = List.of(new Amogus(), new Amogus());
 
 		String json = codec.toJson(amogus);
 		System.out.println(json);
@@ -98,6 +99,7 @@ public class JsonTest {
 		//private Set<Integer> ints = Set.of(1, 2, 3);
 
 		private List<Anus> anusis = null;
+		private List<Amogus> lol = null;
 
 		private int a = 1;
 		private final int b = 2;
