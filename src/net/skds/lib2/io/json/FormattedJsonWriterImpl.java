@@ -117,7 +117,9 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	private void writeTabs(StackEntry e) throws EndOfOutputException {
 		if (tab != null && !tab.isEmpty()) {
 			while (e != null) {
-				output.append(tab);
+				if (e.lineBreak) {
+					output.append(tab);
+				}
 				e = e.parent;
 			}
 		}
