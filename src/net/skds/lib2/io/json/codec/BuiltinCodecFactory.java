@@ -99,6 +99,8 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				return new MapCodec(cl, pt.getActualTypeArguments(), registry);
 			} else if (List.class.isAssignableFrom(cl)) {
 				return new ListCodec(cl, pt.getActualTypeArguments(), registry);
+			} else if (Set.class.isAssignableFrom(cl)) {
+				return new SetCodec(cl, pt.getActualTypeArguments(), registry);
 			}
 		}
 
@@ -317,6 +319,71 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					List<Object> list = constructor.get();
+					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
+						Object value = deserializer.read(reader);
+						list.add(value);
+					}
+					reader.endArray();
+					return list;
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+	}
+
+
+	public static class SetCodec extends AbstractJsonCodec<Set<Object>> {
+
+		final Supplier<Set<Object>> constructor;
+		final JsonDeserializer<Object> deserializer;
+		final JsonSerializer<Object> serializer;
+
+		@SuppressWarnings("unchecked")
+		public SetCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
+			super(tClass, registry);
+			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
+			this.serializer = getUniversalSerializer(parameters[0], registry);
+			Supplier<Set<Object>> tmpC;
+			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
+				tmpC = HashSet::new;
+			} else {
+				tmpC = (Supplier<Set<Object>>) ReflectUtils.getConstructor(tClass);
+				if (tmpC == null) {
+					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! HashSet will be used instead");
+					tmpC = HashSet::new;
+				}
+			}
+			this.constructor = tmpC;
+		}
+
+		@Override
+		public void write(Set<Object> value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginArray();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (Object v : value) {
+				serializer.write(v, writer);
+			}
+			writer.endArray();
+		}
+
+		@Override
+		public Set<Object> read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					Set<Object> list = constructor.get();
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
 						Object value = deserializer.read(reader);
 						list.add(value);

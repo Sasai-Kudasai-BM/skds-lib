@@ -1,4 +1,4 @@
-package net.skds.lib2.utils.json;
+package net.skds.lib2.io.json.codec.typed;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
-@Deprecated
 public class JsonUtils {
 
 	private static final GsonBuilder builder = new GsonBuilder()

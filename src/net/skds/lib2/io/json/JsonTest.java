@@ -94,6 +94,9 @@ public class JsonTest {
 
 	private static class Amogus {
 
+		//private Set<Anus> anusis2 = null;
+		//private Set<Integer> ints = Set.of(1, 2, 3);
+
 		private List<Anus> anusis = null;
 
 		private int a = 1;

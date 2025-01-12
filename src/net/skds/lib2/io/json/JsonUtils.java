@@ -2,21 +2,24 @@ package net.skds.lib2.io.json;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.io.json.codec.JsonCodecFactory;
-import net.skds.lib2.io.json.codec.JsonCodecOptions;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.*;
+import net.skds.lib2.io.json.codec.typed.ConfigType;
+import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
 
 @UtilityClass
+@SuppressWarnings("unused")
 public class JsonUtils {
 
 	@Getter
@@ -46,11 +49,107 @@ public class JsonUtils {
 		rebuild();
 	}
 
+	public static <AT, CT extends AT, E extends Enum<E> & ConfigType<CT>> void addTypedAdapter(Class<AT> type, Class<E> typeClass) {
+		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(r) {
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public void write(AT value, JsonWriter writer) throws IOException {
+				if (value == null) {
+					writer.writeNull();
+					return;
+				}
+				if (!(value instanceof TypedConfig tc)) {
+					throw new UnsupportedOperationException("Value \"" + value + "\" is not a TypedConfig");
+				}
+				if (value instanceof JsonPreSerializeCall jps) {
+					jps.preSerializeJson();
+				}
+				writer.beginObject();
+				E type = (E) tc.getConfigType();
+				writer.writeName(type.keyName());
+				JsonSerializer<CT> serializer = this.registry.getSerializer(type.getTypeClass());
+				serializer.write((CT) value, writer);
+				writer.endObject();
+			}
+
+			@Override
+			public AT read(JsonReader reader) throws IOException {
+				if (reader.nextEntryType() == JsonEntryType.NULL) {
+					reader.skipNull();
+					return null;
+				}
+				reader.beginObject();
+				String typeName = reader.readName();
+				E type = Enum.valueOf(typeClass, typeName);
+				JsonDeserializer<CT> deserializer = this.registry.getDeserializer(type.getTypeClass());
+				CT value = deserializer.read(reader);
+				reader.endObject();
+				if (value instanceof JsonPostDeserializeCall jpi) {
+					jpi.postDeserializedJson();
+				}
+				return value;
+			}
+
+		});
+		rebuild();
+	}
+
+	public static <AT, CT extends AT> void addTypedAdapter(Class<AT> type, Map<String, ? extends ConfigType<?>> typeMap) {
+		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(r) {
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public void write(AT value, JsonWriter writer) throws IOException {
+				if (value == null) {
+					writer.writeNull();
+					return;
+				}
+				if (!(value instanceof TypedConfig tc)) {
+					throw new UnsupportedOperationException("Value \"" + value + "\" is not a TypedConfig");
+				}
+				if (value instanceof JsonPreSerializeCall jps) {
+					jps.preSerializeJson();
+				}
+				writer.beginObject();
+				ConfigType<CT> type = (ConfigType<CT>) tc.getConfigType();
+				writer.writeName(type.keyName());
+				JsonSerializer<CT> serializer = this.registry.getSerializer(type.getTypeClass());
+				serializer.write((CT) value, writer);
+				writer.endObject();
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public AT read(JsonReader reader) throws IOException {
+				if (reader.nextEntryType() == JsonEntryType.NULL) {
+					reader.skipNull();
+					return null;
+				}
+				reader.beginObject();
+				String typeName = reader.readName();
+				ConfigType<CT> type = (ConfigType<CT>) typeMap.get(typeName);
+				if (type == null) {
+					throw new NullPointerException("type is null \"" + typeName + "\" " + typeMap.keySet());
+				}
+				JsonDeserializer<CT> deserializer = this.registry.getDeserializer(type.getTypeClass());
+				CT value = deserializer.read(reader);
+				reader.endObject();
+				if (value instanceof JsonPostDeserializeCall jpi) {
+					jpi.postDeserializedJson();
+				}
+				return value;
+			}
+
+		});
+		rebuild();
+	}
+
 	public static <T> T parseJson(String text, Class<T> clazz) {
 		try {
 			return fancyRegistry.getDeserializer(clazz).parse(text);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -59,7 +158,7 @@ public class JsonUtils {
 		try {
 			return fancyRegistry.getDeserializer(clazz).parse(json);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -77,7 +176,7 @@ public class JsonUtils {
 			String text = Files.readString(file);
 			return parseJson(text, clazz);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -87,7 +186,7 @@ public class JsonUtils {
 			String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 			return parseJson(text, clazz);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -115,7 +214,7 @@ public class JsonUtils {
 			Files.writeString(path, text, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return false;
 	}
@@ -143,7 +242,7 @@ public class JsonUtils {
 			Files.writeString(path, text, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return false;
 	}
