@@ -55,7 +55,6 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 	@Override
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
-		System.out.println(type);
 		if (type instanceof Class<?> cl) {
 			{
 				JsonCodec<?> codec = getDefaultCodec(cl, cl, registry);
@@ -119,13 +118,24 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			return registry.getSerializerIndirect(type);
 		}
 		return new AbstractJsonSerializer<>(registry) {
+			JsonSerializer<Object> serializer;
+
 			@Override
 			public void write(Object value, JsonWriter writer) throws IOException {
 				if (value == null) {
 					writer.writeNull();
 					return;
 				}
-				this.registry.getSerializer((Type) value.getClass()).write(value, writer);
+				JsonSerializer<Object> s = serializer;
+				if (s == null) {
+					s = this.registry.getSerializerNullable(type);
+					this.serializer = Objects.requireNonNullElse(s, this);
+				}
+				if (this.serializer == this) {
+					this.registry.getSerializer((Type) value.getClass()).write(value, writer);
+				} else {
+					this.serializer.write(value, writer);
+				}
 			}
 		};
 	}
@@ -285,7 +295,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				writer.writeNull();
 				return;
 			}
-			writer.beginObject();
+			writer.beginArray();
 			int size = value.size();
 			if (size > 1) {
 				writer.lineBreakEnable(true);
@@ -293,7 +303,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			for (Object v : value) {
 				serializer.write(v, writer);
 			}
-			writer.endObject();
+			writer.endArray();
 		}
 
 		@Override

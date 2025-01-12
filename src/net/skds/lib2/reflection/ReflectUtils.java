@@ -19,15 +19,15 @@ public class ReflectUtils {
 		if (c == null) {
 			try {
 				c = tClass.getDeclaredConstructor();
+				try {
+					c.setAccessible(true);
+				} catch (InaccessibleObjectException exception) {
+					exception.printStackTrace(System.err);
+					return null;
+				}
 			} catch (NoSuchMethodException e) {
 				return null;
 			}
-		}
-		try {
-			c.setAccessible(true);
-		} catch (InaccessibleObjectException exception) {
-			exception.printStackTrace(System.err);
-			return null;
 		}
 		Constructor<?> finalC = c;
 		return () -> {

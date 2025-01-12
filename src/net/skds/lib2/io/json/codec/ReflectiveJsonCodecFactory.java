@@ -26,8 +26,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	@Override
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
+			if (c.isInterface()) {
+				return null;
+			}
 			checkForInnerClass(c);
-
 			if (c.isRecord()) {
 				return getRecordCodec(c, registry);
 			}
@@ -44,8 +46,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	@Override
 	public JsonDeserializer<?> createDeserializer(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
+			if (c.isInterface()) {
+				return null;
+			}
 			checkForInnerClass(c);
-
 			if (c.isRecord()) {
 				return new RecordDeserializer(c, registry);
 			}
@@ -62,8 +66,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	@Override
 	public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
+			if (c.isInterface()) {
+				return null;
+			}
 			checkForInnerClass(c);
-
 			if (c.isRecord()) {
 				return new RecordSerializer(c, registry);
 			}

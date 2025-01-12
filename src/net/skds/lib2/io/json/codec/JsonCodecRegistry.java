@@ -96,6 +96,30 @@ public class JsonCodecRegistry {
 		return (JsonDeserializer<T>) deserializer;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T> JsonSerializer<T> getSerializerNullable(Type type) {
+		JsonSerializer<?> serializer = serializerMap.computeIfAbsent(type, serializerMappingFunction);
+		if (serializer == null) {
+			if (type instanceof ParameterizedType pt) {
+				return getSerializer(pt.getRawType());
+			}
+			return null;
+		}
+		return (JsonSerializer<T>) serializer;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> JsonDeserializer<T> getDeserializerNullable(Type type) {
+		JsonDeserializer<?> deserializer = deserializerMap.computeIfAbsent(type, deserializerMappingFunction);
+		if (deserializer == null) {
+			if (type instanceof ParameterizedType pt) {
+				return getDeserializer(pt.getRawType());
+			}
+			return null;
+		}
+		return (JsonDeserializer<T>) deserializer;
+	}
+
 	public <T> JsonSerializer<T> getSerializer(Class<T> type) {
 		return getSerializer((Type) type);
 	}
