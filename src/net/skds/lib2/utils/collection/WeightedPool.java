@@ -66,7 +66,13 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 	}
 
 	private WeightedPool(WeightedPool<T> parent) {
-		this.entries = parent.entries.clone();
+		final var pes = parent.entries;
+		final var entries = ArrayUtils.createGenericArray(Entry.class, pes.length);
+		for (int i = 0; i < entries.length; i++) {
+			entries[i] = pes[i].clone();
+		}
+		//noinspection unchecked
+		this.entries = entries;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -211,7 +217,7 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		}
 	}
 
-	private class Entry implements Obj2FloatPair<T> {
+	private class Entry implements Obj2FloatPair<T>, Cloneable {
 		final T value;
 		final float weight;
 		float weightCeiling;
@@ -232,6 +238,12 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		@Override
 		public float floatValue() {
 			return chance;
+		}
+
+		@SuppressWarnings("CloneDoesntDeclareCloneNotSupportedException")
+		@Override
+		protected Entry clone() {
+			return new Entry(value, weight, weightCeiling, chance);
 		}
 	}
 

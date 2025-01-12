@@ -1,7 +1,6 @@
 package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
@@ -23,8 +22,6 @@ import java.util.function.Supplier;
 class BuiltinCodecFactory implements JsonCodecFactory {
 
 	public static final BuiltinCodecFactory INSTANCE = new BuiltinCodecFactory();
-
-	public final ReflectiveJsonCodecFactory reflectiveFactory = new ReflectiveJsonCodecFactory();
 
 	final Map<Type, JsonCodecFactory> map = new ImmutableArrayHashMap<>(
 			JsonObject.class, (JsonCodecFactory) JsonObject.Codec::new,
@@ -57,8 +54,8 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	);
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+		System.out.println(type);
 		if (type instanceof Class<?> cl) {
 			{
 				JsonCodec<?> codec = getDefaultCodec(cl, cl, registry);
@@ -89,12 +86,10 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 						return new CharArrayCodec(registry);
 					}
 					throw new RuntimeException("Unknown primitive " + cle);
-				} else if (cle.isArray()) {
-					JsonCodec<Object> codec = (JsonCodec<Object>) createCodec(cle, registry);
-					return new ArrayCodec(cle, codec, registry);
 				} else {
-					JsonCodec<Object> codec = registry.getCodec((Type) cle);
-					return new ArrayCodec(cle, codec, registry);
+					JsonDeserializer<Object> deserializer = registry.getDeserializerIndirect(cle);
+					JsonSerializer<Object> serializer = getUniversalSerializer(cle, registry);
+					return new ArrayCodec(cle, deserializer, serializer, registry);
 				}
 			}
 		} else if (type instanceof ParameterizedType pt) {
@@ -109,7 +104,24 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 
 		JsonCodecFactory fac = map.get(type);
-		return fac == null ? reflectiveFactory.createCodec(type, registry) : fac.createCodec(type, registry);
+		return fac == null ? ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) : fac.createCodec(type, registry);
+	}
+
+	public static JsonSerializer<Object> getUniversalSerializer(Type type, JsonCodecRegistry registry) {
+		if (type instanceof Class<?> cl && (Modifier.isFinal(cl.getModifiers()) || cl.isRecord() || cl.isEnum())
+				|| type instanceof ParameterizedType) {
+			return registry.getSerializerIndirect(type);
+		}
+		return new AbstractJsonSerializer<>(registry) {
+			@Override
+			public void write(Object value, JsonWriter writer) throws IOException {
+				if (value == null) {
+					writer.writeNull();
+					return;
+				}
+				this.registry.getSerializer((Type) value.getClass()).write(value, writer);
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -117,36 +129,41 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 		DefaultJsonCodec defaultCodec = annotatedElement.getAnnotation(DefaultJsonCodec.class);
 		if (defaultCodec == null) return null;
 		Class<?> factoryClass = defaultCodec.value();
-		JsonCodecFactory factory = null;
 		if (JsonCodecFactory.class.isAssignableFrom(factoryClass)) {
 			Supplier<JsonCodecFactory> constructor = (Supplier<JsonCodecFactory>) ReflectUtils.getConstructor(factoryClass);
 			if (constructor != null) {
-				factory = constructor.get();
+				JsonCodecFactory factory = constructor.get();
+				if (factory != null) {
+					JsonCodec<?> codec = factory.createCodec(type, registry);
+					if (codec != null) return (JsonCodec<Object>) codec;
+				}
 			}
-		} else {
-			MultiSupplier<JsonCodec<?>> constructor =
-					(MultiSupplier<JsonCodec<?>>) ReflectUtils.getMultiConstructor(factoryClass, Type.class, JsonCodecRegistry.class);
+		} else l1:{
+			MultiSupplier<Object> constructor =
+					(MultiSupplier<Object>) ReflectUtils.getMultiConstructor(factoryClass, Type.class, JsonCodecRegistry.class);
 			if (constructor != null) {
-				factory = new JsonCodecFactory() {
+				if (!JsonCodec.class.isAssignableFrom(factoryClass)) {
 
-					@Override
-					public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
-						return constructor.get(type, registry);
+					if (!JsonSerializer.class.isAssignableFrom(factoryClass) && !JsonDeserializer.class.isAssignableFrom(factoryClass)) {
+						break l1;
 					}
-
-					@Override
-					public CodecRole getCodecRole() {
-						return defaultCodec.codecRole();
+					JsonDeserializer<?> deserializer;
+					JsonSerializer<?> serializer;
+					if (!JsonSerializer.class.isAssignableFrom(factoryClass)) {
+						serializer = ReflectiveJsonCodecFactory.INSTANCE.createSerializer(type, registry);
+					} else {
+						serializer = (JsonSerializer<?>) constructor.get(type, registry);
 					}
-				};
+					if (!JsonDeserializer.class.isAssignableFrom(factoryClass)) {
+						deserializer = ReflectiveJsonCodecFactory.INSTANCE.createDeserializer(type, registry);
+					} else {
+						deserializer = (JsonDeserializer<?>) constructor.get(type, registry);
+					}
+					return new CombinedJsonCodec<>(serializer, deserializer);
+				}
+				return (JsonCodec<Object>) constructor.get(type, registry);
 			}
 		}
-
-		if (factory != null) {
-			JsonCodec<Object> codec = (JsonCodec<Object>) factory.createCodec(type, registry);
-			if (codec != null) return codec;
-		}
-
 		log.error("Invalid @DefaultJsonCodec on \"" + annotatedElement + "\"");
 		return null;
 	}
@@ -155,15 +172,19 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 
 		//final Class<?> tClass;
 		final Supplier<Map<Object, Object>> constructor;
-		final JsonCodec<Object> keyCodec;
-		final JsonCodec<Object> elementCodec;
+		final JsonDeserializer<Object> keyDeserializer;
+		final JsonDeserializer<Object> elementDeserializer;
+		final JsonSerializer<Object> keySerializer;
+		final JsonSerializer<Object> valueSerializer;
 
 		@SuppressWarnings({"unchecked", "rawTypes"})
 		public MapCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
 			super(tClass, registry);
 			//this.tClass = tClass;
-			this.keyCodec = registry.getCodec(parameters[0]);
-			this.elementCodec = registry.getCodec(parameters[1]);
+			this.keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
+			this.elementDeserializer = registry.getDeserializerIndirect(parameters[1]);
+			this.keySerializer = getUniversalSerializer(parameters[0], registry);
+			this.valueSerializer = getUniversalSerializer(parameters[1], registry);
 			Supplier<Map<Object, Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				tmpC = HashMap::new;
@@ -193,9 +214,12 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 			if (size > 1) {
 				writer.lineBreakEnable(true);
 			}
+
 			for (Map.Entry<Object, Object> entry : value.entrySet()) {
-				writer.writeName(keyCodec.valueAsKeyString(entry.getKey()));
-				elementCodec.write(entry.getValue(), writer);
+				Object k = entry.getKey();
+				Object v = entry.getValue();
+				writer.writeName(keySerializer.valueAsKeyString(k));
+				valueSerializer.write(v, writer);
 			}
 			writer.endObject();
 		}
@@ -212,9 +236,9 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 					reader.beginObject();
 					Map<Object, Object> map = constructor.get();
 					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
-						Object key = keyCodec.read(reader);
+						Object key = keyDeserializer.read(reader);
 						reader.readDotDot();
-						Object value = elementCodec.read(reader);
+						Object value = elementDeserializer.read(reader);
 						map.put(key, value);
 					}
 					reader.endObject();
@@ -228,12 +252,14 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	public static final class ListCodec extends AbstractJsonCodec<List<Object>> {
 
 		final Supplier<List<Object>> constructor;
-		final JsonCodec<Object> elementCodec;
+		final JsonDeserializer<Object> deserializer;
+		final JsonSerializer<Object> serializer;
 
 		@SuppressWarnings("unchecked")
 		public ListCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
 			super(tClass, registry);
-			this.elementCodec = registry.getCodec(parameters[0]);
+			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
+			this.serializer = getUniversalSerializer(parameters[0], registry);
 			Supplier<List<Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				tmpC = ArrayList::new;
@@ -259,7 +285,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 				writer.lineBreakEnable(true);
 			}
 			for (Object v : value) {
-				elementCodec.write(v, writer);
+				serializer.write(v, writer);
 			}
 			writer.endObject();
 		}
@@ -276,7 +302,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 					reader.beginArray();
 					List<Object> list = constructor.get();
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						Object value = elementCodec.read(reader);
+						Object value = deserializer.read(reader);
 						list.add(value);
 					}
 					reader.endArray();
@@ -290,13 +316,15 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 	public static final class ArrayCodec extends AbstractJsonCodec<Object> {
 
 		final Class<?> tClass;
-		final JsonCodec<Object> elementCodec;
+		final JsonDeserializer<Object> deserializer;
+		final JsonSerializer<Object> serializer;
 		final Object[] array;
 
-		public ArrayCodec(Class<?> tClass, JsonCodec<Object> elementCodec, JsonCodecRegistry registry) {
+		public ArrayCodec(Class<?> tClass, JsonDeserializer<Object> deserializer, JsonSerializer<Object> serializer, JsonCodecRegistry registry) {
 			super(tClass, registry);
 			this.tClass = tClass;
-			this.elementCodec = elementCodec;
+			this.deserializer = deserializer;
+			this.serializer = serializer;
 			this.array = (Object[]) Array.newInstance(tClass, 0);
 		}
 
@@ -312,7 +340,8 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 				writer.lineBreakEnable(true);
 			}
 			for (int i = 0; i < size; i++) {
-				elementCodec.write(Array.get(value, i), writer);
+				Object v = Array.get(value, i);
+				serializer.write(v, writer);
 			}
 			writer.endArray();
 		}
@@ -329,7 +358,7 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 					reader.beginArray();
 					ArrayList<Object> list = new ArrayList<>();
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						list.add(elementCodec.read(reader));
+						list.add(deserializer.read(reader));
 					}
 					reader.endArray();
 					return list.toArray(array);
@@ -701,13 +730,13 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 
 	public static final class StringCodec extends AbstractJsonCodec<String> {
 
-		final JsonCodec<JsonObject> joc;
-		final JsonCodec<JsonArray> jac;
+		final JsonDeserializer<JsonObject> jod;
+		final JsonDeserializer<JsonArray> jad;
 
 		public StringCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
-			this.joc = registry.getCodec(JsonObject.class);
-			this.jac = registry.getCodec(JsonArray.class);
+			this.jod = registry.getDeserializer(JsonObject.class);
+			this.jad = registry.getDeserializer(JsonArray.class);
 		}
 
 		@Override
@@ -737,10 +766,10 @@ class BuiltinCodecFactory implements JsonCodecFactory {
 					return String.valueOf(reader.readBoolean());
 				}
 				case BEGIN_OBJECT -> {
-					return joc.read(reader).toString();    // TODO
+					return jod.read(reader).toString();    // TODO
 				}
 				case BEGIN_ARRAY -> {
-					return jac.read(reader).toString();    // TODO
+					return jad.read(reader).toString();    // TODO
 				}
 				default -> throw new JsonReadException("Unexpected token " + type);
 			}

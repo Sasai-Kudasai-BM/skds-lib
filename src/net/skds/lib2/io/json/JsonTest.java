@@ -3,7 +3,7 @@ package net.skds.lib2.io.json;
 import lombok.AllArgsConstructor;
 import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.annotation.JsonAlias;
-import net.skds.lib2.io.json.annotation.JsonCodecRole;
+import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecOptions;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
@@ -74,7 +74,7 @@ public class JsonTest {
 
 	}
 
-	@JsonCodecRole(CodecRole.SERIALIZE)
+	@JsonCodecRoleConstrains(CodecRole.SERIALIZE)
 	@AllArgsConstructor
 	private static class Pizdun {
 		private String s;

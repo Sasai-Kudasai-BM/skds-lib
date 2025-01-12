@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
 
 public abstract class JsonReflectiveBuilderCodec<T> extends AbstractJsonCodec<T> {
 
-	private final JsonCodec<JsonDeserializeBuilder<T>> deserializer;
+	private final JsonDeserializer<JsonDeserializeBuilder<T>> deserializer;
 	private final JsonSerializer<T> serializer;
 
 	@SuppressWarnings("unchecked")
@@ -21,8 +21,8 @@ public abstract class JsonReflectiveBuilderCodec<T> extends AbstractJsonCodec<T>
 			}
 			type = pt.getRawType();
 		}
-		this.deserializer = registry.getCodecIndirect(builderType);
-		this.serializer = BuiltinCodecFactory.INSTANCE.reflectiveFactory.getReflectiveSerializer((Class<T>) cl, registry);
+		this.deserializer = registry.getDeserializerIndirect(builderType);
+		this.serializer = (JsonSerializer<T>) ReflectiveJsonCodecFactory.INSTANCE.createSerializer(cl, registry);
 	}
 
 	@Override

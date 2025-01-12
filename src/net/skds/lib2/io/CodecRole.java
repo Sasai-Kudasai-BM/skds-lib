@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum CodecRole {
 	SERIALIZE(true, false),
 	DESERIALIZE(false, true),
-	BOTH(true, true);
+	BOTH(true, true),
+	NONE(false, false);
 
 	private final boolean canSerialize;
 	private final boolean canDeserialize;

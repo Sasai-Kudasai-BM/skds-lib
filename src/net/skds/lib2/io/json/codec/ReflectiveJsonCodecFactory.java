@@ -3,7 +3,7 @@ package net.skds.lib2.io.json.codec;
 import lombok.CustomLog;
 import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.annotation.JsonAlias;
-import net.skds.lib2.io.json.annotation.JsonCodecRole;
+import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.function.MultiSupplier;
 
@@ -21,13 +21,15 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	private static final FieldCodec[] fieldCodecArray = {};
 
+	public static final ReflectiveJsonCodecFactory INSTANCE = new ReflectiveJsonCodecFactory();
+
 	@Override
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			checkForInnerClass(c);
 
 			if (c.isRecord()) {
-				return new RecordCodec(c, registry);
+				return getRecordCodec(c, registry);
 			}
 			return getReflectiveCodec(c, registry);
 		} else if (type instanceof ParameterizedType pt) {
@@ -39,6 +41,42 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		return null;
 	}
 
+	@Override
+	public JsonDeserializer<?> createDeserializer(Type type, JsonCodecRegistry registry) {
+		if (type instanceof Class<?> c) {
+			checkForInnerClass(c);
+
+			if (c.isRecord()) {
+				return new RecordDeserializer(c, registry);
+			}
+			return getReflectiveDeserializer(c, registry);
+		} else if (type instanceof ParameterizedType pt) {
+			if (pt.getRawType() instanceof Class<?> c) {
+				checkForInnerClass(c);
+			}
+			return createDeserializer(pt.getRawType(), registry);
+		}
+		return null;
+	}
+
+	@Override
+	public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+		if (type instanceof Class<?> c) {
+			checkForInnerClass(c);
+
+			if (c.isRecord()) {
+				return new RecordSerializer(c, registry);
+			}
+			return getReflectiveSerializer(c, registry);
+		} else if (type instanceof ParameterizedType pt) {
+			if (pt.getRawType() instanceof Class<?> c) {
+				checkForInnerClass(c);
+			}
+			return createSerializer(pt.getRawType(), registry);
+		}
+		return null;
+	}
+
 	private static void checkForInnerClass(Class<?> c) {
 		if (c.isMemberClass() && !Modifier.isStatic(c.getModifiers())) {
 			throw new IllegalArgumentException("Can not create ReflectiveCodec for non-static inner class \"" + c + "\"");
@@ -46,38 +84,68 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> JsonSerializer<T> getReflectiveSerializer(Class<T> tClass, JsonCodecRegistry registry) {
+	private <T> JsonSerializer<T> getReflectiveSerializer(Class<T> tClass, JsonCodecRegistry registry) {
+		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+		if (codecRole != null && !codecRole.value().isCanSerialize()) {
+			return new UnsupportedJsonCodec<>(tClass, registry);
+		}
 		return (JsonSerializer<T>) new ReflectiveSerializer(tClass, registry);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> JsonDeserializer<T> getReflectiveDeserializer(Class<T> tClass, JsonCodecRegistry registry) {
+	private <T> JsonDeserializer<T> getReflectiveDeserializer(Class<T> tClass, JsonCodecRegistry registry) {
+		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+		if (codecRole != null && !codecRole.value().isCanSerialize()) {
+			return new UnsupportedJsonCodec<>(tClass, registry);
+		}
 		return (JsonDeserializer<T>) new ReflectiveDeserializer(tClass, registry);
 	}
 
-	private JsonCodec<Object> getReflectiveCodec(Class<?> tClass, JsonCodecRegistry registry) {
-		JsonCodecRole codecRole = tClass.getAnnotation(JsonCodecRole.class);
+	private JsonCodec<?> getReflectiveCodec(Class<?> tClass, JsonCodecRegistry registry) {
+		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
 		if (codecRole != null) {
 			switch (codecRole.value()) {
 				case SERIALIZE -> {
-					return new ReflectiveSerializer(tClass, registry);
+					return SerializeOnlyJsonCodec.ofSerializer(new ReflectiveSerializer(tClass, registry), tClass, registry);
 				}
 				case DESERIALIZE -> {
-					return new ReflectiveDeserializer(tClass, registry);
+					return DeserializeOnlyJsonCodec.ofDeserializer(new ReflectiveDeserializer(tClass, registry), tClass, registry);
+				}
+				case NONE -> {
+					return new UnsupportedJsonCodec<>(tClass, registry);
 				}
 			}
 		}
 		return new CombinedJsonCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer(tClass, registry));
 	}
 
-	public static class ReflectiveDeserializer extends DeserializeOnlyJsonCodec<Object> {
+	private JsonCodec<?> getRecordCodec(Class<?> tClass, JsonCodecRegistry registry) {
+		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+		if (codecRole != null) {
+			switch (codecRole.value()) {
+				case SERIALIZE -> {
+					return SerializeOnlyJsonCodec.ofSerializer(new RecordSerializer(tClass, registry), tClass, registry);
+				}
+				case DESERIALIZE -> {
+					return DeserializeOnlyJsonCodec.ofDeserializer(new RecordDeserializer(tClass, registry), tClass, registry);
+				}
+				case NONE -> {
+					return new UnsupportedJsonCodec<>(tClass, registry);
+				}
+			}
+		}
+		return new CombinedJsonCodec<>(new RecordSerializer(tClass, registry), new RecordDeserializer(tClass, registry));
+	}
+
+	public static class ReflectiveDeserializer implements JsonDeserializer<Object> {
 
 		final Supplier<Object> constructor;
 		final Map<String, FieldCodec> readers;
+		final JsonCodecRegistry registry;
 
 		@SuppressWarnings("unchecked")
 		public ReflectiveDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
-			super(tClass, registry);
+			this.registry = registry;
 			Supplier<Object> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				throw new IllegalArgumentException("Class \"" + tClass.getName() + "\" is abstract type and can not be created by ReflectiveCodec");
@@ -126,14 +194,20 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			}
 			return o;
 		}
+
+		@Override
+		public JsonCodecRegistry getRegistry() {
+			return registry;
+		}
 	}
 
-	public static class ReflectiveSerializer extends SerializeOnlyJsonCodec<Object> {
+	public static class ReflectiveSerializer implements JsonSerializer<Object> {
 
 		final FieldCodec[] writers;
+		final JsonCodecRegistry registry;
 
 		public ReflectiveSerializer(Class<?> tClass, JsonCodecRegistry registry) {
-			super(tClass, registry);
+			this.registry = registry;
 			this.writers = collectFields(tClass, registry);
 		}
 
@@ -160,47 +234,44 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			}
 			writer.endObject();
 		}
+
+		@Override
+		public JsonCodecRegistry getRegistry() {
+			return registry;
+		}
 	}
 
-	public static class RecordCodec extends AbstractJsonCodec<Object> {
+	public static class RecordDeserializer implements JsonDeserializer<Object> {
 
+		final JsonCodecRegistry registry;
 		final MultiSupplier<Object> constructor;
-		final JsonCodec<Object>[] codecs;
+		final JsonDeserializer<Object>[] deserializers;
 		final String[] names;
-		final Function<Object, Object>[] accessors;
 		final Map<String, Integer> readers;
 
 		@SuppressWarnings("unchecked")
-		public RecordCodec(Class<?> tClass, JsonCodecRegistry registry) {
-			super(tClass, registry);
+		public RecordDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
+			this.registry = registry;
 			MultiSupplier<Object> tmpC;
 			var rcs = tClass.getRecordComponents();
 			Class<?>[] args = new Class[rcs.length];
-			JsonCodec<Object>[] codecs1 = new JsonCodec[rcs.length];
+			JsonDeserializer<Object>[] des = new JsonDeserializer[rcs.length];
 			String[] names = new String[rcs.length];
-			Function<Object, Object>[] accessors = new Function[rcs.length];
 			Map<String, Integer> readers = new HashMap<>();
 			for (int i = 0; i < rcs.length; i++) {
 				RecordComponent rc = rcs[i];
 				args[i] = rc.getType();
-				JsonCodec<Object> codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
-				if (codec == null) {
-					codec = registry.getCodecIndirect(rc.getGenericType());
+				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
+				if (codec instanceof JsonDeserializer<?> jd) {
+					des[i] = (JsonDeserializer<Object>) jd;
+				} else {
+					des[i] = registry.getDeserializerIndirect(rc.getGenericType());
 				}
-				codecs1[i] = codec;
 				String name = rc.getName();
 				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
 				if (alias != null) {
 					name = alias.value();
 				}
-				Method m = rc.getAccessor();
-				accessors[i] = r -> {
-					try {
-						return m.invoke(r);
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				};
 				names[i] = name;
 				readers.put(name, i);
 			}
@@ -213,31 +284,9 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			}
 
 			this.constructor = tmpC;
-			this.codecs = codecs1;
+			this.deserializers = des;
 			this.readers = readers;
 			this.names = names;
-			this.accessors = accessors;
-		}
-
-		@Override
-		public void write(Object value, JsonWriter writer) throws IOException {
-			if (value == null) {
-				writer.writeNull();
-				return;
-			}
-			if (value instanceof JsonPreSerializeCall psc) {
-				psc.preSerializeJson();
-			}
-			writer.beginObject();
-			if (codecs.length > 1) {
-				writer.lineBreakEnable(true);
-			}
-			for (int i = 0; i < codecs.length; i++) {
-				JsonCodec<Object> w = codecs[i];
-				writer.writeName(names[i]);
-				w.write(accessors[i].apply(value), writer);
-			}
-			writer.endObject();
 		}
 
 		@Override
@@ -256,7 +305,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 					continue;
 				}
 				int i = index;
-				args[i] = codecs[i].read(reader);
+				args[i] = deserializers[i].read(reader);
 			}
 			reader.endObject();
 			Object o = constructor.get(args);
@@ -264,6 +313,81 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				pdc.postDeserializedJson();
 			}
 			return o;
+		}
+
+		@Override
+		public JsonCodecRegistry getRegistry() {
+			return registry;
+		}
+	}
+
+	public static class RecordSerializer implements JsonSerializer<Object> {
+
+		final JsonCodecRegistry registry;
+		final JsonSerializer<Object>[] serializers;
+		final String[] names;
+		final Function<Object, Object>[] accessors;
+
+		@SuppressWarnings("unchecked")
+		public RecordSerializer(Class<?> tClass, JsonCodecRegistry registry) {
+			this.registry = registry;
+			var rcs = tClass.getRecordComponents();
+			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
+			String[] names = new String[rcs.length];
+			Function<Object, Object>[] accessors = new Function[rcs.length];
+			for (int i = 0; i < rcs.length; i++) {
+				RecordComponent rc = rcs[i];
+				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
+				if (codec instanceof JsonSerializer<?> js) {
+					ser[i] = js;
+				} else {
+					ser[i] = BuiltinCodecFactory.getUniversalSerializer(rc.getGenericType(), registry);
+				}
+				String name = rc.getName();
+				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
+				if (alias != null) {
+					name = alias.value();
+				}
+				Method m = rc.getAccessor();
+				accessors[i] = r -> {
+					try {
+						return m.invoke(r);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				};
+				names[i] = name;
+			}
+
+			this.serializers = (JsonSerializer<Object>[]) ser;
+			this.names = names;
+			this.accessors = accessors;
+		}
+
+		@Override
+		public void write(Object value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			if (value instanceof JsonPreSerializeCall psc) {
+				psc.preSerializeJson();
+			}
+			writer.beginObject();
+			if (serializers.length > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (int i = 0; i < serializers.length; i++) {
+				JsonSerializer<Object> w = serializers[i];
+				writer.writeName(names[i]);
+				w.write(accessors[i].apply(value), writer);
+			}
+			writer.endObject();
+		}
+
+		@Override
+		public JsonCodecRegistry getRegistry() {
+			return registry;
 		}
 	}
 
@@ -437,11 +561,11 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	private static class CharFieldCodec extends FieldCodec {
-		final JsonCodec<Character> codec;
+		final JsonDeserializer<Character> deserializer;
 
 		private CharFieldCodec(Field field, JsonCodecRegistry registry) {
 			super(field);
-			this.codec = registry.getCodecIndirect(char.class);
+			this.deserializer = registry.getDeserializerIndirect(char.class);
 		}
 
 		@Override
@@ -451,7 +575,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		@Override
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setChar(o, codec.read(reader));
+			field.setChar(o, deserializer.read(reader));
 		}
 	}
 
@@ -474,27 +598,31 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	private static class ObjFieldCodec extends FieldCodec {
 
-		final JsonCodec<Object> codec;
+		final JsonSerializer<Object> serializer;
+		final JsonDeserializer<Object> deserializer;
 
 		private ObjFieldCodec(Field field, JsonCodecRegistry registry) {
 			super(field);
-			JsonCodec<Object> c = BuiltinCodecFactory.getDefaultCodec(field, field.getGenericType(), registry);
-			if (c == null) {
-				c = registry.getCodecIndirect(field.getGenericType());
+			Type t = field.getGenericType();
+			JsonCodec<Object> c = BuiltinCodecFactory.getDefaultCodec(field, t, registry);
+			if (c != null) {
+				this.serializer = c;
+				this.deserializer = c;
+			} else {
+				this.serializer = BuiltinCodecFactory.getUniversalSerializer(t, registry);
+				this.deserializer = registry.getDeserializerIndirect(t);
 			}
-			this.codec = c;
 		}
 
 		@Override
 		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
-			codec.write(field.get(o), writer);
+			Object value = field.get(o);
+			serializer.write(value, writer);
 		}
 
 		@Override
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.set(o, codec.read(reader));
+			field.set(o, deserializer.read(reader));
 		}
 	}
-
-
 }

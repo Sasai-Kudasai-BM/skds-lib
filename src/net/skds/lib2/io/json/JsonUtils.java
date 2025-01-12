@@ -48,7 +48,7 @@ public class JsonUtils {
 
 	public static <T> T parseJson(String text, Class<T> clazz) {
 		try {
-			return fancyRegistry.getCodec(clazz).parse(text);
+			return fancyRegistry.getDeserializer(clazz).parse(text);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -57,7 +57,7 @@ public class JsonUtils {
 
 	public static <T> T parseJson(JsonElement json, Class<T> clazz) {
 		try {
-			return fancyRegistry.getCodec(clazz).parse(json);
+			return fancyRegistry.getDeserializer(clazz).parse(json);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -96,7 +96,7 @@ public class JsonUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> String toJson(T object) {
 		Class<T> type = (Class<T>) object.getClass();
-		return fancyRegistry.getCodec(type).toJson(object);
+		return fancyRegistry.getSerializer(type).toJson(object);
 	}
 
 
@@ -125,7 +125,7 @@ public class JsonUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> String toJsonCompact(T object) {
 		Class<T> type = (Class<T>) object.getClass();
-		return compactRegistry.getCodec(type).toJson(object);
+		return compactRegistry.getSerializer(type).toJson(object);
 	}
 
 	public static boolean saveJsonCompact(String path, Object cfg) {

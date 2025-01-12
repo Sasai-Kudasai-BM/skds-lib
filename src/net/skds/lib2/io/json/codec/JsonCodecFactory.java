@@ -1,7 +1,5 @@
 package net.skds.lib2.io.json.codec;
 
-import net.skds.lib2.io.CodecRole;
-
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,59 +9,43 @@ public interface JsonCodecFactory {
 
 	JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry);
 
-	default JsonCodecFactory combine(JsonCodecFactory other) {
-		if (getCodecRole() == other.getCodecRole()) return other;
-		return switch (other.getCodecRole()) {
-			case BOTH -> other;
-
-			case SERIALIZE ->
-					(t, r) -> new CombinedJsonCodec<>(other.createCodec(t, r), JsonCodecFactory.this.createCodec(t, r));
-
-			case DESERIALIZE ->
-					(t, r) -> new CombinedJsonCodec<>(JsonCodecFactory.this.createCodec(t, r), other.createCodec(t, r));
-
-		};
+	default JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+		return createCodec(type, registry);
 	}
 
-	static JsonCodecFactory asDeserializer(JsonCodecFactory factory) {
-		return new JsonCodecFactory() {
-			@Override
-			public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
-				return factory.createCodec(type, registry);
-			}
-
-			@Override
-			public CodecRole getCodecRole() {
-				return CodecRole.DESERIALIZE;
-			}
-		};
-	}
-
-	static JsonCodecFactory asSerializer(JsonCodecFactory factory) {
-		return new JsonCodecFactory() {
-			@Override
-			public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
-				return factory.createCodec(type, registry);
-			}
-
-			@Override
-			public CodecRole getCodecRole() {
-				return CodecRole.SERIALIZE;
-			}
-		};
-	}
-
-	default CodecRole getCodecRole() {
-		return CodecRole.BOTH;
+	default JsonDeserializer<?> createDeserializer(Type type, JsonCodecRegistry registry) {
+		return createCodec(type, registry);
 	}
 
 	default JsonCodecFactory orElse(JsonCodecFactory other) {
-		return (t, r) -> {
-			JsonCodec<?> c = JsonCodecFactory.this.createCodec(t, r);
-			if (c == null) {
-				c = other.createCodec(t, r);
+		return new JsonCodecFactory() {
+
+			@Override
+			public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+				JsonCodec<?> codec = JsonCodecFactory.this.createCodec(type, registry);
+				if (codec != null) {
+					return codec;
+				}
+				return other.createCodec(type, registry);
 			}
-			return c;
+
+			@Override
+			public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+				JsonSerializer<?> codec = JsonCodecFactory.this.createSerializer(type, registry);
+				if (codec != null) {
+					return codec;
+				}
+				return other.createSerializer(type, registry);
+			}
+
+			@Override
+			public JsonDeserializer<?> createDeserializer(Type type, JsonCodecRegistry registry) {
+				JsonDeserializer<?> codec = JsonCodecFactory.this.createDeserializer(type, registry);
+				if (codec != null) {
+					return codec;
+				}
+				return other.createDeserializer(type, registry);
+			}
 		};
 	}
 
@@ -80,18 +62,25 @@ public interface JsonCodecFactory {
 		}
 
 		public void addFactory(Type type, JsonCodecFactory factory) {
-			map.compute(type, (t, f) -> {
-				if (f == null) {
-					return factory;
-				}
-				return f.combine(factory);
-			});
+			map.put(type, factory);
 		}
 
 		@Override
 		public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 			JsonCodecFactory fac = map.get(type);
 			return fac == null ? null : fac.createCodec(type, registry);
+		}
+
+		@Override
+		public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+			JsonCodecFactory fac = map.get(type);
+			return fac == null ? null : fac.createSerializer(type, registry);
+		}
+
+		@Override
+		public JsonDeserializer<?> createDeserializer(Type type, JsonCodecRegistry registry) {
+			JsonCodecFactory fac = map.get(type);
+			return fac == null ? null : fac.createDeserializer(type, registry);
 		}
 	}
 }
