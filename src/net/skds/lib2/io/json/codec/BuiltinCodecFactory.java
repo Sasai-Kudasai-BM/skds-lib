@@ -105,7 +105,9 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 
 		JsonCodecFactory fac = map.get(type);
-		return fac == null ? ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) : fac.createCodec(type, registry);
+		return fac == null ? 
+			ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) : 
+			fac.createCodec(type, registry);
 	}
 
 	private static boolean isFinal(Type type) {

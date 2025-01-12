@@ -50,7 +50,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 
 		public Codec(Type type, JsonCodecRegistry registry) {
 			super(type, registry);
-			this.elementCodec = registry.getCodec(JsonElement.class);
+			this.elementCodec = registry.getCodecIndirect(JsonElement.class);
 		}
 
 		@Override

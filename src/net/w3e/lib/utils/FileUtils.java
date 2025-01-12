@@ -39,7 +39,7 @@ public class FileUtils {
 	}
 
 	public static File getParentFile(Path path) {
-		return path.toFile().getAbsoluteFile();
+		return path.toFile().getAbsoluteFile().getParentFile();
 	}
 
 	public static File createParentDirs(File file) {

@@ -8,6 +8,8 @@ import lombok.Getter;
 import net.sdteam.libmerge.Lib1Merge;
 import net.skds.lib2.io.json.JsonPostDeserializeCall;
 import net.skds.lib2.io.json.JsonPreSerializeCall;
+import net.skds.lib2.io.json.codec.typed.ConfigType;
+import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.Vec3;
 import net.skds.lib2.mat.Vec3D;
 import net.w3e.lib.utils.FileUtils;

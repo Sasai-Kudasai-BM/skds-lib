@@ -5,6 +5,5 @@ import net.sdteam.libmerge.Lib1Merge;
 @Lib1Merge
 public interface ConfigType<CT> {
 	Class<CT> getTypeClass();
-
 	String keyName();
 }

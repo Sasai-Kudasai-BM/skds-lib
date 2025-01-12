@@ -623,12 +623,22 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		@Override
 		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
 			Object value = field.get(o);
-			serializer.write(value, writer);
+			try {
+				serializer.write(value, writer);
+			} catch (Exception e) {
+				System.err.println(name);
+				throw e;
+			}
 		}
 
 		@Override
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.set(o, deserializer.read(reader));
+			try {
+				field.set(o, deserializer.read(reader));
+			} catch (Exception e) {
+				System.err.println(name);
+				throw e;
+			}
 		}
 	}
 }
