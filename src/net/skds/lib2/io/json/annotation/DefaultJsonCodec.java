@@ -8,7 +8,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE, ElementType.RECORD_COMPONENT})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DefaultJsonCodec {
-
 	Class<?> value();
-
 }

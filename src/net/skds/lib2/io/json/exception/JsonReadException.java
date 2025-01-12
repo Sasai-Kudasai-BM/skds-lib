@@ -1,4 +1,4 @@
-package net.skds.lib2.io.json;
+package net.skds.lib2.io.json.exception;
 
 import java.io.IOException;
 

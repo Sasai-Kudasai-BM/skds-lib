@@ -1,11 +1,11 @@
 package net.skds.lib2.io.json.elements;
 
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;

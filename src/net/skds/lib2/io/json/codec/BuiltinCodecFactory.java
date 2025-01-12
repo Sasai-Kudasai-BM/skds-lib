@@ -2,11 +2,11 @@ package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.elements.*;
+import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.StringUtils;
@@ -197,7 +197,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		final JsonSerializer<Object> keySerializer;
 		final JsonSerializer<Object> valueSerializer;
 
-		@SuppressWarnings({"unchecked", "rawTypes"})
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		public MapCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
 			super(tClass, registry);
 			//this.tClass = tClass;
@@ -398,12 +398,16 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static final class ArrayCodec extends AbstractJsonCodec<Object> {
+	public static class ArrayCodec extends AbstractJsonCodec<Object> {
 
 		final Class<?> tClass;
 		final JsonDeserializer<Object> deserializer;
 		final JsonSerializer<Object> serializer;
 		final Object[] array;
+
+		public ArrayCodec(Class<?> type, JsonCodecRegistry registry) {
+			this(type, registry.getDeserializerIndirect(type), registry.getSerializerIndirect(type), registry);
+		}
 
 		public ArrayCodec(Class<?> tClass, JsonDeserializer<Object> deserializer, JsonSerializer<Object> serializer, JsonCodecRegistry registry) {
 			super(tClass, registry);
@@ -415,6 +419,11 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 		@Override
 		public void write(Object value, JsonWriter writer) throws IOException {
+			write(value, writer, this.serializer);
+		}
+
+		@SuppressWarnings("unchecked")
+		public static <T> void write(Object value, JsonWriter writer, JsonSerializer<T> serializer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -425,7 +434,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				writer.lineBreakEnable(true);
 			}
 			for (int i = 0; i < size; i++) {
-				Object v = Array.get(value, i);
+				T v = (T)Array.get(value, i);
 				serializer.write(v, writer);
 			}
 			writer.endArray();
@@ -433,6 +442,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 		@Override
 		public Object read(JsonReader reader) throws IOException {
+			return read(reader, this.deserializer, this.array);
+		}
+
+		public static <T> T[] read(JsonReader reader, JsonDeserializer<T> deserializer, T[] emptyArray) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
@@ -446,7 +459,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 						list.add(deserializer.read(reader));
 					}
 					reader.endArray();
-					return list.toArray(array);
+					return list.toArray(emptyArray);
 				}
 				default -> throw new JsonReadException("Unexpected token " + type);
 			}

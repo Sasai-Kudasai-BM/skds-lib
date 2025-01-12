@@ -2,6 +2,7 @@ package net.skds.lib2.io.json.codec;
 
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.exception.UnsupportedJsonSerializationException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -14,11 +15,11 @@ public final class UnsupportedJsonCodec<T> extends AbstractJsonCodec<T> {
 
 	@Override
 	public void write(T value, JsonWriter writer) throws IOException {
-		throw new UnsupportedOperationException("Serialization is not supported for \"" + codecType + "\"");
+		throw new UnsupportedJsonSerializationException(codecType);
 	}
 
 	@Override
 	public T read(JsonReader reader) throws IOException {
-		throw new UnsupportedOperationException("Deserialization is not supported for \"" + codecType + "\"");
+		throw new UnsupportedJsonSerializationException(codecType);
 	}
 }

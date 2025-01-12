@@ -1,12 +1,12 @@
 package net.skds.lib2.io.json.elements;
 
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.exception.JsonReadException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -51,7 +51,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 
 		public Codec(Type type, JsonCodecRegistry registry) {
 			super(type, registry);
-			this.elementCodec = registry.getCodec(JsonElement.class);
+			this.elementCodec = registry.getCodecIndirect(JsonElement.class);
 		}
 
 		@Override
@@ -61,7 +61,9 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 				return;
 			}
 			writer.beginArray();
-			writer.lineBreakEnable(true);
+			if (value.size() > 1) {
+				writer.lineBreakEnable(true);
+			}
 			for (var e : value) {
 				elementCodec.write(e, writer);
 			}

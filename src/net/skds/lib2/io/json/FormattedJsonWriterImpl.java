@@ -8,8 +8,11 @@ import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
 
+import lombok.Getter;
+
 public final class FormattedJsonWriterImpl implements JsonWriter {
 
+	@Getter
 	private final CharOutput output;
 	private final String tab;
 

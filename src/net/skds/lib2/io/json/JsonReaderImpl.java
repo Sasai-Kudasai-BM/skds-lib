@@ -5,6 +5,7 @@ import net.skds.lib2.io.EndOfInputException;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.elements.JsonElement;
+import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.StringUtils;
 

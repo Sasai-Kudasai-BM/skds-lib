@@ -1,12 +1,12 @@
 package net.skds.lib2.io.json.elements;
 
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.exception.JsonReadException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -21,7 +21,7 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		throw new UnsupportedOperationException();
 	}
 
-	default JsonArray getAsJsonList() {
+	default JsonArray getAsJsonArray() {
 		throw new UnsupportedOperationException();
 	}
 

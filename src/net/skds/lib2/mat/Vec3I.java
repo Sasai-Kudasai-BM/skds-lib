@@ -2,14 +2,15 @@ package net.skds.lib2.mat;
 
 
 import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReadException;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.exception.JsonReadException;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec3I.JCodec.class)
@@ -129,8 +130,8 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 
 	static final class JCodec extends AbstractJsonCodec<Vec3I> {
 
-		public JCodec(JsonCodecRegistry registry) {
-			super(registry);
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, registry);
 		}
 
 		@Override

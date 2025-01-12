@@ -50,7 +50,7 @@ public class JsonUtils {
 	}
 
 	public static <AT, CT extends AT, E extends Enum<E> & ConfigType<CT>> void addTypedAdapter(Class<AT> type, Class<E> typeClass) {
-		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(r) {
+		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
 
 			@Override
 			@SuppressWarnings("unchecked")
@@ -96,11 +96,12 @@ public class JsonUtils {
 	}
 
 	public static <AT, CT extends AT> void addTypedAdapter(Class<AT> type, Map<String, ? extends ConfigType<?>> typeMap) {
-		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(r) {
+		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
 
 			@Override
 			@SuppressWarnings("unchecked")
 			public void write(AT value, JsonWriter writer) throws IOException {
+				//System.out.println(((FormattedJsonWriterImpl)writer).getOutput());
 				if (value == null) {
 					writer.writeNull();
 					return;

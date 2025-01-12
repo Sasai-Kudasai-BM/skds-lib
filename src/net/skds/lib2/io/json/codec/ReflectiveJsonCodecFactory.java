@@ -659,7 +659,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			try {
 				serializer.write(value, writer);
 			} catch (Exception e) {
-				System.err.println(name);
+				System.err.println("exception while write field " + this.name + " " + this.field.getType());
 				throw e;
 			}
 		}
@@ -669,7 +669,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			try {
 				field.set(o, deserializer.read(reader));
 			} catch (Exception e) {
-				System.err.println(name);
+				System.err.println("exception while read field " + this.name + " " + this.field.getType());
 				throw e;
 			}
 		}
