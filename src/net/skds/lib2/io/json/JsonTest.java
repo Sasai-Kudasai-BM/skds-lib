@@ -3,23 +3,15 @@ package net.skds.lib2.io.json;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.skds.lib2.io.json.JsonTest.A1;
-import net.skds.lib2.io.json.JsonTest.DgAdapter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.TransientComponent;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecOptions;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
-import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
+import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.Vec3D;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
@@ -147,7 +139,7 @@ public class JsonTest {
 	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e");
 	static final YupCT y2 = new YupCT(Yup.Yup2.class, "e2");
 	static final YupCT y3 = new YupCT(Yup.Yup3.class, "e3");
-	
+
 	@AllArgsConstructor
 	private static class YupCT implements ConfigType<Yup> {
 
@@ -170,24 +162,24 @@ public class JsonTest {
 
 		private static class Yup1 extends Yup {
 			int sex = 1;
-	
+
 			@Override
 			public ConfigType<?> getConfigType() {
 				return y1;
 			}
 		}
-	
+
 		private static class Yup2 extends Yup {
 			int sex2 = 2;
-	
+
 			@Override
 			public ConfigType<?> getConfigType() {
 				return y2;
 			}
 		}
-	
+
 		private static class Yup3 extends Yup {
-	
+
 			@Override
 			public ConfigType<?> getConfigType() {
 				return y3;
@@ -254,6 +246,7 @@ public class JsonTest {
 				return TYPE;
 			}
 		}
+
 		@DefaultJsonCodec(Dg2.Dg2JsAdapter.class)
 		private static class Dg2 extends Dg {
 			static final String TYPE = "dg2";
@@ -285,10 +278,11 @@ public class JsonTest {
 						Dg2 dg2 = new Dg2("a");
 						dg2.a1 *= -1;
 						return dg2;
-					}		
+					}
 				}
 			}
 		}
+
 		private static class Dg3 extends Dg {
 			static final String TYPE = "dg3";
 			private int a2 = 5;
@@ -307,10 +301,13 @@ public class JsonTest {
 				return TYPE;
 			}
 		}
+
 		private static class Dg4 {
 			private Dg field = new Dg.Dg1("inside");
 		}
-		private static record Dg5(Dg dg) {}
+
+		private record Dg5(Dg dg) {
+		}
 	}
 
 	@AllArgsConstructor
@@ -325,8 +322,9 @@ public class JsonTest {
 			return this.keyName;
 		}
 
-		protected void registerJson() {}
-		
+		protected void registerJson() {
+		}
+
 	}
 
 	private static class Amogus {

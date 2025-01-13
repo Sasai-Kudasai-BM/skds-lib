@@ -1,5 +1,6 @@
 package net.skds.lib2.io.json;
 
+import lombok.Getter;
 import net.skds.lib2.io.CharOutput;
 import net.skds.lib2.io.EndOfOutputException;
 import net.skds.lib2.io.json.codec.JsonCapabilityVersion;
@@ -7,8 +8,6 @@ import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
-
-import lombok.Getter;
 
 public final class FormattedJsonWriterImpl implements JsonWriter {
 
@@ -111,7 +110,7 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void lineBreakEnable(boolean lineBreak) throws EndOfOutputException {
+	public void lineBreakEnable(boolean lineBreak) {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		e.lineBreak = lineBreak;
