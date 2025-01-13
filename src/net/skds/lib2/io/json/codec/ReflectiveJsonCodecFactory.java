@@ -360,9 +360,6 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings("unchecked")
 		public RecordSerializer(Class<?> tClass, JsonCodecRegistry registry) {
-			if (Modifier.isFinal(tClass.getModifiers())) {
-				throw new IllegalArgumentException("Cannot create serializer for private record \"" + tClass.getName() + "\"");
-			}
 			this.registry = registry;
 			var rcs = tClass.getRecordComponents();
 			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
@@ -387,6 +384,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 					name = alias.value();
 				}
 				Method m = rc.getAccessor();
+				m.setAccessible(true);
 				accessors[i] = r -> {
 					try {
 						return m.invoke(r);
