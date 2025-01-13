@@ -21,6 +21,11 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 	}
 
 	@Override
+	public JsonArray getAsJsonArray() {
+		return this;
+	}
+
+	@Override
 	public String toString() {
 		StringJoiner sj = new StringJoiner(",", "[", "]");
 		for (JsonElement e : this) {

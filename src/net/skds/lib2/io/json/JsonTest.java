@@ -3,8 +3,10 @@ package net.skds.lib2.io.json;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
+import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
@@ -15,7 +17,9 @@ import net.skds.lib2.utils.logger.SKDSLogger;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +138,17 @@ public class JsonTest {
 		System.out.println(JsonUtils.toJson(new Dg.Dg5(new Dg.Dg1("inside"))));
 
 		//JsonUtils.saveJson(new File("dg.json"), dgList);
+
+		System.out.println();
+		List<String> list = new ArrayList<>();
+		list.add("null");
+		list.add("1");
+
+		System.out.println(JsonUtils.toJson(list));
+		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder1()));
+		System.out.println(JsonUtils.toJson(new HashMap<String, Boolean>()));
+		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder2()));
+		System.out.println(JsonUtils.toJson(new Obj2BoolMap<String>()));
 	}
 
 	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e");
@@ -146,6 +161,7 @@ public class JsonTest {
 		final Class<? extends Yup> tClass;
 		final String key;
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Class<Yup> getTypeClass() {
 			return (Class<Yup>) tClass;
@@ -215,7 +231,8 @@ public class JsonTest {
 		private List<Dg> list;
 	}
 
-	private abstract static class Dg implements TypedConfig {
+	//@JsonCodecRoleConstrains(CodecRole.NONE)
+	private abstract static class Dg<T> implements TypedConfig {
 		private transient String value;
 		protected final transient ConfigType<?> configType = dgMap.get(keyName());
 
@@ -230,7 +247,7 @@ public class JsonTest {
 
 		protected abstract String keyName();
 
-		private static class Dg1 extends Dg {
+		private static class Dg1 extends Dg<Integer> {
 			static final String TYPE = "dg1";
 
 			public Dg1() {
@@ -248,7 +265,7 @@ public class JsonTest {
 		}
 
 		@DefaultJsonCodec(Dg2.Dg2JsAdapter.class)
-		private static class Dg2 extends Dg {
+		private static class Dg2 extends Dg<String> {
 			static final String TYPE = "dg2";
 			private int a1 = 5;
 
@@ -283,7 +300,7 @@ public class JsonTest {
 			}
 		}
 
-		private static class Dg3 extends Dg {
+		private static class Dg3 extends Dg<Boolean> {
 			static final String TYPE = "dg3";
 			private int a2 = 5;
 			private int a3 = 5;
@@ -303,10 +320,11 @@ public class JsonTest {
 		}
 
 		private static class Dg4 {
+			@SuppressWarnings("rawtypes")
 			private Dg field = new Dg.Dg1("inside");
 		}
 
-		private record Dg5(Dg dg) {
+		private record Dg5(@SuppressWarnings("rawtypes") Dg dg) {
 		}
 	}
 
@@ -377,5 +395,18 @@ public class JsonTest {
 			writer.writeNull();
 			System.out.println("write");
 		}
+	}
+
+	
+	private static class Obj2BoolMapHolder1 {
+		private Map<String, Boolean> map1 = new HashMap<>();
+	}
+
+	private static class Obj2BoolMapHolder2 {
+		private Obj2BoolMap<String> map2 = new Obj2BoolMap<>();
+	}
+
+	private static class Obj2BoolMap<T> extends HashMap<T, Boolean> {
+
 	}
 }

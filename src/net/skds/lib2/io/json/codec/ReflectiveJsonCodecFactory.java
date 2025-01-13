@@ -147,12 +147,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	public static class ReflectiveDeserializer implements JsonDeserializer<Object> {
 
+		final Class<?> tClass;
 		final Supplier<Object> constructor;
 		final Map<String, FieldCodec> readers;
 		final JsonCodecRegistry registry;
 
 		@SuppressWarnings("unchecked")
 		public ReflectiveDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
+			this.tClass = tClass;
 			this.registry = registry;
 			Supplier<Object> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
@@ -192,8 +194,8 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 				try {
 					fc.read(reader, o);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException(e);
+				} catch (IllegalAccessException | ArrayIndexOutOfBoundsException e) {
+					throw new RuntimeException("" + this.tClass + "#" + fc.name, e);
 				}
 			}
 			reader.endObject();
@@ -211,10 +213,12 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	public static class ReflectiveSerializer implements JsonSerializer<Object> {
 
+		final Class<?> tClass;
 		final FieldCodec[] writers;
 		final JsonCodecRegistry registry;
 
 		public ReflectiveSerializer(Class<?> tClass, JsonCodecRegistry registry) {
+			this.tClass = tClass;
 			this.registry = registry;
 			this.writers = collectFields(tClass, registry);
 		}
@@ -236,8 +240,8 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				try {
 					writer.writeName(w.name);
 					w.write(writer, value);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException(e);
+				} catch (IllegalAccessException | ArrayIndexOutOfBoundsException e) {
+					throw new RuntimeException("" + this.tClass + "#" + w.name, e);
 				}
 			}
 			writer.endObject();
@@ -317,7 +321,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 					continue;
 				}
 				int i = index;
-				args[i] = deserializers[i].read(reader);
+				try {
+					args[i] = deserializers[i].read(reader);
+				} catch (Exception e) {
+					System.err.println("exception while read field " + name + " " + this.components[i]);
+					throw e;
+				}
+
 			}
 			reader.endObject();
 
@@ -418,8 +428,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				for (int i = 0; i < serializers.length; i++) {
 					JsonSerializer<Object> w = serializers[i];
 					if (w == null) continue;
-					writer.writeName(names[i]);
-					w.write(accessors[i].apply(value), writer);
+					try {
+						writer.writeName(names[i]);
+						w.write(accessors[i].apply(value), writer);
+					} catch (Exception e) {
+						System.err.println("exception while write field " + names[i]);
+						throw e;
+					}
 				}
 			}
 			writer.endObject();

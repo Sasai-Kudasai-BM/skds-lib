@@ -44,6 +44,22 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return sb.toString();
 	}
 
+	public JsonElement put(String key, Number value) {
+		return super.put(key, new JsonNumber(value));
+	}
+
+	public JsonElement put(String key, boolean value) {
+		return super.put(key, new JsonBoolean(value));
+	}
+
+	public JsonElement put(String key, String value) {
+		return super.put(key, new JsonString(value));
+	}
+
+	public JsonElement putNull(String key) {
+		return super.put(key, JsonElement.NULL);
+	}
+
 	public static class Codec extends AbstractJsonCodec<JsonObject> {
 
 		private final JsonCodec<JsonElement> elementCodec;
