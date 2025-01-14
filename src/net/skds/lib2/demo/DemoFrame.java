@@ -2,6 +2,7 @@ package net.skds.lib2.demo;
 
 import net.skds.lib2.demo.classloader.DemoClassloaderFrame;
 import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.misc.font.demo.FontDemoFrame;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.swing.*;
@@ -33,6 +34,10 @@ public class DemoFrame extends JFrame {
 
 		button = new JButton("WeightedPool");
 		button.addActionListener(e -> new WeightedPoolDemoFrame());
+		add(button);
+
+		button = new JButton("Font");
+		button.addActionListener(e -> new FontDemoFrame());
 		add(button);
 
 		button = new JButton("floor");
