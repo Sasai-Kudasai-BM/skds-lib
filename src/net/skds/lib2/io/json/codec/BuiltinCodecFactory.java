@@ -56,6 +56,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 	@Override
 	public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+		JsonCodecFactory fac = map.get(type);
+		if (fac != null) {
+			return fac.createSerializer(type, registry);
+		}
 		if (type instanceof Class<?> cl) {
 			if (Collection.class.isAssignableFrom(cl)) {
 				return new CollectionSerializer(registry);
@@ -79,6 +83,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 	@Override
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+		JsonCodecFactory fac = map.get(type);
+		if (fac != null) {
+			return fac.createCodec(type, registry);
+		}
 		if (type instanceof Class<?> cl) {
 			{
 				JsonCodec<?> codec = getDefaultCodec(cl, cl, registry);
@@ -130,10 +138,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			}
 		}
 
-		JsonCodecFactory fac = map.get(type);
-		return fac == null ?
-				ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) :
-				fac.createCodec(type, registry);
+		return ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry);
 	}
 
 	private static boolean isFinal(Type type) {
