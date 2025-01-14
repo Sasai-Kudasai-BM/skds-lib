@@ -19,7 +19,6 @@ public interface JsonCodecFactory {
 
 	default JsonCodecFactory orElse(JsonCodecFactory other) {
 		return new JsonCodecFactory() {
-
 			@Override
 			public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 				JsonCodec<?> codec = JsonCodecFactory.this.createCodec(type, registry);

@@ -27,7 +27,8 @@ public class JsonUtils {
 	@Getter
 	private static JsonCodecRegistry fancyRegistry;
 	private static JsonCodecOptions options;
-	private static final JsonCodecFactory.MapJsonFactory userCodecFactory = JsonCodecFactory.newMapFactory();
+	private static final JsonCodecFactory.MapJsonFactory userMapCodecFactory = JsonCodecFactory.newMapFactory();
+	private static JsonCodecFactory userCodecFactory = userMapCodecFactory;
 
 	public static JsonCodecOptions getOptions() {
 		return options.clone();
@@ -45,12 +46,22 @@ public class JsonUtils {
 	}
 
 	public static void addFactory(Type type, JsonCodecFactory factory) {
-		userCodecFactory.addFactory(type, factory);
+		userMapCodecFactory.addFactory(type, factory);
+		rebuild();
+	}
+
+	public static void addFactoryBefore(JsonCodecFactory factory) {
+		userCodecFactory = factory.orElse(userCodecFactory);
+		rebuild();
+	}
+
+	public static void addFactoryAfter(JsonCodecFactory factory) {
+		userCodecFactory = userCodecFactory.orElse(factory);
 		rebuild();
 	}
 
 	public static <AT, CT extends AT, E extends Enum<E> & ConfigType<CT>> void addTypedAdapter(Class<AT> type, Class<E> typeClass) {
-		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
+		userMapCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
 
 			@Override
 			@SuppressWarnings("unchecked")
@@ -96,7 +107,7 @@ public class JsonUtils {
 	}
 
 	public static <AT, CT extends AT> void addTypedAdapter(Class<AT> type, Map<String, ? extends ConfigType<?>> typeMap) {
-		userCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
+		userMapCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
 
 			@Override
 			@SuppressWarnings("unchecked")
