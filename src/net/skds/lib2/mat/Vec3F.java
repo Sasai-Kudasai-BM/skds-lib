@@ -1,6 +1,18 @@
 package net.skds.lib2.mat;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+
+import net.skds.lib2.io.json.JsonEntryType;
+import net.skds.lib2.io.json.JsonReader;
+import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.exception.JsonReadException;
+
 @SuppressWarnings("unused")
+@DefaultJsonCodec(Vec3F.JCodec.class)
 public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 
 	public static final Vec3F XN = new Vec3F(-1.0F, 0.0F, 0.0F);
@@ -68,5 +80,64 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 	@Override
 	public Vec3F getAsFloatVec() {
 		return this;
+	}
+
+	static final class JCodec extends AbstractJsonCodec<Vec3> {
+
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, registry);
+		}
+
+		@Override
+		public void write(Vec3 value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginArray();
+			writer.writeFloat(value.xf());
+			writer.writeFloat(value.yf());
+			writer.writeFloat(value.zf());
+			writer.endArray();
+		}
+
+		@Override
+		public Vec3F read(JsonReader reader) throws IOException {
+			float x = 0;
+			float y = 0;
+			float z = 0;
+
+			switch (reader.nextEntryType()) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					x = reader.readFloat();
+					y = reader.readFloat();
+					z = reader.readFloat();
+					reader.endArray();
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+						String s = reader.readName();
+						float i = reader.readFloat();
+						switch (s.toLowerCase()) {
+							case "x" -> x = i;
+							case "y" -> y = i;
+							case "z" -> z = i;
+						}
+					}
+					reader.endObject();
+				}
+				case NUMBER -> new Vec3F(reader.readFloat());
+				default ->
+						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+			}
+
+			return new Vec3F(x, y, z);
+		}
 	}
 }

@@ -128,22 +128,22 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec3I> {
+	static final class JCodec extends AbstractJsonCodec<Vec3> {
 
 		public JCodec(Type type, JsonCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec3I value, JsonWriter writer) throws IOException {
+		public void write(Vec3 value, JsonWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
 			}
 			writer.beginArray();
-			writer.writeInt(value.xi);
-			writer.writeInt(value.yi);
-			writer.writeInt(value.zi);
+			writer.writeInt(value.xi());
+			writer.writeInt(value.yi());
+			writer.writeInt(value.zi());
 			writer.endArray();
 		}
 
@@ -178,6 +178,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 					}
 					reader.endObject();
 				}
+				case NUMBER -> new Vec3I(reader.readInt());
 				default ->
 						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}

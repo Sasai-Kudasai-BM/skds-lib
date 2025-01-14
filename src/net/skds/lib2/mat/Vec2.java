@@ -1,8 +1,20 @@
 package net.skds.lib2.mat;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Random;
 
+import net.skds.lib2.io.json.JsonEntryType;
+import net.skds.lib2.io.json.JsonReader;
+import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.JsonSerializer;
+import net.skds.lib2.io.json.exception.JsonReadException;
+
 @SuppressWarnings("unused")
+@DefaultJsonCodec(Vec2.JCodec.class)
 public sealed interface Vec2 extends Vector permits Vec2D, Vec2F, Vec2I {
 
 	Vec2 ZERO = Vec2D.ZERO;
@@ -1005,5 +1017,66 @@ public sealed interface Vec2 extends Vector permits Vec2D, Vec2F, Vec2I {
 	@Override
 	default Vec2D getAsDoubleVec() {
 		return new Vec2D(this.x(), this.y());
+	}
+
+	static final class JCodec extends AbstractJsonCodec<Vec2> {
+
+		private final JsonSerializer<Vec2I> veci = this.registry.getSerializerIndirect(Vec2I.class);
+		private final JsonSerializer<Vec2> vecd = this.registry.getSerializerIndirect(Vec2D.class);
+
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, registry);
+		}
+
+		@Override
+		public void write(Vec2 value, JsonWriter writer) throws IOException {
+			if (value instanceof Vec2I vec) {
+				this.veci.write(vec, writer);
+			} else {
+				this.vecd.write(value, writer);
+			}
+		}
+
+		@Override
+		public Vec2 read(JsonReader reader) throws IOException {
+			Number x = 0;
+			Number y = 0;
+			switch (reader.nextEntryType()) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					x = reader.readNumber();
+					y = reader.readNumber();
+					reader.endArray();
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+						String s = reader.readName();
+						Number i = reader.readNumber();
+						switch (s.toLowerCase()) {
+							case "x" -> x = i;
+							case "y" -> y = i;
+						}
+					}
+					reader.endObject();
+				}
+				case NUMBER -> {
+					Number value = reader.readNumber();
+					x = value;
+					y = value;
+				}
+				default ->
+						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+			}
+			if (x instanceof Double || y instanceof Double) {
+				return new Vec2D(x.doubleValue(), y.doubleValue());
+			} else {
+				return new Vec2I(x.intValue(), y.intValue());
+			}
+		}
 	}
 }

@@ -1,6 +1,16 @@
 package net.skds.lib2.mat;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Random;
+
+import net.skds.lib2.io.json.JsonEntryType;
+import net.skds.lib2.io.json.JsonReader;
+import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.JsonSerializer;
+import net.skds.lib2.io.json.exception.JsonReadException;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")
@@ -1445,4 +1455,70 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	default Vec3D getAsDoubleVec() {
 		return new Vec3D(this.x(), this.y(), this.z());
 	}
+
+	static final class JCodec extends AbstractJsonCodec<Vec3> {
+
+		private final JsonSerializer<Vec3I> veci = this.registry.getSerializerIndirect(Vec3I.class);
+		private final JsonSerializer<Vec3> vecd = this.registry.getSerializerIndirect(Vec3D.class);
+
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, registry);
+		}
+
+		@Override
+		public void write(Vec3 value, JsonWriter writer) throws IOException {
+			if (value instanceof Vec3I vec) {
+				this.veci.write(vec, writer);
+			} else {
+				this.vecd.write(value, writer);
+			}
+		}
+
+		@Override
+		public Vec3 read(JsonReader reader) throws IOException {
+			Number x = 0;
+			Number y = 0;
+			Number z = 0;
+			switch (reader.nextEntryType()) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					x = reader.readNumber();
+					y = reader.readNumber();
+					z = reader.readNumber();
+					reader.endArray();
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+						String s = reader.readName();
+						Number i = reader.readNumber();
+						switch (s.toLowerCase()) {
+							case "x" -> x = i;
+							case "y" -> y = i;
+							case "z" -> z = i;
+						}
+					}
+					reader.endObject();
+				}
+				case NUMBER -> {
+					Number value = reader.readNumber();
+					x = value;
+					y = value;
+					z = value;
+				}
+				default ->
+						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+			}
+			if (x instanceof Double || y instanceof Double || z instanceof Double) {
+				return new Vec3D(x.doubleValue(), y.doubleValue(), z.doubleValue());
+			} else {
+				return new Vec3I(x.intValue(), y.intValue(), z.intValue());
+			}
+		}
+	}
+
 }
