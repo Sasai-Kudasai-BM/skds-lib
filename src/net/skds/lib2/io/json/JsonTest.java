@@ -7,6 +7,7 @@ import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.*;
+import net.skds.lib2.io.json.codec.BuiltinCodecFactory.ArrayCodec;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.elements.JsonObject;

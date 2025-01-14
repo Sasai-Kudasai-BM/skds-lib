@@ -1,7 +1,6 @@
 package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.json.FormattedJsonWriterImpl;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -35,14 +34,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			String.class, (JsonCodecFactory) StringCodec::new,
 
 			Number.class, (JsonCodecFactory) NumberCodec::new,
-			Byte.class, (JsonCodecFactory) ByteCodec::new,
-			Boolean.class, (JsonCodecFactory) BooleanCodec::new,
-			Short.class, (JsonCodecFactory) ShortCodec::new,
-			Character.class, (JsonCodecFactory) CharCodec::new,
-			Integer.class, (JsonCodecFactory) IntCodec::new,
-			Long.class, (JsonCodecFactory) LongCodec::new,
-			Float.class, (JsonCodecFactory) FloatCodec::new,
-			Double.class, (JsonCodecFactory) DoubleCodec::new,
+			Byte.class, (JsonCodecFactory) WrappedByteCodec::new,
+			Boolean.class, (JsonCodecFactory) WrappedBooleanCodec::new,
+			Short.class, (JsonCodecFactory) WrappedShortCodec::new,
+			Character.class, (JsonCodecFactory) WrappedCharCodec::new,
+			Integer.class, (JsonCodecFactory) WrappedIntCodec::new,
+			Long.class, (JsonCodecFactory) WrappedLongCodec::new,
+			Float.class, (JsonCodecFactory) WrappedFloatCodec::new,
+			Double.class, (JsonCodecFactory) WrappedDoubleCodec::new,
 
 			byte.class, (JsonCodecFactory) ByteCodec::new,
 			boolean.class, (JsonCodecFactory) BooleanCodec::new,
@@ -497,10 +496,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 		@Override
 		public Object read(JsonReader reader) throws IOException {
-			return read(reader, this.deserializer, this.array);
+			return read(this.array, reader, this.deserializer);
 		}
 
-		public static <T> T[] read(JsonReader reader, JsonDeserializer<T> deserializer, T[] emptyArray) throws IOException {
+		public static <T> T[] read(T[] emptyArray, JsonReader reader, JsonDeserializer<T> deserializer) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
@@ -1007,6 +1006,33 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	public static final class WrappedIntCodec extends AbstractJsonCodec<Integer> {
+
+		public WrappedIntCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Integer value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeRaw(value.toString());
+		}
+
+		@Override
+		public Integer read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			Number n = reader.readNumber();
+			return n.intValue();
+		}
+	}
+
 	public static final class ByteCodec extends AbstractJsonCodec<Byte> {
 
 		public ByteCodec(Type type, JsonCodecRegistry registry) {
@@ -1034,6 +1060,33 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	public static final class WrappedByteCodec extends AbstractJsonCodec<Byte> {
+
+		public WrappedByteCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Byte value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeRaw(value.toString());
+		}
+
+		@Override
+		public Byte read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			Number n = reader.readNumber();
+			return n.byteValue();
+		}
+	}
+
 	public static final class NumberCodec extends AbstractJsonCodec<Number> {
 
 		public NumberCodec(Type type, JsonCodecRegistry registry) {
@@ -1043,7 +1096,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		@Override
 		public void write(Number value, JsonWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeInt(0);
+				writer.writeNull();
 				return;
 			}
 			writer.writeRaw(value.toString());
@@ -1054,12 +1107,11 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			JsonEntryType type = reader.nextEntryType();
 			if (type == JsonEntryType.NULL) {
 				reader.skipNull();
-				return 0;
+				return null;
 			}
 			return reader.readNumber();
 		}
 	}
-
 
 	public static final class BooleanCodec extends AbstractJsonCodec<Boolean> {
 
@@ -1082,6 +1134,32 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			if (type == JsonEntryType.NULL) {
 				reader.skipNull();
 				return false;
+			}
+			return reader.readBoolean();
+		}
+	}
+
+	public static final class WrappedBooleanCodec extends AbstractJsonCodec<Boolean> {
+
+		public WrappedBooleanCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Boolean value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeBoolean(value);
+		}
+
+		@Override
+		public Boolean read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
 			}
 			return reader.readBoolean();
 		}
@@ -1127,6 +1205,46 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	public static final class WrappedCharCodec extends AbstractJsonCodec<Character> {
+
+		public WrappedCharCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Character value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeString(StringUtils.unicodeCharUC(value));
+		}
+
+		@Override
+		public Character read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case NUMBER -> {
+					Number n = reader.readNumber();
+					return (char) n.intValue();
+				}
+				case STRING -> {
+					String cs = reader.readString();
+					if (cs.length() == 1) {
+						return cs.charAt(0);
+					} else {
+						throw new JsonReadException("Unexpected char " + cs);
+					}
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+	}
+
 	public static final class ShortCodec extends AbstractJsonCodec<Short> {
 
 		public ShortCodec(Type type, JsonCodecRegistry registry) {
@@ -1137,6 +1255,33 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		public void write(Short value, JsonWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeInt(0);
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Short read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
+			}
+			Number n = reader.readNumber();
+			return n.shortValue();
+		}
+	}
+
+	public static final class WrappedShortCodec extends AbstractJsonCodec<Short> {
+
+		public WrappedShortCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Short value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
 				return;
 			}
 			writer.writeInt(value);
@@ -1181,6 +1326,33 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	public static final class WrappedLongCodec extends AbstractJsonCodec<Long> {
+
+		public WrappedLongCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Long value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Long read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			Number n = reader.readNumber();
+			return n.longValue();
+		}
+	}
+
 	public static final class FloatCodec extends AbstractJsonCodec<Float> {
 
 		public FloatCodec(Type type, JsonCodecRegistry registry) {
@@ -1208,6 +1380,33 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	public static final class WrappedFloatCodec extends AbstractJsonCodec<Float> {
+
+		public WrappedFloatCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Float value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeFloat(value);
+		}
+
+		@Override
+		public Float read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			Number n = reader.readNumber();
+			return n.floatValue();
+		}
+	}
+
 	public static final class DoubleCodec extends AbstractJsonCodec<Double> {
 
 		public DoubleCodec(Type type, JsonCodecRegistry registry) {
@@ -1229,6 +1428,33 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			if (type == JsonEntryType.NULL) {
 				reader.skipNull();
 				return 0d;
+			}
+			Number n = reader.readNumber();
+			return n.doubleValue();
+		}
+	}
+
+	public static final class WrappedDoubleCodec extends AbstractJsonCodec<Double> {
+
+		public WrappedDoubleCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Double value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeFloat(value);
+		}
+
+		@Override
+		public Double read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			if (type == JsonEntryType.NULL) {
+				reader.skipNull();
+				return null;
 			}
 			Number n = reader.readNumber();
 			return n.doubleValue();

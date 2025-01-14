@@ -8,6 +8,8 @@ public interface JsonWriter {
 
 	JsonCapabilityVersion capabilityVersion();
 
+	void print();
+
 	void beginObject() throws IOException;
 
 	default void beginObject(String name) throws IOException {

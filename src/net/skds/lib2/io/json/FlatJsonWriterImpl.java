@@ -8,6 +8,9 @@ import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
 
+import lombok.CustomLog;
+
+@CustomLog
 public final class FlatJsonWriterImpl implements JsonWriter {
 
 	private final CharOutput output;
@@ -21,6 +24,11 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	@Override
 	public JsonCapabilityVersion capabilityVersion() {
 		return JsonCapabilityVersion.JSON;
+	}
+
+	@Override
+	public void print() {
+		log.debug(this.output);
 	}
 
 	@Override

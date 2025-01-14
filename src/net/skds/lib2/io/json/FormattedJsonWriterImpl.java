@@ -1,5 +1,6 @@
 package net.skds.lib2.io.json;
 
+import lombok.CustomLog;
 import lombok.Getter;
 import net.skds.lib2.io.CharOutput;
 import net.skds.lib2.io.EndOfOutputException;
@@ -9,6 +10,7 @@ import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
 
+@CustomLog
 public final class FormattedJsonWriterImpl implements JsonWriter {
 
 	@Getter
@@ -25,6 +27,11 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	@Override
 	public JsonCapabilityVersion capabilityVersion() {
 		return JsonCapabilityVersion.JSON;
+	}
+
+	@Override
+	public void print() {
+		log.debug(this.output);
 	}
 
 	@Override

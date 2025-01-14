@@ -22,6 +22,6 @@ public class ArrayDeserializeOnlyJsonCodec extends DeserializeOnlyJsonCodec<Obje
 	
 	@Override
 	public final Object read(JsonReader reader) throws IOException {
-		return ArrayCodec.read(reader, this.reader, this.array);
+		return ArrayCodec.read(this.array, reader, this.reader);
 	}
 }
