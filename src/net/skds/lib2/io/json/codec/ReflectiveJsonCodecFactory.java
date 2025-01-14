@@ -86,8 +86,11 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	private static void checkForInnerClass(Class<?> c) {
-		if (c.isMemberClass() && !Modifier.isStatic(c.getModifiers())) {
-			throw new IllegalArgumentException("Can not create ReflectiveCodec for non-static inner class \"" + c + "\"");
+		if (c.isMemberClass()) {
+			if (!Modifier.isStatic(c.getModifiers())) {
+				throw new IllegalArgumentException("Can not create ReflectiveCodec for non-static inner class \"" + c + "\"");
+			}
+			checkForInnerClass(c.getDeclaringClass());
 		}
 	}
 
@@ -241,7 +244,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 					writer.writeName(w.name);
 					w.write(writer, value);
 				} catch (IllegalAccessException | ArrayIndexOutOfBoundsException e) {
-					throw new RuntimeException("" + this.tClass + "#" + w.name, e);
+					throw new RuntimeException("Field write error: " + this.tClass.getName() + "#" + w.name, e);
 				}
 			}
 			writer.endObject();

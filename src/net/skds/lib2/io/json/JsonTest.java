@@ -3,10 +3,8 @@ package net.skds.lib2.io.json;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.skds.lib2.io.CodecRole;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
-import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
@@ -17,12 +15,7 @@ import net.skds.lib2.utils.logger.SKDSLogger;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JsonTest {
@@ -137,6 +130,9 @@ public class JsonTest {
 		System.out.println(JsonUtils.toJson(new Dg.Dg4()));
 		System.out.println(JsonUtils.toJson(new Dg.Dg5(new Dg.Dg1("inside"))));
 
+		//Type t = DgAdapter.class.getGenericInterfaces()[0];
+		//System.out.println(t);
+		//System.out.println(DgAdapter.class.getGenericSuperclass());
 		//JsonUtils.saveJson(new File("dg.json"), dgList);
 
 		System.out.println();
@@ -147,6 +143,7 @@ public class JsonTest {
 		System.out.println(JsonUtils.toJson(list));
 		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder1()));
 		System.out.println(JsonUtils.toJson(new HashMap<String, Boolean>()));
+
 		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder2()));
 		System.out.println(JsonUtils.toJson(new Obj2BoolMap<String>()));
 	}
@@ -368,7 +365,7 @@ public class JsonTest {
 		private Amogus amogus = null;
 	}
 
-	public record A1(int a, @TransientComponent char b, @TransientComponent boolean c) {
+	public record A1(@JsonAlias("hui") int a, @TransientComponent char b, @TransientComponent boolean c) {
 	}
 
 	@DefaultJsonCodec(AnusCodec.class)
@@ -397,7 +394,7 @@ public class JsonTest {
 		}
 	}
 
-	
+
 	private static class Obj2BoolMapHolder1 {
 		private Map<String, Boolean> map1 = new HashMap<>();
 	}

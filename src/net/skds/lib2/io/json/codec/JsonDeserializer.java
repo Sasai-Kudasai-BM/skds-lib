@@ -9,7 +9,7 @@ import net.skds.lib2.io.json.elements.JsonElement;
 import java.io.IOException;
 
 public interface JsonDeserializer<T> extends Deserializer<T, JsonReader>, JsonRegistryGetter {
-	
+
 	default T parse(CharInput charInput) {
 		try {
 			return read(getRegistry().createReader(charInput));

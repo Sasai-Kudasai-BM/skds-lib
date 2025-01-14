@@ -54,6 +54,29 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 	);
 
 	@Override
+	public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+		if (type instanceof Class<?> cl) {
+			if (Collection.class.isAssignableFrom(cl)) {
+				return new CollectionSerializer(registry);
+			}
+			if (Map.class.isAssignableFrom(cl)) {
+				return new MapSerializer(registry);
+			}
+		} else if (type instanceof ParameterizedType pt) {
+			if (pt.getRawType() instanceof Class<?> cl) {
+				// Non-canonical map
+				if (Map.class.isAssignableFrom(cl)) {
+					Type[] args = pt.getActualTypeArguments();
+					if (args.length != 2) {
+						return new MapSerializer(registry);
+					}
+				}
+			}
+		}
+		return createCodec(type, registry);
+	}
+
+	@Override
 	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
 		if (type instanceof Class<?> cl) {
 			{
@@ -97,17 +120,19 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 			if (Map.class.isAssignableFrom(cl)) {
 				return new MapCodec(cl, pt.getActualTypeArguments(), registry);
-			} else if (List.class.isAssignableFrom(cl)) {
-				return new ListCodec(cl, pt.getActualTypeArguments(), registry);
-			} else if (Set.class.isAssignableFrom(cl)) {
-				return new SetCodec(cl, pt.getActualTypeArguments(), registry);
+			} else if (Collection.class.isAssignableFrom(cl)) {
+				if (Set.class.isAssignableFrom(cl)) {
+					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, HashSet::new);
+				} else {
+					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, ArrayList::new);
+				}
 			}
 		}
 
 		JsonCodecFactory fac = map.get(type);
-		return fac == null ? 
-			ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) : 
-			fac.createCodec(type, registry);
+		return fac == null ?
+				ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry) :
+				fac.createCodec(type, registry);
 	}
 
 	private static boolean isFinal(Type type) {
@@ -145,7 +170,8 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static JsonCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, JsonCodecRegistry registry) {
+	public static JsonCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, JsonCodecRegistry
+			registry) {
 		DefaultJsonCodec defaultCodec = annotatedElement.getAnnotation(DefaultJsonCodec.class);
 		if (defaultCodec == null) return null;
 		Class<?> factoryClass = defaultCodec.value();
@@ -188,6 +214,88 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		return null;
 	}
 
+
+	@SuppressWarnings("ClassCanBeRecord")
+	public static class CollectionSerializer implements JsonSerializer<Collection<Object>> {
+
+		final JsonCodecRegistry registry;
+
+		public CollectionSerializer(JsonCodecRegistry registry) {
+			this.registry = registry;
+		}
+
+		@Override
+		public void write(Collection<Object> value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginArray();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (Object v : value) {
+				if (v == null) {
+					writer.writeNull();
+					continue;
+				}
+				registry.getSerializer((Type) v.getClass()).write(v, writer);
+			}
+			writer.endArray();
+		}
+
+		@Override
+		public JsonCodecRegistry getRegistry() {
+			return registry;
+		}
+	}
+
+	@SuppressWarnings("ClassCanBeRecord")
+	public static class MapSerializer implements JsonSerializer<Map<Object, Object>> {
+
+		final JsonCodecRegistry registry;
+
+		public MapSerializer(JsonCodecRegistry registry) {
+			this.registry = registry;
+		}
+
+		@Override
+		public void write(Map<Object, Object> value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginArray();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (var e : value.entrySet()) {
+				Object k = e.getKey();
+				if (k == null) {
+					writer.writeName("null");
+					continue;
+				}
+				String ks = registry.getSerializer((Type) k.getClass()).valueAsKeyString(k);
+				writer.writeName(ks);
+				Object v = e.getValue();
+				if (v == null) {
+					writer.writeNull();
+					continue;
+				}
+				registry.getSerializer((Type) v.getClass()).write(v, writer);
+			}
+			writer.endArray();
+		}
+
+		@Override
+		public JsonCodecRegistry getRegistry() {
+			return registry;
+		}
+	}
+
+
 	public static class MapCodec extends AbstractJsonCodec<Map<Object, Object>> {
 
 		//final Class<?> tClass;
@@ -201,6 +309,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		public MapCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
 			super(tClass, registry);
 			//this.tClass = tClass;
+			if (parameters.length != 2) {
+				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass.getName()
+						+ " " + Arrays.toString(parameters) + "\"");
+			}
 			this.keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
 			this.elementDeserializer = registry.getDeserializerIndirect(parameters[1]);
 			this.keySerializer = getUniversalSerializer(parameters[0], registry);
@@ -269,32 +381,32 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	public static class ListCodec extends AbstractJsonCodec<List<Object>> {
+	public static class CollectionCodec extends AbstractJsonCodec<Collection<Object>> {
 
-		final Supplier<List<Object>> constructor;
+		final Supplier<Collection<Object>> constructor;
 		final JsonDeserializer<Object> deserializer;
 		final JsonSerializer<Object> serializer;
 
 		@SuppressWarnings("unchecked")
-		public ListCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
+		public CollectionCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
 			super(tClass, registry);
 			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
 			this.serializer = getUniversalSerializer(parameters[0], registry);
-			Supplier<List<Object>> tmpC;
+			Supplier<Collection<Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
-				tmpC = ArrayList::new;
+				tmpC = defaultSupplier;
 			} else {
-				tmpC = (Supplier<List<Object>>) ReflectUtils.getConstructor(tClass);
+				tmpC = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
 				if (tmpC == null) {
-					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! ArrayList will be used instead");
-					tmpC = ArrayList::new;
+					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! Default supplier will be used instead");
+					tmpC = defaultSupplier;
 				}
 			}
 			this.constructor = tmpC;
 		}
 
 		@Override
-		public void write(List<Object> value, JsonWriter writer) throws IOException {
+		public void write(Collection<Object> value, JsonWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -311,7 +423,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		public List<Object> read(JsonReader reader) throws IOException {
+		public Collection<Object> read(JsonReader reader) throws IOException {
 			JsonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
@@ -320,7 +432,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				}
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
-					List<Object> list = constructor.get();
+					Collection<Object> list = constructor.get();
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
 						Object value = deserializer.read(reader);
 						list.add(value);
@@ -333,70 +445,6 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-
-	public static class SetCodec extends AbstractJsonCodec<Set<Object>> {
-
-		final Supplier<Set<Object>> constructor;
-		final JsonDeserializer<Object> deserializer;
-		final JsonSerializer<Object> serializer;
-
-		@SuppressWarnings("unchecked")
-		public SetCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry) {
-			super(tClass, registry);
-			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
-			this.serializer = getUniversalSerializer(parameters[0], registry);
-			Supplier<Set<Object>> tmpC;
-			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
-				tmpC = HashSet::new;
-			} else {
-				tmpC = (Supplier<Set<Object>>) ReflectUtils.getConstructor(tClass);
-				if (tmpC == null) {
-					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! HashSet will be used instead");
-					tmpC = HashSet::new;
-				}
-			}
-			this.constructor = tmpC;
-		}
-
-		@Override
-		public void write(Set<Object> value, JsonWriter writer) throws IOException {
-			if (value == null) {
-				writer.writeNull();
-				return;
-			}
-			writer.beginArray();
-			int size = value.size();
-			if (size > 1) {
-				writer.lineBreakEnable(true);
-			}
-			for (Object v : value) {
-				serializer.write(v, writer);
-			}
-			writer.endArray();
-		}
-
-		@Override
-		public Set<Object> read(JsonReader reader) throws IOException {
-			JsonEntryType type = reader.nextEntryType();
-			switch (type) {
-				case NULL -> {
-					reader.skipNull();
-					return null;
-				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
-					Set<Object> list = constructor.get();
-					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						Object value = deserializer.read(reader);
-						list.add(value);
-					}
-					reader.endArray();
-					return list;
-				}
-				default -> throw new JsonReadException("Unexpected token " + type);
-			}
-		}
-	}
 
 	public static class ArrayCodec extends AbstractJsonCodec<Object> {
 
@@ -434,7 +482,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				writer.lineBreakEnable(true);
 			}
 			for (int i = 0; i < size; i++) {
-				T v = (T)Array.get(value, i);
+				T v = (T) Array.get(value, i);
 				serializer.write(v, writer);
 			}
 			writer.endArray();

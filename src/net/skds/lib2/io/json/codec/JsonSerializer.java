@@ -7,7 +7,7 @@ import net.skds.lib2.io.json.JsonWriter;
 import java.io.IOException;
 
 public interface JsonSerializer<T> extends Serializer<T, JsonWriter>, JsonRegistryGetter {
-	
+
 	default String valueAsKeyString(T val) {
 		return String.valueOf(val);
 	}
