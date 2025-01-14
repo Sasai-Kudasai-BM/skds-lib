@@ -197,8 +197,8 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 				try {
 					fc.read(reader, o);
-				} catch (IllegalAccessException | ArrayIndexOutOfBoundsException e) {
-					throw new RuntimeException("" + this.tClass + "#" + fc.name, e);
+				} catch (Exception e) {
+					throw new RuntimeException("Field read error: " + this.tClass + ":" + fc.name, e);
 				}
 			}
 			reader.endObject();
@@ -243,8 +243,8 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				try {
 					writer.writeName(w.name);
 					w.write(writer, value);
-				} catch (IllegalAccessException | ArrayIndexOutOfBoundsException e) {
-					throw new RuntimeException("Field write error: " + this.tClass.getName() + "#" + w.name, e);
+				} catch (Exception e) {
+					throw new RuntimeException("Field write error: " + this.tClass.getName() + ":" + w.name, e);
 				}
 			}
 			writer.endObject();
@@ -680,18 +680,16 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			try {
 				serializer.write(value, writer);
 			} catch (Exception e) {
-				System.err.println("exception while write field " + this.name + " " + this.field.getType());
-				throw e;
+				throw new RuntimeException("Field while error: " + this.field.getDeclaringClass().getName() + ":" + this.field.getName(), e);
 			}
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
+		void read(JsonReader reader, Object o) {
 			try {
 				field.set(o, deserializer.read(reader));
 			} catch (Exception e) {
-				System.err.println("exception while read field " + this.name + " " + this.field.getType());
-				throw e;
+				throw new RuntimeException("Field read error: " + this.field.getDeclaringClass().getName() + ":" + this.field.getName(), e);
 			}
 		}
 	}
