@@ -370,8 +370,16 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	@SuppressWarnings("WrapperTypeMayBePrimitive")
+	@SuppressWarnings({ "WrapperTypeMayBePrimitive", "unchecked" })
 	private static Predicate<Object> getSkipPredicate(SkipSerialization ss, Class<?> type) {
+		Class<? extends Predicate<?>> p = ss.predicate();
+		if (p != SkipSerialization.BLANK_PREDICATE) {
+			Supplier<? extends Predicate<?>> constructor = ReflectUtils.getConstructor(p);
+			if (constructor == null) {
+				throw new NullPointerException("constructor of " + p + " is invalid");
+			}
+			return (Predicate<Object>)constructor.get();
+		}
 		Predicate<Object> predicate = o -> false;
 		if (type.isPrimitive()) {
 			if (type == byte.class) {
@@ -442,6 +450,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			if (ss.skipNull()) {
 				predicate = ((Predicate<Object>) Objects::isNull).or(predicate);
 			}
+
 		}
 		return predicate;
 	}
