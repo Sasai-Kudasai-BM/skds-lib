@@ -1,6 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
+import net.skds.lib2.io.json.FormattedJsonWriterImpl;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -266,18 +267,19 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
+			writer.beginObject();
 			int size = value.size();
 			if (size > 1) {
 				writer.lineBreakEnable(true);
 			}
 			for (var e : value.entrySet()) {
+				String ks;
 				Object k = e.getKey();
 				if (k == null) {
-					writer.writeName("null");
-					continue;
+					ks = "null";
+				} else {
+					ks = registry.getSerializer((Type) k.getClass()).valueAsKeyString(k);
 				}
-				String ks = registry.getSerializer((Type) k.getClass()).valueAsKeyString(k);
 				writer.writeName(ks);
 				Object v = e.getValue();
 				if (v == null) {
@@ -286,7 +288,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				}
 				registry.getSerializer((Type) v.getClass()).write(v, writer);
 			}
-			writer.endArray();
+			writer.endObject();
 		}
 
 		@Override

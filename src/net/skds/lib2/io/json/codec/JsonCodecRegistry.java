@@ -26,7 +26,7 @@ public class JsonCodecRegistry {
 		this.options = options.clone();
 		JsonCodecFactory combined;
 		if (extraFactory != null) {
-			combined = extraFactory.orElse(builtin);
+			combined = builtin.orElse(extraFactory);
 		} else {
 			combined = builtin;
 		}

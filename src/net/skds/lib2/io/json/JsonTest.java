@@ -9,6 +9,7 @@ import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
+import net.skds.lib2.io.json.elements.JsonObject;
 import net.skds.lib2.mat.Vec3D;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
@@ -16,6 +17,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.*;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 
 @SuppressWarnings("unused")
 public class JsonTest {
@@ -146,6 +150,11 @@ public class JsonTest {
 
 		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder2()));
 		System.out.println(JsonUtils.toJson(new Obj2BoolMap<String>()));
+
+
+		JsonObject jsonNullTest = new JsonObject();
+		jsonNullTest.putNull("count");
+		System.out.println(JsonUtils.toJson(jsonNullTest));
 	}
 
 	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e");
@@ -397,10 +406,17 @@ public class JsonTest {
 
 	private static class Obj2BoolMapHolder1 {
 		private Map<String, Boolean> map1 = new HashMap<>();
+		public Obj2BoolMapHolder1() {
+			map1.put("a", true);
+		}
 	}
 
 	private static class Obj2BoolMapHolder2 {
 		private Obj2BoolMap<String> map2 = new Obj2BoolMap<>();
+
+		public Obj2BoolMapHolder2() {
+			map2.put("b", false);
+		}
 	}
 
 	private static class Obj2BoolMap<T> extends HashMap<T, Boolean> {

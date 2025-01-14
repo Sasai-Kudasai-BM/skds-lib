@@ -84,7 +84,6 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		@Override
 		public void write(JsonElement value, JsonWriter writer) throws IOException {
 			switch (value.type()) {
-
 				case BOOLEAN -> booleanCodec.write((JsonBoolean) value, writer);
 				case OBJECT -> objectCodec.write((JsonObject) value, writer);
 				case ARRAY -> arrayCodec.write((JsonArray) value, writer);
