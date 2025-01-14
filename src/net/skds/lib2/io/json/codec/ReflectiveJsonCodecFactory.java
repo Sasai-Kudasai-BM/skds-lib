@@ -4,6 +4,7 @@ import lombok.CustomLog;
 import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
+import net.skds.lib2.io.json.annotation.SkipSerialization;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.Numbers;
@@ -11,11 +12,9 @@ import net.skds.lib2.utils.function.MultiSupplier;
 
 import java.io.IOException;
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @CustomLog
@@ -239,13 +238,20 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			if (writers.length > 1) {
 				writer.lineBreakEnable(true);
 			}
+			boolean empty = true;
 			for (FieldCodec w : writers) {
 				try {
-					writer.writeName(w.name);
-					w.write(writer, value);
+					if (!w.checkSkip(value)) {
+						writer.writeName(w.name);
+						w.write(writer, value);
+						empty = false;
+					}
 				} catch (Exception e) {
 					throw new RuntimeException("Field write error: " + this.tClass.getName() + ":" + w.name, e);
 				}
+			}
+			if (empty) {
+				writer.lineBreakEnable(false);
 			}
 			writer.endObject();
 		}
@@ -364,6 +370,82 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 	}
 
+	@SuppressWarnings("WrapperTypeMayBePrimitive")
+	private static Predicate<Object> getSkipPredicate(SkipSerialization ss, Class<?> type) {
+		Predicate<Object> predicate = o -> false;
+		if (type.isPrimitive()) {
+			if (type == byte.class) {
+				byte value = ss.defaultByte();
+				predicate = o -> o.equals(value);
+			} else if (type == int.class) {
+				int value = ss.defaultInt();
+				predicate = o -> o.equals(value);
+			} else if (type == float.class) {
+				float value = ss.defaultFloat();
+				predicate = o -> o.equals(value);
+			} else if (type == long.class) {
+				long value = ss.defaultLong();
+				predicate = o -> o.equals(value);
+			} else if (type == double.class) {
+				double value = ss.defaultDouble();
+				predicate = o -> o.equals(value);
+			} else if (type == boolean.class) {
+				boolean value = ss.defaultBoolean();
+				predicate = o -> o.equals(value);
+			} else if (type == short.class) {
+				short value = ss.defaultShort();
+				predicate = o -> o.equals(value);
+			} else if (type == char.class) {
+				char value = ss.defaultChar();
+				predicate = o -> o.equals(value);
+			}
+		} else {
+			if (Number.class.isAssignableFrom(type)) {
+				if (type == Byte.class) {
+					Byte value = ss.defaultByte();
+					predicate = value::equals;
+				} else if (type == Integer.class) {
+					Integer value = ss.defaultInt();
+					predicate = value::equals;
+				} else if (type == Float.class) {
+					Float value = ss.defaultFloat();
+					predicate = value::equals;
+				} else if (type == Long.class) {
+					Long value = ss.defaultLong();
+					predicate = value::equals;
+				} else if (type == Double.class) {
+					Double value = ss.defaultDouble();
+					predicate = value::equals;
+				} else if (type == Short.class) {
+					Short value = ss.defaultShort();
+					predicate = value::equals;
+				}
+			} else if (type == Boolean.class) {
+				Boolean value = ss.defaultBoolean();
+				predicate = value::equals;
+			} else if (type == Character.class) {
+				Character value = ss.defaultChar();
+				predicate = value::equals;
+			} else if (CharSequence.class.isAssignableFrom(type)) {
+				String value = ss.defaultString();
+				predicate = value::equals;
+			}
+			if (ss.skipZeroSize()) {
+				if (type.isArray()) {
+					predicate = o -> o != null && Array.getLength(o) == 0;
+				} else if (Collection.class.isAssignableFrom(type)) {
+					predicate = o -> o != null && ((Collection<?>) o).isEmpty();
+				} else if (Map.class.isAssignableFrom(type)) {
+					predicate = o -> o != null && ((Map<?, ?>) o).isEmpty();
+				}
+			}
+			if (ss.skipNull()) {
+				predicate = ((Predicate<Object>) Objects::isNull).or(predicate);
+			}
+		}
+		return predicate;
+	}
+
 	public static class RecordSerializer implements JsonSerializer<Object> {
 
 		final Class<?> tClass;
@@ -372,12 +454,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		final int nonNullSerializers;
 		final String[] names;
 		final Function<Object, Object>[] accessors;
+		final Predicate<Object>[] skipPredicates;
 
 		@SuppressWarnings("unchecked")
 		public RecordSerializer(Class<?> tClass, JsonCodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			var rcs = tClass.getRecordComponents();
+			Predicate<Object>[] skips = new Predicate[rcs.length];
 			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
 			String[] names = new String[rcs.length];
 			Function<Object, Object>[] accessors = new Function[rcs.length];
@@ -393,6 +477,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 					ser[i] = js;
 				} else {
 					ser[i] = BuiltinCodecFactory.getUniversalSerializer(rc.getGenericType(), registry);
+				}
+				SkipSerialization ss = rc.getAnnotation(SkipSerialization.class);
+				if (ss != null) {
+					skips[i] = getSkipPredicate(ss, rc.getType());
 				}
 				String name = rc.getName();
 				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
@@ -411,6 +499,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				names[i] = name;
 			}
 
+			this.skipPredicates = skips;
 			this.nonNullSerializers = c;
 			this.serializers = (JsonSerializer<Object>[]) ser;
 			this.names = names;
@@ -431,15 +520,25 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				if (nonNullSerializers > 1) {
 					writer.lineBreakEnable(true);
 				}
+				boolean empty = true;
 				for (int i = 0; i < serializers.length; i++) {
 					JsonSerializer<Object> w = serializers[i];
 					if (w == null) continue;
+					Predicate<Object> predicate = skipPredicates[i];
 					try {
+						Object val = accessors[i].apply(value);
+						if (predicate != null && predicate.test(val)) {
+							continue;
+						}
 						writer.writeName(names[i]);
-						w.write(accessors[i].apply(value), writer);
+						w.write(val, writer);
+						empty = false;
 					} catch (Exception e) {
 						throw new RuntimeException("Exception while write enum component \"" + tClass.getName() + ":" + names[i] + "\"", e);
 					}
+				}
+				if (empty) {
+					writer.lineBreakEnable(false);
 				}
 			}
 			writer.endObject();
@@ -499,6 +598,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	private static abstract class FieldCodec {
 		protected final Field field;
 		protected final String name;
+		protected final SkipSerialization skipSerialization;
 
 		private FieldCodec(Field field) {
 			this.field = field;
@@ -511,11 +611,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				n = field.getName();
 			}
 			this.name = n;
+			this.skipSerialization = field.getAnnotation(SkipSerialization.class);
 		}
 
 		abstract void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException;
 
 		abstract void read(JsonReader reader, Object o) throws IOException, IllegalAccessException;
+
+		abstract boolean checkSkip(Object o) throws IllegalAccessException;
 	}
 
 	private static class ByteFieldCodec extends FieldCodec {
@@ -532,6 +635,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		@Override
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setByte(o, reader.readNumber().byteValue());
+		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			byte value = field.getByte(o);
+			return value == skipSerialization.defaultByte();
 		}
 	}
 
@@ -550,6 +660,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setShort(o, reader.readNumber().shortValue());
 		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			short value = field.getShort(o);
+			return value == skipSerialization.defaultShort();
+		}
 	}
 
 	private static class IntFieldCodec extends FieldCodec {
@@ -566,6 +683,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		@Override
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setInt(o, reader.readNumber().intValue());
+		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			int value = field.getInt(o);
+			return value == skipSerialization.defaultInt();
 		}
 	}
 
@@ -584,6 +708,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setLong(o, reader.readNumber().longValue());
 		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			long value = field.getLong(o);
+			return value == skipSerialization.defaultLong();
+		}
 	}
 
 	private static class FloatFieldCodec extends FieldCodec {
@@ -601,6 +732,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setFloat(o, reader.readNumber().floatValue());
 		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			float value = field.getFloat(o);
+			return value == skipSerialization.defaultFloat();
+		}
 	}
 
 	private static class DoubleFieldCodec extends FieldCodec {
@@ -617,6 +755,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		@Override
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setDouble(o, reader.readNumber().doubleValue());
+		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			double value = field.getDouble(o);
+			return value == skipSerialization.defaultDouble();
 		}
 	}
 
@@ -637,6 +782,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setChar(o, deserializer.read(reader));
 		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			char value = field.getChar(o);
+			return value == skipSerialization.defaultChar();
+		}
 	}
 
 	private static class BooleanFieldCodec extends FieldCodec {
@@ -654,12 +806,20 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setBoolean(o, reader.readBoolean());
 		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			boolean value = field.getBoolean(o);
+			return value == skipSerialization.defaultBoolean();
+		}
 	}
 
 	private static class ObjFieldCodec extends FieldCodec {
 
 		final JsonSerializer<Object> serializer;
 		final JsonDeserializer<Object> deserializer;
+		final Predicate<Object> skipPredicate;
 
 		private ObjFieldCodec(Field field, JsonCodecRegistry registry) {
 			super(field);
@@ -672,10 +832,11 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				this.serializer = BuiltinCodecFactory.getUniversalSerializer(t, registry);
 				this.deserializer = registry.getDeserializerIndirect(t);
 			}
+			this.skipPredicate = this.skipSerialization == null ? o -> false : getSkipPredicate(this.skipSerialization, field.getType());
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
+		void write(JsonWriter writer, Object o) throws IllegalAccessException {
 			Object value = field.get(o);
 			try {
 				serializer.write(value, writer);
@@ -691,6 +852,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			} catch (Exception e) {
 				throw new RuntimeException("Field read error: " + this.field.getDeclaringClass().getName() + ":" + this.field.getName(), e);
 			}
+		}
+
+		@Override
+		boolean checkSkip(Object o) throws IllegalAccessException {
+			if (skipSerialization == null) return false;
+			Object value = field.get(o);
+			return skipPredicate.test(value);
 		}
 	}
 }

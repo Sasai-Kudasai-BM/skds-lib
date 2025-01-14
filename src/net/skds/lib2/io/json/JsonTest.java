@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
+import net.skds.lib2.io.json.annotation.SkipSerialization;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.*;
-import net.skds.lib2.io.json.codec.BuiltinCodecFactory.ArrayCodec;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.elements.JsonObject;
@@ -18,9 +18,6 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.*;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 
 @SuppressWarnings("unused")
 public class JsonTest {
@@ -156,6 +153,8 @@ public class JsonTest {
 		JsonObject jsonNullTest = new JsonObject();
 		jsonNullTest.putNull("count");
 		System.out.println(JsonUtils.toJson(jsonNullTest));
+
+		System.out.println(Integer.valueOf(1).equals(1));
 	}
 
 	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e");
@@ -184,6 +183,7 @@ public class JsonTest {
 		transient int arab = 0;
 
 		private static class Yup1 extends Yup {
+			@SkipSerialization(defaultInt = 3)
 			int sex = 1;
 
 			@Override
@@ -407,6 +407,7 @@ public class JsonTest {
 
 	private static class Obj2BoolMapHolder1 {
 		private Map<String, Boolean> map1 = new HashMap<>();
+
 		public Obj2BoolMapHolder1() {
 			map1.put("a", true);
 		}
