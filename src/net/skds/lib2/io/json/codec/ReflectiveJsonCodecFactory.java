@@ -258,6 +258,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	public static class RecordDeserializer implements JsonDeserializer<Object> {
 
+		final Class<?> tClass;
 		final JsonCodecRegistry registry;
 		final MultiSupplier<Object> constructor;
 		final JsonDeserializer<Object>[] deserializers;
@@ -267,6 +268,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings("unchecked")
 		public RecordDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
+			this.tClass = tClass;
 			this.registry = registry;
 			MultiSupplier<Object> tmpC;
 			var rcs = tClass.getRecordComponents();
@@ -327,8 +329,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				try {
 					args[i] = deserializers[i].read(reader);
 				} catch (Exception e) {
-					System.err.println("exception while read field " + name + " " + this.components[i]);
-					throw e;
+					throw new RuntimeException("Exception while read enum component \"" + tClass.getName() + ":" + names[i] + "\"", e);
 				}
 
 			}
@@ -365,6 +366,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	public static class RecordSerializer implements JsonSerializer<Object> {
 
+		final Class<?> tClass;
 		final JsonCodecRegistry registry;
 		final JsonSerializer<Object>[] serializers;
 		final int nonNullSerializers;
@@ -373,6 +375,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 		@SuppressWarnings("unchecked")
 		public RecordSerializer(Class<?> tClass, JsonCodecRegistry registry) {
+			this.tClass = tClass;
 			this.registry = registry;
 			var rcs = tClass.getRecordComponents();
 			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
@@ -435,8 +438,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 						writer.writeName(names[i]);
 						w.write(accessors[i].apply(value), writer);
 					} catch (Exception e) {
-						System.err.println("exception while write field " + names[i]);
-						throw e;
+						throw new RuntimeException("Exception while write enum component \"" + tClass.getName() + ":" + names[i] + "\"", e);
 					}
 				}
 			}
