@@ -7,6 +7,7 @@ import java.util.Random;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.JsonSerializer;
@@ -14,6 +15,7 @@ import net.skds.lib2.io.json.exception.JsonReadException;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")
+@DefaultJsonCodec(Vec3.JCodec.class)
 public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 
 	Vec3 XN = Vec3D.XN;

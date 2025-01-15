@@ -103,7 +103,7 @@ public class JsonUtils {
 			}
 
 		});
-		fancyRegistry.getCodec(type);
+		//fancyRegistry.getCodec(type);
 		rebuild();
 	}
 
@@ -157,7 +157,7 @@ public class JsonUtils {
 			}
 
 		});
-		fancyRegistry.getCodec(type);
+		//fancyRegistry.getCodec(type);
 		rebuild();
 	}
 

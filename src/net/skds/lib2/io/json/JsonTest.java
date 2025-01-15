@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import net.skds.lib2.io.json.JsonTest.A1;
+import net.skds.lib2.io.json.JsonTest.DgAdapter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.SkipSerialization;
@@ -114,13 +116,34 @@ public class JsonTest {
 		);
 
 		JsonUtils.addTypedAdapter(Yup.class, yupMap);
+		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup0Error.class);
+		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup0.class);
+		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup1.class);
+		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup2.class);
+		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup3.class);
+
+		Yup.Yup0 yup0 = new Yup.Yup0();
+		String yupRead = JsonUtils.toJson(yup0);
+		System.out.println(yupRead);
+		yup0 = JsonUtils.parseJson(yupRead, yup0.getClass());
+		System.out.println(yup0);
+
+		Yup.Yup0Error yup0Error = new Yup.Yup0Error();
+		String yup0ErrorRead = JsonUtils.toJson(yup0Error);
+		System.out.println(yup0ErrorRead);
+		yup0Error = JsonUtils.parseJson(yup0ErrorRead, yup0Error.getClass());
+		System.out.println(yup0Error);
 
 		Pizdun p = new Pizdun();
+		p.yup.add(new Yup.Yup0());
+		p.yup.add(new Yup.Yup0Error());
 		p.yup.add(new Yup.Yup1());
 		p.yup.add(new Yup.Yup1());
 		p.yup.add(new Yup.Yup2());
 		p.yup.add(new Yup.Yup3());
-		System.out.println(JsonUtils.toJson(p));
+		String yupJson = JsonUtils.toJson(p);
+		System.out.println(yupJson);
+		System.out.println(JsonUtils.parseJson(yupJson, Pizdun.class));
 
 		//JsonUtils.saveJson(new File("yup.json"), p);
 
@@ -136,6 +159,7 @@ public class JsonTest {
 
 		DgList dgList = new DgList(Arrays.asList(new Dg.Dg1(), new Dg.Dg2(), new Dg.Dg3()));
 
+		System.out.println(JsonUtils.toJson(new Dg.Dg0()));
 		System.out.println(JsonUtils.toJson(dgList));
 		System.out.println(JsonUtils.toJson(new Dg.Dg4()));
 		System.out.println(JsonUtils.toJson(new Dg.Dg5(new Dg.Dg1("inside"))));
@@ -169,7 +193,9 @@ public class JsonTest {
 		System.out.println(JsonUtils.parseJson(vecTest, TestVec3.class));
 	}
 
-	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e");
+	static final YupCT y0 = new YupCT(Yup.Yup0.class, "e0");
+	static final YupCT y0Error = new YupCT(Yup.Yup0.class, "e0Error");
+	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e1");
 	static final YupCT y2 = new YupCT(Yup.Yup2.class, "e2");
 	static final YupCT y3 = new YupCT(Yup.Yup3.class, "e3");
 
@@ -194,6 +220,61 @@ public class JsonTest {
 	private static abstract class Yup implements TypedConfig {
 		transient int arab = 0;
 
+		//@DefaultJsonCodec(YupJsonAdapter0.class)
+		@ToString
+		private static class Yup0<T> extends Yup {
+
+			Yup ield_0 = new Yup.Yup1();
+			
+			@Override
+			public ConfigType<?> getConfigType() {
+				return y0;
+			}
+		}
+
+		//@DefaultJsonCodec(YupJsonAdapter0Error.class)
+		@ToString
+		private static class Yup0Error extends Yup {
+
+			Yup errorField_0 = new Yup.Yup1();
+			
+			@Override
+			public ConfigType<?> getConfigType() {
+				return y0Error;
+			}
+		}
+
+		private static class YupJsonAdapter0 extends JsonReflectiveBuilderCodec<Yup> {
+
+			public YupJsonAdapter0(Type type, JsonCodecRegistry registry) {
+				super(type, YupErrorBuilder.class, registry);
+			}
+		
+			private static class YupErrorBuilder implements JsonDeserializeBuilder<Yup> {
+
+				@Override
+				public Yup build() {
+					return new Yup0();
+				}
+			}
+		}
+
+		private static class YupJsonAdapter0Error extends JsonReflectiveBuilderCodec<Yup> {
+
+			public YupJsonAdapter0Error(Type type, JsonCodecRegistry registry) {
+				super(type, YupErrorBuilder.class, registry);
+			}
+		
+			private static class YupErrorBuilder implements JsonDeserializeBuilder<Yup> {
+
+				@Override
+				public Yup build() {
+					return new Yup0Error();
+				}
+			}
+		}
+
+		@ToString
 		private static class Yup1 extends Yup {
 			@SkipSerialization(defaultInt = 3)
 			int sex = 1;
@@ -223,6 +304,7 @@ public class JsonTest {
 	}
 
 	@NoArgsConstructor
+	@ToString
 	private static class Pizdun extends PizdunAss {
 		private String s = "s";
 		private transient String s2 = "s2";
@@ -235,10 +317,12 @@ public class JsonTest {
 		private transient String s2PizdunAss = "b";
 	}
 
+	static final DgAdapter<?> dg0 = new DgAdapter<>(Dg.Dg0.TYPE, Dg.Dg0.class);
 	static final DgAdapter<?> dg1 = new DgAdapter<>(Dg.Dg1.TYPE, Dg.Dg1.class);
 	static final DgAdapter<?> dg2 = new DgAdapter<>(Dg.Dg2.TYPE, Dg.Dg2.class);
 	static final DgAdapter<?> dg3 = new DgAdapter<>(Dg.Dg3.TYPE, Dg.Dg3.class);
 	static final Map<String, DgAdapter<?>> dgMap = Map.of(
+			dg0.keyName, dg0,
 			dg1.keyName, dg1,
 			dg2.keyName, dg2,
 			dg3.keyName, dg3
@@ -265,6 +349,21 @@ public class JsonTest {
 		}
 
 		protected abstract String keyName();
+
+		private static class Dg0 extends Dg<Integer> {
+			static final String TYPE = "dg0";
+			
+			@SuppressWarnings("rawtypes")
+			private final Dg dgError = new Dg.Dg1();
+
+			public Dg0() {
+				super("error");
+			}
+			@Override
+			protected String keyName() {
+				return TYPE;
+			}
+		}
 
 		private static class Dg1 extends Dg<Integer> {
 			static final String TYPE = "dg1";
