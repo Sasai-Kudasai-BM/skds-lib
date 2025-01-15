@@ -222,7 +222,7 @@ public class JsonTest {
 
 		//@DefaultJsonCodec(YupJsonAdapter0.class)
 		@ToString
-		private static class Yup0<T> extends Yup {
+		private static class Yup0 extends Yup {
 
 			Yup ield_0 = new Yup.Yup1();
 			
@@ -232,9 +232,9 @@ public class JsonTest {
 			}
 		}
 
-		//@DefaultJsonCodec(YupJsonAdapter0Error.class)
+		@DefaultJsonCodec(YupJsonAdapter0Error.class)
 		@ToString
-		private static class Yup0Error extends Yup {
+		private static class Yup0Error<T> extends Yup {
 
 			Yup errorField_0 = new Yup.Yup1();
 			
