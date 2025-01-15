@@ -225,6 +225,7 @@ public class JsonTest {
 		private static class Yup0 extends Yup {
 
 			Yup ield_0 = new Yup.Yup1();
+			Yup ield_0Crash = new Yup.Yup0Error();
 			
 			@Override
 			public ConfigType<?> getConfigType() {
@@ -234,7 +235,7 @@ public class JsonTest {
 
 		@DefaultJsonCodec(YupJsonAdapter0Error.class)
 		@ToString
-		private static class Yup0Error<T> extends Yup {
+		private static class Yup0Error extends Yup {
 
 			Yup errorField_0 = new Yup.Yup1();
 			
@@ -252,6 +253,9 @@ public class JsonTest {
 		
 			private static class YupErrorBuilder implements JsonDeserializeBuilder<Yup> {
 
+				Yup ield_0 = new Yup.Yup1();
+				Yup errorField_0 = new Yup.Yup1();
+
 				@Override
 				public Yup build() {
 					return new Yup0();
@@ -266,6 +270,9 @@ public class JsonTest {
 			}
 		
 			private static class YupErrorBuilder implements JsonDeserializeBuilder<Yup> {
+
+				Yup ield_0 = new Yup.Yup1();
+				Yup errorField_0 = new Yup.Yup1();
 
 				@Override
 				public Yup build() {
