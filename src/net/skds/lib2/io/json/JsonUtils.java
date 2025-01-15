@@ -103,11 +103,14 @@ public class JsonUtils {
 			}
 
 		});
+		fancyRegistry.getCodec(type);
 		rebuild();
 	}
 
 	public static <AT, CT extends AT> void addTypedAdapter(Class<AT> type, Map<String, ? extends ConfigType<?>> typeMap) {
 		userMapCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
+
+			private boolean init;
 
 			@Override
 			@SuppressWarnings("unchecked")
@@ -154,6 +157,7 @@ public class JsonUtils {
 			}
 
 		});
+		fancyRegistry.getCodec(type);
 		rebuild();
 	}
 

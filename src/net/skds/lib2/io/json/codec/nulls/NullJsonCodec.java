@@ -19,12 +19,12 @@ public class NullJsonCodec extends AbstractJsonCodec<Object> {
 	}
 
 	@Override
-	public final void write(Object value, JsonWriter writer) throws IOException {
+	public void write(Object value, JsonWriter writer) throws IOException {
 		writer.writeNull();
 	}
 
 	@Override
-	public final Object read(JsonReader reader) throws IOException {
+	public Object read(JsonReader reader) throws IOException {
 		reader.skipNull();
 		return null;
 	}
