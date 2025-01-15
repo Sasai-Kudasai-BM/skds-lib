@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.skds.lib2.io.json.JsonTest.A1;
-import net.skds.lib2.io.json.JsonTest.DgAdapter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.SkipSerialization;
@@ -14,14 +12,7 @@ import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.elements.JsonObject;
-import net.skds.lib2.mat.Vec2;
-import net.skds.lib2.mat.Vec2D;
-import net.skds.lib2.mat.Vec2F;
-import net.skds.lib2.mat.Vec2I;
-import net.skds.lib2.mat.Vec3;
-import net.skds.lib2.mat.Vec3D;
-import net.skds.lib2.mat.Vec3F;
-import net.skds.lib2.mat.Vec3I;
+import net.skds.lib2.mat.*;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import java.io.IOException;
@@ -194,7 +185,7 @@ public class JsonTest {
 	}
 
 	static final YupCT y0 = new YupCT(Yup.Yup0.class, "e0");
-	static final YupCT y0Error = new YupCT(Yup.Yup0.class, "e0Error");
+	static final YupCT y0Error = new YupCT(Yup.Yup0Error.class, "e0Error");
 	static final YupCT y1 = new YupCT(Yup.Yup1.class, "e1");
 	static final YupCT y2 = new YupCT(Yup.Yup2.class, "e2");
 	static final YupCT y3 = new YupCT(Yup.Yup3.class, "e3");
@@ -226,31 +217,32 @@ public class JsonTest {
 
 			Yup ield_0 = new Yup.Yup1();
 			Yup ield_0Crash = new Yup.Yup0Error();
-			
+
 			@Override
 			public ConfigType<?> getConfigType() {
 				return y0;
 			}
 		}
 
-		@DefaultJsonCodec(YupJsonAdapter0Error.class)
+		//@DefaultJsonCodec(YupJsonAdapter0Error.class)
 		@ToString
 		private static class Yup0Error extends Yup {
 
 			Yup errorField_0 = new Yup.Yup1();
-			
+
 			@Override
 			public ConfigType<?> getConfigType() {
 				return y0Error;
 			}
 		}
 
+		/*
 		private static class YupJsonAdapter0 extends JsonReflectiveBuilderCodec<Yup> {
 
 			public YupJsonAdapter0(Type type, JsonCodecRegistry registry) {
 				super(type, YupErrorBuilder.class, registry);
 			}
-		
+
 			private static class YupErrorBuilder implements JsonDeserializeBuilder<Yup> {
 
 				Yup ield_0 = new Yup.Yup1();
@@ -263,12 +255,14 @@ public class JsonTest {
 			}
 		}
 
+
+
 		private static class YupJsonAdapter0Error extends JsonReflectiveBuilderCodec<Yup> {
 
 			public YupJsonAdapter0Error(Type type, JsonCodecRegistry registry) {
 				super(type, YupErrorBuilder.class, registry);
 			}
-		
+
 			private static class YupErrorBuilder implements JsonDeserializeBuilder<Yup> {
 
 				Yup ield_0 = new Yup.Yup1();
@@ -280,6 +274,7 @@ public class JsonTest {
 				}
 			}
 		}
+		 */
 
 		@ToString
 		private static class Yup1 extends Yup {
@@ -359,13 +354,14 @@ public class JsonTest {
 
 		private static class Dg0 extends Dg<Integer> {
 			static final String TYPE = "dg0";
-			
+
 			@SuppressWarnings("rawtypes")
 			private final Dg dgError = new Dg.Dg1();
 
 			public Dg0() {
 				super("error");
 			}
+
 			@Override
 			protected String keyName() {
 				return TYPE;

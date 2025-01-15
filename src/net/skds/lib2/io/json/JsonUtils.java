@@ -145,15 +145,18 @@ public class JsonUtils {
 				String typeName = reader.readName();
 				ConfigType<CT> type = (ConfigType<CT>) typeMap.get(typeName);
 				if (type == null) {
-					throw new NullPointerException("type is null \"" + typeName + "\" " + typeMap.keySet());
+					reader.skipValue();
+					reader.endObject();
+				} else {
+					JsonDeserializer<CT> deserializer = this.registry.getDeserializer(type.getTypeClass());
+					CT value = deserializer.read(reader);
+					reader.endObject();
+					if (value instanceof JsonPostDeserializeCall jpi) {
+						jpi.postDeserializedJson();
+					}
+					return value;
 				}
-				JsonDeserializer<CT> deserializer = this.registry.getDeserializer(type.getTypeClass());
-				CT value = deserializer.read(reader);
-				reader.endObject();
-				if (value instanceof JsonPostDeserializeCall jpi) {
-					jpi.postDeserializedJson();
-				}
-				return value;
+				return null;
 			}
 
 		});

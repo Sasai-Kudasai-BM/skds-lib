@@ -32,10 +32,15 @@ public @interface SkipSerialization {
 
 	double defaultDouble() default 0;
 
-	static Class<? extends Predicate<?>> BLANK_PREDICATE = BlankPredicate.class;
+	Class<? extends Predicate<?>> BLANK_PREDICATE = BlankPredicate.class;
+
 	Class<? extends Predicate<?>> predicate() default BlankPredicate.class;
 
-	static class BlankPredicate implements Predicate<Object> {
+	final class BlankPredicate implements Predicate<Object> {
+		private BlankPredicate() {
+			throw new UnsupportedOperationException();
+		}
+
 		@Override
 		public boolean test(Object t) {
 			return false;
