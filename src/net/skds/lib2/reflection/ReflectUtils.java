@@ -123,7 +123,7 @@ public class ReflectUtils {
 
 	@FunctionalInterface
 	public interface FillingFunction {
-		public void accept(Field field, Consumer<Object> consumer);
+		void accept(Field field, Consumer<Object> consumer);
 	}
 
 	public static final Field accessField(Class<?> cl, String key) {

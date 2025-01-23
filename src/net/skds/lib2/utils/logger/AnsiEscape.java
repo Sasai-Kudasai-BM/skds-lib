@@ -3,6 +3,8 @@ package net.skds.lib2.utils.logger;
 @SuppressWarnings("unused")
 public enum AnsiEscape {
 
+	NORMAL("0"),
+
 	BRIGHT("1"),
 	BLACK("30"),
 	RED("31"),

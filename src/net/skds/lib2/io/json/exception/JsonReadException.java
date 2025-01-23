@@ -7,4 +7,8 @@ public class JsonReadException extends IOException {
 	public JsonReadException(String message) {
 		super(message);
 	}
+
+	public JsonReadException(Throwable cause) {
+		super(cause);
+	}
 }

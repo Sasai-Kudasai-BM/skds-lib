@@ -1,6 +1,5 @@
 package net.w3e.lib.utils;
 
-import net.sdteam.libmerge.Lib1Merge;
 import net.skds.lib2.io.json.JsonTest;
 
 import java.io.File;
@@ -14,7 +13,6 @@ import java.util.stream.Stream;
 
 import lombok.experimental.UtilityClass;
 
-@Lib1Merge
 @UtilityClass
 public class ResourceUtil {
 
@@ -31,10 +29,8 @@ public class ResourceUtil {
 			if (!uri.getScheme().equals("jar")) {
 				path = Paths.get(resource.toURI());
 			}
-		} catch (Exception ignored) {
-		}
+		} catch (Exception ignored) {}
 		rootPath = path;
-		System.out.println(rootPath);
 	}
 
 	private static void walk(Path path, Collection<Path> collection) {

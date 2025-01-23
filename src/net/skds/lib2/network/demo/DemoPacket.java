@@ -32,6 +32,5 @@ public class DemoPacket implements OutPacket, InPacket<TCPTest.ServerConnection>
 	@Override
 	public int getPacketId() {
 		return 1;
-
 	}
 }

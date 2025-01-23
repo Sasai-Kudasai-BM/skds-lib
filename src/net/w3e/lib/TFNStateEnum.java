@@ -1,8 +1,5 @@
 package net.w3e.lib;
 
-import net.sdteam.libmerge.Lib1Merge;
-
-@Lib1Merge
 public enum TFNStateEnum {
 	TRUE,
 	FALSE,

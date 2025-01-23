@@ -36,6 +36,33 @@ public enum Direction implements Vec3 {
 	public static final Direction ZP = SOUTH;
 	public static final Direction ZN = NORTH;
 
+	private static final Direction[][] shuffleH = {
+		{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH},
+		{Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH},
+		{Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST},
+		{Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH},
+		{Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH},
+		{Direction.EAST, Direction.SOUTH, Direction.NORTH, Direction.WEST},
+		{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH},
+		{Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH},
+		{Direction.WEST, Direction.NORTH, Direction.SOUTH, Direction.EAST},
+		{Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH},
+		{Direction.WEST, Direction.SOUTH, Direction.EAST, Direction.NORTH},
+		{Direction.WEST, Direction.SOUTH, Direction.NORTH, Direction.EAST},
+		{Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH},
+		{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST},
+		{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST},
+		{Direction.NORTH, Direction.WEST, Direction.EAST, Direction.SOUTH},
+		{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST},
+		{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST},
+		{Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.NORTH},
+		{Direction.SOUTH, Direction.EAST, Direction.NORTH, Direction.WEST},
+		{Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.EAST},
+		{Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.NORTH},
+		{Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST},
+		{Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST},
+	};
+
 	Direction(int id, int idOpposite, int idHorizontal, String name, AxisDirection direction, Axis axis,
 			  Vec3I vector) {
 		this.id = id;
@@ -64,6 +91,10 @@ public enum Direction implements Vec3 {
 
 	public Direction getOpposite() {
 		return VALUES[this.idOpposite];
+	}
+
+	public static Direction[] randomHorizontal() {
+		return ArrayUtils.getRandom(shuffleH);
 	}
 
 	public Direction rotateClockwise(Axis axis) {
@@ -190,6 +221,21 @@ public enum Direction implements Vec3 {
 	@Override
 	public float zf() {
 		return this.vector.zf();
+	}
+
+	@Override
+	public int xi() {
+		return this.vector.xi();
+	}
+
+	@Override
+	public int yi() {
+		return this.vector.yi();
+	}
+
+	@Override
+	public int zi() {
+		return this.vector.zi();
 	}
 
 	@Override

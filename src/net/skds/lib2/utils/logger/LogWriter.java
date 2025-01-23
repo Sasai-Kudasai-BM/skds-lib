@@ -22,7 +22,6 @@ class LogWriter extends Thread {
 	private final LinkedBlockingQueue<LogWriteable> entries = new LinkedBlockingQueue<>();
 	private final FileLogWriter fileWriter;
 
-
 	public LogWriter() {
 		super("SKDS-LogWriter");
 		this.fileWriter = new FileLogWriter();
@@ -69,7 +68,7 @@ class LogWriter extends Thread {
 				String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
 				Path path = Path.of(logName);
 				if (msg.length() > 3) {
-					msg = msg.substring(level.getColor().length());
+					msg = msg.substring(level.getColor().length(), msg.length() - LogEntry.TERMINATION_LENGTH);;
 				}
 				INSTANCE.fileWriter.addMsg(path, msg);
 			}

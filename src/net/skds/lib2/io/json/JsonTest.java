@@ -182,6 +182,9 @@ public class JsonTest {
 		String vecTest = JsonUtils.toJson(new TestVec3());
 		System.out.println(vecTest);
 		System.out.println(JsonUtils.parseJson(vecTest, TestVec3.class));
+
+		String prePostTest = JsonUtils.toJson(new PrePostList());
+		JsonUtils.parseJson(prePostTest, PrePostList.class);
 	}
 
 	static final YupCT y0 = new YupCT(Yup.Yup0.class, "e0");
@@ -552,5 +555,20 @@ public class JsonTest {
 		private Vec2D d2 = new Vec2D(3);
 		private Vec2 vA2 = new Vec2D(4);
 		private Vec2 vB2 = new Vec2I(5);
+	}
+
+	private static class PrePostList {
+		private List<PrePostListImpl> list = Arrays.asList(new PrePostListImpl());
+		
+		private static class PrePostListImpl implements JsonPostDeserializeCall, JsonPreSerializeCall {
+			@Override
+			public void preSerializeJson() {
+				System.out.println("pre");
+			}
+			@Override
+			public void postDeserializedJson() {
+				System.out.println("post");
+			}
+		}
 	}
 }

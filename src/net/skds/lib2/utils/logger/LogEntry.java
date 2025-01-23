@@ -9,6 +9,8 @@ record LogEntry(long time, String message, LoggerLevel level, String thread, Sta
 				Class<?> loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
 				boolean useFileOut) implements LogWriter.LogWriteable {
 
+	private static final String TERMINATION = '\n' + AnsiEscape.NORMAL.sequence;
+	public static final int TERMINATION_LENGTH = TERMINATION.length() - 1;
 	@Override
 	public void write() {
 		Date date = new Date(time);
@@ -32,7 +34,7 @@ record LogEntry(long time, String message, LoggerLevel level, String thread, Sta
 					.append("] ");
 		}
 		logMsg.append('[').append(level.msg).append("] ");
-		logMsg.append(message).append('\n');
+		logMsg.append(message).append(TERMINATION);
 		String decoratedMsg = logMsg.toString();
 
 		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, useFileOut);
