@@ -183,6 +183,8 @@ public class JsonTest {
 		System.out.println(vecTest);
 		System.out.println(JsonUtils.parseJson(vecTest, TestVec3.class));
 
+		System.out.println(long.class == Long.TYPE);
+
 		String prePostTest = JsonUtils.toJson(new PrePostList());
 		JsonUtils.parseJson(prePostTest, PrePostList.class);
 	}
@@ -559,7 +561,7 @@ public class JsonTest {
 
 	private static class PrePostList {
 		private List<PrePostListImpl> list = Arrays.asList(new PrePostListImpl());
-		
+
 		private static class PrePostListImpl implements JsonPostDeserializeCall, JsonPreSerializeCall {
 			@Override
 			public void preSerializeJson() {

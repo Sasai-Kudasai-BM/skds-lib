@@ -2,6 +2,7 @@ package net.skds.lib2.utils.logger;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.skds.lib2.utils.AnsiEscape;
 
 @AllArgsConstructor
 public enum LoggerLevel {

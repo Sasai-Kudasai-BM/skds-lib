@@ -2,7 +2,8 @@ package net.skds.lib2.utils.logger;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.skds.lib2.utils.json.JsonUtils;
+import net.skds.lib2.io.json.JsonUtils;
+import net.skds.lib2.utils.AnsiEscape;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ public final class SKDSLoggerConfig {
 		this.logStackTop = cfg.includeStackTop;
 		this.includeLoggerClass = cfg.includeLoggerClass;
 		this.logDir = cfg.logDir;
+		SKDSLogger.useFileOut = cfg.useFileOut;
 		for (Entry<LoggerLevel, AnsiEscape> entry : cfg.ansiColors.entrySet()) {
 			entry.getKey().setColor(entry.getValue());
 		}
@@ -52,6 +54,7 @@ public final class SKDSLoggerConfig {
 		private boolean includeThread = true;
 		private boolean includeLoggerClass = false;
 		private boolean includeStackTop = true;
+		private boolean useFileOut = true;
 		private EnumMap<LoggerLevel, AnsiEscape> ansiColors = new EnumMap<>(LoggerLevel.class);
 	}
 
@@ -59,7 +62,7 @@ public final class SKDSLoggerConfig {
 		Cfg cfg = null;
 		try (InputStream is = SKDSLoggerConfig.class.getClassLoader().getResourceAsStream("SKDSLog.json")) {
 			if (is != null) {
-				cfg = JsonUtils.readConfig(is, Cfg.class);
+				cfg = JsonUtils.readJson(is, Cfg.class);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

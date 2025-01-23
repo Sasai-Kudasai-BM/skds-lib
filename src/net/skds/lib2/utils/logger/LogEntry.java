@@ -1,5 +1,6 @@
 package net.skds.lib2.utils.logger;
 
+import net.skds.lib2.utils.AnsiEscape;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.PrintStream;
@@ -11,6 +12,7 @@ record LogEntry(long time, String message, LoggerLevel level, String thread, Sta
 
 	private static final String TERMINATION = '\n' + AnsiEscape.NORMAL.sequence;
 	public static final int TERMINATION_LENGTH = TERMINATION.length() - 1;
+
 	@Override
 	public void write() {
 		Date date = new Date(time);

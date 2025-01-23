@@ -1,7 +1,7 @@
 package net.skds.lib2.utils;
 
 import net.sdteam.libmerge.Lib1Merge;
-import net.skds.lib2.utils.json.JsonUtils;
+import net.skds.lib2.io.json.JsonUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public interface AutoString {
 			if (value instanceof AutoString autoString) {
 				builder.append(autoString.autoString());
 			} else {
-				builder.append(JsonUtils.toJsonCompactNull(value));
+				builder.append(JsonUtils.toJsonCompact(value));
 			}
 
 			if (iterator.hasNext()) {
@@ -83,7 +83,7 @@ public interface AutoString {
 			if (value instanceof AutoString autoString) {
 				builder.append(autoString.autoString());
 			} else {
-				builder.append(JsonUtils.toJsonCompactNull(value));
+				builder.append(JsonUtils.toJsonCompact(value));
 			}
 
 			if (iterator.hasNext()) {

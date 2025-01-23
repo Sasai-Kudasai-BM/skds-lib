@@ -19,32 +19,6 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 		}
 	}
 
-	private void skipWhitespaces() throws IOException {
-		while (true) {
-			char next = input.getCurrentChar();
-			switch (next) {
-				case 0x0D, '\t', ' ', '\n' -> input.skip(1);
-				default -> {
-					return;
-				}
-			}
-		}
-	}
-
-	private int findEndOfValue() throws IOException {
-		int p = input.getPos();
-		while (input.isAvailable(p, 1)) {
-			char next = input.getCharAt(p);
-			switch (next) {
-				case 0x0D, '\t', ' ', '\n', '}', ']', ',' -> {
-					return p;
-				}
-				default -> p++;
-			}
-		}
-		throw new EndOfInputException("Unfinished value");
-	}
-
 	private void resetLastEntry() {
 		lastReadEntryType = null;
 		cachedValue = null;
@@ -181,9 +155,10 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 	private static class StackEntry {
 		final StackEntry parent;
 		final JsonElement element;
-		Iterator<Map.Entry<String, JsonElement>> mapIterator;
-		Iterator<JsonElement> listIterator;
+		final Iterator<Map.Entry<String, JsonElement>> mapIterator;
+		final Iterator<JsonElement> listIterator;
 
+		JsonEntryType nextElementType;
 		JsonElement nextElement;
 		String nextName;
 		boolean first = true;
@@ -191,50 +166,82 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 		private StackEntry(StackEntry parent, JsonElement element) {
 			this.parent = parent;
 			this.element = element;
+
+			switch (element.type()) {
+				case OBJECT -> {
+					this.mapIterator = ((JsonObject) element).entrySet().iterator();
+					this.listIterator = null;
+				}
+				case ARRAY -> {
+					this.listIterator = ((JsonArray) element).iterator();
+					this.mapIterator = null;
+				}
+				default -> {
+					this.listIterator = null;
+					this.mapIterator = null;
+				}
+			}
 			nextElement();
 		}
 
 		JsonElement nextElement() {
-			JsonElement ne = nextElement;
+			JsonElement ne;
 			switch (element.type()) {
 				case OBJECT -> {
-					mapIterator = ((JsonObject) element).entrySet().iterator();
 					if (mapIterator.hasNext()) {
 						var e = mapIterator.next();
-						nextElement = e.getValue();
+						ne = e.getValue();
 						nextName = e.getKey();
+						nextElementType = ne.type().getBeginEntryType();
 					} else {
-						nextElement = null;
+						nextName = null;
+						ne = null;
+						nextElementType = JsonEntryType.END_OBJECT;
 					}
 				}
 				case ARRAY -> {
-					listIterator = ((JsonArray) element).iterator();
+					nextName = null;
 					if (listIterator.hasNext()) {
-						nextElement = listIterator.next();
+						ne = listIterator.next();
+						nextElementType = ne.type().getBeginEntryType();
 					} else {
-						nextElement = null;
+						ne = null;
+						nextElementType = JsonEntryType.END_ARRAY;
 					}
 				}
-				default -> nextElement = first ? element : null;
+				default -> {
+					nextName = null;
+					if (first) {
+						ne = element;
+						nextElementType = element.type().getBeginEntryType();
+					} else {
+						nextElementType = null;
+						ne = null;
+					}
+				}
 			}
 
+			nextElement = ne;
 			first = false;
 			return ne;
 		}
 
-		JsonEntryType nextEntryType() throws IOException {
-				JsonElement ne = nextElement;
-				if (ne == null && first) {
-					return
-				}
-				switch (element.type()) {
-					case OBJECT -> {
-						if (ne == null)
-					}
-				}
+		String readName() {
+			String n = nextName;
+			nextName = null;
+			return n;
+		}
 
+		JsonEntryType nextEntryType() throws JsonReadException {
+			if (nextElementType == null) {
+				throw new JsonReadException("NextElementType is null");
+			}
+			if (nextName != null) {
+				return JsonEntryType.STRING;
+			}
+			return nextElementType;
 		}
 	}
 
-	*/
+	//*/
 }

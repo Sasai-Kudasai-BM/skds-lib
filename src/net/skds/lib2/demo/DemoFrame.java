@@ -36,6 +36,10 @@ public class DemoFrame extends JFrame {
 		button.addActionListener(e -> new WeightedPoolDemoFrame());
 		add(button);
 
+		button = new JButton("Overlay");
+		button.addActionListener(e -> new WindowOverlay());
+		add(button);
+
 		button = new JButton("Font");
 		button.addActionListener(e -> new FontDemoFrame());
 		add(button);

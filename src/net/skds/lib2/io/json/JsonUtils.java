@@ -213,6 +213,9 @@ public class JsonUtils {
 	// FANCY
 	@SuppressWarnings("unchecked")
 	public static <T> String toJson(T object) {
+		if (object == null) {
+			return "null";
+		}
 		Class<T> type = (Class<T>) object.getClass();
 		return fancyRegistry.getSerializer(type).toJson(object);
 	}
@@ -242,6 +245,9 @@ public class JsonUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> String toJsonCompact(T object) {
+		if (object == null) {
+			return "null";
+		}
 		Class<T> type = (Class<T>) object.getClass();
 		return compactRegistry.getSerializer(type).toJson(object);
 	}

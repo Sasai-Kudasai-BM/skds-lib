@@ -1,7 +1,6 @@
 package net.skds.lib2.misc.font.demo;
 
 import net.skds.lib2.misc.font.FontTriangulator;
-import net.skds.lib2.utils.SKDSUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,14 +20,17 @@ public class FontDemoFrame extends JFrame {
 
 		this.triangulator = new FontTriangulator();
 		this.drawPanel = new SVGDrawPanel();
-		//add(drawPanel);
+		add(drawPanel);
 
-		JButton button = new JButton("sex");
-		button.addActionListener(e -> test());
-		add(button);
+		Font f = new Font(Font.SERIF, Font.PLAIN, 20);
+		drawPanel.setChar(f, '@');
+
+		//JButton button = new JButton("sex");
+		//button.addActionListener(e -> test());
+		//add(button);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		setPreferredSize(new Dimension(100, 100));
+		setPreferredSize(new Dimension(1000, 800));
 		pack();
 		setLocation(-getWidth() / 2, -getHeight() / 2);
 		setLocationRelativeTo(null);
@@ -39,7 +41,6 @@ public class FontDemoFrame extends JFrame {
 
 		Font f = new Font(Font.DIALOG, Font.PLAIN, 20);
 		FontRenderContext frc = new FontRenderContext(null, false, false);
-		var t = SKDSUtils.startTimeMeasure();
 		int n = f.getNumGlyphs();
 		int j = 0;
 		char[] array = new char[n];
@@ -49,21 +50,26 @@ public class FontDemoFrame extends JFrame {
 				j++;
 			}
 		}
-		System.out.println(t.query());
-		t = SKDSUtils.startTimeMeasure();
 		GlyphVector glyphVector = f.createGlyphVector(frc, array);
-
 		GeneralPath s = (GeneralPath) glyphVector.getGlyphOutline(10);
-		System.out.println(t.query());
-
-		System.out.println(new String(array));
 		PathIterator iterator = s.getPathIterator(null);
 		float[] buffer = new float[6];
 		while (!iterator.isDone()) {
-			iterator.currentSegment(buffer);
+			int type = iterator.currentSegment(buffer);
+			iterator.next();
+			switch (type) {
+				case PathIterator.SEG_MOVETO -> {
+				}
+				case PathIterator.SEG_LINETO -> {
+				}
+				case PathIterator.SEG_CUBICTO -> {
+				}
+				case PathIterator.SEG_CLOSE -> {
+				}
+				default -> throw new RuntimeException("Unknown type " + type);
+			}
 		}
 
-		System.out.println();
 	}
 
 }

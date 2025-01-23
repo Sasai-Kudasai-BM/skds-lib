@@ -1,4 +1,4 @@
-package net.skds.lib2.utils.logger;
+package net.skds.lib2.utils;
 
 @SuppressWarnings("unused")
 public enum AnsiEscape {
