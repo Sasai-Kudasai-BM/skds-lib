@@ -16,17 +16,20 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	@Getter
 	private final CharOutput output;
 	private final String tab;
+	private final JsonCapabilityVersion cpv;
 
 	private StackEntry stack;
+	private String nextComment;
 
-	public FormattedJsonWriterImpl(CharOutput output, String tab) {
+	public FormattedJsonWriterImpl(CharOutput output, String tab, JsonCapabilityVersion cpv) {
 		this.output = output;
 		this.tab = tab;
+		this.cpv = cpv;
 	}
 
 	@Override
 	public JsonCapabilityVersion capabilityVersion() {
-		return JsonCapabilityVersion.JSON;
+		return cpv;
 	}
 
 	@Override
@@ -96,8 +99,13 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeHex(long n) {
-		throw new UnsupportedOperationException("Hex ints are not available in " + capabilityVersion());
+	public void writeHex(long n) throws IOException {
+		if (cpv == JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.hexIntUC(n));
+		} else {
+			writeInt(n);
+		}
 	}
 
 	@Override
@@ -107,13 +115,20 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeFloatExp(double n) {
-		throw new UnsupportedOperationException("Exponents are not available in " + capabilityVersion());
+	public void writeFloatExp(double n) throws IOException {
+		if (cpv == JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.expFloatUC(n));
+		} else {
+			writeFloat(n);
+		}
 	}
 
 	@Override
 	public void writeComment(String comment) {
-		throw new UnsupportedOperationException("Comments are not available in " + capabilityVersion());
+		if (cpv != JsonCapabilityVersion.JSON) {
+			nextComment = comment;
+		}
 	}
 
 	@Override
@@ -138,6 +153,10 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		if (!e.isList) {
+			String nc = nextComment;
+			if (nc != null) {
+				e.lineBreak = true;
+			}
 			boolean lb = e.lineBreak;
 			if (e.n++ > 0) {
 				if (lb) {
@@ -149,6 +168,9 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 			if (lb) {
 				output.append('\n');
 				writeTabs(e);
+			}
+			if (nc != null) {
+				writeComment0(nc);
 			}
 		}
 	}
@@ -157,6 +179,10 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		if (e.isList) {
+			String nc = nextComment;
+			if (nc != null) {
+				e.lineBreak = true;
+			}
 			boolean lb = e.lineBreak;
 			if (e.n++ > 0) {
 				if (lb) {
@@ -169,7 +195,33 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 				output.append('\n');
 				writeTabs(e);
 			}
+			if (nc != null) {
+				writeComment0(nc);
+			}
 		}
+	}
+
+	private void writeComment0(String nc) throws IOException {
+		//output.append('\n');
+		if (nc.indexOf('\n') == -1) {
+			output.append("// ");
+			output.append(nc);
+			output.append('\n');
+		} else {
+			String[] com = nc.split("\n");
+			if (com.length > 0) {
+				output.append("/* ");
+				output.append(com[0]);
+				for (int i = 1; i < com.length; i++) {
+					output.append('\n');
+					writeTabs(stack);
+					output.append(com[i]);
+				}
+				output.append(" */\n");
+			}
+		}
+		writeTabs(stack);
+		nextComment = null;
 	}
 
 	private void pushStack(boolean isList) throws IOException {

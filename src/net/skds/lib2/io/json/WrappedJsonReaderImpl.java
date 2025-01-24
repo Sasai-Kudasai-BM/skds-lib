@@ -1,15 +1,23 @@
 package net.skds.lib2.io.json;
 
-public abstract class WrappedJsonReaderImpl implements JsonReader {
+import net.skds.lib2.io.json.elements.JsonArray;
+import net.skds.lib2.io.json.elements.JsonElement;
+import net.skds.lib2.io.json.elements.JsonObject;
+import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.utils.Numbers;
 
-	/*
-	private final JsonElement input;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 
+public class WrappedJsonReaderImpl implements JsonReader {
+	//*
 	private StackEntry stack;
+	private final JsonElement input;
 
 	public WrappedJsonReaderImpl(JsonElement input) {
 		this.input = input;
-		this.stack = new StackEntry(null, input);
+		//this.stack = new StackEntry(null, input);
 	}
 
 	private void validateEntryType(JsonEntryType expected) throws IOException {
@@ -19,33 +27,22 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 		}
 	}
 
-	private void resetLastEntry() {
-		lastReadEntryType = null;
-		cachedValue = null;
-	}
-
 	@Override
 	public String readName() throws IOException {
 		validateEntryType(JsonEntryType.STRING);
-		char next = input.getCurrentCharAntInc();
-		if (next != '"') {
-			throw unexpectedCharacter(next, input.getPos() - 1);
-		}
-		String name = StringUtils.readQuoted(input, '"');
-		readDotDot();
-		resetLastEntry();
-		return name;
+		return stack.readName();
 	}
 
 	@Override
 	public String readString() throws IOException {
 		validateEntryType(JsonEntryType.STRING);
-		char next = input.getCurrentCharAntInc();
-		if (next != '"') {
-			throw unexpectedCharacter(next, input.getPos() - 1);
+		String n = stack.readName();
+		{
+			if (n != null) {
+				return n;
+			}
 		}
-		resetLastEntry();
-		return StringUtils.readQuoted(input, '"');
+		return nextElement().getAsString();
 	}
 
 	@Override
@@ -53,9 +50,7 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 		Number n;
 		switch (nextEntryType()) {
 			case NUMBER -> {
-				input.setPos(valueEnd);
-				n = (Number) cachedValue;
-				resetLastEntry();
+				n = nextElement().getAsNumber();
 			}
 			case NULL -> {
 				return Numbers.ZERO;
@@ -72,38 +67,31 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 	@Override
 	public void beginObject() throws IOException {
 		validateEntryType(JsonEntryType.BEGIN_OBJECT);
-		input.skip(1);
-		resetLastEntry();
+		pushStack();
 	}
 
 	@Override
 	public void endObject() throws IOException {
 		validateEntryType(JsonEntryType.END_OBJECT);
-		input.skip(1);
-		resetLastEntry();
+		popStack();
 	}
 
 	@Override
 	public void beginArray() throws IOException {
 		validateEntryType(JsonEntryType.BEGIN_ARRAY);
-		input.skip(1);
-		resetLastEntry();
+		pushStack();
 	}
 
 	@Override
 	public void endArray() throws IOException {
 		validateEntryType(JsonEntryType.END_ARRAY);
-		input.skip(1);
-		resetLastEntry();
+		popStack();
 	}
 
 	@Override
 	public void skipNull() throws IOException {
 		switch (nextEntryType()) {
-			case NULL -> {
-				input.setPos(valueEnd);
-				resetLastEntry();
-			}
+			case NULL -> nextElement();
 			case STRING -> {
 				String s = readString();
 				if (!s.equalsIgnoreCase("null")) {
@@ -115,18 +103,16 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 	}
 
 	@Override
-	public void skipValue() throws IOException {
-		skipCodec.read(this);
+	public void skipValue() {
+		nextElement();
 	}
 
 	@Override
 	public boolean readBoolean() throws IOException {
-		Boolean b;
+		boolean b;
 		switch (nextEntryType()) {
 			case BOOLEAN -> {
-				input.setPos(valueEnd);
-				b = (Boolean) cachedValue;
-				resetLastEntry();
+				b = nextElement().getAsBoolean();
 			}
 			case STRING -> {
 				return Boolean.parseBoolean(readString());
@@ -136,20 +122,39 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 		return b;
 	}
 
-
-	private static JsonReadException unexpectedCharacter(char c, int pos) {
-		return new JsonReadException("Unexpected character \\u" + Integer.toHexString(c).toUpperCase() + " '" + c + "' at " + pos);
-	}
-
-
 	@Override
 	public JsonEntryType nextEntryType() throws IOException {
-
-
+		StackEntry s = stack;
+		if (s == null) {
+			return input.type().getBeginEntryType();
+		}
+		return s.nextEntryType();
 	}
 
 	@Override
-	public void readDotDot() throws IOException {
+	public void readDotDot() {
+	}
+
+	private JsonElement nextElement() {
+		StackEntry s = stack;
+		if (s == null) {
+			return input;
+		}
+		return s.nextElement();
+	}
+
+	private void pushStack() {
+		StackEntry s = stack;
+		if (s == null) {
+			stack = new StackEntry(null, input);
+			return;
+		}
+		stack = new StackEntry(s, s.nextElement());
+	}
+
+	private void popStack() {
+		var s = stack;
+		stack = s.parent;
 	}
 
 	private static class StackEntry {
@@ -176,10 +181,7 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 					this.listIterator = ((JsonArray) element).iterator();
 					this.mapIterator = null;
 				}
-				default -> {
-					this.listIterator = null;
-					this.mapIterator = null;
-				}
+				default -> throw new UnsupportedOperationException();
 			}
 			nextElement();
 		}
@@ -221,9 +223,10 @@ public abstract class WrappedJsonReaderImpl implements JsonReader {
 				}
 			}
 
+			var last = nextElement;
 			nextElement = ne;
 			first = false;
-			return ne;
+			return last;
 		}
 
 		String readName() {

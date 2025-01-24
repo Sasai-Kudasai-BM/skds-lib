@@ -28,7 +28,7 @@ public interface JsonDeserializer<T> extends Deserializer<T, JsonReader>, JsonRe
 
 	default T parse(JsonElement json) {
 		try {
-			return read(getRegistry().createReader(new StringCharInput(json.toString()))); // TODO
+			return read(getRegistry().createReader(json));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

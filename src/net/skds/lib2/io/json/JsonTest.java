@@ -4,13 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.annotation.JsonAlias;
-import net.skds.lib2.io.json.annotation.SkipSerialization;
-import net.skds.lib2.io.json.annotation.TransientComponent;
+import net.skds.lib2.io.json.annotation.*;
 import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
+import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.io.json.elements.JsonObject;
 import net.skds.lib2.mat.*;
 import net.skds.lib2.utils.logger.SKDSLogger;
@@ -34,6 +32,9 @@ public class JsonTest {
 				  	"d": 7,
 				  	"e": true,
 				  	"f": false,
+				  	// am gay
+				  	/* am gay2
+				  	lines sex */
 				  	"g": {
 				  		"ab\\"oba": 777.7,
 				  		"ses": 0x7,
@@ -64,6 +65,7 @@ public class JsonTest {
 
 
 		JsonCodecOptions options = new JsonCodecOptions();
+		options.setCapabilityVersion(JsonCapabilityVersion.JSON_WITH_COMMENTS);
 		options.setDecorationType(JsonCodecOptions.DecorationType.FANCY);
 
 		JsonCodecRegistry registry = new JsonCodecRegistry(options, null);
@@ -91,6 +93,13 @@ public class JsonTest {
 		System.out.println(json2);
 
 		System.out.println(json2.equals(json));
+		JsonCodec<JsonElement> jec = registry.getCodec(JsonElement.class);
+		JsonElement je = jec.parse(json2);
+		System.out.println(je);
+		Amogus amg = codec.parse(je);
+		String json3 = codec.toJson(amg);
+		System.out.println(json2.equals(json3));
+
 
 		System.out.println();
 
@@ -187,6 +196,8 @@ public class JsonTest {
 
 		String prePostTest = JsonUtils.toJson(new PrePostList());
 		JsonUtils.parseJson(prePostTest, PrePostList.class);
+
+		System.out.println(JsonUtils.parseJson(test, JsonElement.class));
 	}
 
 	static final YupCT y0 = new YupCT(Yup.Yup0.class, "e0");
@@ -479,8 +490,13 @@ public class JsonTest {
 		//private Pizdun ssss = new Pizdun();
 
 		private List<Anus> anusis = null;
+		@JsonComment("Am cuuummm zzz")
 		private List<Amogus> lol = null;
 
+		@JsonComment("""
+				suck
+				nice
+				""")
 		private int a = 1;
 		private final int b = 2;
 		@JsonAlias("C-Gay")
@@ -567,6 +583,7 @@ public class JsonTest {
 			public void preSerializeJson() {
 				System.out.println("pre");
 			}
+
 			@Override
 			public void postDeserializedJson() {
 				System.out.println("post");

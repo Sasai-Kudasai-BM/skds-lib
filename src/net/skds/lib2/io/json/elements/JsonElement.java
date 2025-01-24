@@ -31,6 +31,10 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		throw new UnsupportedOperationException();
 	}
 
+	default String getAsString() {
+		throw new UnsupportedOperationException();
+	}
+
 	default Number getAsNumber() {
 		throw new UnsupportedOperationException();
 	}

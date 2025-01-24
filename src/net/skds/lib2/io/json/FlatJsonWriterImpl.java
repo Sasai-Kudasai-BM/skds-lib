@@ -1,5 +1,6 @@
 package net.skds.lib2.io.json;
 
+import lombok.CustomLog;
 import net.skds.lib2.io.CharOutput;
 import net.skds.lib2.io.EndOfOutputException;
 import net.skds.lib2.io.json.codec.JsonCapabilityVersion;
@@ -7,8 +8,6 @@ import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
-
-import lombok.CustomLog;
 
 @CustomLog
 public final class FlatJsonWriterImpl implements JsonWriter {
@@ -93,8 +92,9 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeHex(long n) {
-		throw new UnsupportedOperationException("Hex ints are not available in " + capabilityVersion());
+	public void writeHex(long n) throws IOException {
+		writeInt(n);
+		//throw new UnsupportedOperationException("Hex ints are not available in " + capabilityVersion());
 	}
 
 	@Override
@@ -104,13 +104,14 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeFloatExp(double n) {
-		throw new UnsupportedOperationException("Exponents are not available in " + capabilityVersion());
+	public void writeFloatExp(double n) throws IOException {
+		writeFloat(n);
+		//throw new UnsupportedOperationException("Exponents are not available in " + capabilityVersion());
 	}
 
 	@Override
 	public void writeComment(String comment) {
-		throw new UnsupportedOperationException("Comments are not available in " + capabilityVersion());
+		//throw new UnsupportedOperationException("Comments are not available in " + capabilityVersion());
 	}
 
 	@Override

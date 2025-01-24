@@ -374,7 +374,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 					reader.beginObject();
 					Map<Object, Object> map = constructor.get();
 					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
-						Object key = keyDeserializer.read(reader);
+						Object key = keyDeserializer.read(reader); // TODO read name
 						reader.readDotDot();
 						Object value = elementDeserializer.read(reader);
 						map.put(key, value);

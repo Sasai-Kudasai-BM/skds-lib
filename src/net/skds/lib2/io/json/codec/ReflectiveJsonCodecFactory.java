@@ -2,10 +2,7 @@ package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
 import net.skds.lib2.io.json.*;
-import net.skds.lib2.io.json.annotation.JsonAlias;
-import net.skds.lib2.io.json.annotation.JsonCodecRoleConstrains;
-import net.skds.lib2.io.json.annotation.SkipSerialization;
-import net.skds.lib2.io.json.annotation.TransientComponent;
+import net.skds.lib2.io.json.annotation.*;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.function.MultiSupplier;
@@ -242,6 +239,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			for (FieldCodec w : writers) {
 				try {
 					if (!w.checkSkip(value)) {
+						w.comment(writer);
 						writer.writeName(w.name);
 						w.write(writer, value);
 						empty = false;
@@ -370,7 +368,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-	@SuppressWarnings({ "WrapperTypeMayBePrimitive", "unchecked" })
+	@SuppressWarnings({"WrapperTypeMayBePrimitive", "unchecked"})
 	private static Predicate<Object> getSkipPredicate(SkipSerialization ss, Class<?> type) {
 		Class<? extends Predicate<?>> p = ss.predicate();
 		if (p != SkipSerialization.BLANK_PREDICATE) {
@@ -378,7 +376,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			if (constructor == null) {
 				throw new NullPointerException("constructor of " + p + " is invalid");
 			}
-			return (Predicate<Object>)constructor.get();
+			return (Predicate<Object>) constructor.get();
 		}
 		Predicate<Object> predicate = o -> false;
 		if (type.isPrimitive()) {
@@ -462,6 +460,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		final JsonSerializer<Object>[] serializers;
 		final int nonNullSerializers;
 		final String[] names;
+		final String[] comments;
 		final Function<Object, Object>[] accessors;
 		final Predicate<Object>[] skipPredicates;
 
@@ -472,6 +471,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			var rcs = tClass.getRecordComponents();
 			Predicate<Object>[] skips = new Predicate[rcs.length];
 			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
+			String[] comments = new String[rcs.length];
 			String[] names = new String[rcs.length];
 			Function<Object, Object>[] accessors = new Function[rcs.length];
 			int c = 0;
@@ -490,6 +490,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				SkipSerialization ss = rc.getAnnotation(SkipSerialization.class);
 				if (ss != null) {
 					skips[i] = getSkipPredicate(ss, rc.getType());
+				}
+				JsonComment comment = rc.getAnnotation(JsonComment.class);
+				if (comment != null) {
+					comments[i] = comment.value();
 				}
 				String name = rc.getName();
 				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
@@ -512,6 +516,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			this.nonNullSerializers = c;
 			this.serializers = (JsonSerializer<Object>[]) ser;
 			this.names = names;
+			this.comments = comments;
 			this.accessors = accessors;
 		}
 
@@ -538,6 +543,10 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 						Object val = accessors[i].apply(value);
 						if (predicate != null && predicate.test(val)) {
 							continue;
+						}
+						String comment = comments[i];
+						if (comment != null) {
+							writer.writeComment(comment);
 						}
 						writer.writeName(names[i]);
 						w.write(val, writer);
@@ -607,11 +616,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	private static abstract class FieldCodec {
 		protected final Field field;
 		protected final String name;
+		protected final String comment;
 		protected final SkipSerialization skipSerialization;
 
 		private FieldCodec(Field field) {
 			this.field = field;
 			field.setAccessible(true);
+			JsonComment com = field.getAnnotation(JsonComment.class);
+			comment = com != null ? com.value() : null;
 			JsonAlias alias = field.getAnnotation(JsonAlias.class);
 			String n;
 			if (alias != null) {
@@ -628,6 +640,12 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		abstract void read(JsonReader reader, Object o) throws IOException, IllegalAccessException;
 
 		abstract boolean checkSkip(Object o) throws IllegalAccessException;
+
+		void comment(JsonWriter writer) throws IOException {
+			if (comment != null) {
+				writer.writeComment(comment);
+			}
+		}
 	}
 
 	private static class ByteFieldCodec extends FieldCodec {

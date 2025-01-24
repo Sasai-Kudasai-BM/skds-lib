@@ -38,8 +38,38 @@ public final class JsonReaderImpl implements JsonReader {
 		while (true) {
 			char next = input.getCurrentChar();
 			switch (next) {
+				case '/' -> {
+					char n2 = input.getNextChar();
+					switch (n2) {
+						case '/' -> skipSingleLineComment();
+						case '*' -> skipMultiLineComment();
+						default -> throw new JsonReadException("Unexpected slash");
+					}
+				}
 				case 0x0D, '\t', ' ', '\n' -> input.skip(1);
 				default -> {
+					return;
+				}
+			}
+		}
+	}
+
+	private void skipSingleLineComment() throws IOException {
+		while (true) {
+			char next = input.getNextChar();
+			if (next == '\n') {
+				return;
+			}
+		}
+	}
+
+	private void skipMultiLineComment() throws IOException {
+		while (true) {
+			char next = input.getNextChar();
+			if (next == '*') {
+				char n2 = input.getNextChar();
+				if (n2 == '/') {
+					input.skip(1);
 					return;
 				}
 			}

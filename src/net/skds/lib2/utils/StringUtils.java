@@ -5,9 +5,13 @@ import net.skds.lib2.io.CharInput;
 import net.skds.lib2.io.EndOfInputException;
 
 import java.io.IOException;
+import java.util.HexFormat;
 
 @UtilityClass
 public class StringUtils {
+
+	public static final HexFormat HEX_FORMAT_LC = HexFormat.of();
+	public static final HexFormat HEX_FORMAT_UC = HexFormat.of().withUpperCase();
 
 	public static String quote(String s) {
 		return '"' + s.replace("\"", "\\\"") + '"';
@@ -23,6 +27,22 @@ public class StringUtils {
 
 	public static String unicodeCharLC(int c) {
 		return "\\u%04x".formatted(c);
+	}
+
+	public static String expFloatUC(double value) {
+		return "%E".formatted(value);
+	}
+
+	public static String expFloatLC(double value) {
+		return "%e".formatted(value);
+	}
+
+	public static String hexIntUC(long value) {
+		return "0x%X".formatted(value);
+	}
+
+	public static String hexIntLC(long value) {
+		return "0x%x".formatted(value);
 	}
 
 	public static String cutStringBefore(String str, char split) {

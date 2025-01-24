@@ -18,6 +18,11 @@ public record JsonString(String value) implements JsonElement {
 		return JsonElementType.STRING;
 	}
 
+	@Override
+	public String getAsString() {
+		return value;
+	}
+
 	public static final class Codec extends AbstractJsonCodec<JsonString> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {

@@ -6,6 +6,7 @@ public interface JsonReader {
 
 	JsonEntryType nextEntryType() throws IOException;
 
+	@Deprecated
 	void readDotDot() throws IOException;
 
 	String readName() throws IOException;

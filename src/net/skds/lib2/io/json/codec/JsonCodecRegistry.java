@@ -3,6 +3,7 @@ package net.skds.lib2.io.json.codec;
 import net.skds.lib2.io.CharInput;
 import net.skds.lib2.io.CharOutput;
 import net.skds.lib2.io.json.*;
+import net.skds.lib2.io.json.elements.JsonElement;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -52,9 +53,13 @@ public class JsonCodecRegistry {
 		return new JsonReaderImpl(input, this);
 	}
 
+	public JsonReader createReader(JsonElement input) {
+		return new WrappedJsonReaderImpl(input);
+	}
+
 	public JsonWriter createWriter(CharOutput output) {
 		return switch (options.getDecorationType()) {
-			case FANCY -> new FormattedJsonWriterImpl(output, options.getTabulation());
+			case FANCY -> new FormattedJsonWriterImpl(output, options.getTabulation(), options.getCapabilityVersion());
 			default -> new FlatJsonWriterImpl(output);
 		};
 	}

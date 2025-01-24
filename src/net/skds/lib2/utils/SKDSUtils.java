@@ -29,7 +29,7 @@ import java.util.zip.Inflater;
 @SuppressWarnings("unused")
 public class SKDSUtils {
 
-	public static final HexFormat HEX_FORMAT_LC = HexFormat.of();
+	public static final HexFormat HEX_FORMAT_LC = StringUtils.HEX_FORMAT_LC;
 	public static final OSType OS_TYPE = getOS();
 	public static final String OS_ARC = getOSAndArc();
 
