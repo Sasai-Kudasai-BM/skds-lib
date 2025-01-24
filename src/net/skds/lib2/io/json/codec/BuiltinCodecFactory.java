@@ -61,6 +61,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			return fac.createSerializer(type, registry);
 		}
 		if (type instanceof Class<?> cl) {
+			JsonCodec<?> codec = getDefaultCodec(cl, cl, registry);
+			if (codec != null) {
+				return codec;
+			}
 			if (Collection.class.isAssignableFrom(cl)) {
 				return new CollectionSerializer(registry);
 			}
