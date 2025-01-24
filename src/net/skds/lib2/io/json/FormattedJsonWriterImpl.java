@@ -2,8 +2,8 @@ package net.skds.lib2.io.json;
 
 import lombok.CustomLog;
 import lombok.Getter;
-import net.skds.lib2.io.CharOutput;
-import net.skds.lib2.io.EndOfOutputException;
+import net.skds.lib2.io.chars.CharOutput;
+import net.skds.lib2.io.exception.EndOfOutputException;
 import net.skds.lib2.io.json.codec.JsonCapabilityVersion;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.exception.StackUnderflowException;

@@ -1,7 +1,7 @@
 package net.skds.lib2.io.json;
 
-import net.skds.lib2.io.CharInput;
-import net.skds.lib2.io.EndOfInputException;
+import net.skds.lib2.io.chars.CharInput;
+import net.skds.lib2.io.exception.EndOfInputException;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.elements.JsonElement;
@@ -103,7 +103,11 @@ public final class JsonReaderImpl implements JsonReader {
 			throw unexpectedCharacter(next, input.getPos() - 1);
 		}
 		String name = StringUtils.readQuoted(input, '"');
-		readDotDot();
+		skipWhitespaces();
+		char next2 = input.getCurrentCharAntInc();
+		if (next2 != ':') {
+			throw unexpectedCharacter(next2, input.getPos() - 1);
+		}
 		resetLastEntry();
 		return name;
 	}
@@ -266,14 +270,4 @@ public final class JsonReaderImpl implements JsonReader {
 		lastReadEntryType = rt;
 		return rt;
 	}
-
-	@Override
-	public void readDotDot() throws IOException {
-		skipWhitespaces();
-		char next = input.getCurrentCharAntInc();
-		if (next != ':') {
-			throw unexpectedCharacter(next, input.getPos() - 1);
-		}
-	}
-
 }

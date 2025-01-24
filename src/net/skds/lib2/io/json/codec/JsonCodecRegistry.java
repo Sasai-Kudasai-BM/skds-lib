@@ -1,7 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
-import net.skds.lib2.io.CharInput;
-import net.skds.lib2.io.CharOutput;
+import net.skds.lib2.io.chars.CharInput;
+import net.skds.lib2.io.chars.CharOutput;
 import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.elements.JsonElement;
 

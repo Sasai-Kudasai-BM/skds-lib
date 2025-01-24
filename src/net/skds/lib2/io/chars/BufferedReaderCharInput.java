@@ -1,4 +1,4 @@
-package net.skds.lib2.io;
+package net.skds.lib2.io.chars;
 
 import java.io.BufferedReader;
 import java.util.stream.Collectors;

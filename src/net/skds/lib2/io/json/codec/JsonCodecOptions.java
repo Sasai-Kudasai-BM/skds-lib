@@ -8,9 +8,9 @@ import java.lang.reflect.Modifier;
 public class JsonCodecOptions implements Cloneable {
 
 	private DecorationType decorationType = DecorationType.FLAT;
-	private JsonCapabilityVersion capabilityVersion = JsonCapabilityVersion.JSON; //TODO
+	private JsonCapabilityVersion capabilityVersion = JsonCapabilityVersion.JSON;
 	private int excludeFieldModifiers = Modifier.TRANSIENT | Modifier.STATIC;
-	private boolean serializeNulls = true; //TODO
+	//private boolean serializeNulls = true; //TODO
 	//private boolean deserializeNulls = false;
 	private String tabulation = "\t";
 
@@ -20,7 +20,7 @@ public class JsonCodecOptions implements Cloneable {
 		clone.decorationType = decorationType;
 		clone.capabilityVersion = capabilityVersion;
 		clone.excludeFieldModifiers = excludeFieldModifiers;
-		clone.serializeNulls = serializeNulls;
+		//clone.serializeNulls = serializeNulls;
 		//clone.deserializeNulls = deserializeNulls;
 		clone.tabulation = tabulation;
 		return clone;
@@ -41,10 +41,10 @@ public class JsonCodecOptions implements Cloneable {
 		return this;
 	}
 
-	public JsonCodecOptions setSerializeNulls(boolean serializeNulls) {
-		this.serializeNulls = serializeNulls;
-		return this;
-	}
+	//public JsonCodecOptions setSerializeNulls(boolean serializeNulls) {
+	//	this.serializeNulls = serializeNulls;
+	//	return this;
+	//}
 
 	//public JsonCodecOptions setDeserializeNulls(boolean deserializeNulls) {
 	//	this.deserializeNulls = deserializeNulls;

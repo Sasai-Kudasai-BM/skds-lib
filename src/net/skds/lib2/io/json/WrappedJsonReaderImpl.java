@@ -131,10 +131,6 @@ public class WrappedJsonReaderImpl implements JsonReader {
 		return s.nextEntryType();
 	}
 
-	@Override
-	public void readDotDot() {
-	}
-
 	private JsonElement nextElement() {
 		StackEntry s = stack;
 		if (s == null) {

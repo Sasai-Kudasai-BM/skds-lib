@@ -1,4 +1,4 @@
-package net.skds.lib2.io;
+package net.skds.lib2.io.chars;
 
 public class StringCharOutput implements CharOutput {
 

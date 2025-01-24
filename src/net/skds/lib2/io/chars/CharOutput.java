@@ -1,12 +1,12 @@
-package net.skds.lib2.io;
+package net.skds.lib2.io.chars;
+
+import net.skds.lib2.io.exception.EndOfOutputException;
 
 public interface CharOutput {
 
 	int getPos();
 
-
 	boolean isAvailable(int count);
-
 
 	void setCurrentChar(char c) throws EndOfOutputException;
 

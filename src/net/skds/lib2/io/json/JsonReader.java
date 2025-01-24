@@ -5,10 +5,7 @@ import java.io.IOException;
 public interface JsonReader {
 
 	JsonEntryType nextEntryType() throws IOException;
-
-	@Deprecated
-	void readDotDot() throws IOException;
-
+	
 	String readName() throws IOException;
 
 	void beginObject() throws IOException;

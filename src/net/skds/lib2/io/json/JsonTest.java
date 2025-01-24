@@ -12,10 +12,13 @@ import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.io.json.elements.JsonObject;
 import net.skds.lib2.mat.*;
 import net.skds.lib2.utils.logger.SKDSLogger;
+import net.w3e.lib.utils.FileUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @SuppressWarnings("unused")
@@ -86,6 +89,7 @@ public class JsonTest {
 		amogus.lol = List.of(new Amogus(), new Amogus());
 
 		String json = codec.toJson(amogus);
+		FileUtils.save(new File("amogus.json5"), json.getBytes(StandardCharsets.UTF_8));
 		System.out.println(json);
 		Amogus amogus2 = codec.parse(json);
 		String json2 = codec.toJson(amogus2);

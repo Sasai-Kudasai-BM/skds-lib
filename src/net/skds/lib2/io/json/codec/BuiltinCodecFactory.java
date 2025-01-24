@@ -1,6 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
 import lombok.CustomLog;
+import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -374,8 +375,9 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 					reader.beginObject();
 					Map<Object, Object> map = constructor.get();
 					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
-						Object key = keyDeserializer.read(reader); // TODO read name
-						reader.readDotDot();
+						String name = reader.readName();
+						JsonReader r2 = registry.createReader(new StringCharInput(name));
+						Object key = keyDeserializer.read(r2);
 						Object value = elementDeserializer.read(reader);
 						map.put(key, value);
 					}

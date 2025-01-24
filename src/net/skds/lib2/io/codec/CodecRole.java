@@ -1,4 +1,4 @@
-package net.skds.lib2.io;
+package net.skds.lib2.io.codec;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

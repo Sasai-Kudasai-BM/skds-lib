@@ -1,8 +1,8 @@
 package net.skds.lib2.io.json.codec;
 
-import net.skds.lib2.io.CharInput;
-import net.skds.lib2.io.Deserializer;
-import net.skds.lib2.io.StringCharInput;
+import net.skds.lib2.io.chars.CharInput;
+import net.skds.lib2.io.codec.Deserializer;
+import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.elements.JsonElement;
 

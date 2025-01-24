@@ -1,4 +1,6 @@
-package net.skds.lib2.io;
+package net.skds.lib2.io.chars;
+
+import net.skds.lib2.io.exception.EndOfInputException;
 
 public interface CharInput {
 

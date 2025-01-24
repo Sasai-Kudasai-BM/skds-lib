@@ -1,7 +1,7 @@
 package net.skds.lib2.io.json.codec;
 
-import net.skds.lib2.io.Serializer;
-import net.skds.lib2.io.StringCharOutput;
+import net.skds.lib2.io.chars.StringCharOutput;
+import net.skds.lib2.io.codec.Serializer;
 import net.skds.lib2.io.json.JsonWriter;
 
 import java.io.IOException;

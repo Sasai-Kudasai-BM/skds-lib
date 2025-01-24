@@ -1,4 +1,6 @@
-package net.skds.lib2.io;
+package net.skds.lib2.io.chars;
+
+import net.skds.lib2.io.exception.EndOfInputException;
 
 public class StringCharInput implements CharInput {
 
@@ -8,7 +10,7 @@ public class StringCharInput implements CharInput {
 	public StringCharInput(String value) {
 		this.value = value;
 	}
-	
+
 	@Override
 	public int getPos() {
 		return pos;

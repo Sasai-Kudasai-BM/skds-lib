@@ -1,8 +1,8 @@
 package net.skds.lib2.utils;
 
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.io.CharInput;
-import net.skds.lib2.io.EndOfInputException;
+import net.skds.lib2.io.chars.CharInput;
+import net.skds.lib2.io.exception.EndOfInputException;
 
 import java.io.IOException;
 import java.util.HexFormat;

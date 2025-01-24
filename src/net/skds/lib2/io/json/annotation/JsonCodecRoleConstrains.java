@@ -1,6 +1,6 @@
 package net.skds.lib2.io.json.annotation;
 
-import net.skds.lib2.io.CodecRole;
+import net.skds.lib2.io.codec.CodecRole;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
