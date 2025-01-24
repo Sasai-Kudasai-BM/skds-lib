@@ -335,7 +335,6 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				} catch (Exception e) {
 					throw new RuntimeException("Exception while read enum component \"" + tClass.getName() + ":" + names[i] + "\"", e);
 				}
-
 			}
 			reader.endObject();
 

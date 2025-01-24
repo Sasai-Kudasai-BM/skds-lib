@@ -58,17 +58,7 @@ public final class SKDSLoggerConfig {
 		private EnumMap<LoggerLevel, AnsiEscape> ansiColors = new EnumMap<>(LoggerLevel.class);
 	}
 
-	private static void load() {
-		Cfg cfg = null;
-		try (InputStream is = SKDSLoggerConfig.class.getClassLoader().getResourceAsStream("SKDSLog.json")) {
-			if (is != null) {
-				cfg = JsonUtils.readJson(is, Cfg.class);
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		if (cfg == null) cfg = new Cfg();
-		instance = new SKDSLoggerConfig(cfg);
+	public static void init() {
 	}
 
 	public static void setLevels(LoggerLevel level, LoggerLevel... levels) {
@@ -86,6 +76,15 @@ public final class SKDSLoggerConfig {
 	}
 
 	static {
-		load();
+		Cfg cfg = null;
+		try (InputStream is = SKDSLoggerConfig.class.getClassLoader().getResourceAsStream("SKDSLog.json")) {
+			if (is != null) {
+				cfg = JsonUtils.readJson(is, Cfg.class);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		if (cfg == null) cfg = new Cfg();
+		instance = new SKDSLoggerConfig(cfg);
 	}
 }

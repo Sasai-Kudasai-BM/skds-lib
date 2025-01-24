@@ -126,8 +126,9 @@ public class StringUtils {
 			}
 			builder.append(input.getChars(start, p - start));
 			input.setPos(p);
-			if (input.isAvailable(p, 1)) {
-				throw new IOException("Unterminated string");
+			if (!input.isAvailable(p, 1)) {
+				return builder.toString();
+				//throw new IOException("Unterminated string");
 			}
 		}
 	}

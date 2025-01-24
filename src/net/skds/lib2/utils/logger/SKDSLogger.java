@@ -56,6 +56,7 @@ public abstract class SKDSLogger {
 
 
 	public static void replaceOuts() {
+		SKDSLoggerConfig.init();
 		System.setOut(REPLACED_OUT);
 		System.setErr(REPLACED_ERR);
 	}
