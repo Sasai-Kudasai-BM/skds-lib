@@ -26,7 +26,7 @@ record LogEntry(long time, String message, LoggerLevel level, String thread, Sta
 			logMsg.append('[').append(thread).append("] ");
 		}
 		StackTraceElement trace = trace();
-		if (trace != null) {
+		if (trace != null && !trace.getClassName().equals("java.lang.Throwable$WrappedPrintStream")) {
 			logMsg.append('[')
 					.append(StringUtils.cutStringAfterFromEnd(trace.getClassName(), '.'))
 					.append(':')

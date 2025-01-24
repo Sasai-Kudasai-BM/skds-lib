@@ -202,6 +202,7 @@ public class JsonTest {
 		JsonUtils.parseJson(prePostTest, PrePostList.class);
 
 		System.out.println(JsonUtils.parseJson(test, JsonElement.class));
+		//throw new RuntimeException(new Exception("seaxe"));
 	}
 
 	static final YupCT y0 = new YupCT(Yup.Yup0.class, "e0");
