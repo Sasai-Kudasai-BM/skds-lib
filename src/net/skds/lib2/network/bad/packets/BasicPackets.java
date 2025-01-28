@@ -1,4 +1,4 @@
-package net.skds.lib2.network.packets;
+package net.skds.lib2.network.bad.packets;
 
 import lombok.experimental.UtilityClass;
 

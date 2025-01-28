@@ -14,8 +14,12 @@ import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 import net.skds.lib2.utils.function.MultiSupplier;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.*;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -33,6 +37,12 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			JsonArray.class, (JsonCodecFactory) JsonArray.Codec::new,
 
 			String.class, (JsonCodecFactory) StringCodec::new,
+			Object.class, (JsonCodecFactory) ObjectCodec::new,
+			File.class, (JsonCodecFactory) FileCodec::new,
+			Path.class, (JsonCodecFactory) PathCodec::new,
+			URI.class, (JsonCodecFactory) URICodec::new,
+			URL.class, (JsonCodecFactory) URLCodec::new,
+			UUID.class, (JsonCodecFactory) UUIDCodec::new,
 
 			Number.class, (JsonCodecFactory) NumberCodec::new,
 			Byte.class, (JsonCodecFactory) WrappedByteCodec::new,
@@ -886,6 +896,223 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 	}
 
 
+	public static final class FileCodec extends AbstractJsonCodec<File> {
+
+		public FileCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public File read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					URI uri = URI.create(reader.readString());
+					if (uri.getScheme() == null) {
+						return new File(uri.getPath());
+					}
+					return new File(uri);
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(File value, JsonWriter writer) throws IOException {
+			URI uri = value.toURI();
+			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
+				writer.writeString(value.toString());
+				return;
+			}
+			writer.writeString(value.toURI().toString());
+		}
+	}
+
+
+	public static final class PathCodec extends AbstractJsonCodec<Path> {
+
+		public PathCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public Path read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					URI uri = URI.create(reader.readString());
+					if (uri.getScheme() == null) {
+						return Path.of(uri.getPath());
+					}
+					return Path.of(uri);
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(Path value, JsonWriter writer) throws IOException {
+			URI uri = value.toUri();
+			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
+				writer.writeString(value.toString());
+				return;
+			}
+			writer.writeString(value.toUri().toString());
+		}
+	}
+
+	public static final class URICodec extends AbstractJsonCodec<URI> {
+
+		public URICodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public URI read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					return URI.create(reader.readString());
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(URI value, JsonWriter writer) throws IOException {
+			writer.writeString(value.toString());
+		}
+	}
+
+	public static final class URLCodec extends AbstractJsonCodec<URL> {
+
+		public URLCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public URL read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					return URI.create(reader.readString()).toURL();
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(URL value, JsonWriter writer) throws IOException {
+			writer.writeString(value.toString());
+		}
+	}
+
+	public static final class UUIDCodec extends AbstractJsonCodec<UUID> {
+
+		public UUIDCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public UUID read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					return UUID.fromString(reader.readString());
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					long m = reader.readLong();
+					long l = reader.readLong();
+					reader.endArray();
+					return new UUID(m, l);
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(UUID value, JsonWriter writer) throws IOException {
+			writer.writeString(value.toString());
+		}
+	}
+
+	public static final class ObjectCodec extends AbstractJsonCodec<Object> {
+
+		final JsonDeserializer<JsonObject> jod;
+		final JsonDeserializer<JsonArray> jad;
+
+		public ObjectCodec(Type type, JsonCodecRegistry registry) {
+			super(registry);
+			this.jod = registry.getDeserializerIndirect(JsonObject.class);
+			this.jad = registry.getDeserializerIndirect(JsonArray.class);
+		}
+
+		@Override
+		public Object read(JsonReader reader) throws IOException {
+			JsonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case STRING -> {
+					return reader.readString();
+				}
+				case BOOLEAN -> {
+					return reader.readBoolean();
+				}
+				case NUMBER -> {
+					return reader.readNumber();
+				}
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_OBJECT -> {
+					return jod.read(reader);
+				}
+				case BEGIN_ARRAY -> {
+					return jad.read(reader);
+				}
+				default -> throw new JsonReadException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void write(Object value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			Class<Object> cl = (Class<Object>) value.getClass();
+			if (cl == Object.class) {
+				writer.beginObject();
+				writer.endObject();
+				return;
+			}
+			JsonSerializer<Object> ser = registry.getSerializer(cl);
+			ser.write(value, writer);
+		}
+	}
+
 	public static final class StringCodec extends AbstractJsonCodec<String> {
 
 		final JsonDeserializer<JsonObject> jod;
@@ -893,8 +1120,8 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 		public StringCodec(Type type, JsonCodecRegistry registry) {
 			super(registry);
-			this.jod = registry.getDeserializer(JsonObject.class);
-			this.jad = registry.getDeserializer(JsonArray.class);
+			this.jod = registry.getDeserializerIndirect(JsonObject.class);
+			this.jad = registry.getDeserializerIndirect(JsonArray.class);
 		}
 
 		@Override

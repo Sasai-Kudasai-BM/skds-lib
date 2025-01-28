@@ -105,6 +105,11 @@ public class SKDSUtils {
 		return HEX_FORMAT_LC.formatHex(md.digest(data));
 	}
 
+	public static String hashString(String data) {
+		MessageDigest md = getSHA1();
+		return HEX_FORMAT_LC.formatHex(md.digest(data.getBytes(StandardCharsets.UTF_8)));
+	}
+
 	public static StartTime startTimeMeasure() {
 		return new StartTime(System.nanoTime());
 	}

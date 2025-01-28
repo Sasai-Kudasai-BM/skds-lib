@@ -1,9 +1,9 @@
-package net.skds.lib2.network.packets;
+package net.skds.lib2.network.bad.packets;
 
 import lombok.AllArgsConstructor;
-import net.skds.lib2.network.AbstractClientConnection;
-import net.skds.lib2.network.InPacket;
-import net.skds.lib2.network.OutPacket;
+import net.skds.lib2.network.bad.AbstractClientConnection;
+import net.skds.lib2.network.bad.InPacket;
+import net.skds.lib2.network.bad.OutPacket;
 import net.skds.lib2.utils.SKDSByteBuf;
 
 @AllArgsConstructor

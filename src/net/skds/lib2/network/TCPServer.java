@@ -1,35 +1,33 @@
 package net.skds.lib2.network;
 
-
-import lombok.Setter;
+import lombok.CustomLog;
+import net.skds.lib2.utils.ThreadUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.concurrent.Executor;
+import java.nio.channels.*;
 import java.util.function.Function;
 
-//TODO
+
+@CustomLog
 public class TCPServer {
 
 	protected boolean running = false;
 	public final Selector selector;
+	public final Selector monitirSelector;
 	public final ServerSocketChannel server;
 	protected final Object acceptAttachment = new Object();
-	@Setter
-	private Function<SocketChannel, AbstractClientConnection<?>> connectionFactory;
-	private final Executor inputExecutor, outputExecutor;
 
-	public TCPServer(Function<SocketChannel, AbstractClientConnection<?>> connectionFactory, Executor inputExecutor, Executor outputExecutor) {
+	protected final String serverName;
+	protected final Function<SocketChannel, ChannelConnection> connectionFactory;
+
+	public TCPServer(String serverName, Function<SocketChannel, ChannelConnection> connectionFactory) {
+		this.serverName = serverName;
 		this.connectionFactory = connectionFactory;
-		this.outputExecutor = outputExecutor;
-		this.inputExecutor = inputExecutor;
 		try {
+			this.monitirSelector = Selector.open();
 			this.selector = Selector.open();
 			this.server = ServerSocketChannel.open();
 		} catch (IOException e) {
@@ -43,8 +41,13 @@ public class TCPServer {
 			try {
 				k.channel().close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(System.err);
 			}
+		}
+		try {
+			selector.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -53,69 +56,114 @@ public class TCPServer {
 		try {
 			server.bind(address);
 			server.configureBlocking(false);
-			server.register(selector, SelectionKey.OP_ACCEPT, acceptAttachment);
+			server.register(monitirSelector, SelectionKey.OP_ACCEPT, acceptAttachment);
+			//server.register(selector, SelectionKey.OP_READ);
 
 			final ServerSocket socket = server.socket();
 			socket.setSoTimeout(5000);
-			inputExecutor.execute(this::inputLoop);
+			ThreadUtils.runNewThreadMainGroup(() -> {
+				while (running) {
+					try {
+						monitirSelector.select(this::onSelectMonitor);
+					} catch (Exception e) {
+						e.printStackTrace(System.err);
+					}
+				}
+			}, serverName + "-monitor");
+			ThreadUtils.runNewThreadMainGroup(() -> {
+				while (running) {
+					try {
+						selector.select(this::onSelect);
+					} catch (Exception e) {
+						e.printStackTrace(System.err);
+					}
+				}
+			}, serverName + "-input");
 		} catch (IOException e) {
 			running = false;
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected void onSelect(SelectionKey key) {
+	public void registerMain(ChannelConnection cs) {
+		SocketChannel sc = cs.getChannel();
+		try {
+			sc.register(selector, SelectionKey.OP_READ, sc);
+		} catch (ClosedChannelException e) {
+			e.printStackTrace(System.err);
+			disconnectSC(sc);
+		}
+	}
+
+	protected void onSelectMonitor(SelectionKey key) {
 		if (key.isAcceptable()) {
 			if (key.attachment() != acceptAttachment) {
-				key.cancel();
+				disconnectKey(key);
 				return;
 			}
 			try {
-				final SocketChannel sc = server.accept();
-				AbstractClientConnection<?> connection = connectionFactory.apply(sc);
-				sc.configureBlocking(false);
+
+				@SuppressWarnings("resource") final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
+				log.debug("[Monitor] accepting " + sc.getRemoteAddress());
+
 				final Socket socket = sc.socket();
+				sc.configureBlocking(false);
 				socket.setTcpNoDelay(true);
-				socket.setSoTimeout(connection.getTimeout());
-				outputExecutor.execute(() -> outputLoop(connection));
-				sc.register(selector, SelectionKey.OP_READ, connection);
-				connection.startEncryption();
+				socket.setSoTimeout(5000);
+				sc.register(monitirSelector, SelectionKey.OP_READ, connectionFactory.apply(sc));
 			} catch (IOException e) {
-				key.cancel();
-				e.printStackTrace();
+				e.printStackTrace(System.err);
+				disconnectKey(key);
 			}
-		} else if (key.isReadable() && (key.attachment() instanceof AbstractClientConnection<?> cc)) {
+		} else if (key.isReadable() && (key.attachment() instanceof ChannelConnection cr)) {
 			try {
-				cc.read();
+				cr.read((SocketChannel) key.channel());
 			} catch (IOException e) {
-				try {
-					cc.channel.close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+				e.printStackTrace(System.err);
+				disconnectKey(key);
 			}
 		} else {
-			key.cancel();
+			disconnectKey(key);
 		}
 	}
 
-	protected void inputLoop() {
-		while (running) {
+	protected void onSelect(SelectionKey key) {
+		if (key.isReadable() && (key.attachment() instanceof ChannelConnection cr)) {
 			try {
-				selector.select(this::onSelect);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	protected void outputLoop(AbstractClientConnection<?> connection) {
-		while (running && connection.isAlive()) {
-			try {
-				connection.flushPackets();
+				cr.read((SocketChannel) key.channel());
 			} catch (IOException e) {
-				connection.disconnect();
+				e.printStackTrace(System.err);
+				disconnectKey(key);
 			}
+		} else {
+			disconnectKey(key);
 		}
 	}
+
+	public void disconnectKey(SelectionKey key) {
+		try {
+			key.cancel();
+			key.channel().close();
+		} catch (IOException ex) {
+			ex.printStackTrace(System.err);
+		}
+	}
+
+	public void disconnectSC(SocketChannel sc) {
+		try {
+			sc.close();
+		} catch (IOException ex) {
+			ex.printStackTrace(System.err);
+		}
+	}
+
+	//protected void outputLoop(AbstractClientConnection<?> connection) {
+	//	while (running && connection.isAlive()) {
+	//		try {
+	//			connection.flushPackets();
+	//		} catch (IOException e) {
+	//			connection.disconnect();
+	//		}
+	//	}
+	//}
 }

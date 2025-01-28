@@ -164,18 +164,21 @@ public class JsonUtils {
 		rebuild();
 	}
 
-	public static <T> T parseJson(String text, Class<T> clazz) {
+	public static <T> T parseJson(String text, Class<T> type) {
 		try {
-			return fancyRegistry.getDeserializer(clazz).parse(text);
+			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			return deserializer.parse(text);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 		return null;
 	}
 
-	public static <T> T parseJson(JsonElement json, Class<T> clazz) {
+
+	public static <T> T parseJson(JsonElement json, Class<T> type) {
 		try {
-			return fancyRegistry.getDeserializer(clazz).parse(json);
+			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			return deserializer.parse(json);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -204,6 +207,56 @@ public class JsonUtils {
 		try {
 			String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 			return parseJson(text, clazz);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return null;
+	}
+
+
+	public static <T> T readJson(String file, Type type) {
+		return readJson(Path.of(file), type);
+	}
+
+	public static <T> T readJson(File file, Type type) {
+		return readJson(file.toPath(), type);
+	}
+
+	public static <T> T readJson(Path file, Type type) {
+		try {
+			String text = Files.readString(file);
+			return parseJson(text, type);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return null;
+	}
+
+	public static <T> T readJson(InputStream is, Type type) {
+		try {
+			String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+			return parseJson(text, type);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return null;
+	}
+
+	public static <T> T parseJson(String text, Type type) {
+		try {
+			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			return deserializer.parse(text);
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return null;
+	}
+
+
+	public static <T> T parseJson(JsonElement json, Type type) {
+		try {
+			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			return deserializer.parse(json);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}

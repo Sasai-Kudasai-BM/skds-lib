@@ -26,7 +26,7 @@ public class LongMap<T> {
 		this.bitCount = 0;
 	}
 
-	public LongMap(int markBits) {
+	private LongMap(int markBits) {
 		this.bitCount = markBits;
 		this.bitSet = new BitSet();
 	}

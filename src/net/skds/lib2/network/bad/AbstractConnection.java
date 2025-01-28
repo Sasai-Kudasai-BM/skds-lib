@@ -1,4 +1,4 @@
-package net.skds.lib2.network;
+package net.skds.lib2.network.bad;
 
 import lombok.Setter;
 import net.skds.lib2.utils.SKDSByteBuf;

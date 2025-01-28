@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unused")
 public class JsonTest {
@@ -203,6 +204,10 @@ public class JsonTest {
 
 		System.out.println(JsonUtils.parseJson(test, JsonElement.class));
 		//throw new RuntimeException(new Exception("seaxe"));
+	}
+
+	public static CompletableFuture<Boolean> test() {
+		return CompletableFuture.completedFuture(true);
 	}
 
 	static final YupCT y0 = new YupCT(Yup.Yup0.class, "e0");

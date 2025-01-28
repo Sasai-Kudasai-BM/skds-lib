@@ -1,4 +1,4 @@
-package net.skds.lib2.network.demo;
+package net.skds.lib2.network.bad.demo;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

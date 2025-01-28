@@ -1,8 +1,8 @@
-package net.skds.lib2.network;
+package net.skds.lib2.network.bad;
 
-import net.skds.lib2.network.packets.BasicPackets;
-import net.skds.lib2.network.packets.EncryptionReplyC2SPacket;
-import net.skds.lib2.network.packets.EncryptionStartS2CPacket;
+import net.skds.lib2.network.bad.packets.BasicPackets;
+import net.skds.lib2.network.bad.packets.EncryptionReplyC2SPacket;
+import net.skds.lib2.network.bad.packets.EncryptionStartS2CPacket;
 import net.skds.lib2.utils.SKDSByteBuf;
 
 import java.nio.channels.SocketChannel;

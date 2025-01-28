@@ -44,6 +44,19 @@ public class FileUtils {
 		file.mkdirs();
 	}
 
+	public static void createFileAndParentDirs(File file) {
+		createParentDirs(file);
+		try {
+			if (!file.exists()) {
+				if (!file.createNewFile()) {
+					throw new IOException("Unable to create file " + file);
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static boolean createParentDirs(Path path) {
 		File file = getParentFile(path);
 		return file.mkdirs();

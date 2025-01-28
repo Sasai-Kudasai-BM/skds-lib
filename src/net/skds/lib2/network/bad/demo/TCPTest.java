@@ -1,6 +1,6 @@
-package net.skds.lib2.network.demo;
+package net.skds.lib2.network.bad.demo;
 
-import net.skds.lib2.network.*;
+import net.skds.lib2.network.bad.*;
 import net.skds.lib2.utils.SKDSByteBuf;
 import net.skds.lib2.utils.ThreadUtils;
 
@@ -33,7 +33,7 @@ public class TCPTest {
 
 	public static void main(String[] args) {
 
-		TCPServer server = new TCPServer(ClientConnection::new, ThreadUtils.EXECUTOR, ThreadUtils.EXECUTOR);
+		BadTCPServer server = new BadTCPServer(ClientConnection::new, ThreadUtils.EXECUTOR, ThreadUtils.EXECUTOR);
 		TCPClient<ServerConnection> client = new TCPClient<>(ServerConnection::new, ThreadUtils.EXECUTOR, ThreadUtils.EXECUTOR);
 
 		InetSocketAddress address = new InetSocketAddress(1000);
