@@ -6,7 +6,5 @@
 	"includeLoggerClass": false,
 	"includeStackTop": true,
 	"useFileOut": false,
-	"ansiColors": {
-		"DEBUG": "BRIGHT_BLACK"
-	}
+	"ansiColors": {}
 }

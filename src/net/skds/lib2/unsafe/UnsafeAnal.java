@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 
 @UtilityClass
 @SuppressWarnings("unused")
+@Deprecated
 public final class UnsafeAnal {
 
 	public static final Unsafe UNSAFE = getUnsafe();

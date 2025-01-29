@@ -136,8 +136,8 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return super.put(key, new JsonBoolean(value));
 	}
 
-	public JsonElement put(String key, String value) {
-		return super.put(key, new JsonString(value));
+	public JsonElement put(String key, CharSequence value) {
+		return super.put(key, new JsonString(value.toString()));
 	}
 
 	public JsonElement putNull(String key) {
