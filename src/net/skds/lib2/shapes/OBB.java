@@ -8,7 +8,7 @@ public class OBB implements ConvexShape {
 
 	public final Matrix3 normals;
 	public final Vec3 center;
-	//public final Vec3 dimensions;
+	public final Vec3 dimensions;
 
 	private Vec3[] vertexCache;
 	private AABB boundingCache;
@@ -17,39 +17,41 @@ public class OBB implements ConvexShape {
 
 	public OBB(Vec3 center, Vec3 dimensions, Quat q) {
 		this.center = center;
+		this.dimensions = dimensions;
 		this.normals = Matrix3.fromQuatNS(q, dimensions.x(), dimensions.y(), dimensions.z());
 	}
 
-	public OBB(Vec3 center, Matrix3 normals) {
+	public OBB(Vec3 center, Vec3 dimensions, Matrix3 normals) {
 		this.center = center;
+		this.dimensions = dimensions;
 		this.normals = normals;
 	}
 
-	private OBB(Vec3 center, Matrix3 normals, Object attachment) {
+	private OBB(Vec3 center, Vec3 dimensions, Matrix3 normals, Object attachment) {
 		this.center = center;
+		this.dimensions = dimensions;
 		this.normals = normals;
 		this.attachment = attachment;
 	}
 
-
 	@Override
 	public OBB rotate(Matrix3 m3) {
-		return new OBB(center, m3.multiply(normals), attachment);
+		return new OBB(center, this.dimensions, normals.multiply(m3), attachment);
 	}
 
 	@Override
 	public OBB move(Vec3 delta) {
-		return new OBB(center.add(delta), normals, attachment);
+		return new OBB(center.add(delta), this.dimensions, normals, attachment);
 	}
 
 	@Override
 	public OBB scale(double scale) {
-		return new OBB(center, normals.scale(scale), attachment);
+		return new OBB(center, this.dimensions.scale(scale), normals, attachment);
 	}
 
 	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
-		return new OBB(center.add(pos), m3.multiply(normals).scale(scale), attachment);
+		return new OBB(center.add(pos), this.dimensions.scale(scale), normals.multiply(m3), attachment);
 	}
 
 	@Override
@@ -57,9 +59,19 @@ public class OBB implements ConvexShape {
 		return attachment;
 	}
 
+	/**
+	 * Don't use it
+	 *
+	 * @see OBB#withAttachment
+	 */
+	@Override
+	public void setAttachment(Object attachment) {
+		this.attachment = attachment;
+	}
+
 	@Override
 	public OBB withAttachment(Object attachment) {
-		return new OBB(center, normals, attachment);
+		return new OBB(center, this.dimensions, normals, attachment);
 	}
 
 	@Override
@@ -77,13 +89,12 @@ public class OBB implements ConvexShape {
 		return bb;
 	}
 
-
 	@Override
 	public Vec3[] getPoints() {
 		Vec3[] vc = vertexCache;
-		Vec3 l = normals.left();
-		Vec3 u = normals.up();
-		Vec3 f = normals.forward();
+		Vec3 l = normals.left().scale(this.dimensions.x());
+		Vec3 u = normals.up().scale(this.dimensions.y());
+		Vec3 f = normals.forward().scale(this.dimensions.z());
 		if (vc == null) {
 			vc = new Vec3[]{
 					center.addScale(l.sub(u), .5),
@@ -102,19 +113,19 @@ public class OBB implements ConvexShape {
 
 	@Override
 	public double surfaceArea() {
-		double l = normals.left().length();
-		double u = normals.up().length();
-		double f = normals.forward().length();
+		double l = this.dimensions.x();
+		double u = this.dimensions.y();
+		double f = this.dimensions.z();
 		return 2 * (l * u + l * f + u * f);
 	}
-
 
 	@Override
 	public Vec3[] getNormals() {
 		return new Vec3[]{
-				normals.leftNorm(),
-				normals.upNorm(),
-				normals.forwardNorm()
+				normals.left(),
+				normals.up(),
+				normals.forward()
 		};
 	}
+
 }

@@ -37,6 +37,13 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Object getAttachment();
 
+	/**
+	 * Don't use it
+	 *
+	 * @see Shape#withAttachment
+	 */
+	void setAttachment(Object object);
+
 	Shape withAttachment(Object attachment);
 
 }

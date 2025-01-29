@@ -1,6 +1,5 @@
 package net.skds.lib2.shapes;
 
-
 import net.skds.lib2.mat.Direction;
 import net.skds.lib2.mat.Vec3;
 

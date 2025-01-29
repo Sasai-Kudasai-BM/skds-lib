@@ -108,7 +108,6 @@ public class ConvexCollision {
 		return new Collision(distance, termLen, minTerm, Vec3.ZERO, null, a, b);
 	}
 
-
 	public static Collision collideAABB(AABB a, AABB b, Vec3 velocityBA) {
 
 		double pMin = 0;
@@ -182,6 +181,5 @@ public class ConvexCollision {
 		}
 		return new Collision(distance, termLen, minTerm, Vec3.ZERO, minTerm, a, b);
 	}
-
 
 }

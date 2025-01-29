@@ -71,15 +71,14 @@ public final class AABB implements ConvexShape {
 	}
 
 	public static AABB fromPosSize(Vec3 pos, Vec3 size) {
-		double dx = size.x() / 2;
-		double dy = size.y() / 2;
-		double dz = size.z() / 2;
-		return new AABB(pos.x() - dx, pos.y() - dy, pos.z() - dz, pos.x() + dx, pos.y() + dy, pos.z() + dz);
+		double dx = size.x();
+		double dy = size.y();
+		double dz = size.z();
+		return new AABB(pos.x(), pos.y(), pos.z(), pos.x() + dx, pos.y() + dy, pos.z() + dz);
 	}
 
 	public static AABB fromPosSize(Vec3 pos, double size) {
-		size /= 2;
-		return new AABB(pos.x() - size, pos.y() - size, pos.z() - size, pos.x() + size, pos.y() + size, pos.z() + size);
+		return new AABB(pos.x(), pos.y(), pos.z(), pos.x() + size, pos.y() + size, pos.z() + size);
 	}
 
 	public static AABB fromNormal(Vec3 n) {
@@ -96,6 +95,16 @@ public final class AABB implements ConvexShape {
 	public static AABB fromCenter(Vec3 center, double dx, double dy, double dz) {
 		return new AABB(center.x() - dx / 2.0, center.y() - dy / 2.0, center.z() - dz / 2.0, center.x() + dx / 2.0,
 				center.y() + dy / 2.0, center.z() + dz / 2.0);
+	}
+
+	public static AABB fromCenter(Vec3 center, double size) {
+		return new AABB(center.x() - size / 2.0, center.y() - size / 2.0, center.z() - size / 2.0, center.x() + size / 2.0,
+				center.y() + size / 2.0, center.z() + size / 2.0);
+	}
+
+	public static AABB fromCenter(double centerX, double centerY, double centerZ, double dx, double dy, double dz) {
+		return new AABB(centerX - dx / 2.0, centerY - dy / 2.0, centerZ - dz / 2.0, centerX + dx / 2.0,
+				centerY + dy / 2.0, centerZ + dz / 2.0);
 	}
 
 	public static AABB fromRadius(Vec3 center, double radius) {
@@ -136,21 +145,21 @@ public final class AABB implements ConvexShape {
 	public AABB scale(double scale) {
 		Vec3 center = getCenter();
 		AABB box = fromCenter(getCenter(), sizeX() * scale, sizeY() * scale, sizeZ() * scale);
-		box.attachment = attachment;
+		box.setAttachment(attachment);
 		return box;
 	}
 
 	@Override
 	public OBB rotate(Matrix3 m3) {
-		OBB obb = new OBB(getCenter(), m3.scaleNS(sizeX(), sizeY(), sizeZ()));
-		obb.withAttachment(attachment);
+		OBB obb = new OBB(getCenter(), this.dimensions(), m3);
+		obb.setAttachment(attachment);
 		return obb;
 	}
 
 	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
-		OBB obb = new OBB(getCenter().add(pos), m3.scaleNS(sizeX() * scale, sizeY() * scale, sizeZ() * scale));
-		obb.withAttachment(attachment);
+		OBB obb = new OBB(getCenter().add(pos), this.dimensions().scale(scale), m3);
+		obb.setAttachment(attachment);
 		return obb;
 	}
 
@@ -510,6 +519,16 @@ public final class AABB implements ConvexShape {
 		return attachment;
 	}
 
+	/**
+	 * Don't use it
+	 *
+	 * @see AABB#withAttachment
+	 */
+	@Override
+	public void setAttachment(Object attachment) {
+		this.attachment = attachment;
+	}
+
 	@Override
 	public AABB withAttachment(Object attachment) {
 		return new AABB(minX, minY, minZ, maxX, maxY, maxZ, attachment);
@@ -530,10 +549,6 @@ public final class AABB implements ConvexShape {
 	@Override
 	public Vec3 getCenter() {
 		return new Vec3D((this.minX + this.maxX) / 2, (this.minY + this.maxY) / 2, (this.minZ + this.maxZ) / 2);
-	}
-
-	public Vec3 getDimensions() {
-		return new Vec3D(maxX - minX, maxY - minY, maxZ - minZ);
 	}
 
 	public double getMin(Direction.Axis axis) {

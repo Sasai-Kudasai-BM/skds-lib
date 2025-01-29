@@ -162,9 +162,23 @@ public sealed class VoxelShape implements CompositeShape {
 		return bounding;
 	}
 
+	public AABB[] getBoxes() {
+		return this.boxes;
+	}
+
 	@Override
 	public Object getAttachment() {
 		return attachment;
+	}
+
+	/**
+	 * Don't use it
+	 *
+	 * @see VoxelShape#withAttachment
+	 */
+	@Override
+	public void setAttachment(Object attachment) {
+		this.attachment = attachment;
 	}
 
 	@Override

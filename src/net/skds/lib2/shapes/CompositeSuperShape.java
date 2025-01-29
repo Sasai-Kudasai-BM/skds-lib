@@ -41,6 +41,13 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return new CompositeSuperShape(shapes, center, null);
 	}
 
+	public static CompositeSuperShape of(Shape[] shapes, Vec3 center, Object attachment) {
+		if (shapes == null || shapes.length == 0) {
+			return EMPTY;
+		}
+		return new CompositeSuperShape(shapes, center, attachment);
+	}
+
 	public boolean isEmpty() {
 		return shapes.length == 0;
 	}
@@ -98,14 +105,14 @@ public sealed class CompositeSuperShape implements CompositeShape {
 
 	@Override
 	public CompositeSuperShape rotate(Matrix3 m3) {
-		final Shape[] convexShapes = new Shape[shapes.length];
+		final Shape[] convexShapes = new Shape[this.shapes.length];
 		for (int i = 0; i < convexShapes.length; i++) {
-			Shape shape = shapes[i];
-			Vec3 od = shape.getCenter().sub(center);
+			Shape shape = this.shapes[i];
+			Vec3 od = shape.getCenter().sub(this.center);
 			Vec3 nd = od.transform(m3);
 			convexShapes[i] = shape.moveRotScale(nd.sub(od), m3, 1);
 		}
-		return new CompositeSuperShape(convexShapes, center, attachment);
+		return new CompositeSuperShape(convexShapes, this.center, this.attachment);
 	}
 
 	@Override
@@ -146,9 +153,23 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return bounding;
 	}
 
+	public Shape[] getAllShapes() {
+		return this.shapes;
+	}
+
 	@Override
 	public Object getAttachment() {
 		return attachment;
+	}
+
+	/**
+	 * Don't use it
+	 *
+	 * @see CompositeSuperShape#withAttachment
+	 */
+	@Override
+	public void setAttachment(Object attachment) {
+		this.attachment = attachment;
 	}
 
 	@Override
