@@ -50,6 +50,15 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		return super.add(JsonElement.NULL);
 	}
 
+	@Override
+	public JsonArray deepCopy() {
+		JsonArray array = new JsonArray();
+		for (JsonElement jsonElement : this) {
+			array.add(jsonElement.deepCopy());
+		}
+		return array;
+	}
+
 	public static class Codec extends AbstractJsonCodec<JsonArray> {
 
 		private final JsonCodec<JsonElement> elementCodec;

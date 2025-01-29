@@ -23,6 +23,11 @@ public record JsonString(String value) implements JsonElement {
 		return value;
 	}
 
+	@Override
+	public JsonString deepCopy() {
+		return this;
+	}
+
 	public static final class Codec extends AbstractJsonCodec<JsonString> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {

@@ -15,7 +15,8 @@ public interface JsonSerializer<T> extends Serializer<T, JsonWriter>, JsonRegist
 	default String toJson(T value) {
 		try {
 			StringCharOutput co = new StringCharOutput();
-			write(value, getRegistry().createWriter(co));
+			JsonWriter writer = getRegistry().createWriter(co);
+			write(value, writer);
 			return co.toString();
 		} catch (IOException e) {
 			throw new RuntimeException(e);

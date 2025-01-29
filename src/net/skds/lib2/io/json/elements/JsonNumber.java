@@ -28,6 +28,11 @@ public record JsonNumber(Number value) implements JsonElement {
 		return value;
 	}
 
+	@Override
+	public JsonNumber deepCopy() {
+		return this;
+	}
+
 	public static final class Codec extends AbstractJsonCodec<JsonNumber> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {

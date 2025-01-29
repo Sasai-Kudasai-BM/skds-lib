@@ -33,6 +33,11 @@ public record JsonBoolean(boolean value) implements JsonElement {
 		return b ? TRUE : FALSE;
 	}
 
+	@Override
+	public JsonBoolean deepCopy() {
+		return this;
+	}
+
 	public static final class Codec extends AbstractJsonCodec<JsonBoolean> {
 
 		public Codec(Type type, JsonCodecRegistry registry) {

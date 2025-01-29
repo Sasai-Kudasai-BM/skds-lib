@@ -203,6 +203,14 @@ public class JsonTest {
 		JsonUtils.parseJson(prePostTest, PrePostList.class);
 
 		System.out.println(JsonUtils.parseJson(test, JsonElement.class));
+
+		DefaultCodecExtendsCollection defCollectionCodec = new DefaultCodecExtendsCollection();
+		defCollectionCodec.add("a");
+		defCollectionCodec.add("b");
+		defCollectionCodec.add("c");
+		String defCollectionCodecJson = JsonUtils.toJson(defCollectionCodec);
+		System.out.println(defCollectionCodecJson);
+		JsonUtils.parseJson(defCollectionCodecJson, DefaultCodecExtendsCollection.class);
 		//throw new RuntimeException(new Exception("seaxe"));
 	}
 
@@ -598,6 +606,58 @@ public class JsonTest {
 			public void postDeserializedJson() {
 				System.out.println("post");
 			}
+		}
+	}
+
+
+	@DefaultJsonCodec(DefaultCodecExtendsCollectionCodec.class)
+	private static class DefaultCodecExtendsCollection extends ArrayList<String> {
+		private int version = 10;
+	}
+
+	private static final class DefaultCodecExtendsCollectionCodec extends AbstractJsonCodec<DefaultCodecExtendsCollection> {
+
+		public DefaultCodecExtendsCollectionCodec(Type type, JsonCodecRegistry registry) {
+			super(type, registry);
+			System.out.println("create " + type);
+		}
+
+		@Override
+		public DefaultCodecExtendsCollection read(JsonReader reader) throws IOException {
+			System.out.println("read");
+			DefaultCodecExtendsCollection value = new DefaultCodecExtendsCollection();
+			reader.beginObject();
+			while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+				String name = reader.readName();
+				if (name.equals("version")) {
+					value.version = reader.readInt();
+				}
+				if (name.equals("values")) {
+					reader.beginArray();
+					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
+						value.add(reader.readString());
+					}
+					reader.endArray();
+				}
+			}
+			reader.endObject();
+			return value;
+		}
+
+		@Override
+		public void write(DefaultCodecExtendsCollection value, JsonWriter writer) throws IOException {
+			System.out.println("write");
+			writer.beginObject();
+
+			writer.writeInt("version", value.version);
+
+			writer.beginArray("values");
+			for (String string : value) {
+				writer.writeString(string);
+			}
+			writer.endArray();
+
+			writer.endObject();
 		}
 	}
 }

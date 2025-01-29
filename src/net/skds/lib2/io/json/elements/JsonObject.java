@@ -32,6 +32,90 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return this;
 	}
 
+	public JsonObject getAsJsonObjectOrNull(String key) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsJsonObject();
+		} else {
+			return null;
+		}
+	}
+	
+	public JsonObject getAsJsonObjectOrNew(String key) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsJsonObject();
+		} else {
+			return new JsonObject();
+		}
+	}
+	
+	public JsonObject getAsJsonObjectOr(String key, JsonObject or) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsJsonObject();
+		} else {
+			return or;
+		}
+	}
+
+
+	public JsonArray getAsJsonArrayOrNull(String key) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsJsonArray();
+		} else {
+			return null;
+		}
+	}
+	
+	public JsonArray getAsJsonArrayOrNew(String key) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsJsonArray();
+		} else {
+			return new JsonArray();
+		}
+	}
+	
+	public JsonArray getAsJsonArrayOr(String key, JsonArray or) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsJsonArray();
+		} else {
+			return or;
+		}
+	}
+
+
+	public String getAsJsonStringOrNull(String key) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsString();
+		} else {
+			return null;
+		}
+	}
+	
+	public String getAsJsonStringOrNew(String key) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsString();
+		} else {
+			return "";
+		}
+	}
+	
+	public String getAsJsonStringOr(String key, String or) {
+		JsonElement element = this.get(key);
+		if (element != null) {
+			return element.getAsString();
+		} else {
+			return or;
+		}
+	}
+
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -58,6 +142,15 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 
 	public JsonElement putNull(String key) {
 		return super.put(key, JsonElement.NULL);
+	}
+
+	@Override
+	public JsonObject deepCopy() {
+		JsonObject jsonObject = new JsonObject();
+		for (Entry<String, JsonElement> entry : this.entrySet()) {
+			jsonObject.put(entry.getKey(), entry.getValue().deepCopy());
+		}
+		return jsonObject;
 	}
 
 	public static class Codec extends AbstractJsonCodec<JsonObject> {

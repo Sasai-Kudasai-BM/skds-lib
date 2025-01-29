@@ -55,7 +55,14 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		return getAsNumber().doubleValue();
 	}
 
+	JsonElement deepCopy();
+
+	default boolean isJsonPrimitive() {
+		return this.type().isJsonPrimitive();
+	}
+
 	final class JsonNull implements JsonElement {
+
 		@Override
 		public JsonElementType type() {
 			return JsonElementType.NULL;
@@ -64,6 +71,11 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		@Override
 		public String toString() {
 			return "null";
+		}
+
+		@Override
+		public JsonNull deepCopy() {
+			return this;
 		}
 	}
 
@@ -125,4 +137,6 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 			}
 		}
 	}
+
+
 }
