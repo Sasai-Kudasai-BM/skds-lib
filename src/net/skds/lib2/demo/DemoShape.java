@@ -40,6 +40,13 @@ public class DemoShape {
 		print(shape, 1);
 		log.warn("shape2");
 		print(shape, 0.5f);
+
+		log.warn("shape rot");
+		CompositeSuperShape shape3 = shape.setPose(FUNCTION, OFFSET, Quat.fromAxisDegrees(Vec3.XP, 90), 1);
+		CompositeSuperShape shape4 = shape.setPose(FUNCTION, OFFSET, Quat.fromAxisDegrees(Vec3.XP, 180), 1);
+		System.out.println("base: " + shape.getBoundingBox());
+		System.out.println("90: " + shape3.getBoundingBox());
+		System.out.println("180: " + shape4.getBoundingBox());
 	}
 
 	private static void print(CompositeSuperShape shape, float scale) {
