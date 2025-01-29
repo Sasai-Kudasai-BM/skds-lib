@@ -15,11 +15,11 @@ public class BezierCurve {
 	 */
 	public static Vec3D curve1(float t, Vec3 start, Vec3 point1, Vec3 end) {
 		float a = 1f - t;
-		return
-				start.scale(a * a)
-						.add(point1.scale(2 * t * a))
-						.add(end.scale(t * t))
-				;
+		return 
+			start.scale(a * a)
+			.add(point1.scale(2 * t * a))
+			.add(end.scale(t * t))
+		;
 	}
 
 	/**
@@ -27,25 +27,25 @@ public class BezierCurve {
 	 */
 	public static Vec3D curve2(float t, Vec3 start, Vec3 point1, Vec3 point2, Vec3 end) {
 		float a = 1f - t;
-		return
-				start.scale(a * a * a)
-						.add(point1.scale(3 * t * a * a))
-						.add(point2.scale(3 * t * t * a))
-						.add(end.scale(t * t * t))
-				;
+		return 
+			start.scale(a * a * a)
+			.add(point1.scale(3 *  t * a * a))
+			.add(point2.scale(3 * t * t * a))
+			.add(end.scale(t * t * t))
+		;
 	}
 
-
+	
 	/**
 	 * (1-t)^2*P0 + 2t(1 - t)P1 + t^2*P2
 	 */
 	public static Vec2D curve1(float t, Vec2 start, Vec2 point1, Vec2 end) {
 		float a = 1f - t;
-		return
-				start.scale(a * a)
-						.add(point1.scale(2 * t * a))
-						.add(end.scale(t * t))
-				;
+		return 
+			start.scale(a * a)
+			.add(point1.scale(2 * t * a))
+			.add(end.scale(t * t))
+		;
 	}
 
 	/**
@@ -53,12 +53,12 @@ public class BezierCurve {
 	 */
 	public static Vec2D curve2(float t, Vec2 start, Vec2 point1, Vec2 point2, Vec2 end) {
 		float a = 1f - t;
-		return
-				start.scale(a * a * a)
-						.add(point1.scale(3 * t * a * a))
-						.add(point2.scale(3 * t * t * a))
-						.add(end.scale(t * t * t))
-				;
+		return 
+			start.scale(a * a * a)
+			.add(point1.scale(3 *  t * a * a))
+			.add(point2.scale(3 * t * t * a))
+			.add(end.scale(t * t * t))
+		;
 	}
 
 	/**

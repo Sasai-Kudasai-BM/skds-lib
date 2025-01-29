@@ -1,6 +1,5 @@
 package net.skds.lib2.mat;
 
-
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -14,7 +13,7 @@ import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec3I.JCodec.class)
-public record Vec3I(int xi, int yi, int zi) implements Vec3 {
+public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 
 	public static final Vec3I XN = new Vec3I(-1, 0, 0);
 	public static final Vec3I XP = new Vec3I(1, 0, 0);
@@ -108,6 +107,89 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 		this(size, size, size);
 	}
 
+	public Vec3I(double x, double y, double z) {
+		this(FastMath.floor(x), FastMath.floor(y), FastMath.floor(z));
+	}
+
+	@Override
+	public Vec3I up() {
+		return addI(0, 1, 0);
+	}
+	@Override
+	public Vec3I down() {
+		return addI(0, -1, 0);
+	}
+	@Override
+	public Vec3I left() {
+		return addI(1, 0, 0);
+	}
+	@Override
+	public Vec3I right() {
+		return addI(-1, 0, 0);
+	}
+	@Override
+	public Vec3I forward() {
+		return addI(0, 0, 1);
+	}
+	@Override
+	public Vec3I backward() {
+		return addI(0, 0, -1);
+	}
+
+	@Override
+	public Vec3I up(int i) {
+		return addI(0, i, 0);
+	}
+	@Override
+	public Vec3I down(int i) {
+		return addI(0, -i, 0);
+	}
+	@Override
+	public Vec3I left(int i) {
+		return addI(i, 0, 0);
+	}
+	@Override
+	public Vec3I right(int i) {
+		return addI(-i, 0, 0);
+	}
+	@Override
+	public Vec3I forward(int i) {
+		return addI(0, 0, i);
+	}
+	@Override
+	public Vec3I backward(int i) {
+		return addI(0, 0, -i);
+	}
+
+	@Override
+	public Vec3I up(double i) {
+		return addI(0, FastMath.round(i), 0);
+	}
+	@Override
+	public Vec3I down(double i) {
+		return addI(0, FastMath.round(-i), 0);
+	}
+	@Override
+	public Vec3I left(double i) {
+		return addI(FastMath.round(i), 0, 0);
+	}
+	@Override
+	public Vec3I right(double i) {
+		return addI(FastMath.round(-i), 0, 0);
+	}
+	@Override
+	public Vec3I forward(double i) {
+		return addI(0, 0, FastMath.round(i));
+	}
+	@Override
+	public Vec3I backward(double i) {
+		return addI(0, 0, FastMath.round(-i));
+	}
+
+	public Vec3 getCenter() {
+		return Vec3.of(this.xi() + 0.5, this.yi() + 0.5, this.zi() + 0.5);
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -126,6 +208,11 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3 {
 	@Override
 	public Vec3I getAsIntVec() {
 		return this;
+	}
+
+	@Override
+	public final int compareTo(Vec3 o) {
+		return Vec3.compareTo(this, o);
 	}
 
 	static final class JCodec extends AbstractJsonCodec<Vec3> {

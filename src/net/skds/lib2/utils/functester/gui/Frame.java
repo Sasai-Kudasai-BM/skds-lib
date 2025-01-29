@@ -4,7 +4,6 @@ import net.skds.lib2.utils.functester.FunctionTester;
 
 import javax.swing.*;
 
-
 public class Frame extends JFrame {
 
 	public final FunctionTester tester;

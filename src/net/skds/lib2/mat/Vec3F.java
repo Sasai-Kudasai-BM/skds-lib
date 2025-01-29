@@ -63,6 +63,81 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 	}
 
 	@Override
+	public Vec3F up() {
+		return addF(0, 1, 0);
+	}
+	@Override
+	public Vec3F down() {
+		return addF(0, -1, 0);
+	}
+	@Override
+	public Vec3F left() {
+		return addF(1, 0, 0);
+	}
+	@Override
+	public Vec3F right() {
+		return addF(-1, 0, 0);
+	}
+	@Override
+	public Vec3F forward() {
+		return addF(0, 0, 1);
+	}
+	@Override
+	public Vec3F backward() {
+		return addF(0, 0, -1);
+	}
+
+	@Override
+	public Vec3F up(int i) {
+		return addF(0, i, 0);
+	}
+	@Override
+	public Vec3F down(int i) {
+		return addF(0, -i, 0);
+	}
+	@Override
+	public Vec3F left(int i) {
+		return addF(i, 0, 0);
+	}
+	@Override
+	public Vec3F right(int i) {
+		return addF(-i, 0, 0);
+	}
+	@Override
+	public Vec3F forward(int i) {
+		return addF(0, 0, i);
+	}
+	@Override
+	public Vec3F backward(int i) {
+		return addF(0, 0, -i);
+	}
+
+	@Override
+	public Vec3F up(double i) {
+		return addF(0, (float)i, 0);
+	}
+	@Override
+	public Vec3F down(double i) {
+		return addF(0, (float)-i, 0);
+	}
+	@Override
+	public Vec3F left(double i) {
+		return addF((float)i, 0, 0);
+	}
+	@Override
+	public Vec3F right(double i) {
+		return addF((float)-i, 0, 0);
+	}
+	@Override
+	public Vec3F forward(double i) {
+		return addF(0, 0, (float)i);
+	}
+	@Override
+	public Vec3F backward(double i) {
+		return addF(0, 0, (float)-i);
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;

@@ -1,9 +1,7 @@
 package net.skds.lib2.utils;
 
 import lombok.Getter;
-import net.skds.lib2.mat.Quat;
-import net.skds.lib2.mat.VarInt;
-import net.skds.lib2.mat.Vec3;
+import net.skds.lib2.mat.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +12,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+// TODO DataInput DataOutput
 @SuppressWarnings("unused")
 public final class SKDSByteBuf {
 
@@ -97,6 +96,14 @@ public final class SKDSByteBuf {
 		buffer.putFloat((float) vec.x());
 		buffer.putFloat((float) vec.y());
 		buffer.putFloat((float) vec.z());
+	}
+
+	public Vec3D readDoubleVector() {
+		return Vec3.of(buffer.getDouble(), buffer.getDouble(), buffer.getDouble());
+	}
+
+	public Vec3F readFloatVector(Vec3 vec) {
+		return Vec3.of(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
 	}
 
 	//public void writeNBT(String name, NBT tag) {
@@ -603,12 +610,4 @@ public final class SKDSByteBuf {
 		}
 
 	}
-
-	//public void writeBlockPos(BlockPos pos) {
-	//	buffer.putLong(pos.asLong());
-	//}
-	//public BlockPos readBlockPos() {
-	//	return BlockPos.fromLong(buffer.getLong());
-	//}
-
 }

@@ -1,4 +1,4 @@
-package net.skds.lib2.utils.annotations;
+package net.skds.lib2.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -55,6 +55,7 @@ public class ReflectUtils {
 		}
 	}
 
+
 	public static <T> HiddenField<T> getField(Class<?> clazz, FindOptions options) {
 		final Field[] fields = clazz.getDeclaredFields();
 		int currentOrdinal = 0;
@@ -70,6 +71,25 @@ public class ReflectUtils {
 			}
 		}
 		throw new RuntimeException("No field found");
+	}
+
+	public static <T> Map<String, HiddenField<T>> getAllFields(Class<?> clazz, FindOptions options) {
+		Map<String, HiddenField<T>> map = new HashMap<>();
+
+		final Field[] fields = clazz.getDeclaredFields();
+		int currentOrdinal = 0;
+		for (int i = 0; i < fields.length; i++) {
+			Field f = fields[i];
+			if (options.test(f)) {
+				if (currentOrdinal >= options.getOrdinal() || options.getOrdinal() == -1) {
+					f.setAccessible(true);
+					map.put(f.getName(), new HiddenField<>(f));
+				} else {
+					currentOrdinal++;
+				}
+			}
+		}
+		return map;
 	}
 
 	public static void fillInstanceFields(Object instance, FillingFunction function) {
@@ -92,26 +112,6 @@ public class ReflectUtils {
 		}
 	}
 
-
-	public static <T> Map<String, HiddenField<T>> getAllFields(Class<?> clazz, FindOptions options) {
-		Map<String, HiddenField<T>> map = new HashMap<>();
-
-		final Field[] fields = clazz.getDeclaredFields();
-		int currentOrdinal = 0;
-		for (int i = 0; i < fields.length; i++) {
-			Field f = fields[i];
-			if (options.test(f)) {
-				if (currentOrdinal >= options.getOrdinal() || options.getOrdinal() == -1) {
-					f.setAccessible(true);
-					map.put(f.getName(), new HiddenField<>(f));
-				} else {
-					currentOrdinal++;
-				}
-			}
-		}
-		return map;
-	}
-
 	public static Type extractFieldType(Class<?> clazz, String fieldName) {
 		try {
 			return clazz.getDeclaredField(fieldName).getGenericType();
@@ -119,7 +119,6 @@ public class ReflectUtils {
 			throw new RuntimeException(e);
 		}
 	}
-
 
 	@FunctionalInterface
 	public interface FillingFunction {

@@ -31,7 +31,6 @@ public class LongMap<T> {
 		this.bitSet = new BitSet();
 	}
 
-
 	@SuppressWarnings("unchecked")
 	// Should be 2^n
 	private void initialize(int capacity) {

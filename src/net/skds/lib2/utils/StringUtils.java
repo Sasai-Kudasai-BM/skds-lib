@@ -7,6 +7,7 @@ import net.skds.lib2.io.exception.EndOfInputException;
 import java.io.IOException;
 import java.util.HexFormat;
 
+@SuppressWarnings("unused")
 @UtilityClass
 public class StringUtils {
 

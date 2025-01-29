@@ -33,6 +33,81 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	}
 
 	@Override
+	public Vec3D up() {
+		return add(0, 1, 0);
+	}
+	@Override
+	public Vec3D down() {
+		return add(0, -1, 0);
+	}
+	@Override
+	public Vec3D left() {
+		return add(1, 0, 0);
+	}
+	@Override
+	public Vec3D right() {
+		return add(-1, 0, 0);
+	}
+	@Override
+	public Vec3D forward() {
+		return add(0, 0, 1);
+	}
+	@Override
+	public Vec3D backward() {
+		return add(0, 0, -1);
+	}
+
+	@Override
+	public Vec3D up(int i) {
+		return add(0, i, 0);
+	}
+	@Override
+	public Vec3D down(int i) {
+		return add(0, -i, 0);
+	}
+	@Override
+	public Vec3D left(int i) {
+		return add(i, 0, 0);
+	}
+	@Override
+	public Vec3D right(int i) {
+		return add(-i, 0, 0);
+	}
+	@Override
+	public Vec3D forward(int i) {
+		return add(0, 0, i);
+	}
+	@Override
+	public Vec3D backward(int i) {
+		return add(0, 0, -i);
+	}
+
+	@Override
+	public Vec3D up(double i) {
+		return add(0, i, 0);
+	}
+	@Override
+	public Vec3D down(double i) {
+		return add(0, -i, 0);
+	}
+	@Override
+	public Vec3D left(double i) {
+		return add(i, 0, 0);
+	}
+	@Override
+	public Vec3D right(double i) {
+		return add(-i, 0, 0);
+	}
+	@Override
+	public Vec3D forward(double i) {
+		return add(0, 0, i);
+	}
+	@Override
+	public Vec3D backward(double i) {
+		return add(0, 0, -i);
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;

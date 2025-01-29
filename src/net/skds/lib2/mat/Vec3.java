@@ -159,15 +159,15 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		};
 	}
 
-	static Vec3 of(double x, double y, double z) {
+	static Vec3D of(double x, double y, double z) {
 		return new Vec3D(x, y, z);
 	}
 
-	static Vec3 of(float x, float y, float z) {
+	static Vec3F of(float x, float y, float z) {
 		return new Vec3F(x, y, z);
 	}
 
-	static Vec3 of(int x, int y, int z) {
+	static Vec3I of(int x, int y, int z) {
 		return new Vec3I(x, y, z);
 	}
 
@@ -521,6 +521,150 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return l == 0 ? ret : ret / l;
 	}
 
+	default Vec3 up() {
+		return add(0, 1, 0);
+	}
+
+	default Vec3 down() {
+		return add(0, -1, 0);
+	}
+
+	default Vec3 left() {
+		return add(1, 0, 0);
+	}
+
+	default Vec3 right() {
+		return add(-1, 0, 0);
+	}
+
+	default Vec3 forward() {
+		return add(0, 0, 1);
+	}
+
+	default Vec3 backward() {
+		return add(0, 0, -1);
+	}
+
+	default Vec3 up(int i) {
+		return add(0, i, 0);
+	}
+
+	default Vec3 down(int i) {
+		return add(0, -i, 0);
+	}
+
+	default Vec3 left(int i) {
+		return add(i, 0, 0);
+	}
+
+	default Vec3 right(int i) {
+		return add(-i, 0, 0);
+	}
+
+	default Vec3 forward(int i) {
+		return add(0, 0, i);
+	}
+
+	default Vec3 backward(int i) {
+		return add(0, 0, -i);
+	}
+
+	default Vec3 up(double i) {
+		return add(0, i, 0);
+	}
+
+	default Vec3 down(double i) {
+		return add(0, -i, 0);
+	}
+
+	default Vec3 left(double i) {
+		return add(i, 0, 0);
+	}
+
+	default Vec3 right(double i) {
+		return add(-i, 0, 0);
+	}
+
+	default Vec3 forward(double i) {
+		return add(0, 0, i);
+	}
+
+	default Vec3 backward(double i) {
+		return add(0, 0, -i);
+	}
+
+	default Vec3I upI(int i) {
+		return addI(0, i, 0);
+	}
+
+	default Vec3I downI(int i) {
+		return addI(0, -i, 0);
+	}
+
+	default Vec3I leftI(int i) {
+		return addI(i, 0, 0);
+	}
+
+	default Vec3I rightI(int i) {
+		return addI(-i, 0, 0);
+	}
+
+	default Vec3I forwardI(int i) {
+		return addI(0, 0, i);
+	}
+
+	default Vec3I backwardI(int i) {
+		return addI(0, 0, -i);
+	}
+
+	default Vec3F upF(float i) {
+		return addF(0, i, 0);
+	}
+
+	default Vec3F downF(float i) {
+		return addF(0, -i, 0);
+	}
+
+	default Vec3F leftF(float i) {
+		return addF(i, 0, 0);
+	}
+
+	default Vec3F rightF(float i) {
+		return addF(-i, 0, 0);
+	}
+
+	default Vec3F forwardF(float i) {
+		return addF(0, 0, i);
+	}
+
+	default Vec3F backwardF(float i) {
+		return addF(0, 0, -i);
+	}
+
+	default Vec3D upD(double i) {
+		return add(0, i, 0);
+	}
+
+	default Vec3D downD(double i) {
+		return add(0, -i, 0);
+	}
+
+	default Vec3D leftD(double i) {
+		return add(i, 0, 0);
+	}
+
+	default Vec3D rightD(double i) {
+		return add(-i, 0, 0);
+	}
+
+	default Vec3D forwardD(double i) {
+		return add(0, 0, i);
+	}
+
+	default Vec3D backwardD(double i) {
+		return add(0, 0, -i);
+	}
+
 	default Vec3D add(Vec3 vec) {
 		return new Vec3D(
 				this.x() + vec.x(),
@@ -545,7 +689,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
-	default Vec3I add(int x2, int y2, int z2) {
+	default Vec3I addI(int x2, int y2, int z2) {
 		return new Vec3I(
 				this.xi() + x2,
 				this.yi() + y2,
@@ -1523,4 +1667,35 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		}
 	}
 
+	static int compareTo(Vec3 a, Vec3 b) {
+		if ((a instanceof Vec3I || a instanceof Direction) && (b instanceof Vec3I || b instanceof Direction)) {
+			if (a.xi() > b.xi()) {
+				return 1;
+			}
+			if (a.xi() < b.xi()) {
+				return -1;
+			}
+			if (a.yi() > b.yi()) {
+				return 1;
+			}
+			if (a.yi() < b.yi()) {
+				return -1;
+			}
+			return Integer.compare(a.zi(), b.zi());
+		} else {
+			if (a.x() > b.x()) {
+				return 1;
+			}
+			if (a.x() < b.x()) {
+				return -1;
+			}
+			if (a.y() > b.y()) {
+				return 1;
+			}
+			if (a.y() < b.y()) {
+				return -1;
+			}
+			return Double.compare(a.z(), b.z());
+		}
+	}
 }

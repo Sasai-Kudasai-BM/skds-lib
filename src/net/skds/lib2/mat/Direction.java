@@ -283,6 +283,81 @@ public enum Direction implements Vec3 {
 		return this.vector.roundZ();
 	}
 
+	@Override
+	public Vec3I up() {
+		return addI(0, 1, 0);
+	}
+	@Override
+	public Vec3I down() {
+		return addI(0, -1, 0);
+	}
+	@Override
+	public Vec3I left() {
+		return addI(1, 0, 0);
+	}
+	@Override
+	public Vec3I right() {
+		return addI(-1, 0, 0);
+	}
+	@Override
+	public Vec3I forward() {
+		return addI(0, 0, 1);
+	}
+	@Override
+	public Vec3I backward() {
+		return addI(0, 0, -1);
+	}
+
+	@Override
+	public Vec3I up(int i) {
+		return addI(0, i, 0);
+	}
+	@Override
+	public Vec3I down(int i) {
+		return addI(0, -i, 0);
+	}
+	@Override
+	public Vec3I left(int i) {
+		return addI(i, 0, 0);
+	}
+	@Override
+	public Vec3I right(int i) {
+		return addI(-i, 0, 0);
+	}
+	@Override
+	public Vec3I forward(int i) {
+		return addI(0, 0, i);
+	}
+	@Override
+	public Vec3I backward(int i) {
+		return addI(0, 0, -i);
+	}
+
+	@Override
+	public Vec3I up(double i) {
+		return addI(0, FastMath.round(i), 0);
+	}
+	@Override
+	public Vec3I down(double i) {
+		return addI(0, FastMath.round(-i), 0);
+	}
+	@Override
+	public Vec3I left(double i) {
+		return addI(FastMath.round(i), 0, 0);
+	}
+	@Override
+	public Vec3I right(double i) {
+		return addI(FastMath.round(-i), 0, 0);
+	}
+	@Override
+	public Vec3I forward(double i) {
+		return addI(0, 0, FastMath.round(i));
+	}
+	@Override
+	public Vec3I backward(double i) {
+		return addI(0, 0, FastMath.round(-i));
+	}
+
 	public String getName() {
 		return this.name;
 	}
