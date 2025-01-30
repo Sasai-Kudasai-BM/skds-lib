@@ -2,6 +2,7 @@ package net.skds.lib2.demo;
 
 import lombok.CustomLog;
 import net.skds.lib2.utils.logger.SKDSLogger;
+import net.skds.lib2.utils.logger.SKDSLoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -52,6 +53,19 @@ public class LoggerDemoFrame extends JFrame {
 		btn = new JButton("println");
 		btn.addActionListener(e -> {
 			System.out.println();
+		});
+		add(btn);
+		btn = new JButton("testAll");
+		btn.addActionListener(e -> {
+			System.out.println("1");
+			System.err.println("2");
+			System.out.println();
+			System.err.println();
+			SKDSLoggerFactory.getLogger().info("info");
+			SKDSLoggerFactory.getLogger().debug("debug");
+			SKDSLoggerFactory.getLogger().warn("warn");
+			SKDSLoggerFactory.getLogger().error("error");
+			SKDSLoggerFactory.getLogger().log("log");
 		});
 		add(btn);
 

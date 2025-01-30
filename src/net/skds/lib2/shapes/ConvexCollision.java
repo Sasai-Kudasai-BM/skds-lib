@@ -1,8 +1,8 @@
 package net.skds.lib2.shapes;
 
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.mat.Direction;
-import net.skds.lib2.mat.Vec3;
+import net.skds.lib2.mat.vec3.Direction;
+import net.skds.lib2.mat.vec3.Vec3;
 
 import java.util.ArrayList;
 import java.util.Collections;

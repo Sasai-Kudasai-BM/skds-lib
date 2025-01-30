@@ -1,10 +1,10 @@
 package net.skds.lib2.shapes;
 
 
-import net.skds.lib2.mat.Direction;
-import net.skds.lib2.mat.Matrix3;
-import net.skds.lib2.mat.Vec3;
-import net.skds.lib2.mat.Vec3D;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.vec3.Direction;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec3.Vec3D;
 
 import java.util.Collection;
 
@@ -168,14 +168,14 @@ public final class AABB implements ConvexShape {
 		Vec3[] pc = pointsCache;
 		if (pc == null) {
 			pc = new Vec3[]{
-					new Vec3D(minX, minY, minZ),
-					new Vec3D(minX, minY, maxZ),
-					new Vec3D(minX, maxY, minZ),
-					new Vec3D(minX, maxY, maxZ),
-					new Vec3D(maxX, minY, minZ),
-					new Vec3D(maxX, minY, maxZ),
-					new Vec3D(maxX, maxY, minZ),
-					new Vec3D(maxX, maxY, maxZ)
+					new Vec3D(minX, minY, minZ), //000 - 0
+					new Vec3D(minX, minY, maxZ), //001 - 1
+					new Vec3D(minX, maxY, minZ), //010 - 2
+					new Vec3D(minX, maxY, maxZ), //011 - 3
+					new Vec3D(maxX, minY, minZ), //100 - 4
+					new Vec3D(maxX, minY, maxZ), //101 - 5
+					new Vec3D(maxX, maxY, minZ), //110 - 6
+					new Vec3D(maxX, maxY, maxZ)  //111 - 7
 			};
 			pointsCache = pc;
 		}

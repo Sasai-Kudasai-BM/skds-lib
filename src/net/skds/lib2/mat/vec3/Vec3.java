@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec3;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -12,6 +12,15 @@ import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.JsonSerializer;
 import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.mat.Vector;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.vec2.Vec2D;
+import net.skds.lib2.mat.vec2.Vec2F;
+import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.mat.vec4.Vec4D;
+import net.skds.lib2.mat.vec4.Vec4F;
+import net.skds.lib2.mat.vec4.Vec4I;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")
@@ -1600,6 +1609,18 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	@Override
 	default Vec3D getAsDoubleVec() {
 		return new Vec3D(this.x(), this.y(), this.z());
+	}
+
+	default Vec4I getAsIntVec4() {
+		return new Vec4I(this.xi(), this.yi(), this.zi(), 1);
+	}
+
+	default Vec4F getAsFloatVec4() {
+		return new Vec4F(this.xf(), this.yf(), this.zf(), 1);
+	}
+
+	default Vec4D getAsDoubleVec4() {
+		return new Vec4D(this.x(), this.y(), this.z(), 1);
 	}
 
 	static final class JCodec extends AbstractJsonCodec<Vec3> {

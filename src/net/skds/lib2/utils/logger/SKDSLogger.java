@@ -54,7 +54,6 @@ public abstract class SKDSLogger {
 		useFileOut = attached;
 	}
 
-
 	public static void replaceOuts() {
 		SKDSLoggerConfig.init();
 		System.setOut(REPLACED_OUT);

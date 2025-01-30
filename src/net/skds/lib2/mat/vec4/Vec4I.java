@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec4;
 
 public record Vec4I(int xi, int yi, int zi, int wi) implements Vec4 {
 

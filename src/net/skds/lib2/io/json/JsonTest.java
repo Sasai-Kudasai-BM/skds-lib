@@ -11,6 +11,14 @@ import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.io.json.elements.JsonObject;
 import net.skds.lib2.mat.*;
+import net.skds.lib2.mat.vec2.Vec2;
+import net.skds.lib2.mat.vec2.Vec2D;
+import net.skds.lib2.mat.vec2.Vec2F;
+import net.skds.lib2.mat.vec2.Vec2I;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec3.Vec3F;
+import net.skds.lib2.mat.vec3.Vec3I;
 import net.skds.lib2.utils.logger.SKDSLogger;
 import net.w3e.lib.utils.FileUtils;
 

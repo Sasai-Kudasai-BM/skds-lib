@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.matrix3;
 
 public record Matrix3F(
 		float m00f, float m01f, float m02f,
@@ -54,7 +54,6 @@ public record Matrix3F(
 		return m22f;
 	}
 
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -65,6 +64,7 @@ public record Matrix3F(
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		int i = this.m00f != 0.0F ? Float.floatToIntBits(this.m00f) : 0;
 		i = 31 * i + (this.m01f != 0.0F ? Float.floatToIntBits(this.m01f) : 0);

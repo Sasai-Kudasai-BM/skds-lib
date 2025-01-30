@@ -1,7 +1,16 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec4;
 
+import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.mat.Vector;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.matrix4.Matrix4;
+import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec3.Vec3F;
+import net.skds.lib2.mat.vec3.Vec3I;
+
+// TODO json
 @SuppressWarnings("unused")
-public interface Vec4 extends Vector {
+public sealed interface Vec4 extends Vector permits Vec4D, Vec4F, Vec4I, Quat {
 
 	@Override
 	default int dimension() {
@@ -46,6 +55,55 @@ public interface Vec4 extends Vector {
 
 	default int wi() {
 		return (int) z();
+	}
+
+	
+	default int floorX() {
+		return FastMath.floor(x());
+	}
+
+	default int floorY() {
+		return FastMath.floor(y());
+	}
+
+	default int floorZ() {
+		return FastMath.floor(z());
+	}
+
+	default int floorW() {
+		return FastMath.floor(w());
+	}
+
+	default int ceilX() {
+		return FastMath.ceil(x());
+	}
+
+	default int ceilY() {
+		return FastMath.ceil(y());
+	}
+
+	default int ceilZ() {
+		return FastMath.ceil(z());
+	}
+
+	default int ceilW() {
+		return FastMath.ceil(w());
+	}
+
+	default int roundX() {
+		return FastMath.round(x());
+	}
+
+	default int roundY() {
+		return FastMath.round(y());
+	}
+
+	default int roundZ() {
+		return FastMath.round(z());
+	}
+
+	default int roundW() {
+		return FastMath.round(w());
 	}
 
 	@Override
@@ -141,55 +199,6 @@ public interface Vec4 extends Vector {
 		return 31 * i + Double.hashCode(vec.w());
 	}
 
-
-	default int floorX() {
-		return FastMath.floor(x());
-	}
-
-	default int floorY() {
-		return FastMath.floor(y());
-	}
-
-	default int floorZ() {
-		return FastMath.floor(z());
-	}
-
-	default int floorW() {
-		return FastMath.floor(w());
-	}
-
-	default int ceilX() {
-		return FastMath.ceil(x());
-	}
-
-	default int ceilY() {
-		return FastMath.ceil(y());
-	}
-
-	default int ceilZ() {
-		return FastMath.ceil(z());
-	}
-
-	default int ceilW() {
-		return FastMath.ceil(w());
-	}
-
-	default int roundX() {
-		return FastMath.round(x());
-	}
-
-	default int roundY() {
-		return FastMath.round(y());
-	}
-
-	default int roundZ() {
-		return FastMath.round(z());
-	}
-
-	default int roundW() {
-		return FastMath.round(w());
-	}
-
 	default double length() {
 		return Math.sqrt(this.x() * this.x() + this.y() * this.y() + this.z() * this.z() + this.w() * this.w());
 	}
@@ -222,18 +231,49 @@ public interface Vec4 extends Vector {
 		return this.xf() * this.xf() + this.yf() * this.yf() + this.zf() * this.zf() + this.wf() * this.wf();
 	}
 
+	default Vec4D transform(Matrix4 matrixIn) {
+		final double x = matrixIn.m00() * this.x() + matrixIn.m01() * this.y() + matrixIn.m02() * this.z() + matrixIn.m03() * this.w();
+		final double y = matrixIn.m10() * this.x() + matrixIn.m11() * this.y() + matrixIn.m12() * this.z() + matrixIn.m13() * this.w();
+		final double z = matrixIn.m20() * this.x() + matrixIn.m21() * this.y() + matrixIn.m22() * this.z() + matrixIn.m23() * this.w();
+		final double w = matrixIn.m30() * this.x() + matrixIn.m31() * this.y() + matrixIn.m32() * this.z() + matrixIn.m33() * this.w();
+		return new Vec4D(x, y, z, w);
+	}
+
+	default Vec4F transformF(Matrix4 matrixIn) {
+		final float x = matrixIn.m00f() * this.xf() + matrixIn.m01f() * this.yf() + matrixIn.m02f() * this.zf() + matrixIn.m03f() * this.wf();
+		final float y = matrixIn.m10f() * this.xf() + matrixIn.m11f() * this.yf() + matrixIn.m12f() * this.zf() + matrixIn.m13f() * this.wf();
+		final float z = matrixIn.m20f() * this.xf() + matrixIn.m21f() * this.yf() + matrixIn.m22f() * this.zf() + matrixIn.m23f() * this.wf();
+		final float w = matrixIn.m30f() * this.xf() + matrixIn.m31f() * this.yf() + matrixIn.m32f() * this.zf() + matrixIn.m33f() * this.wf();
+		return new Vec4F(x, y, z, w);
+	}
+
 	@Override
 	default Vec4I getAsIntVec() {
 		return new Vec4I(this.xi(), this.yi(), this.zi(), this.wi());
 	}
 
 	@Override
-	default Vec4 getAsFloatVec() {
-		throw new UnsupportedOperationException("Unimplemented method 'getAsFloatVec'");
+	default Vec4F getAsFloatVec() {
+		return new Vec4F(this.xf(), this.yf(), this.zf(), this.wf());
 	}
 
 	@Override
-	default Vec4 getAsDoubleVec() {
-		throw new UnsupportedOperationException("Unimplemented method 'getAsDoubleVec'");
+	default Vec4D getAsDoubleVec() {
+		return new Vec4D(this.x(), this.y(), this.z(), this.w());
+	}
+
+	default Vec3I getAsIntVec3() {
+		int w = this.wi();
+		return new Vec3I(this.xi()/ w, this.yi() / w, this.zi() / w);
+	}
+
+	default Vec3F getAsFloatVec3() {
+		float w = this.wf();
+		return new Vec3F(this.xf() / w, this.yf() / w, this.zf() / w);
+	}
+
+	default Vec3D getAsDoubleVec3() {
+		double w = this.w();
+		return new Vec3D(this.x() / w, this.y() / w, this.z() / w);
 	}
 }

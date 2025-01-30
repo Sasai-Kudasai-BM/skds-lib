@@ -1,8 +1,9 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib2.mat.Matrix3;
-import net.skds.lib2.mat.Quat;
-import net.skds.lib2.mat.Vec3;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.utils.AutoString;
 
 public class OBB implements ConvexShape {
 
@@ -92,19 +93,23 @@ public class OBB implements ConvexShape {
 	@Override
 	public Vec3[] getPoints() {
 		Vec3[] vc = vertexCache;
-		Vec3 l = normals.left().scale(this.dimensions.x());
-		Vec3 u = normals.up().scale(this.dimensions.y());
-		Vec3 f = normals.forward().scale(this.dimensions.z());
+		Vec3 l = normals.left().scale(this.dimensions.x() * 0.5);
+		Vec3 u = normals.up().scale(this.dimensions.y() * 0.5);
+		Vec3 f = normals.forward().scale(this.dimensions.z() * 0.5);
+		Vec3 v0 = l.invSub(u);
+		Vec3 v1 = u.sub(l);
+		Vec3 v3 = l.sub(u);
+		Vec3 v4 = l.add(u);
 		if (vc == null) {
 			vc = new Vec3[]{
-					center.addScale(l.sub(u), .5),
-					center.addScale(f.sub(u), .5),
-					center.addScale(l.invSub(u), .5),
-					center.addScale(f.invSub(u), .5),
-					center.addScale(l.add(u), .5),
-					center.addScale(f.add(u), .5),
-					center.addScale(l.invSub(u), .5),
-					center.addScale(f.invSub(u), .5)
+					center.add(v0.sub(f)),
+					center.add(v0.add(f)),
+					center.add(v1.sub(f)),
+					center.add(v1.add(f)),
+					center.add(v3.sub(f)),
+					center.add(v3.add(f)),
+					center.add(v4.sub(f)),
+					center.add(v4.add(f))
 			};
 			vertexCache = vc;
 		}
@@ -126,6 +131,18 @@ public class OBB implements ConvexShape {
 				normals.up(),
 				normals.forward()
 		};
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("\"normals\":").append(this.normals);
+		builder.append(",\"dimensions\":").append(this.dimensions);
+		builder.append(",\"center\":").append(this.center);
+		if (this.attachment != null) {
+			builder.append(",\"attachment\":").append(this.attachment);
+		}
+		return AutoString.build(this, builder.toString());
 	}
 
 }

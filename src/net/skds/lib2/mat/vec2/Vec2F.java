@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec2;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -11,67 +11,32 @@ import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.exception.JsonReadException;
 
-@DefaultJsonCodec(Vec2I.JCodec.class)
-public record Vec2I(int xi, int yi) implements Vec2 {
+@DefaultJsonCodec(Vec2F.JCodec.class)
+public record Vec2F(float xf, float yf) implements Vec2 {
+	public static final Vec2F ZERO = new Vec2F(0.0F, 0.0F);
 
-	public static final Vec2I ZERO = new Vec2I(0, 0);
-	public static final Vec2I XP = new Vec2I(1, 0);
-	public static final Vec2I XN = new Vec2I(-1, 0);
-	public static final Vec2I YP = new Vec2I(0, 1);
-	public static final Vec2I YN = new Vec2I(0, -1);
-
-	public Vec2I(int size) {
+	public Vec2F(float size) {
 		this(size, size);
 	}
 
 	@Override
 	public double x() {
-		return xi;
+		return xf;
 	}
 
 	@Override
 	public double y() {
-		return yi;
+		return yf;
 	}
 
 	@Override
-	public float xf() {
-		return xi;
+	public int xi() {
+		return (int) xf;
 	}
 
 	@Override
-	public float yf() {
-		return yi;
-	}
-
-	@Override
-	public int floorX() {
-		return xi;
-	}
-
-	@Override
-	public int floorY() {
-		return yi;
-	}
-
-	@Override
-	public int ceilX() {
-		return xi;
-	}
-
-	@Override
-	public int ceilY() {
-		return yi;
-	}
-
-	@Override
-	public int roundX() {
-		return xi;
-	}
-
-	@Override
-	public int roundY() {
-		return yi;
+	public int yi() {
+		return (int) yf;
 	}
 
 	@Override
@@ -90,7 +55,7 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 	}
 
 	@Override
-	public Vec2I getAsIntVec() {
+	public Vec2F getAsFloatVec() {
 		return this;
 	}
 
@@ -107,15 +72,15 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 				return;
 			}
 			writer.beginArray();
-			writer.writeInt(value.xi());
-			writer.writeInt(value.yi());
+			writer.writeFloat(value.xf());
+			writer.writeFloat(value.yf());
 			writer.endArray();
 		}
 
 		@Override
-		public Vec2I read(JsonReader reader) throws IOException {
-			int x = 0;
-			int y = 0;
+		public Vec2F read(JsonReader reader) throws IOException {
+			float x = 0;
+			float y = 0;
 
 			switch (reader.nextEntryType()) {
 				case NULL -> {
@@ -124,15 +89,15 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 				}
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
-					x = reader.readInt();
-					y = reader.readInt();
+					x = reader.readFloat();
+					y = reader.readFloat();
 					reader.endArray();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
 						String s = reader.readName();
-						int i = reader.readInt();
+						float i = reader.readFloat();
 						switch (s.toLowerCase()) {
 							case "x" -> x = i;
 							case "y" -> y = i;
@@ -140,12 +105,13 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> new Vec2I(reader.readInt());
+				case NUMBER -> new Vec2F(reader.readFloat());
 				default ->
 						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
 
-			return new Vec2I(x, y);
+			return new Vec2F(x, y);
 		}
 	}
+
 }

@@ -1,11 +1,13 @@
 package net.skds.lib2.shapes;
 
 import lombok.AllArgsConstructor;
-import net.skds.lib2.mat.Matrix3;
-import net.skds.lib2.mat.Quat;
-import net.skds.lib2.mat.Vec3;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.utils.AutoString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public sealed class CompositeSuperShape implements CompositeShape {
@@ -127,20 +129,23 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return new CompositeSuperShape(convexShapes, center.add(pos), attachment);
 	}
 
-
 	public CompositeSuperShape setPose(PoseFunction pf, Vec3 pos, Quat rot, double scale) {
-		final Shape[] convexShapes = new Shape[shapes.length];
-		for (int i = 0; i < convexShapes.length; i++) {
-			Shape shape = shapes[i];
-			Vec3 od = shape.getCenter().sub(center);
-			PoseCallbackImpl pc = new PoseCallbackImpl(pos, rot, scale);
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			Shape shape = this.shapes[i];
+			Vec3 od = shape.getCenter().sub(this.center);
+			PoseCallbackImpl pc = new PoseCallbackImpl(Vec3.ZERO, rot, scale);
 
 			pf.applyPose(shape, pos, rot, scale, pc);
 
-			Vec3 nd = od.add(pc.pos).transform(pc.rot).scale(pc.scale);
-			convexShapes[i] = shape.moveRotScale(nd.sub(od), pc.rot, pc.scale);
+			Vec3 nd = od.add(pc.pos).transform(pc.rot).scale(pc.scale).add(pos);
+			if (shape instanceof CompositeSuperShape css) {
+				shapes[i] = css.setPose(pf, nd.sub(od), pc.rot, pc.scale);
+			} else {
+				shapes[i] = shape.moveRotScale(nd.sub(od), pc.rot, pc.scale);
+			}
 		}
-		return new CompositeSuperShape(convexShapes, center.add(pos), attachment);
+		return new CompositeSuperShape(shapes, center.add(pos), attachment);
 	}
 
 	@Override
@@ -215,5 +220,17 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		public ConvexShape[] simplify(AABB bounding) {
 			return empty;
 		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("\"shapes\":").append(Arrays.toString(this.shapes));
+		builder.append(",\"aabb\":").append(this.bounding);
+		builder.append(",\"center\":").append(this.center);
+		if (this.attachment != null) {
+			builder.append(",\"attachment\":").append(this.attachment);
+		}
+		return AutoString.build(this, builder.toString());
 	}
 }

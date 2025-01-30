@@ -1,5 +1,9 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.matrix3;
 
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec3.Vec3F;
+import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.linkiges.Obj2DoublePairRecord;
 import net.skds.lib2.utils.linkiges.Obj2FloatPairRecord;
 
@@ -325,7 +329,7 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 	}
 
 	default Obj2DoublePairRecord<Matrix3D> adjugateAndDet() {
-		double f = this.m11() * this.m22() - this.m12() * this.m21();
+		double f0 = this.m11() * this.m22() - this.m12() * this.m21();
 		double f1 = -(this.m10() * this.m22() - this.m12() * this.m20());
 		double f2 = this.m10() * this.m21() - this.m11() * this.m20();
 		double f3 = -(this.m01() * this.m22() - this.m02() * this.m21());
@@ -334,9 +338,9 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		double f6 = this.m01() * this.m12() - this.m02() * this.m11();
 		double f7 = -(this.m00() * this.m12() - this.m02() * this.m10());
 		double f8 = this.m00() * this.m11() - this.m01() * this.m10();
-		double det = this.m00() * f + this.m01() * f1 + this.m02() * f2;
+		double det = this.m00() * f0 + this.m01() * f1 + this.m02() * f2;
 		Matrix3D m = new Matrix3D(
-				f,
+				f0,
 				f1,
 				f2,
 				f3,

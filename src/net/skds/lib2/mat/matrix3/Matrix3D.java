@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.matrix3;
 
 
 public record Matrix3D(
@@ -19,6 +19,7 @@ public record Matrix3D(
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		int i = this.m00 != 0.0F ? Float.floatToIntBits((float) this.m00) : 0;
 		i = 31 * i + (this.m01 != 0.0F ? Float.floatToIntBits((float) this.m01) : 0);

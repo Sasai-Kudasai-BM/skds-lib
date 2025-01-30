@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec2;
 
 import java.io.IOException;
 import java.lang.reflect.Type;

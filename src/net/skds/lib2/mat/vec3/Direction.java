@@ -1,5 +1,6 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec3;
 
+import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.ArrayUtils;
 
 import java.util.function.Predicate;

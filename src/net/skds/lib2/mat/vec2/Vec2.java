@@ -1,4 +1,4 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec2;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -12,6 +12,8 @@ import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.JsonSerializer;
 import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.mat.Vector;
 
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec2.JCodec.class)

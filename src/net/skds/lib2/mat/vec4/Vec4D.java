@@ -1,10 +1,6 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec4;
 
-
-public record QuatD(double x, double y, double z, double w) implements Quat {
-
-	public static final QuatD ONE = new QuatD(0, 0, 0, 1);
-
+public record Vec4D(double x, double y, double z, double w) implements Vec4 {
 
 	@Override
 	public boolean equals(Object obj) {
@@ -20,5 +16,4 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	public int hashCode() {
 		return Vec4.hashCode(this);
 	}
-
 }

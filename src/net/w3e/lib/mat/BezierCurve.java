@@ -1,10 +1,10 @@
 package net.w3e.lib.mat;
 
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.mat.Vec2;
-import net.skds.lib2.mat.Vec2D;
-import net.skds.lib2.mat.Vec3;
-import net.skds.lib2.mat.Vec3D;
+import net.skds.lib2.mat.vec2.Vec2;
+import net.skds.lib2.mat.vec2.Vec2D;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec3.Vec3D;
 
 //https://ru.wikipedia.org/wiki/Кривая_Безье
 @UtilityClass

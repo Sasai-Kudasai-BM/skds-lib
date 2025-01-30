@@ -1,7 +1,7 @@
 package net.skds.lib2.demo;
 
 import net.skds.lib2.mat.FastMath;
-import net.skds.lib2.mat.Vec2I;
+import net.skds.lib2.mat.vec2.Vec2I;
 import net.skds.lib2.utils.ColorUtils;
 import net.skds.lib2.utils.ImageUtils;
 

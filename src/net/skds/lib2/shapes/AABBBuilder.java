@@ -1,7 +1,7 @@
 package net.skds.lib2.shapes;
 
 
-import net.skds.lib2.mat.Vec3;
+import net.skds.lib2.mat.vec3.Vec3;
 
 public class AABBBuilder {
 	private double minX;

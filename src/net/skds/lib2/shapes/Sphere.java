@@ -1,6 +1,10 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib2.mat.*;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.vec2.Vec2D;
+import net.skds.lib2.mat.vec3.Direction;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec4.Quat;
 
 public final class Sphere implements ConvexShape {
 

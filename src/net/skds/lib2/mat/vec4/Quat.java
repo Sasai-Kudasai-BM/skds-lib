@@ -1,4 +1,10 @@
-package net.skds.lib2.mat;
+package net.skds.lib2.mat.vec4;
+
+import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec3.Vec3F;
 
 @SuppressWarnings("unused")
 public sealed interface Quat extends Vec4 permits QuatD, QuatF {

@@ -8,11 +8,7 @@ import java.util.Iterator;
 
 public interface AutoString {
 
-	default String autoString() {
-		return autoString(this);
-	}
-
-	static String autoString(Object object) {
+	public static String build(Object object, String fields) {
 		if (object == null) {
 			return "null";
 		}
@@ -27,7 +23,21 @@ public interface AutoString {
 		builder.append(",");
 
 		builder.append("\"fields\":{");
+		builder.append(fields);
+		builder.append("}}");
 
+		return builder.toString();
+	}
+
+	default String autoString() {
+		return autoString(this);
+	}
+
+	static String autoString(Object object) {
+		if (object == null) {
+			return "null";
+		}
+		StringBuilder builder = new StringBuilder();
 		Iterator<Field> iterator = Arrays.asList(object.getClass().getFields()).iterator();
 		while (iterator.hasNext()) {
 			Field field = iterator.next();
@@ -53,9 +63,7 @@ public interface AutoString {
 				builder.append(",");
 			}
 		}
-		builder.append("}}");
-
-		return builder.toString();
+		return build(object, builder.toString());
 	}
 
 	/*public static void main(String[] args) {

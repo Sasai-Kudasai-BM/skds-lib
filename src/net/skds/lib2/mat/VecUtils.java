@@ -1,6 +1,8 @@
 package net.skds.lib2.mat;
 
 import lombok.experimental.UtilityClass;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec3.Vec3D;
 
 @SuppressWarnings("unused")
 @UtilityClass

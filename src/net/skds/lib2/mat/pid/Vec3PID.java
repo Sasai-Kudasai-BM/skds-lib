@@ -1,6 +1,6 @@
 package net.skds.lib2.mat.pid;
 
-import net.skds.lib2.mat.Vec3;
+import net.skds.lib2.mat.vec3.Vec3;
 
 public final class Vec3PID extends AbstractPID {
 

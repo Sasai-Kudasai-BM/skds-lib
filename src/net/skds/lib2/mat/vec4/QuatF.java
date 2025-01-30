@@ -1,5 +1,4 @@
-package net.skds.lib2.mat;
-
+package net.skds.lib2.mat.vec4;
 
 public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 

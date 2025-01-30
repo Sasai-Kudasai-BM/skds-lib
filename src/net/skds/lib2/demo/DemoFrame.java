@@ -1,6 +1,7 @@
 package net.skds.lib2.demo;
 
 import net.skds.lib2.demo.classloader.DemoClassloaderFrame;
+import net.skds.lib2.demo.demo3d.Demo3dFrame;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.misc.font.demo.FontDemoFrame;
 import net.skds.lib2.utils.logger.SKDSLogger;
@@ -56,12 +57,17 @@ public class DemoFrame extends JFrame {
 			}
 		});
 		add(button);
+		button = new JButton("Demo3d");
+		button.addActionListener(e -> new Demo3dFrame());
+		add(button);
 
-		setMinimumSize(new Dimension(300, 0));
+
+		setMinimumSize(new Dimension(300, 50));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
 		setLocation(-getWidth() / 2, -getHeight() / 2);
 		setLocationRelativeTo(null);
+		setResizable(false);
 		setVisible(true);
 	}
 
