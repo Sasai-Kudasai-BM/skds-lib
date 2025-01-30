@@ -2,6 +2,7 @@ package net.skds.lib2.demo.demo3d;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.MatrixStack;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.matrix4.Matrix4;
@@ -9,15 +10,27 @@ import net.skds.lib2.mat.matrix4.Matrix4F;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.shapes.AABB;
+import net.skds.lib2.shapes.CompositeShape;
+import net.skds.lib2.shapes.CompositeSuperShape;
 import net.skds.lib2.shapes.ConvexShape;
+import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.utils.linkiges.Pair;
+import net.w3e.lib.utils.suppliers.ValueSupplier;
 
 import javax.swing.*;
-import java.awt.*;
+
+import java.awt.AWTException;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Robot;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class RenderDemo3dPanel extends JPanel {
 
@@ -29,7 +42,7 @@ public class RenderDemo3dPanel extends JPanel {
 	@Getter
 	private Matrix3 lastRot = Matrix3.SINGLE;
 
-	private List<ConvexShape> shapes = new ArrayList<>();
+	private List<Supplier<Shape>> shapes = new ArrayList<>();
 
 	private float cameraYaw;
 	private float cameraPitch;
@@ -105,8 +118,52 @@ public class RenderDemo3dPanel extends JPanel {
 			}
 		});
 
-		shapes.add(AABB.fromCenter(0, 0, 0, 1, 1, 1));
-		shapes.add(AABB.fromCenter(0, -1, 0, 2, 1, 2));
+		shapes.add(new ValueSupplier<>(AABB.fromCenter(0, 0, 0, 1, 1, 1)));
+		shapes.add(new ValueSupplier<>(AABB.fromCenter(0, -1, 0, 2, 1, 2)));
+
+		CompositeSuperShape superShape = CompositeSuperShape.of(new Shape[]{
+			CompositeSuperShape.of(new Shape[]{
+				AABB.fromCenter(Vec3.of(0, 1, 0), Vec3.of(1, 2, .5)),
+
+				CompositeSuperShape.of(new Shape[]{
+					AABB.fromCenter(Vec3.of(0, 0.75 / 2, 0), 0.75)
+				}, Vec3.ZERO, "head").move(Vec3.of(0, 2, 0))
+					.rotate(Quat.fromAxisDegrees(Vec3.ZN, 10))
+				,
+
+				CompositeSuperShape.of(new Shape[]{
+					AABB.fromCenter(Vec3.of(0, 0, 0), Vec3.of(0.25, 1.75, 0.25))
+				}, Vec3.of(0.25 / 2, 1.75 / 2 - 0.1, 0), "hand").move(Vec3.of(-1f / 2 - 0.25 / 2, 1.1, 0)).rotate(Quat.fromAxisDegrees(Vec3.XN, 30))
+
+			}, Vec3.ZERO, "body")
+		}, Vec3.ZERO);
+
+		CompositeSuperShape rotated = superShape
+				.move(Vec3.of(2, 0, 0))
+				.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XN, 30)))
+				;
+
+		shapes.add(() -> rotated.rotate(Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 50d) % 360)));
+		shapes.add(new ValueSupplier<>(superShape.move(Vec3.of(4, 0, 0))));
+
+		CompositeSuperShape scaled = superShape.move(Vec3.of(6, 0, 0));
+
+		shapes.add(() -> scaled.scale(FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360) / 2d + .5));
+
+		CompositeSuperShape moveRotScale = superShape.move(Vec3.of(8, 0, 0));
+
+		shapes.add(() -> {
+			Quat rot = Quat.fromAxisDegrees(Vec3.YN, (System.currentTimeMillis() / 10d) % 360);
+			//Quat rot = Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 10d) % 360);
+			return moveRotScale.moveRotScale(Vec3.of(0, 0, FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360)), rot, 1);
+		});
+
+		CompositeSuperShape posed = superShape.move(Vec3.of(10, 0, 0));
+
+		shapes.add(() -> {
+			Quat rot = Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 10d) % 360);
+			return posed.setPose((sh, p, r, s, c) -> {}, Vec3.ZP.scale(0.5).transform(rot), rot, 1);
+		});
 	}
 
 	public void resetMouse() {
@@ -128,16 +185,33 @@ public class RenderDemo3dPanel extends JPanel {
 
 		MatrixStack stack = new MatrixStack(getMatrix());
 
-		this.shapes.forEach(b -> {
-			g.setColor(Color.green);
-
-			drawPoint(g, stack, b.getCenter(), 2);
-
-			g.setColor(Color.BLACK);
-			drawBox(g, stack, b);
-		});
+		this.shapes.forEach(b -> drawShape(g, stack, b.get(), true));
+		g.setColor(Color.BLACK);
 
 		stack.close();
+	}
+
+	private void drawShape(Graphics2D g, MatrixStack stack, Shape shape, boolean root) {
+		if (shape instanceof ConvexShape convexShape) {
+			g.setColor(Color.GREEN);
+			drawPoint(g, stack, convexShape.getCenter(), 2);
+
+			g.setColor(Color.BLACK);
+			drawBox(g, stack, convexShape);
+		}
+		if (shape instanceof CompositeShape compositeShape) {
+			if (root) {
+				g.setColor(Color.BLUE);
+				drawPoint(g, stack, compositeShape.getCenter(), 3);
+			} else {
+				g.setColor(Color.RED);
+				drawPoint(g, stack, compositeShape.getCenter(), 2);
+			}
+
+			for (Shape s : compositeShape.getAllShapes()) {
+				drawShape(g, stack, s, false);
+			}
+		}
 	}
 
 	private void drawBox(Graphics2D g, MatrixStack stack, ConvexShape box) {
@@ -180,8 +254,8 @@ public class RenderDemo3dPanel extends JPanel {
 		Matrix4F proj = Matrix4.perspectiveInfinityF(cameraFov, (float) getWidth() / getHeight(), .2f);
 		Quat q = Quat.fromAxisDegrees(Vec3.YP, cameraYaw).rotateAxisDegrees(Vec3.XP, cameraPitch);
 		this.lastRot = Matrix3.fromQuat(q);
-		//return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot.transposeF()).translateF(cameraPos.xf(), cameraPos.yf(), cameraPos.zf()));
 
-		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot.transposeF()).multiply(Matrix4.makeTranslationF(cameraPos.xf(), cameraPos.yf(), cameraPos.zf())));
+		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot).transposeF().translateF(cameraPos));
+
 	}
 }

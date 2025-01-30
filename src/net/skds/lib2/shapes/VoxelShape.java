@@ -162,7 +162,8 @@ public sealed class VoxelShape implements CompositeShape {
 		return bounding;
 	}
 
-	public AABB[] getBoxes() {
+	@Override
+	public Shape[] getAllShapes() {
 		return this.boxes;
 	}
 

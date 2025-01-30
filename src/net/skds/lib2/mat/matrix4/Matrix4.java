@@ -391,26 +391,8 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		return new Matrix4F(
 				this.m00f(), this.m01f(), this.m02f(), m03,
 				this.m10f(), this.m11f(), this.m12f(), m13,
-				this.m20f(), this.m20f(), this.m20f(), m23,
-				this.m30f(), this.m30f(), this.m30f(), m33
-		);
-	}
-
-	default Matrix4D translateAbsolute(double x, double y, double z) {
-		return new Matrix4D(
-				this.m00(), this.m01(), this.m02(), this.m03() + x,
-				this.m10(), this.m11(), this.m12(), this.m13() + y,
-				this.m20(), this.m20(), this.m20(), this.m23() + z,
-				this.m30(), this.m30(), this.m30(), this.m33()
-		);
-	}
-
-	default Matrix4F translateAbsoluteF(float x, float y, float z) {
-		return new Matrix4F(
-				this.m00f(), this.m01f(), this.m02f(), this.m03f() + x,
-				this.m10f(), this.m11f(), this.m12f(), this.m13f() + y,
-				this.m20f(), this.m20f(), this.m20f(), this.m23f() + z,
-				this.m30f(), this.m30f(), this.m30f(), this.m33f()
+				this.m20f(), this.m21f(), this.m22f(), m23,
+				this.m30f(), this.m31f(), this.m32f(), m33
 		);
 	}
 
@@ -425,8 +407,8 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		return new Matrix4D(
 				this.m00(), this.m01(), this.m02(), m03,
 				this.m10(), this.m11(), this.m12(), m13,
-				this.m20(), this.m20(), this.m20(), m23,
-				this.m30(), this.m30(), this.m30(), m33
+				this.m20(), this.m21(), this.m22(), m23,
+				this.m30(), this.m31(), this.m32(), m33
 		);
 	}
 
@@ -441,8 +423,26 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		return new Matrix4F(
 				this.m00f(), this.m01f(), this.m02f(), m03,
 				this.m10f(), this.m11f(), this.m12f(), m13,
-				this.m20f(), this.m20f(), this.m20f(), m23,
-				this.m30f(), this.m30f(), this.m30f(), m33
+				this.m20f(), this.m21f(), this.m22f(), m23,
+				this.m30f(), this.m31f(), this.m32f(), m33
+		);
+	}
+
+	default Matrix4D translateAbsolute(double x, double y, double z) {
+		return new Matrix4D(
+				this.m00(), this.m01(), this.m02(), this.m03() + x,
+				this.m10(), this.m11(), this.m12(), this.m13() + y,
+				this.m20(), this.m21(), this.m22(), this.m23() + z,
+				this.m30(), this.m31(), this.m32(), this.m33()
+		);
+	}
+
+	default Matrix4F translateAbsoluteF(float x, float y, float z) {
+		return new Matrix4F(
+				this.m00f(), this.m01f(), this.m02f(), this.m03f() + x,
+				this.m10f(), this.m11f(), this.m12f(), this.m13f() + y,
+				this.m20f(), this.m21f(), this.m22f(), this.m23f() + z,
+				this.m30f(), this.m31f(), this.m32f(), this.m33f()
 		);
 	}
 
@@ -453,8 +453,8 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		return new Matrix4D(
 				this.m00(), this.m01(), this.m02(), this.m03() + vec.x(),
 				this.m10(), this.m11(), this.m12(), this.m13() + vec.y(),
-				this.m20(), this.m20(), this.m20(), this.m23() + vec.z(),
-				this.m30(), this.m30(), this.m30(), this.m33()
+				this.m20(), this.m21(), this.m22(), this.m23() + vec.z(),
+				this.m30(), this.m31(), this.m32(), this.m33()
 		);
 	}
 
@@ -462,8 +462,8 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		return new Matrix4F(
 				this.m00f(), this.m01f(), this.m02f(), this.m03f() + vec.xf(),
 				this.m10f(), this.m11f(), this.m12f(), this.m13f() + vec.yf(),
-				this.m20f(), this.m20f(), this.m20f(), this.m23f() + vec.zf(),
-				this.m30f(), this.m30f(), this.m30f(), this.m33f()
+				this.m20f(), this.m21f(), this.m22f(), this.m23f() + vec.zf(),
+				this.m30f(), this.m31f(), this.m32f(), this.m33f()
 		);
 	}
 

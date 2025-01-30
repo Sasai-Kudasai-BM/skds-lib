@@ -85,48 +85,47 @@ public sealed class CompositeSuperShape implements CompositeShape {
 
 	@Override
 	public CompositeSuperShape move(Vec3 delta) {
-		final Shape[] convexShapes = new Shape[shapes.length];
-		for (int i = 0; i < convexShapes.length; i++) {
-			convexShapes[i] = shapes[i].move(delta);
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			shapes[i] = this.shapes[i].move(delta);
 		}
-		return new CompositeSuperShape(convexShapes, center.add(delta), attachment);
+		return new CompositeSuperShape(shapes, center.add(delta), attachment);
 	}
 
 	@Override
 	public CompositeSuperShape scale(double scale) {
-		final Shape[] convexShapes = new Shape[shapes.length];
-		for (int i = 0; i < convexShapes.length; i++) {
-			Shape shape = shapes[i];
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			Shape shape = this.shapes[i];
 			Vec3 od = shape.getCenter().sub(center);
 			Vec3 nd = od.scale(scale);
-			convexShapes[i] = shape.move(nd.sub(od)).scale(scale);
+			shapes[i] = shape.move(nd.sub(od)).scale(scale);
 		}
-		return new CompositeSuperShape(convexShapes, center, attachment);
+		return new CompositeSuperShape(shapes, center, attachment);
 	}
-
 
 	@Override
 	public CompositeSuperShape rotate(Matrix3 m3) {
-		final Shape[] convexShapes = new Shape[this.shapes.length];
-		for (int i = 0; i < convexShapes.length; i++) {
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
 			Shape shape = this.shapes[i];
 			Vec3 od = shape.getCenter().sub(this.center);
 			Vec3 nd = od.transform(m3);
-			convexShapes[i] = shape.moveRotScale(nd.sub(od), m3, 1);
+			shapes[i] = shape.moveRotScale(nd.sub(od), m3, 1);
 		}
-		return new CompositeSuperShape(convexShapes, this.center, this.attachment);
+		return new CompositeSuperShape(shapes, this.center, this.attachment);
 	}
 
 	@Override
 	public CompositeSuperShape moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
-		final Shape[] convexShapes = new Shape[shapes.length];
-		for (int i = 0; i < convexShapes.length; i++) {
-			Shape shape = shapes[i];
-			Vec3 od = shape.getCenter().sub(center);
-			Vec3 nd = od.add(pos).transform(m3).scale(scale);
-			convexShapes[i] = shape.moveRotScale(nd.sub(od), m3, scale);
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			Shape shape = this.shapes[i];
+			Vec3 od = shape.getCenter().sub(this.center);
+			Vec3 nd = od.transform(m3).scale(scale).add(pos);
+			shapes[i] = shape.moveRotScale(nd.sub(od), m3, scale);
 		}
-		return new CompositeSuperShape(convexShapes, center.add(pos), attachment);
+		return new CompositeSuperShape(shapes, center.add(pos), attachment);
 	}
 
 	public CompositeSuperShape setPose(PoseFunction pf, Vec3 pos, Quat rot, double scale) {
@@ -158,6 +157,7 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return bounding;
 	}
 
+	@Override
 	public Shape[] getAllShapes() {
 		return this.shapes;
 	}

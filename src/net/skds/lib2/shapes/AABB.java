@@ -102,6 +102,13 @@ public final class AABB implements ConvexShape {
 				center.y() + size / 2.0, center.z() + size / 2.0);
 	}
 
+	public static AABB fromCenter(Vec3 center, Vec3 size) {
+		double x = size.x() / 2;
+		double y = size.y() / 2;
+		double z = size.z() / 2;
+		return new AABB(center.x() - x, center.y() - y, center.z() - z, center.x() + x, center.y() + y, center.z() + z);
+	}
+
 	public static AABB fromCenter(double centerX, double centerY, double centerZ, double dx, double dy, double dz) {
 		return new AABB(centerX - dx / 2.0, centerY - dy / 2.0, centerZ - dz / 2.0, centerX + dx / 2.0,
 				centerY + dy / 2.0, centerZ + dz / 2.0);

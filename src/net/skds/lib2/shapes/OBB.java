@@ -37,7 +37,7 @@ public class OBB implements ConvexShape {
 
 	@Override
 	public OBB rotate(Matrix3 m3) {
-		return new OBB(center, this.dimensions, normals.multiply(m3), attachment);
+		return new OBB(center, this.dimensions, m3.multiply(normals), attachment);
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class OBB implements ConvexShape {
 
 	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
-		return new OBB(center.add(pos), this.dimensions.scale(scale), normals.multiply(m3), attachment);
+		return new OBB(center.add(pos), this.dimensions.scale(scale), m3.multiply(normals), attachment);
 	}
 
 	@Override

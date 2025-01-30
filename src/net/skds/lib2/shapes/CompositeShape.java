@@ -7,7 +7,6 @@ import net.skds.lib2.mat.vec4.Quat;
 
 public non-sealed interface CompositeShape extends Shape {
 
-
 	ConvexShape[] simplify(AABB bounding);
 
 	@Override
@@ -30,6 +29,7 @@ public non-sealed interface CompositeShape extends Shape {
 	@Override
 	AABB getBoundingBox();
 
+	Shape[] getAllShapes();
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to) {
