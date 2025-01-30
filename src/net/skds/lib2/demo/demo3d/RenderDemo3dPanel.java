@@ -1,22 +1,18 @@
 package net.skds.lib2.demo.demo3d;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.skds.lib2.mat.MatrixStack;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.matrix4.Matrix4F;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
-import net.skds.lib2.mat.vec4.Vec4F;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.ConvexShape;
-import net.skds.lib2.shapes.OBB;
 import net.skds.lib2.utils.linkiges.Pair;
 
 import javax.swing.*;
-
-import lombok.Getter;
-import lombok.Setter;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -109,7 +105,8 @@ public class RenderDemo3dPanel extends JPanel {
 			}
 		});
 
-		shapes.add(AABB.fromCenter(Vec3.ZERO, 1));
+		shapes.add(AABB.fromCenter(0, 0, 0, 1, 1, 1));
+		shapes.add(AABB.fromCenter(0, -1, 0, 2, 1, 2));
 	}
 
 	public void resetMouse() {
@@ -156,7 +153,7 @@ public class RenderDemo3dPanel extends JPanel {
 			Pair<Vec3, Vec3> line = lines[i];
 			Vec3 a = line.a().getAsFloatVec4().transformF(last).getAsFloatVec3();
 			Vec3 b = line.b().getAsFloatVec4().transformF(last).getAsFloatVec3();
-			if (a.z() < 0 || b.z() < 0) {
+			if (a.z() < 0 || b.z() < 0 || a.z() > 1 || b.z() > 1) {
 				continue;
 			}
 			g.drawLine((int) (a.x() * w) + w2, (int) (-a.y() * h) + h2, (int) (b.x() * w) + w2, (int) (-b.y() * h) + h2);
@@ -170,6 +167,9 @@ public class RenderDemo3dPanel extends JPanel {
 		int w2 = w / 2;
 		int h2 = h / 2;
 		point = point.getAsFloatVec4().transformF(stack.getLast()).getAsFloatVec3();
+		if (point.z() < 0 || point.z() > 1) {
+			return;
+		}
 
 		int s = (int) (100 * size * (1 - point.z()));
 
@@ -180,6 +180,8 @@ public class RenderDemo3dPanel extends JPanel {
 		Matrix4F proj = Matrix4.perspectiveInfinityF(cameraFov, (float) getWidth() / getHeight(), .2f);
 		Quat q = Quat.fromAxisDegrees(Vec3.YP, cameraYaw).rotateAxisDegrees(Vec3.XP, cameraPitch);
 		this.lastRot = Matrix3.fromQuat(q);
-		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot).transpose().translate(cameraPos.x(), cameraPos.y(), cameraPos.z()));
+		//return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot.transposeF()).translateF(cameraPos.xf(), cameraPos.yf(), cameraPos.zf()));
+
+		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot.transposeF()).multiply(Matrix4.makeTranslationF(cameraPos.xf(), cameraPos.yf(), cameraPos.zf())));
 	}
 }
