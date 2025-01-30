@@ -115,7 +115,7 @@ public class Demo3dFrame extends JFrame {
 		pack();
 		setLocation(-getWidth() / 2, -getHeight() / 2);
 		setLocationRelativeTo(null);
-		setResizable(false);
+		//setResizable(false);
 		setVisible(true);
 	}
 

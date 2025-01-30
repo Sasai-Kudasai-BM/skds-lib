@@ -227,7 +227,7 @@ public class RenderDemo3dPanel extends JPanel {
 			Pair<Vec3, Vec3> line = lines[i];
 			Vec3 a = line.a().getAsFloatVec4().transformF(last).getAsFloatVec3();
 			Vec3 b = line.b().getAsFloatVec4().transformF(last).getAsFloatVec3();
-			if (a.z() < 0 || b.z() < 0 || a.z() > 1 || b.z() > 1) {
+			if ((a.z() < 0 && b.z() < 0) || a.z() > 1 || b.z() > 1) {
 				continue;
 			}
 			g.drawLine((int) (a.x() * w) + w2, (int) (-a.y() * h) + h2, (int) (b.x() * w) + w2, (int) (-b.y() * h) + h2);
@@ -246,8 +246,9 @@ public class RenderDemo3dPanel extends JPanel {
 		}
 
 		int s = (int) (100 * size * (1 - point.z()));
+		int s2 = s / 2;
 
-		g.fillOval((int) (point.x() * w) + w2, (int) -(point.y() * h) + h2, s, s);
+		g.fillOval((int) (point.x() * w) + w2 - s2, (int) -(point.y() * h) + h2 - s2, s, s);
 	}
 
 	public Matrix4F getMatrix() {
