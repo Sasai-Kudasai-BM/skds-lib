@@ -476,49 +476,21 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 	}
 
 	default Matrix4D transpose() {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		double f = this.m10();
-		matrix4.m10 = this.m01();
-		matrix4.m01 = f;
-		f = this.m20();
-		matrix4.m20 = this.m02();
-		matrix4.m02 = f;
-		f = this.m21();
-		matrix4.m21 = this.m12();
-		matrix4.m12 = f;
-		f = this.m30();
-		matrix4.m30 = this.m03();
-		matrix4.m03 = f;
-		f = this.m31();
-		matrix4.m31 = this.m13();
-		matrix4.m13 = f;
-		f = this.m32();
-		matrix4.m32 = this.m23();
-		matrix4.m23 = f;
-		return matrix4.buildD();
+		return new Matrix4D(
+				this.m00(), this.m10(), this.m20(), this.m30(),
+				this.m01(), this.m11(), this.m21(), this.m31(),
+				this.m02(), this.m12(), this.m22(), this.m32(),
+				this.m03(), this.m13(), this.m23(), this.m33()
+		);
 	}
 
 	default Matrix4F transposeF() {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		double f = this.m10();
-		matrix4.m10 = this.m01();
-		matrix4.m01 = f;
-		f = this.m20();
-		matrix4.m20 = this.m02();
-		matrix4.m02 = f;
-		f = this.m21();
-		matrix4.m21 = this.m12();
-		matrix4.m12 = f;
-		f = this.m30();
-		matrix4.m30 = this.m03();
-		matrix4.m03 = f;
-		f = this.m31();
-		matrix4.m31 = this.m13();
-		matrix4.m13 = f;
-		f = this.m32();
-		matrix4.m32 = this.m23();
-		matrix4.m23 = f;
-		return matrix4.buildF();
+		return new Matrix4F(
+				this.m00f(), this.m10f(), this.m20f(), this.m30f(),
+				this.m01f(), this.m11f(), this.m21f(), this.m31f(),
+				this.m02f(), this.m12f(), this.m22f(), this.m32f(),
+				this.m03f(), this.m13f(), this.m23f(), this.m33f()
+		);
 	}
 
 	default Matrix4D inverse() {
@@ -766,27 +738,30 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 	}
 
 	static Matrix4D makeTranslation(double x, double y, double z) {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		//this.m00 = 1.0F;
-		//this.m11 = 1.0F;
-		//this.m22 = 1.0F;
-		//this.m33 = 1.0F;
-		matrix4.m03 = x;
-		matrix4.m13 = y;
-		matrix4.m23 = z;
-		return matrix4.buildD();
+		return new Matrix4D(
+				1, 0, 0, x,
+				0, 1, 0, y,
+				0, 0, 1, z,
+				0, 0, 0, 1
+		);
 	}
 
 	static Matrix4F makeTranslationF(float x, float y, float z) {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		//this.m00 = 1.0F;
-		//this.m11 = 1.0F;
-		//this.m22 = 1.0F;
-		//this.m33 = 1.0F;
-		matrix4.m03 = x;
-		matrix4.m13 = y;
-		matrix4.m23 = z;
-		return matrix4.buildF();
+		return new Matrix4F(
+				1, 0, 0, x,
+				0, 1, 0, y,
+				0, 0, 1, z,
+				0, 0, 0, 1
+		);
+		//Matrix4Builder matrix4 = new Matrix4Builder();
+		////this.m00 = 1.0F;
+		////this.m11 = 1.0F;
+		////this.m22 = 1.0F;
+		////this.m33 = 1.0F;
+		//matrix4.m03 = x;
+		//matrix4.m13 = y;
+		//matrix4.m23 = z;
+		//return matrix4.buildF();
 	}
 
 	@Deprecated
