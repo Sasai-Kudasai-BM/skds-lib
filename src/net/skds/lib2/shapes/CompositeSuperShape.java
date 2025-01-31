@@ -1,6 +1,7 @@
 package net.skds.lib2.shapes;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
@@ -128,23 +129,48 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return new CompositeSuperShape(shapes, center.add(pos), attachment);
 	}
 
-	public CompositeSuperShape setPose(PoseFunction pf, Vec3 pos, Quat rot, double scale) {
+	public CompositeSuperShape setPose(PoseFunction pf, final Vec3 parentPos, final Quat parentRot, final double parentScale) {
 		final Shape[] shapes = new Shape[this.shapes.length];
+
+		PoseCallback pc = new PoseCallback();
+
 		for (int i = 0; i < shapes.length; i++) {
 			Shape shape = this.shapes[i];
 			Vec3 od = shape.getCenter().sub(this.center);
-			PoseCallbackImpl pc = new PoseCallbackImpl(Vec3.ZERO, rot, scale);
 
-			pf.applyPose(shape, pos, rot, scale, pc);
+			pc.setPos(Vec3.ZERO);
+			pc.setRot(Quat.ONE);
+			pc.setScale(1);
 
-			Vec3 nd = od.add(pc.pos).transform(pc.rot).scale(pc.scale).add(pos);
+			pf.applyPose(shape, parentPos, parentRot, parentScale, pc);
+
+			if (pc.pos != Vec3.ZERO) {
+				od = od.add(pc.pos);
+			}
+			if (pc.rot == Quat.ONE) {
+				pc.rot = parentRot;
+			} else if (parentRot != Quat.ONE) {
+				pc.rot = parentRot.multiply(pc.rot);
+			}
+
+			if (pc.scale != 1 || parentScale != 1) {
+				pc.scale *= parentScale;
+			}
+			
+			Vec3 nd = od.transform(parentRot);
+			if (pc.scale != 1) {
+				nd = nd.scale(pc.scale);
+			}
+			nd = nd.add(parentPos).sub(od);
+
 			if (shape instanceof CompositeSuperShape css) {
-				shapes[i] = css.setPose(pf, nd.sub(od), pc.rot, pc.scale);
+				shapes[i] = css.setPose(pf, nd, pc.rot, pc.scale);
 			} else {
-				shapes[i] = shape.moveRotScale(nd.sub(od), pc.rot, pc.scale);
+				shapes[i] = shape.moveRotScale(nd, pc.rot, pc.scale);
 			}
 		}
-		return new CompositeSuperShape(shapes, center.add(pos), attachment);
+
+		return new CompositeSuperShape(shapes, center.add(parentPos), attachment);
 	}
 
 	@Override
@@ -182,28 +208,21 @@ public sealed class CompositeSuperShape implements CompositeShape {
 		return new CompositeSuperShape(shapes, center, attachment);
 	}
 
-	@AllArgsConstructor
-	private static final class PoseCallbackImpl implements PoseCallback {
-		Vec3 pos;
-		Quat rot;
-		double scale;
-
-		@Override
-		public void applyPose(Vec3 pos, Quat rot, double scale) {
-			this.pos = pos;
-			this.rot = rot;
-			this.scale = scale;
-		}
+	public class PoseCallback {
+		@Getter
+		@Setter
+		private Vec3 pos = Vec3.ZERO;
+		@Getter
+		@Setter
+		private Quat rot = Quat.ONE;
+		@Getter
+		@Setter
+		private double scale = 1;
 	}
 
 	@FunctionalInterface
 	public interface PoseFunction {
-		void applyPose(Shape shape, Vec3 pos, Quat rot, double scale, PoseCallback callback);
-	}
-
-	@FunctionalInterface
-	public interface PoseCallback {
-		void applyPose(Vec3 pos, Quat rot, double scale);
+		void applyPose(Shape shape, Vec3 parentPos, Quat parentRot, double parentScale, PoseCallback callback);
 	}
 
 	private static final class Empty extends CompositeSuperShape {

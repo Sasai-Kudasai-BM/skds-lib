@@ -19,7 +19,7 @@ public class DemoShape {
 
 	private static final List<String> BONES_KEYS_FOUND = new ArrayList<>();
 
-	private static final PoseFunction FUNCTION = (Shape s, Vec3 pos, Quat rot, double scale, PoseCallback callback) -> {
+	private static final PoseFunction FUNCTION = (Shape s, Vec3 parentPos, Quat parentRot, double parentScale, PoseCallback callback) -> {
 		//BONES_KEYS_FOUND.add(s.getAttachment().toString());
 	};
 

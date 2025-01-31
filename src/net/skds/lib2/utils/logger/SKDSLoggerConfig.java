@@ -54,12 +54,11 @@ public final class SKDSLoggerConfig {
 		private boolean includeThread = true;
 		private boolean includeLoggerClass = false;
 		private boolean includeStackTop = true;
-		private boolean useFileOut = true;
+		private boolean useFileOut = false;
 		private EnumMap<LoggerLevel, AnsiEscape> ansiColors = new EnumMap<>(LoggerLevel.class);
 	}
 
-	public static void init() {
-	}
+	public static void init() {}
 
 	public static void setLevels(LoggerLevel level, LoggerLevel... levels) {
 		SKDSLoggerConfig.levels = EnumSet.of(level, levels);

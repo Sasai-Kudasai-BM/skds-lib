@@ -58,7 +58,9 @@ public class DemoFrame extends JFrame {
 		});
 		add(button);
 		button = new JButton("Demo3d");
-		button.addActionListener(e -> new Demo3dFrame());
+		button.addActionListener(e -> 
+			new Demo3dFrame().initDefault()
+		);
 		add(button);
 
 

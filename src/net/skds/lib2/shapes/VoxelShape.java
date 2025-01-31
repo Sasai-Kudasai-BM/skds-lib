@@ -163,7 +163,7 @@ public sealed class VoxelShape implements CompositeShape {
 	}
 
 	@Override
-	public Shape[] getAllShapes() {
+	public AABB[] getAllShapes() {
 		return this.boxes;
 	}
 
