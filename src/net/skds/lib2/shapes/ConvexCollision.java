@@ -97,7 +97,7 @@ public class ConvexCollision {
 		}
 
 		assert minTerm != null : "nan or infinite values";
-		if (nInv) {
+		if (!nInv) {
 			minTerm = minTerm.inverse();
 		}
 		if (distance > 0) {
@@ -147,7 +147,7 @@ public class ConvexCollision {
 
 		double termLen = Double.MAX_VALUE;
 		Direction minTerm = null;
-		boolean nInv = false;
+
 
 		for (int i = 0; i < axs.length; i++) {
 			Direction.Axis axis = axs[i];
@@ -164,17 +164,13 @@ public class ConvexCollision {
 
 			if (d < termLen) {
 				double dc = (aMax - aMin) - (bMax - bMin);
-				nInv = v * dc < 0;
 				termLen = d;
-				minTerm = axis.getDirection(!nInv);
+				minTerm = axis.getDirection(v * dc < 0);
 			}
 		}
 
 		assert minTerm != null : "nan or infinite values";
-		if (nInv) {
-			minTerm = minTerm.getOpposite();
-		}
-		if (distance > 0) {
+			if (distance > 0) {
 			termLen = 0;
 		} else if (termLen < 0) {
 			termLen = -termLen;

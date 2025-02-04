@@ -1,85 +1,34 @@
 package net.skds.lib2.demo.demo3d;
 
-import lombok.Getter;
-import lombok.Setter;
+import net.skds.lib2.demo.demo3d.Demo3dShape.DemoShape3dHolder;
 import net.skds.lib2.mat.MatrixStack;
-import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.matrix4.Matrix4;
-import net.skds.lib2.mat.matrix4.Matrix4F;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.shapes.Collision;
 import net.skds.lib2.shapes.CompositeShape;
 import net.skds.lib2.shapes.ConvexShape;
 import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.utils.linkiges.Pair;
-import net.w3e.lib.utils.suppliers.ValueSupplier;
 
 import javax.swing.*;
 
-import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.Robot;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
-public class RenderDemo3dPanel extends JPanel implements MouseMotionListener, MouseListener {
+public class RenderDemo3dPanel extends JPanel {
 
 	private final Demo3dFrame demo;
 
-	@Setter
-	@Getter
-	private Vec3 cameraPos = Vec3.ZERO;
-	@Getter
-	private Matrix3 lastRot = Matrix3.SINGLE;
-
-	private List<Supplier<Shape>> shapes = new ArrayList<>();
-
-	@Getter
-	private float cameraYaw;
-	@Getter
-	private float cameraPitch;
-	private float cameraFov = 70;
-
-	private int lastMouseX;
-	private int lastMouseY;
-
 	//private int lastMouseB;
-	private final Robot robot;
 
 	public RenderDemo3dPanel(Demo3dFrame demo) {
 		this.demo = demo;
-		try {
-			this.robot = new Robot();
-		} catch (AWTException e) {
-			throw new RuntimeException(e);
-		}
-
-		addMouseMotionListener(this);
-		addMouseListener(this);
-	}
-
-	public void addShape(Supplier<Shape> shape) {
-		this.shapes.add(shape);
-	}
-
-	public void addShape(Shape shape) {
-		this.shapes.add(new ValueSupplier<Shape>(shape));
-	}
-
-	public void resetMouse() {
-		Point p = getLocationOnScreen();
-		lastMouseX = getWidth() / 2;
-		lastMouseY = getHeight() / 2;
-		robot.mouseMove(p.x + lastMouseX, p.y + lastMouseY);
 	}
 
 	@Override
@@ -88,12 +37,78 @@ public class RenderDemo3dPanel extends JPanel implements MouseMotionListener, Mo
 		Graphics2D g = (Graphics2D) g0;
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		MatrixStack stack = new MatrixStack(getMatrix());
+		List<DemoShape3dHolder> list = new ArrayList<>();
 
-		this.shapes.forEach(b -> drawShape(g, stack, b.get(), true));
+		for (Demo3dShape shape : this.demo.shapes) {
+			shape.tick();
+			shape.setHovered(null);
+			collectShape(shape, list::add);
+		}
+
+		Vec3 startPos = this.demo.getCameraPos();
+		Vec3 endPos = startPos.add(Vec3.ZN.scale(5).transform(this.demo.getLastRot()));
+
+		double distance = Double.MAX_VALUE;
+		DemoShape3dHolder result = null;
+		for (DemoShape3dHolder s : list) {
+			Shape shape = s.getShape();
+			Collision collision = shape.raytrace(startPos, 
+				endPos
+			);
+
+			if (collision != null && collision.distance() <= distance) {
+				distance = collision.distance();
+				result = s;
+			}
+		}
+		if (result == null && list.size() == 1) {
+			result = list.getFirst();
+		}
+		if (result != null) {
+			result.setHovered();
+			this.demo.setHovered(result.root);
+		}
+
+		MatrixStack stack = new MatrixStack(this.demo.getMatrix());
+
+		for (DemoShape3dHolder shape : list) {
+			drawShape(g, stack, shape.getShape(), true);
+		}
+
 		g.setColor(Color.BLACK);
 
 		stack.close();
+	}
+
+	private void collectShape(Object object, Consumer<DemoShape3dHolder> apply) {
+		if (object == null) {
+			return;
+		}
+		if (object instanceof DemoShape3dHolder shape) {
+			if (shape.getShape() != null) {
+				apply.accept(shape);
+			}
+			return;
+		}
+		if (object instanceof Collection collection) {
+			for (Object o : collection) {
+				collectShape(o, apply);
+			}
+			return;
+		}
+		if (object.getClass().isArray()) {
+			for (Object o : ((Object[])object)) {
+				collectShape(o, apply);
+			}
+			return;
+		}
+		if (object instanceof Demo3dShape shape) {
+			collectShape(shape.getShape(), apply);
+			return;
+		}
+		if (object instanceof Shape shape) {
+			throw new ClassCastException(shape.getClass() + " is not " + DemoShape3dHolder.class);
+		}
 	}
 
 	private void drawShape(Graphics2D g, MatrixStack stack, Shape shape, boolean root) {
@@ -154,57 +169,6 @@ public class RenderDemo3dPanel extends JPanel implements MouseMotionListener, Mo
 		int s2 = s / 2;
 
 		g.fillOval((int) (point.x() * w) + w2 - s2, (int) -(point.y() * h) + h2 - s2, s, s);
-	}
-
-	public Matrix4F getMatrix() {
-		Matrix4F proj = Matrix4.perspectiveInfinityF(cameraFov, (float) getWidth() / getHeight(), .2f);
-		Quat q = Quat.fromAxisDegrees(Vec3.YP, cameraYaw).rotateAxisDegrees(Vec3.XP, cameraPitch);
-		this.lastRot = Matrix3.fromQuat(q);
-
-		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot).transposeF().translateF(cameraPos));
-	}
-
-	@Override
-	public void mouseDragged(MouseEvent e) {
-		mouseMoved(e);
-	}
-
-	@Override
-	public void mouseMoved(MouseEvent e) {
-		int dX = e.getX() - this.lastMouseX;
-		int dY = e.getY() - this.lastMouseY;
-
-		this.lastMouseX = e.getX();
-		this.lastMouseY = e.getY();
-
-		if (this.demo.isFocus()) {
-			this.cameraYaw -= dX * .2f;
-			this.cameraPitch -= dY * .2f;
-
-			if (this.cameraPitch > 90) this.cameraPitch = 90;
-			if (this.cameraPitch < -90) this.cameraPitch = -90;
-
-			//onMouseMoved();
-			this.repaint();
-			this.demo.toolPanel.repaint();
-		}
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {}
-
-	@Override
-	public void mousePressed(MouseEvent e) {}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		if (demo.isFocus()) resetMouse();
 	}
 
 }

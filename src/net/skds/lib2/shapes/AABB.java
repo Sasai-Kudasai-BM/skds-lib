@@ -93,13 +93,15 @@ public final class AABB implements ConvexShape {
 
 
 	public static AABB fromCenter(Vec3 center, double dx, double dy, double dz) {
-		return new AABB(center.x() - dx / 2.0, center.y() - dy / 2.0, center.z() - dz / 2.0, center.x() + dx / 2.0,
-				center.y() + dy / 2.0, center.z() + dz / 2.0);
+		dx /= 2.0;
+		dy /= 2.0;
+		dz /= 2.0;
+		return new AABB(center.x() - dx, center.y() - dy, center.z() - dz, center.x() + dx, center.y() + dy, center.z() + dz);
 	}
 
 	public static AABB fromCenter(Vec3 center, double size) {
-		return new AABB(center.x() - size / 2.0, center.y() - size / 2.0, center.z() - size / 2.0, center.x() + size / 2.0,
-				center.y() + size / 2.0, center.z() + size / 2.0);
+		size /= 2;
+		return new AABB(center.x() - size, center.y() - size, center.z() - size, center.x() + size, center.y() + size, center.z() + size);
 	}
 
 	public static AABB fromCenter(Vec3 center, Vec3 size) {
@@ -110,8 +112,15 @@ public final class AABB implements ConvexShape {
 	}
 
 	public static AABB fromCenter(double centerX, double centerY, double centerZ, double dx, double dy, double dz) {
-		return new AABB(centerX - dx / 2.0, centerY - dy / 2.0, centerZ - dz / 2.0, centerX + dx / 2.0,
-				centerY + dy / 2.0, centerZ + dz / 2.0);
+		dx /= 2.0;
+		dy /= 2.0;
+		dz /= 2.0;
+		return new AABB(centerX - dx, centerY - dy, centerZ - dz, centerX + dx, centerY + dy, centerZ + dz);
+	}
+
+	public static AABB fromCenter(double centerX, double centerY, double centerZ, double size) {
+		size /= 2.0;
+		return new AABB(centerX - size, centerY - size, centerZ - size, centerX + size, centerY + size, centerZ + size);
 	}
 
 	public static AABB fromRadius(Vec3 center, double radius) {

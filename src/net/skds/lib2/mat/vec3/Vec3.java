@@ -180,6 +180,18 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return new Vec3I(x, y, z);
 	}
 
+	static Vec3D of(double size) {
+		return new Vec3D(size, size, size);
+	}
+
+	static Vec3F of(float size) {
+		return new Vec3F(size, size, size);
+	}
+
+	static Vec3I of(int size) {
+		return new Vec3I(size, size, size);
+	}
+
 	static Vec3D randomNormal(Random r) {
 		return normalized(r.nextFloat() - .5, r.nextFloat() - .5, r.nextFloat() - .5);
 	}

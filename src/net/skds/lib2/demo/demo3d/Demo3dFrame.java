@@ -2,36 +2,86 @@ package net.skds.lib2.demo.demo3d;
 
 import javax.swing.*;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.matrix4.Matrix4;
+import net.skds.lib2.mat.matrix4.Matrix4F;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
-import net.skds.lib2.shapes.AABB;
-import net.skds.lib2.shapes.CompositeSuperShape;
 import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.utils.ThreadUtils;
+import net.w3e.lib.utils.RobotUtils;
 
-import java.awt.*;
-import java.awt.event.KeyAdapter;
+import java.awt.AWTException;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Supplier;
 
-public class Demo3dFrame extends JFrame {
+public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener {
+
+	private static final Cursor BLANK_CURSOR;
+	
+	static {
+		BufferedImage cursorImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		BLANK_CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
+	}
 
 	public final RenderDemo3dPanel renderPanel;
-	public final ToolDemo3dPanel toolPanel;
+	public final Demo3dToolPanel toolPanel;
 
 	private final ConcurrentLinkedQueue<Runnable> tasks = new ConcurrentLinkedQueue<>();
 
 	@Getter
 	private boolean focus;
+
 	private int forward;
 	private int left;
 	private int up;
+	private boolean pressShift;
 
-	double speed = .1f;
+	@Setter
+	@Getter
+	private Vec3 cameraPos = Vec3.ZERO;
+	@Getter
+	private Matrix3 lastRot = Matrix3.SINGLE;
+
+	@Getter
+	private float cameraYaw;
+	@Getter
+	private float cameraPitch;
+	@Getter
+	private float cameraFov = 70;
+
+	private int lastMouseX;
+	private int lastMouseY;
+
+	//private int lastMouseB;
+
+	@Getter
+	private double speed = .1f;
+
+	@Setter(value = AccessLevel.PACKAGE)
+	@Getter
+	private Demo3dShape hovered;
+
+	final List<Demo3dShape> shapes = new ArrayList<>();
 
 	public Demo3dFrame() {
 		super("Demo3d");
@@ -39,12 +89,9 @@ public class Demo3dFrame extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		this.renderPanel = new RenderDemo3dPanel(this);
-		this.toolPanel = new ToolDemo3dPanel(this);
+		this.toolPanel = new Demo3dToolPanel(this);
 		add(this.renderPanel, BorderLayout.CENTER);
 		add(this.toolPanel, BorderLayout.EAST);
-
-		BufferedImage cursorImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
 
 		ThreadUtils.runTickableDaemon(() -> {
 			Demo3dFrame.this.tick();
@@ -59,64 +106,10 @@ public class Demo3dFrame extends JFrame {
 			return true;
 		}, "tick", 10);
 
-		addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				switch (e.getKeyCode()) {
-					case KeyEvent.VK_ESCAPE -> {
-						focus = !focus;
-						if (focus) {
-							setCursor(blankCursor);
-							renderPanel.resetMouse();
-						} else {
-							setCursor(null);
-						}
-					}
-					case KeyEvent.VK_W -> {
-						if (forward < 1) forward++;
-					}
-					case KeyEvent.VK_S -> {
-						if (forward > -1) forward--;
-					}
-					case KeyEvent.VK_A -> {
-						if (left < 1) left++;
-					}
-					case KeyEvent.VK_D -> {
-						if (left > -1) left--;
-					}
-					case KeyEvent.VK_SPACE -> {
-						if (up < 1) up++;
-					}
-					case KeyEvent.VK_CONTROL -> {
-						if (up > -1) up--;
-					}
-				}
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				switch (e.getKeyCode()) {
-					case KeyEvent.VK_S -> {
-						if (forward < 1) forward++;
-					}
-					case KeyEvent.VK_W -> {
-						if (forward > -1) forward--;
-					}
-					case KeyEvent.VK_D -> {
-						if (left < 1) left++;
-					}
-					case KeyEvent.VK_A -> {
-						if (left > -1) left--;
-					}
-					case KeyEvent.VK_CONTROL -> {
-						if (up < 1) up++;
-					}
-					case KeyEvent.VK_SPACE -> {
-						if (up > -1) up--;
-					}
-				}
-			}
-		});
+		addKeyListener(this);
+		addMouseMotionListener(this);
+		addMouseListener(this);
+		addMouseWheelListener(this);
 
 		setMinimumSize(new Dimension(300, 50));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -127,91 +120,208 @@ public class Demo3dFrame extends JFrame {
 		setVisible(true);
 	}
 
-	public Demo3dFrame initDefault() {
-		this.renderPanel.addShape(AABB.fromCenter(0, 0, 0, 1, 1, 1));
-		this.renderPanel.addShape(AABB.fromCenter(0, -1, 0, 2, 1, 2));
-
-		CompositeSuperShape superShape = CompositeSuperShape.of(new Shape[]{
-			CompositeSuperShape.of(new Shape[]{
-				AABB.fromCenter(Vec3.of(0, 1, 0), Vec3.of(1, 2, .5)),
-
-				CompositeSuperShape.of(new Shape[]{
-					AABB.fromCenter(Vec3.of(0, 0.75 / 2, 0), 0.75)
-				}, Vec3.ZERO, "head").move(Vec3.of(0, 2, 0))
-					.rotate(Quat.fromAxisDegrees(Vec3.ZN, 10))
-				,
-
-				CompositeSuperShape.of(new Shape[]{
-					AABB.fromCenter(Vec3.of(0, 0, 0), Vec3.of(0.25, 1.75, 0.25))
-				}, Vec3.of(0.25 / 2, 1.75 / 2 - 0.1, 0), "hand").move(Vec3.of(-1f / 2 - 0.25 / 2, 1.1, 0)).rotate(Quat.fromAxisDegrees(Vec3.XN, 30))
-
-			}, Vec3.ZERO, "body")
-		}, Vec3.ZERO);
-
-		CompositeSuperShape rotated = superShape
-				.move(Vec3.of(2, 0, 0))
-				.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XN, 30)))
-				;
-
-		this.renderPanel.addShape(() -> rotated.rotate(Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 50d) % 360)));
-		this.renderPanel.addShape(superShape.move(Vec3.of(4, 0, 0)));
-
-		CompositeSuperShape scaled = superShape.move(Vec3.of(6, 0, 0));
-
-		this.renderPanel.addShape(() -> scaled.scale(FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360) / 2d + .5));
-
-		CompositeSuperShape moveRotScale = superShape.move(Vec3.of(8, 0, 0));
-
-		this.renderPanel.addShape(() -> {
-			Quat rot = Quat.fromAxisDegrees(Vec3.YN, (System.currentTimeMillis() / 10d) % 360);
-			return moveRotScale.moveRotScale(Vec3.of(0, 0, FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360)), rot, 1);
-		});
-
-		CompositeSuperShape posed1 = superShape.move(Vec3.of(10, 0, 0));
-
-		this.renderPanel.addShape(() -> {
-			Quat rot = Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 10d) % 360);
-			return posed1.setPose((sh, p, r, s, c) -> {}, Vec3.ZP.scale(0.5).transform(rot), rot, 1);
-		});
-
-		CompositeSuperShape posed2 = superShape.move(Vec3.of(12, 0, 0));
-
-		this.renderPanel.addShape(() -> {
-			return posed2.setPose((sh, p, r, s, c) -> {
-				Object attachment = sh.getAttachment();
-				if (attachment != null) {
-					if (attachment.equals("head")) {
-						c.setRot(Quat.fromAxisDegrees(Vec3.XP, 50));
-					}
-				}
-			}, Vec3.ZERO, Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 100d) % 360), 1);
-		});
-
-		return this;
+	public final void addShape(Supplier<Shape> shape) {
+		this.shapes.add(Demo3dShape.of(shape));
 	}
 
-	public void addTask(Runnable task) {
-		tasks.offer(task);
+	public final void addShape(Shape shape) {
+		this.shapes.add(Demo3dShape.of(shape));
+	}
+
+	public final void addShape(Demo3dShape shape) {
+		this.shapes.add(shape);
+	}
+
+	public final void addTask(Runnable task) {
+		this.tasks.offer(task);
 	}
 
 	private void tick() {
 		if (focus && (up != 0 || left != 0 || forward != 0)) {
 			if (up != 0) {
-				renderPanel.setCameraPos(renderPanel.getCameraPos().add(renderPanel.getLastRot().up().scale(-speed * up)));
+				this.setCameraPos(this.cameraPos.add(this.lastRot.up().scale(-speed * up)));
 			}
 			if (left != 0) {
-				renderPanel.setCameraPos(renderPanel.getCameraPos().add(renderPanel.getLastRot().left().scale(speed * left)));
+				this.setCameraPos(this.cameraPos.add(this.lastRot.left().scale(speed * left)));
 			}
 			if (forward != 0) {
-				renderPanel.setCameraPos(renderPanel.getCameraPos().add(renderPanel.getLastRot().forward().scale(speed * forward)));
+				this.setCameraPos(this.cameraPos.add(this.lastRot.forward().scale(speed * forward)));
 			}
 			this.renderPanel.repaint();
 			this.toolPanel.repaint();
 		}
 	}
 
+	public final void resetMouse() {
+		Point p = getLocationOnScreen();
+		lastMouseX = getWidth() / 2;
+		lastMouseY = getHeight() / 2;
+		RobotUtils.mouseMove(p.x + lastMouseX, p.y + lastMouseY);
+	}
+
+	public final Matrix4F getMatrix() {
+		Matrix4F proj = Matrix4.perspectiveInfinityF(this.cameraFov, (float)this.renderPanel.getWidth() / this.renderPanel.getHeight(), .2f);
+		Quat q = Quat.fromAxisDegrees(Vec3.YP, this.cameraYaw).rotateAxisDegrees(Vec3.XP, cameraPitch);
+		this.lastRot = Matrix3.fromQuat(q);
+
+		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot).transposeF().translateF(this.cameraPos));
+	}
+
+	@Override
+	public final void keyTyped(KeyEvent e) {}
+
+	@Override
+	public final void keyPressed(KeyEvent e) {
+		switch (e.getKeyCode()) {
+			case KeyEvent.VK_ESCAPE -> {
+				focus = !focus;
+				if (focus) {
+					setCursor(BLANK_CURSOR);
+					resetMouse();
+				} else {
+					setCursor(null);
+				}
+			}
+			case KeyEvent.VK_W -> {
+				if (forward < 1) forward++;
+			}
+			case KeyEvent.VK_S -> {
+				if (forward > -1) forward--;
+			}
+			case KeyEvent.VK_A -> {
+				if (left < 1) left++;
+			}
+			case KeyEvent.VK_D -> {
+				if (left > -1) left--;
+			}
+			case KeyEvent.VK_SPACE -> {
+				if (up < 1) up++;
+			}
+			case KeyEvent.VK_CONTROL -> {
+				if (up > -1) up--;
+			}
+			case KeyEvent.VK_SHIFT -> {
+				this.pressShift = true;
+			}
+		}
+	}
+
+	@Override
+	public final void keyReleased(KeyEvent e) {
+		switch (e.getKeyCode()) {
+			case KeyEvent.VK_S -> {
+				if (forward < 1) forward++;
+			}
+			case KeyEvent.VK_W -> {
+				if (forward > -1) forward--;
+			}
+			case KeyEvent.VK_D -> {
+				if (left < 1) left++;
+			}
+			case KeyEvent.VK_A -> {
+				if (left > -1) left--;
+			}
+			case KeyEvent.VK_CONTROL -> {
+				if (up < 1) up++;
+			}
+			case KeyEvent.VK_SPACE -> {
+				if (up > -1) up--;
+			}
+			case KeyEvent.VK_SHIFT -> {
+				this.pressShift = false;
+			}
+		}
+	}
+
+	@Override
+	public final void mouseDragged(MouseEvent e) {
+		mouseMoved(e);
+	}
+
+	@Override
+	public final void mouseMoved(MouseEvent e) {
+		if (!this.isFocus()) {
+			return;
+		}
+		int dX = e.getX() - this.lastMouseX;
+		int dY = e.getY() - this.lastMouseY;
+
+		this.lastMouseX = e.getX();
+		this.lastMouseY = e.getY();
+
+		if (this.isFocus()) {
+			this.cameraYaw -= dX * this.speed * 2;
+			this.cameraPitch -= dY * this.speed * 2;
+
+			if (this.cameraPitch > 90) this.cameraPitch = 90;
+			if (this.cameraPitch < -90) this.cameraPitch = -90;
+
+			//onMouseMoved();
+			this.renderPanel.repaint();
+			this.toolPanel.repaint();
+		}
+		this.resetMouse();
+	}
+
+	@Override
+	public final void mouseClicked(MouseEvent e) {
+		if (this.isFocus()) {
+			if (this.hovered != null) {
+				this.hovered.mouseClicked(e);
+			}
+		}
+	}
+
+	@Override
+	public final void mousePressed(MouseEvent e) {
+		if (this.isFocus()) {
+			if (this.hovered != null) {
+				this.hovered.mousePressed(e);
+			}
+		}
+	}
+
+	@Override
+	public final void mouseReleased(MouseEvent e) {
+		if (this.isFocus()) {
+			if (this.hovered != null) {
+				this.hovered.mouseReleased(e);
+			}
+		}
+	}
+
+	@Override
+	public final void mouseEntered(MouseEvent e) {}
+
+	@Override
+	public final void mouseExited(MouseEvent e) {
+		if (this.isFocus()) {
+			this.resetMouse();
+		}
+	}
+
+	@Override
+	public final void mouseWheelMoved(MouseWheelEvent e) {
+		if (!this.isFocus()) {
+			return;
+		}
+		if (this.pressShift) {
+			float clamp = FastMath.clamp(this.cameraFov + e.getWheelRotation(), 30, 120);
+			if (clamp != this.speed) {
+				this.cameraFov = clamp;
+				this.toolPanel.repaint();
+			}
+		} else {
+			double clamp = FastMath.clamp(this.speed + e.getWheelRotation() / -100d, 0.01, 0.2);
+			if (clamp != this.speed) {
+				this.speed = clamp;
+				this.toolPanel.repaint();
+			}
+		}
+	}
+
 	public static void main(String[] args) throws AWTException {
-		new Demo3dFrame().setVisible(true);
+		new Demo3dFrame();
 	}
 }
 
