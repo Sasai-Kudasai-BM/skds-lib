@@ -21,6 +21,7 @@ public class WindowOverlay extends JFrame {
 		getRootPane().setBorder(border);
 		setBackground(new Color(0, true));
 		pack();
+		setVisible(true);
 
 		//Toolkit.getDefaultToolkit().getLockingKeyState()
 		//		setVisible(true);

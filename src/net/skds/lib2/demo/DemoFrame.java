@@ -5,6 +5,8 @@ import net.skds.lib2.demo.demo3d.Demo3dFrame;
 import net.skds.lib2.demo.demo3d.Demo3dFrameExample;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.misc.font.demo.FontDemoFrame;
+import net.skds.lib2.misc.graph.GraphicBuilder;
+import net.skds.lib2.natives.NativesDemo;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.swing.*;
@@ -17,12 +19,17 @@ public class DemoFrame extends JFrame {
 		super("SKDS Lib v2 demo");
 		SKDSLogger.replaceOuts();
 
-		setLayout(new FlowLayout());
+		setLayout(new GridBagLayout());
+
 		JButton button = new JButton("Color");
 		button.addActionListener(e -> new ColorDemoFrame());
 		add(button);
 
-		button = new JButton("Perlin");
+		button = new JButton("Natives");
+		button.addActionListener(e -> new NativesDemo());
+		add(button);
+
+		button = new JButton("Noise");
 		button.addActionListener(e -> new NoiseFrame());
 		add(button);
 
@@ -58,22 +65,33 @@ public class DemoFrame extends JFrame {
 			}
 		});
 		add(button);
+
 		button = new JButton("Demo3d");
-		button.addActionListener(e -> 
+		button.addActionListener(e ->
 			Demo3dFrameExample.initCollision(new Demo3dFrame())
 		);
 		add(button);
+
+		button = new JButton("GraphicBuilder");
+		button.addActionListener(e -> new GraphicBuilder());
+		add(button);
+
 
 		setMinimumSize(new Dimension(300, 50));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
 		setLocation(-getWidth() / 2, -getHeight() / 2);
 		setLocationRelativeTo(null);
-		setResizable(false);
 		setVisible(true);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+
 		new DemoFrame();
 	}
 }
