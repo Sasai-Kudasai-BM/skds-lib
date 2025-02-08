@@ -134,6 +134,30 @@ public class ArrayUtils {
 		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
+	public static <T> boolean containsAll(Collection<T> collection, T[] array) {
+		for (int i = 0; i < array.length; i++) {
+			if (!collection.contains(array[i])) return false;
+		}
+		return true;
+	}
+
+	public static <T> T[] addToArray(T[] array, T value) {
+		T[] a = Arrays.copyOf(array, array.length + 1);
+		a[array.length] = value;
+		return a;
+	}
+
+	public static <T> T[] addToArrayAsSet(T[] array, T value) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(value)) {
+				return array;
+			}
+		}
+		T[] a = Arrays.copyOf(array, array.length + 1);
+		a[array.length] = value;
+		return a;
+	}
+
 	public static class ObjHashedArray {
 
 		public final Object[] array;
