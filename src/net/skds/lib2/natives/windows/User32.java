@@ -19,7 +19,15 @@ public class User32 extends AbstractLinkedLibrary {
 			SafeLinker.G_INT,
 			SafeLinker.G_LONG
 	);
+	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = SafeLinker.createUpcallLink(
+			User32.LowLevelMouseProc.class,
+			SafeLinker.G_INT,
+			SafeLinker.G_INT,
+			SafeLinker.G_INT,
+			SafeLinker.G_LONG
+	);
 
+	private final MethodHandle peekMessage = createHandle(lib, "PeekMessageA", BOOLEAN, PTR, PTR, INT, INT, INT);
 	private final MethodHandle waitMessage = createHandle(lib, "WaitMessage", BOOLEAN);
 	private final MethodHandle getMessage = createHandle(lib, "GetMessageW", BOOLEAN, PTR, PTR, INT, INT);
 	private final MethodHandle setWindowsHookExA = createHandle(lib, "SetWindowsHookExA", PTR, INT, PTR, PTR, INT);
@@ -53,6 +61,14 @@ public class User32 extends AbstractLinkedLibrary {
 		}
 	}
 
+	public boolean peekMessage(long lpMsg, long hWnd, int wMsgFilterMin, int wMsgFilterMax, int wRemoveMsg) {
+		try {
+			return (boolean) peekMessage.invokeExact(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public boolean waitMessage() {
 		try {
 			return (boolean) waitMessage.invokeExact();
@@ -65,6 +81,12 @@ public class User32 extends AbstractLinkedLibrary {
 	public interface LowLevelKeyboardProc {
 		int call(int nCode, int wParam, long lParam);
 	}
+
+	@FunctionalInterface
+	public interface LowLevelMouseProc {
+		int call(int nCode, int wParam, long lParam);
+	}
+
 
 	public static User32 getInstance() {
 		User32 inst = instance;

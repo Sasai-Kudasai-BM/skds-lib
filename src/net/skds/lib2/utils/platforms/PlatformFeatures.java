@@ -3,6 +3,7 @@ package net.skds.lib2.utils.platforms;
 import net.skds.lib2.utils.SKDSUtils;
 
 import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
 
 public abstract sealed class PlatformFeatures permits WindowsPlatform {
 
@@ -12,6 +13,10 @@ public abstract sealed class PlatformFeatures permits WindowsPlatform {
 	public abstract void addKeyListener(KeyListener listener);
 
 	public abstract void removeKeyListener(KeyListener listener);
+	
+	public abstract void addMouseListener(MouseListener listener);
+
+	public abstract void removeMouseListener(MouseListener listener);
 
 	public static PlatformFeatures getInstance() {
 		PlatformFeatures platform = instance;
@@ -25,4 +30,5 @@ public abstract sealed class PlatformFeatures permits WindowsPlatform {
 		}
 		return platform;
 	}
+
 }

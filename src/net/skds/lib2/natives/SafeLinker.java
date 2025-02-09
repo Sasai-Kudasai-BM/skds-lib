@@ -83,7 +83,6 @@ public final class SafeLinker {
 		try {
 			Method method = clazz.getDeclaredMethod(name, jArray(argTypes));
 			handle = METHOD_LOOKUP.unreflect(method);
-			//handle = METHOD_LOOKUP.findVirtual(clazz, name, MethodType.methodType(returnType.jType, jArray(argTypes)));
 		} catch (NoSuchMethodException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}

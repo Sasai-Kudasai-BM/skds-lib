@@ -4,17 +4,25 @@ import net.skds.lib2.natives.AbstractLinkedLibrary;
 
 import java.lang.invoke.MethodHandle;
 
-import static net.skds.lib2.natives.SafeLinker.PTR;
-import static net.skds.lib2.natives.SafeLinker.createHandle;
+import static net.skds.lib2.natives.SafeLinker.*;
 
 public class Kernel32 extends AbstractLinkedLibrary {
 
 	private static Kernel32 instance;
 
 	private final MethodHandle getModuleHandle = createHandle(lib, "GetModuleHandleW", PTR, PTR);
+	private final MethodHandle getLastError = createHandle(lib, "GetLastError", INT);
 
 	private Kernel32() {
 		super("kernel32");
+	}
+
+	public int getLastError() {
+		try {
+			return (int) getLastError.invokeExact();
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public long getModuleHandle(long ptr) {
