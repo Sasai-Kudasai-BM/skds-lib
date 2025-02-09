@@ -23,7 +23,7 @@ public record Collision(double distance,
 	@Override
 	public int compareTo(Collision o) {
 		if (o == null) return -1;
-		int d = Double.compare(depth, o.depth);
+		int d = Double.compare(o.depth, depth);
 		if (d == 0) {
 			return Double.compare(distance, o.distance);
 		}

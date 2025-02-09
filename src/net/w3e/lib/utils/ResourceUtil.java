@@ -1,7 +1,5 @@
 package net.w3e.lib.utils;
 
-import net.skds.lib2.io.json.JsonTest;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,7 +55,7 @@ public class ResourceUtil {
 
 	public static void getResourceFiles(List<Path> collection, String root) {
 		try {
-			URI uri = Objects.requireNonNull(JsonTest.class.getClassLoader().getResource(root)).toURI();
+			URI uri = Objects.requireNonNull(ResourceUtil.class.getClassLoader().getResource(root)).toURI();
 
 			Path myPath;
 			if (uri.getScheme().equals("jar")) {

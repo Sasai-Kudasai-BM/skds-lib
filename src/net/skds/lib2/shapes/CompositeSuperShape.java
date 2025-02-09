@@ -2,24 +2,34 @@ package net.skds.lib2.shapes;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
+import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
+import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
+import net.skds.lib2.io.json.codec.typed.ConfigType;
+import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.AutoString;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public sealed class CompositeSuperShape implements CompositeShape {
+@DefaultJsonCodec(CompositeSuperShape.JCodec.class)
+public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 
 	private static final ConvexShape[] empty = {};
 
 	public static final CompositeSuperShape EMPTY = new Empty();
 
 	private final Shape[] shapes;
-	private final AABB bounding;
+	private final transient AABB bounding;
 	private final Vec3 center;
+	@DefaultJsonCodec(JsonToStringSerialiser.class)
 	private Object attachment;
 
 	CompositeSuperShape(Shape[] shapes, Vec3 center, Object attachment) {
@@ -251,5 +261,48 @@ public sealed class CompositeSuperShape implements CompositeShape {
 			builder.append(",\"attachment\":").append(this.attachment);
 		}
 		return AutoString.build(this, builder.toString());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof CompositeShape compositeShape) {
+			if (!this.center.equals(compositeShape.getCenter())) {
+				return false;
+			}
+			if (!this.bounding.equals(compositeShape.getBoundingBox())) {
+				return false;
+			}
+			if (!Arrays.equals(this.shapes, compositeShape.getAllShapes())) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	static final class JCodec extends JsonReflectiveBuilderCodec<CompositeSuperShape> {
+
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, CompositeShapeTypeAdapter.class, registry);
+		}
+
+		private static class CompositeShapeTypeAdapter implements JsonDeserializeBuilder<CompositeSuperShape> {
+
+			private Shape[] shapes;
+			private Vec3 center = Vec3.ZERO;
+			private String attachment;
+
+			@Override
+			public CompositeSuperShape build() {
+				return new CompositeSuperShape(shapes, center, this.attachment);
+			}
+		}
+	}
+
+	@Override
+	public final ConfigType<?> getConfigType() {
+		return ShapeType.COMPOSITE;
 	}
 }

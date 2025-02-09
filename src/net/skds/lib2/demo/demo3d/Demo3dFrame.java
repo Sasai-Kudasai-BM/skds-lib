@@ -5,13 +5,13 @@ import javax.swing.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import net.w3e.lib.awtutils.SwingKeyListener;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.matrix4.Matrix4F;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
-import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.utils.ThreadUtils;
 import net.w3e.lib.utils.RobotUtils;
 
@@ -32,9 +32,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Supplier;
 
-public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener {
+public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener, Demo3dShapeCollector {
 
 	private static final Cursor BLANK_CURSOR;
 	
@@ -59,13 +58,15 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 	@Setter
 	@Getter
 	private Vec3 cameraPos = Vec3.ZERO;
+	@Setter
+	@Getter
+	private float cameraYaw;
+	@Setter
+	@Getter
+	private float cameraPitch;
 	@Getter
 	private Matrix3 lastRot = Matrix3.SINGLE;
 
-	@Getter
-	private float cameraYaw;
-	@Getter
-	private float cameraPitch;
 	@Getter
 	private float cameraFov = 70;
 
@@ -80,6 +81,16 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 	@Setter(value = AccessLevel.PACKAGE)
 	@Getter
 	private Demo3dShape hovered;
+
+	@Setter(value = AccessLevel.PACKAGE)
+	@Getter
+	private boolean fill;
+
+	@Setter(value = AccessLevel.PACKAGE)
+	@Getter
+	private boolean sort;
+
+	private final List<SwingKeyListener> keys = new ArrayList<>();
 
 	final List<Demo3dShape> shapes = new ArrayList<>();
 
@@ -106,7 +117,10 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 			return true;
 		}, "tick", 10);
 
-		addKeyListener(this);
+		JComponent root = ((JComponent)this.getContentPane());
+		new SwingKeyListener(root, KeyEvent.VK_ESCAPE, this).install();
+
+		this.renderPanel.addKeyListener(this);
 		addMouseMotionListener(this);
 		addMouseListener(this);
 		addMouseWheelListener(this);
@@ -120,14 +134,23 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 		setVisible(true);
 	}
 
-	public final void addShape(Supplier<Shape> shape) {
-		this.shapes.add(Demo3dShape.of(shape));
-	}
+	/*@Override
+	protected JRootPane createRootPane() {
+		JRootPane rootPane = new JRootPane() {
+			@Override
+			protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+				if (e.getKeyCode() == KeyEvent.VK_TAB) {
+					return super.processKeyBinding(ks, e, condition, pressed);
+				}
+				return true;
+			}
+		};
+		rootPane.setOpaque(true);
 
-	public final void addShape(Shape shape) {
-		this.shapes.add(Demo3dShape.of(shape));
-	}
+		return rootPane;
+	}*/
 
+	@Override
 	public final void addShape(Demo3dShape shape) {
 		this.shapes.add(shape);
 	}
@@ -139,16 +162,17 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 	private void tick() {
 		if (focus && (up != 0 || left != 0 || forward != 0)) {
 			if (up != 0) {
-				this.setCameraPos(this.cameraPos.add(this.lastRot.up().scale(-speed * up)));
+				this.setCameraPos(this.cameraPos.add(this.lastRot.up().scale(speed * up)));
 			}
 			if (left != 0) {
-				this.setCameraPos(this.cameraPos.add(this.lastRot.left().scale(speed * left)));
+				this.setCameraPos(this.cameraPos.add(this.lastRot.left().scale(-speed * left)));
 			}
 			if (forward != 0) {
-				this.setCameraPos(this.cameraPos.add(this.lastRot.forward().scale(speed * forward)));
+				this.setCameraPos(this.cameraPos.add(this.lastRot.forward().scale(-speed * forward)));
 			}
 			this.renderPanel.repaint();
 			this.toolPanel.repaint();
+			this.renderPanel.requestFocus();
 		}
 	}
 
@@ -161,27 +185,25 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 
 	public final Matrix4F getMatrix() {
 		Matrix4F proj = Matrix4.perspectiveInfinityF(this.cameraFov, (float)this.renderPanel.getWidth() / this.renderPanel.getHeight(), .2f);
-		Quat q = Quat.fromAxisDegrees(Vec3.YP, this.cameraYaw).rotateAxisDegrees(Vec3.XP, cameraPitch);
+		Quat q = Quat.fromAxisDegrees(Vec3.YP, this.cameraYaw + 180).rotateAxisDegrees(Vec3.XP, cameraPitch);
 		this.lastRot = Matrix3.fromQuat(q);
 
-		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot).transposeF().translateF(this.cameraPos));
+		return proj.multiplyF(Matrix4.fromMatrix3F(this.lastRot).transposeF().translateF(-this.cameraPos.xf(), -this.cameraPos.yf(), -this.cameraPos.zf()));
 	}
 
 	@Override
-	public final void keyTyped(KeyEvent e) {}
+	public final void keyTyped(KeyEvent e) {
+		if (!this.isFocused()) {
+			return;
+		}
+	}
 
 	@Override
 	public final void keyPressed(KeyEvent e) {
+		if (!this.isFocused() && !this.focus) {
+			return;
+		}
 		switch (e.getKeyCode()) {
-			case KeyEvent.VK_ESCAPE -> {
-				focus = !focus;
-				if (focus) {
-					setCursor(BLANK_CURSOR);
-					resetMouse();
-				} else {
-					setCursor(null);
-				}
-			}
 			case KeyEvent.VK_W -> {
 				if (forward < 1) forward++;
 			}
@@ -208,6 +230,29 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 
 	@Override
 	public final void keyReleased(KeyEvent e) {
+		if (!this.isFocused()) {
+			return;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			if (!focus) {
+				this.keys.forEach(SwingKeyListener::install);
+				this.renderPanel.setFocusable(true);
+				this.renderPanel.requestFocus();
+				setCursor(BLANK_CURSOR);
+				resetMouse();
+			} else {
+				this.renderPanel.setFocusable(false);
+				this.keys.forEach(SwingKeyListener::uninstall);
+				setCursor(null);
+			}
+			focus = !focus;
+			e.consume();
+			return;
+		}
+		if (!this.focus) {
+			return;
+		}
+		e.consume();
 		switch (e.getKeyCode()) {
 			case KeyEvent.VK_S -> {
 				if (forward < 1) forward++;
@@ -250,8 +295,8 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 		this.lastMouseY = e.getY();
 
 		if (this.isFocus()) {
-			this.cameraYaw -= dX * this.speed * 2;
-			this.cameraPitch -= dY * this.speed * 2;
+			this.cameraYaw -= dX / 10f;
+			this.cameraPitch -= dY / 10f;
 
 			if (this.cameraPitch > 90) this.cameraPitch = 90;
 			if (this.cameraPitch < -90) this.cameraPitch = -90;
@@ -312,7 +357,7 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 				this.toolPanel.repaint();
 			}
 		} else {
-			double clamp = FastMath.clamp(this.speed + e.getWheelRotation() / -100d, 0.01, 0.2);
+			double clamp = FastMath.clamp(this.speed + e.getWheelRotation() / -100d, 0.01, 0.5);
 			if (clamp != this.speed) {
 				this.speed = clamp;
 				this.toolPanel.repaint();

@@ -1,19 +1,30 @@
 package net.skds.lib2.shapes;
 
+import java.lang.reflect.Type;
+
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
+import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
+import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
+import net.skds.lib2.io.json.codec.typed.ConfigType;
+import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.AutoString;
 
-public class OBB implements ConvexShape {
+@DefaultJsonCodec(OBB.JCodec.class)
+public class OBB implements ConvexShape, TypedConfig {
 
 	public final Matrix3 normals;
 	public final Vec3 center;
 	public final Vec3 dimensions;
 
-	private Vec3[] vertexCache;
-	private AABB boundingCache;
+	private transient Vec3[] vertexCache;
+	private transient AABB boundingCache;
 
+	@DefaultJsonCodec(JsonToStringSerialiser.class)
 	private Object attachment;
 
 	public OBB(Vec3 center, Vec3 dimensions, Quat q) {
@@ -134,6 +145,19 @@ public class OBB implements ConvexShape {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof OBB obb) {
+			return ConvexShape.equals(this, obb);
+		} else if (obj instanceof ConvexShape convexShape) {
+			return ConvexShape.equals(this, convexShape);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("\"normals\":").append(this.normals);
@@ -143,6 +167,31 @@ public class OBB implements ConvexShape {
 			builder.append(",\"attachment\":").append(this.attachment);
 		}
 		return AutoString.build(this, builder.toString());
+	}
+
+	static final class JCodec extends JsonReflectiveBuilderCodec<OBB> {
+
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, OBBBuilder.class, registry);
+		}
+
+		private static class OBBBuilder implements JsonDeserializeBuilder<OBB> {
+
+			public Matrix3 normals = Matrix3.SINGLE;
+			public Vec3 center = Vec3.ZERO;
+			public Vec3 dimensions = Vec3.SINGLE;
+			public String attachment;
+
+			@Override
+			public OBB build() {
+				return new OBB(this.center, this.dimensions, this.normals, this.attachment);
+			}
+		}
+	}
+
+	@Override
+	public final ConfigType<?> getConfigType() {
+		return ShapeType.OBB;
 	}
 
 }

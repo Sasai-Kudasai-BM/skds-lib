@@ -1,6 +1,8 @@
 package net.skds.lib2.demo.demo3d;
 
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -9,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.shapes.Collision;
 import net.skds.lib2.shapes.Shape;
 
 public abstract class Demo3dShape {
@@ -26,7 +30,7 @@ public abstract class Demo3dShape {
 
 	public abstract Object getShape();
 
-	protected void tick() {}
+	protected void tick(Demo3dFrame demo) {}
 
 	public void mouseClicked(MouseEvent event) {
 		mouseEvent(event, this::mouseClickedM1, this::mouseClickedM2, this::mouseClickedMiddle);
@@ -115,4 +119,83 @@ public abstract class Demo3dShape {
 		}
 	}
 
+	//@AllArgsConstructor
+	public abstract static class Demo3dShapeInterractable extends Demo3dShape {
+	
+		protected final Shape staticBox;
+
+		protected final DemoShape3dHolder[] shapes;
+
+		protected int move;
+
+		protected Demo3dShapeInterractable() {
+			this(1);
+		}
+
+		protected Demo3dShapeInterractable(int physexBodyCount) {
+			this.staticBox = initStaticBox();
+
+			List<DemoShape3dHolder> list = new ArrayList<>();
+			list.add(new DemoShape3dHolder(this, this.staticBox));
+			this.shapes = new DemoShape3dHolder[physexBodyCount + 1];
+			this.shapes[0] = new DemoShape3dHolder(this, this.staticBox);
+			for (int i = 0; i < physexBodyCount; i++) {
+				this.shapes[i+1] = new DemoShape3dHolder(this);
+			}
+		}
+
+		protected abstract Shape initStaticBox();
+
+		@Override
+		protected abstract void tick(Demo3dFrame demo);
+
+		protected final Collision collide(Vec3 way) {
+			return collide(this.shapes[1].getShape(), way);
+		}
+
+		protected final Collision collide(Shape human, Vec3 way) {
+			return staticBox.collide(human, way);
+		}
+
+		@SuppressWarnings("unchecked")
+		protected final <T extends Shape> T getHuman() {
+			return (T)this.shapes[1].getShape();
+		}
+
+		protected final void setHuman(Shape human) {
+			this.shapes[1].setShape(human);
+		}
+		
+		@Override
+		public final void mousePressedM1(MouseEvent event) {
+			this.move = 1;
+		}
+
+		@Override
+		public final void mouseReleasedM1(MouseEvent event) {
+			this.move = 0;
+		}
+		
+		@Override
+		public final void mousePressedM2(MouseEvent event) {
+			this.move = -1;
+		}
+
+		@Override
+		public final void mouseReleasedM2(MouseEvent event) {
+			this.move = 0;
+		}
+
+		@Override
+		public final void mouseClickedMiddle(MouseEvent event) {
+			this.reset();
+		}
+
+		protected abstract void reset();
+
+		@Override
+		public Object getShape() {
+			return this.shapes;
+		}
+	}
 }

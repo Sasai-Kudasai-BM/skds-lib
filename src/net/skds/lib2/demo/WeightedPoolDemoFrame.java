@@ -12,7 +12,6 @@ import java.util.List;
 @CustomLog
 public class WeightedPoolDemoFrame extends JFrame {
 
-
 	public WeightedPoolDemoFrame() {
 		super("WeightedPool demo");
 

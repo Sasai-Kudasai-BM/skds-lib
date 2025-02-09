@@ -1,6 +1,5 @@
 package net.skds.lib2.shapes;
 
-
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
@@ -33,7 +32,7 @@ public non-sealed interface CompositeShape extends Shape {
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to) {
-		ConvexShape[] shapes = simplify(AABB.fromTo(from, to));
+		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
 		if (shapes.length == 0) return null;
 		Collision nearest = null;
 		for (int i = 0; i < shapes.length; i++) {
@@ -47,7 +46,7 @@ public non-sealed interface CompositeShape extends Shape {
 	}
 
 	static Collision collideConvex(CompositeShape composite, ConvexShape convex, Vec3 velocityBA) {
-		AABB convexAABB = convex.getBoundingBox();
+		AABB convexAABB = convex.getBoundingBox().stretch(velocityBA.x(), velocityBA.y(), velocityBA.z());
 		ConvexShape[] shapes = composite.simplify(convexAABB);
 		if (shapes.length == 0) return null;
 		Collision nearest = null;

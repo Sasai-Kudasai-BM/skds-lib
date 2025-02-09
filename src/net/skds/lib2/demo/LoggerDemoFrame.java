@@ -10,7 +10,6 @@ import java.awt.*;
 @CustomLog
 public class LoggerDemoFrame extends JFrame {
 
-
 	public LoggerDemoFrame() {
 		super("Logger demo");
 

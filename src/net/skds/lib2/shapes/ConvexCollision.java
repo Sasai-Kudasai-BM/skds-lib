@@ -50,6 +50,19 @@ public class ConvexCollision {
 			double bMin = b.getProjectionMin(terminator);
 			double bMax = b.getProjectionMax(terminator);
 
+			if (Math.abs(v) < 1E-30) {
+				if (aMax + aMin < bMax + bMin) {
+					if (aMax <= bMin) {
+						return null;
+					}
+				} else {
+					if (bMax <= aMin) {
+						return null;
+					}
+				}
+				continue;
+			}
+
 			double tMin = (aMin - bMax) / v;
 			double tMax = (aMax - bMin) / v;
 
@@ -89,8 +102,8 @@ public class ConvexCollision {
 			double d = tMax - tMin;
 
 			if (d < termLen) {
-				double dc = (aMax - aMin) - (bMax - bMin);
-				nInv = v * dc < 0;
+				double dc = (bMax + bMin) - (aMax + aMin);
+				nInv = dc > 0;
 				termLen = d;
 				minTerm = terminator;
 			}
@@ -123,6 +136,19 @@ public class ConvexCollision {
 			double bMin = b.getProjectionMin(axis);
 			double bMax = b.getProjectionMax(axis);
 
+			if (Math.abs(v) < 1E-30) {
+				if (aMax + aMin < bMax + bMin) {
+					if (aMax <= bMin) {
+						return null;
+					}
+				} else {
+					if (bMax <= aMin) {
+						return null;
+					}
+				}
+				continue;
+			}
+
 			double tMin = (aMin - bMax) / v;
 			double tMax = (aMax - bMin) / v;
 
@@ -148,7 +174,6 @@ public class ConvexCollision {
 		double termLen = Double.MAX_VALUE;
 		Direction minTerm = null;
 
-
 		for (int i = 0; i < axs.length; i++) {
 			Direction.Axis axis = axs[i];
 			double v = axis.choose(velocityBA);
@@ -163,14 +188,14 @@ public class ConvexCollision {
 			double d = tMax - tMin;
 
 			if (d < termLen) {
-				double dc = (aMax - aMin) - (bMax - bMin);
+				double dc = (bMax + bMin) - (aMax + aMin);
 				termLen = d;
-				minTerm = axis.getDirection(v * dc < 0);
+				minTerm = axis.getDirection(dc > 0);
 			}
 		}
 
 		assert minTerm != null : "nan or infinite values";
-			if (distance > 0) {
+		if (distance > 0) {
 			termLen = 0;
 		} else if (termLen < 0) {
 			termLen = -termLen;

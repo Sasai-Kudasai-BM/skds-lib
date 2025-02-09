@@ -277,27 +277,14 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		double f25 = this.m20() * f05 - this.m22() * f02 + this.m23() * f01;
 		double f26 = -this.m20() * f04 + this.m21() * f02 - this.m23() * f00;
 		double f27 = this.m20() * f03 - this.m21() * f01 + this.m22() * f00;
-		Matrix4Builder matrix4 = new Matrix4Builder();
-
-		matrix4.m00 = f12;
-		matrix4.m10 = f13;
-		matrix4.m20 = f14;
-		matrix4.m30 = f15;
-		matrix4.m01 = f16;
-		matrix4.m11 = f17;
-		matrix4.m21 = f18;
-		matrix4.m31 = f19;
-		matrix4.m02 = f20;
-		matrix4.m12 = f21;
-		matrix4.m22 = f22;
-		matrix4.m32 = f23;
-		matrix4.m03 = f24;
-		matrix4.m13 = f25;
-		matrix4.m23 = f26;
-		matrix4.m33 = f27;
 
 		double det = f00 * f11 - f01 * f10 + f02 * f09 + f03 * f08 - f04 * f07 + f05 * f06;
-		Matrix4D m = matrix4.buildD();
+		Matrix4D m = new Matrix4D(
+			f12, f13, f14, f15,
+			f16, f17, f18, f19,
+			f20, f21, f22, f23,
+			f24, f25, f26, f27
+		);
 		return new Obj2DoublePairRecord<>(m, det);
 	}
 
@@ -330,27 +317,14 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		float f25 = this.m20f() * f05 - this.m22f() * f02 + this.m23f() * f01;
 		float f26 = -this.m20f() * f04 + this.m21f() * f02 - this.m23f() * f00;
 		float f27 = this.m20f() * f03 - this.m21f() * f01 + this.m22f() * f00;
-		Matrix4Builder matrix4 = new Matrix4Builder();
-
-		matrix4.m00 = f12;
-		matrix4.m10 = f13;
-		matrix4.m20 = f14;
-		matrix4.m30 = f15;
-		matrix4.m01 = f16;
-		matrix4.m11 = f17;
-		matrix4.m21 = f18;
-		matrix4.m31 = f19;
-		matrix4.m02 = f20;
-		matrix4.m12 = f21;
-		matrix4.m22 = f22;
-		matrix4.m32 = f23;
-		matrix4.m03 = f24;
-		matrix4.m13 = f25;
-		matrix4.m23 = f26;
-		matrix4.m33 = f27;
 
 		float det = f00 * f11 - f01 * f10 + f02 * f09 + f03 * f08 - f04 * f07 + f05 * f06;
-		Matrix4F m = matrix4.buildF();
+		Matrix4F m = new Matrix4F(
+			f12, f13, f14, f15,
+			f16, f17, f18, f19,
+			f20, f21, f22, f23,
+			f24, f25, f26, f27
+		);
 		return new Obj2FloatPairRecord<>(m, det);
 	}
 
@@ -720,21 +694,21 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 	}
 
 	static Matrix4D makeScale(float x, float y, float z) {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = x;
-		matrix4.m11 = y;
-		matrix4.m22 = z;
-		//matrix4f.m33 = 1.0f;
-		return matrix4.buildD();
+		return new Matrix4D(
+			x, 0, 0, 0,
+			0, y, 0, 0,
+			0, 0, z, 0,
+			0, 0, 0, 1
+		);
 	}
 
-	static Matrix4F makeScaleF(double x, double y, double z) {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = x;
-		matrix4.m11 = y;
-		matrix4.m22 = z;
-		//matrix4f.m33 = 1.0f;
-		return matrix4.buildF();
+	static Matrix4F makeScaleF(float x, float y, float z) {
+		return new Matrix4F(
+			x, 0, 0, 0,
+			0, y, 0, 0,
+			0, 0, z, 0,
+			0, 0, 0, 1
+		);
 	}
 
 	static Matrix4D makeTranslation(double x, double y, double z) {
@@ -753,20 +727,11 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 				0, 0, 1, z,
 				0, 0, 0, 1
 		);
-		//Matrix4Builder matrix4 = new Matrix4Builder();
-		////this.m00 = 1.0F;
-		////this.m11 = 1.0F;
-		////this.m22 = 1.0F;
-		////this.m33 = 1.0F;
-		//matrix4.m03 = x;
-		//matrix4.m13 = y;
-		//matrix4.m23 = z;
-		//return matrix4.buildF();
 	}
 
 	@Deprecated
 	@NoArgsConstructor
-	public static class Matrix4Builder {
+	class Matrix4Builder {
 		private double m00 = 1;
 		private double m01 = 0;
 		private double m02 = 0;

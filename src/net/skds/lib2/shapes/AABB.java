@@ -1,15 +1,23 @@
 package net.skds.lib2.shapes;
 
-
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
+import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
+import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
+import net.skds.lib2.io.json.codec.typed.ConfigType;
+import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-public final class AABB implements ConvexShape {
+@DefaultJsonCodec(AABB.JCodec.class)
+public final class AABB implements ConvexShape, TypedConfig {
 
 	public static final AABB EMPTY = new AABB(0, 0, 0, 0, 0, 0);
 	public static final AABB ONE = new AABB(0, 0, 0, 1, 1, 1);
@@ -18,9 +26,10 @@ public final class AABB implements ConvexShape {
 
 	public final double minX, minY, minZ, maxX, maxY, maxZ;
 
+	@DefaultJsonCodec(JsonToStringSerialiser.class)
 	private Object attachment;
 
-	private Vec3[] pointsCache;
+	private transient Vec3[] pointsCache;
 
 	public AABB(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
 		this.minX = minX;
@@ -41,7 +50,6 @@ public final class AABB implements ConvexShape {
 		this.attachment = attachment;
 	}
 
-
 	public AABB(Vec3 pos1, Vec3 pos2) {
 		this(pos1.x(), pos1.y(), pos1.z(), pos2.x(), pos2.y(), pos2.z());
 	}
@@ -60,6 +68,26 @@ public final class AABB implements ConvexShape {
 
 	public static AABB fromTo(Vec3 from, Vec3 to) {
 		return new AABB(from.x(), from.y(), from.z(), to.x(), to.y(), to.z());
+	}
+
+	public static AABB fromToNormalized(Vec3 from, Vec3 to) {
+		double _minX = Math.min(from.x(), to.x());
+		double _minY = Math.min(from.y(), to.y());
+		double _minZ = Math.min(from.z(), to.z());
+		double _maxX = Math.max(from.x(), to.x());
+		double _maxY = Math.max(from.y(), to.y());
+		double _maxZ = Math.max(from.z(), to.z());
+		return new AABB(_minX, _minY, _minZ, _maxX, _maxY, _maxZ);
+	}
+
+	public static AABB fromToNormalized(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+		double _minX = Math.min(minX, maxX);
+		double _minY = Math.min(minY, maxY);
+		double _minZ = Math.min(minZ, maxZ);
+		double _maxX = Math.max(minX, maxX);
+		double _maxY = Math.max(minY, maxY);
+		double _maxZ = Math.max(minZ, maxZ);
+		return new AABB(_minX, _minY, _minZ, _maxX, _maxY, _maxZ);
 	}
 
 	public static AABB fromPos(Vec3 pos) {
@@ -90,7 +118,6 @@ public final class AABB implements ConvexShape {
 	public static AABB fromNormal(double x, double y, double z) {
 		return new AABB(x < 0 ? x : 0, y < 0 ? y : 0, z < 0 ? z : 0, x > 0 ? x : 0, y > 0 ? y : 0, z > 0 ? z : 0);
 	}
-
 
 	public static AABB fromCenter(Vec3 center, double dx, double dy, double dz) {
 		dx /= 2.0;
@@ -257,28 +284,15 @@ public final class AABB implements ConvexShape {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) {
+		if (o == this) {
 			return true;
-		}
-		if (!(o instanceof AABB box)) {
+		} else if (o instanceof AABB aabb) {
+			return ConvexShape.equals(this, aabb);
+		} else if (o instanceof ConvexShape convexShape) {
+			return ConvexShape.equals(this, convexShape);
+		} else {
 			return false;
 		}
-		if (box.minX != this.minX) {
-			return false;
-		}
-		if (box.minY != this.minY) {
-			return false;
-		}
-		if (box.minZ != this.minZ) {
-			return false;
-		}
-		if (box.maxX != this.maxX) {
-			return false;
-		}
-		if (box.maxY != this.maxY) {
-			return false;
-		}
-		return box.maxZ == this.maxZ;
 	}
 
 	public int hashCode() {
@@ -553,8 +567,12 @@ public final class AABB implements ConvexShape {
 
 	@Override
 	public String toString() {
-		return "AABB[" + this.minX + ", " + this.minY + ", " + this.minZ + "] -> [" + this.maxX + ", " + this.maxY
-				+ ", " + this.maxZ + "]";
+		String message = "AABB[" + this.minX + ", " + this.minY + ", " + this.minZ + "] -> [" + this.maxX + ", " + this.maxY
+		+ ", " + this.maxZ + "]";
+		if (this.attachment != null) {
+			message += "(" + this.attachment + ")";
+		}
+		return message;
 	}
 
 	public boolean isValid() {
@@ -593,5 +611,29 @@ public final class AABB implements ConvexShape {
 			b = b.union(iter.next());
 		}
 		return b;
+	}
+
+	static final class JCodec extends JsonReflectiveBuilderCodec<AABB> {
+
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, AABBAdapter.class, registry);
+		}
+
+		private static class AABBAdapter extends AABBBuilder implements JsonDeserializeBuilder<AABB> {
+
+			private String attachment;
+		
+			@Override
+			public AABB build() {
+				AABB aabb = super.build();
+				aabb.setAttachment(this.attachment);
+				return aabb;
+			}
+		}
+	}
+
+	@Override
+	public final ConfigType<?> getConfigType() {
+		return ShapeType.AABB;
 	}
 }

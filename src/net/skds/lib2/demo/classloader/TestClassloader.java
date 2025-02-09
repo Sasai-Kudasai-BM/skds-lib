@@ -16,7 +16,6 @@ public class TestClassloader extends ClassLoader {
 	}
 
 	private byte[] loadClassFromFile(String fileName) {
-		byte[] buffer;
 		try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName.replace('.', '/') + ".class")) {
 			if (inputStream == null) throw new NullPointerException();
 			return inputStream.readAllBytes();

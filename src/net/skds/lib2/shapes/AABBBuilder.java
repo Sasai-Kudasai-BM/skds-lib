@@ -1,8 +1,10 @@
 package net.skds.lib2.shapes;
 
-
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.skds.lib2.mat.vec3.Vec3;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AABBBuilder {
 	private double minX;
 	private double minY;
@@ -10,7 +12,6 @@ public class AABBBuilder {
 	private double maxX;
 	private double maxY;
 	private double maxZ;
-
 
 	public AABBBuilder(Shape[] shapes) {
 		this(shapes[0].getBoundingBox());
