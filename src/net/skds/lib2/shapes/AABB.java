@@ -408,7 +408,6 @@ public final class AABB implements ConvexShape, TypedConfig {
 		return this.move(vec.x(), vec.y(), vec.z());
 	}
 
-
 	public boolean intersects(AABB box) {
 		return this.intersects(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
 	}

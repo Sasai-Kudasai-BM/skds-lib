@@ -15,6 +15,7 @@ import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
 import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 @SuppressWarnings("unused")
 public abstract class JsonTestDg<T> implements TypedConfig {
@@ -30,15 +31,15 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 			dg3.keyName, dg3
 	);
 
-	public static void test(JsonCodecRegistry registry) {
-		JsonUtils.addTypedAdapter(JsonTestDg.class, dgMap);
+	public static void test(JsonTestRegistry registry) {
+		registry.addTypedAdapter(JsonTestDg.class, dgMap);
 
 		DgList dgList = new DgList(Arrays.asList(new Dg1(), new Dg2(), new Dg3()));
 
-		System.out.println(JsonUtils.toJson(new Dg0()));
-		System.out.println(JsonUtils.toJson(dgList));
-		System.out.println(JsonUtils.toJson(new Dg4()));
-		System.out.println(JsonUtils.toJson(new Dg5(new Dg1("inside"))));
+		System.out.println(registry.toJson(new Dg0()));
+		System.out.println(registry.toJson(dgList));
+		System.out.println(registry.toJson(new Dg4()));
+		System.out.println(registry.toJson(new Dg5(new Dg1("inside"))));
 
 		//Type t = DgAdapter.class.getGenericInterfaces()[0];
 		//System.out.println(t);

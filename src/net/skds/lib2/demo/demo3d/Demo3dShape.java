@@ -154,7 +154,7 @@ public abstract class Demo3dShape {
 		}
 
 		protected final Collision collide(Shape human, Vec3 way) {
-			return staticBox.collide(human, way);
+			return this.staticBox.collide(human, way);
 		}
 
 		@SuppressWarnings("unchecked")

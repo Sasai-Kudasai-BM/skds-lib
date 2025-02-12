@@ -7,6 +7,7 @@ import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
+import net.skds.lib2.io.json.codec.typed.TypedMapAdapter;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.w3e.lib.utils.FileUtils;
 
@@ -63,64 +64,13 @@ public class JsonUtils {
 	}
 
 	public static <CT, E extends Enum<E> & ConfigEnumType<CT>> void addTypedAdapter(Class<CT> type, Class<E> typeClass) {
-		userMapCodecFactory.addFactory(type, (t, r) -> new TypedEnumAdapter<>(type, typeClass, r));
+		userMapCodecFactory.addFactory(type, (t, r) -> new TypedEnumAdapter<>(t, typeClass, r));
 		//fancyRegistry.getCodec(type);
 		rebuild();
 	}
 
-	public static <AT, CT extends AT> void addTypedAdapter(Class<AT> type, Map<String, ? extends ConfigType<?>> typeMap) {
-		userMapCodecFactory.addFactory(type, (t, r) -> new AbstractJsonCodec<AT>(t, r) {
-
-			private boolean init;
-
-			@Override
-			@SuppressWarnings("unchecked")
-			public void write(AT value, JsonWriter writer) throws IOException {
-				//System.out.println(((FormattedJsonWriterImpl)writer).getOutput());
-				if (value == null) {
-					writer.writeNull();
-					return;
-				}
-				if (!(value instanceof TypedConfig tc)) {
-					throw new UnsupportedOperationException("Value \"" + value + "\" is not a TypedConfig");
-				}
-				if (value instanceof JsonPreSerializeCall jps) {
-					jps.preSerializeJson();
-				}
-				writer.beginObject();
-				ConfigType<CT> type = (ConfigType<CT>) tc.getConfigType();
-				writer.writeName(type.keyName());
-				JsonSerializer<CT> serializer = this.registry.getSerializer(type.getTypeClass());
-				serializer.write((CT) value, writer);
-				writer.endObject();
-			}
-
-			@Override
-			@SuppressWarnings("unchecked")
-			public AT read(JsonReader reader) throws IOException {
-				if (reader.nextEntryType() == JsonEntryType.NULL) {
-					reader.skipNull();
-					return null;
-				}
-				reader.beginObject();
-				String typeName = reader.readName();
-				ConfigType<CT> type = (ConfigType<CT>) typeMap.get(typeName);
-				if (type == null) {
-					reader.skipValue();
-					reader.endObject();
-				} else {
-					JsonDeserializer<CT> deserializer = this.registry.getDeserializer(type.getTypeClass());
-					CT value = deserializer.read(reader);
-					reader.endObject();
-					if (value instanceof JsonPostDeserializeCall jpi) {
-						jpi.postDeserializedJson();
-					}
-					return value;
-				}
-				return null;
-			}
-
-		});
+	public static <CT> void addTypedAdapter(Class<CT> type, Map<String, ? extends ConfigType<?>> typeMap) {
+		userMapCodecFactory.addFactory(type, (t, r) -> new TypedMapAdapter<>(t, typeMap, r));
 		//fancyRegistry.getCodec(type);
 		rebuild();
 	}
@@ -226,11 +176,11 @@ public class JsonUtils {
 
 	// FANCY
 	@SuppressWarnings("unchecked")
-	public static <T> String toJson(T object) {
+	public static String toJson(Object object) {
 		if (object == null) {
 			return "null";
 		}
-		Class<T> type = (Class<T>) object.getClass();
+		Class<Object> type = (Class<Object>)object.getClass();
 		return fancyRegistry.getSerializer(type).toJson(object);
 	}
 

@@ -16,13 +16,15 @@ import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.elements.JsonElement;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRun;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.w3e.lib.utils.FileUtils;
 
 @SuppressWarnings("unused")
 public class JsonTestAmogus {
 
-	public static void test(JsonCodecRegistry registry) {
+	public static void test(JsonTestRegistry registry) {
 		JsonCodec<JsonTestAmogus> codec = registry.getCodec(JsonTestAmogus.class);
 
 		JsonTestAmogus amogus = new JsonTestAmogus();

@@ -20,6 +20,12 @@ public final class Holders {
 		protected A valueA;
 		protected B valueB;
 
+		public Multi2Holder<A, B> setValue(A valueA, B valueB) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			return this;
+		}
+
 		@Override
 		public String toString() {
 			return "MultiHolder(" + valueA + ", " + valueB + ")";
@@ -35,6 +41,13 @@ public final class Holders {
 		protected A valueA;
 		protected B valueB;
 		protected C valueC;
+
+		public Multi3Holder<A, B, C> setValue(A valueA, B valueB, C valueC) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			this.valueC = valueC;
+			return this;
+		}
 
 		@Override
 		public String toString() {
@@ -53,6 +66,14 @@ public final class Holders {
 		protected C valueC;
 		protected D valueD;
 
+		public Multi4Holder<A, B, C, D> setValue(A valueA, B valueB, C valueC, D valueD) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			this.valueC = valueC;
+			this.valueD = valueD;
+			return this;
+		}
+
 		@Override
 		public String toString() {
 			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ", " + valueD + ")";
@@ -70,6 +91,15 @@ public final class Holders {
 		protected C valueC;
 		protected D valueD;
 		protected E valueE;
+
+		public Multi5Holder<A, B, C, D, E> setValue(A valueA, B valueB, C valueC, D valueD, E valueE) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			this.valueC = valueC;
+			this.valueD = valueD;
+			this.valueE = valueE;
+			return this;
+		}
 
 		@Override
 		public String toString() {

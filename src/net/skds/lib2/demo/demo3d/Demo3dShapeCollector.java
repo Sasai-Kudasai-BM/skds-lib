@@ -66,5 +66,11 @@ public interface Demo3dShapeCollector {
 			throw new IllegalStateException(shape.getClass().toGenericString());
 		}
 		
+		@Override
+		public final void clear() {
+			this.array.clear();
+		}
 	}
+
+	void clear();
 }

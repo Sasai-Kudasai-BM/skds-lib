@@ -48,11 +48,11 @@ public interface JsonCodecFactory {
 		};
 	}
 
-	static MapJsonFactory newMapFactory() {
+	public static MapJsonFactory newMapFactory() {
 		return new MapJsonFactory(new ConcurrentHashMap<>());
 	}
 
-	final class MapJsonFactory implements JsonCodecFactory {
+	public final class MapJsonFactory implements JsonCodecFactory {
 
 		private final Map<Type, JsonCodecFactory> map;
 

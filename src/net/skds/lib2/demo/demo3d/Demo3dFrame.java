@@ -155,6 +155,11 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 		this.shapes.add(shape);
 	}
 
+	@Override
+	public final void clear() {
+		this.shapes.clear();
+	}
+
 	public final void addTask(Runnable task) {
 		this.tasks.offer(task);
 	}
