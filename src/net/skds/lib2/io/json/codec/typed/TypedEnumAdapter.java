@@ -1,22 +1,18 @@
 package net.skds.lib2.io.json.codec.typed;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonPostDeserializeCall;
-import net.skds.lib2.io.json.JsonPreSerializeCall;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.*;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.JsonDeserializer;
 import net.skds.lib2.io.json.codec.JsonSerializer;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+
 public class TypedEnumAdapter<CT, E extends Enum<E> & ConfigEnumType<CT>> extends AbstractJsonCodec<CT> {
 
-	private Class<E> typeClass;
-	
+	private final Class<E> typeClass;
+
 	public TypedEnumAdapter(Type type, Class<E> typeClass, JsonCodecRegistry registry) {
 		super(type, registry);
 		this.typeClass = typeClass;
@@ -60,5 +56,5 @@ public class TypedEnumAdapter<CT, E extends Enum<E> & ConfigEnumType<CT>> extend
 		}
 		return value;
 	}
-	
+
 }
