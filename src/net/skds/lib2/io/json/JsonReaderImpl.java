@@ -21,7 +21,6 @@ public final class JsonReaderImpl implements JsonReader {
 	private Object cachedValue;
 	private int valueEnd;
 
-
 	public JsonReaderImpl(CharInput input, JsonCodecRegistry registry) {
 		this.input = input;
 		this.skipCodec = registry.getCodec(JsonElement.class);

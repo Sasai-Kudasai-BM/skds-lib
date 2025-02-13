@@ -1,11 +1,14 @@
 package net.skds.lib2.demo.demo3d;
 
+import java.util.Iterator;
+import java.util.List;
+
 import lombok.CustomLog;
+import net.skds.lib2.demo.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.Collision;
@@ -16,14 +19,20 @@ import net.skds.lib2.shapes.Shape;
 @SuppressWarnings("unused")
 public class Demo3dFrameExample {
 
-	// OBB
+	// BotAiModule#lookupEnemies
 	// HumanoidRig //sit//arms
 
 	public static <T extends Demo3dShapeCollector> T init(T frame) {
-		return initCollisionBox(frame);
+		/*Vec3 a = Vec3.of(999, 1, 1);
+		Vec3 b = Vec3.of(1, -1, 0);
+
+		System.out.println(a.dot(b));*/
+
+		initCollisionFuck(frame);
+		return frame;
 	}
 
-	public static <T extends Demo3dShapeCollector> T initDefault(T frame) {
+	public static void initDefault(Demo3dShapeCollector frame) {
 		frame.addShape(AABB.fromCenter(0, 0, 0, 1, 1, 1));
 		frame.addShape(AABB.fromCenter(0, -1, 0, 2, 1, 2));
 
@@ -82,17 +91,13 @@ public class Demo3dFrameExample {
 				}
 			}, Vec3.ZERO, Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 100d) % 360), 1);
 		});
-
-		return frame;
 	}
 
-	public static <T extends Demo3dShapeCollector> T initCollisionBox(T frame) {
+	public static void initCollisionBox(Demo3dShapeCollector frame) {
 		Demo3dFrameCollisionBox collision = new Demo3dFrameCollisionBox(AABB.fromSize(.5)
 			.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XP, 45)))
 		);
 		frame.addShape(collision);
-
-		return frame;
 	}
 
 	private static class Demo3dFrameCollisionBox extends Demo3dShape.Demo3dShapeInterractable {
@@ -163,11 +168,9 @@ public class Demo3dFrameExample {
 		}
 	}
 
-	public static <T extends Demo3dShapeCollector> T initCollisionPeople(T frame) {
+	public static void initCollisionPeople(Demo3dShapeCollector frame) {
 		Demo3dFrameCollisionPeople collision = new Demo3dFrameCollisionPeople();
 		frame.addShape(collision);
-
-		return frame;
 	}
 
 	private static class Demo3dFrameCollisionPeople extends Demo3dShape.Demo3dShapeInterractable {
@@ -189,8 +192,8 @@ public class Demo3dFrameExample {
 
 			float h2 = HEIGHT / 2;
 
-			this.peopleBox = AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
-			//this.peopleBox = AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human");
+			//this.peopleBox = AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
+			this.peopleBox = AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human");
 
 			this.reset();
 		}
@@ -242,7 +245,7 @@ public class Demo3dFrameExample {
 				onGround = true;
 			}
 			Vec3 pos = this.getHuman().getCenter();
-			upTick(demo);
+			tickMove(demo);
 			log.debug(this.getHuman().getCenter().sub(pos));
 		}
 
@@ -299,10 +302,10 @@ public class Demo3dFrameExample {
 								vel = vel.scale(1, 0, 1);
 							}
 						}
-						if (cr.depth() != 0) {
-							//hitGround = true;
-							//vel = vel.scale(1, 0, 1);
-						}
+						//if (cr.depth() != 0) {
+						//	hitGround = true;
+						//	vel = vel.scale(1, 0, 1);
+						//}
 
 						depth *= (1 - cr.distance());
 						human = human.move(way.scale(cr.distance()));
@@ -419,7 +422,7 @@ public class Demo3dFrameExample {
 					
 					// вперед
 					Vec3 moveForward = move;
-					Vec3D moveForwardAbs = moveForward.abs();
+					Vec3 moveForwardAbs = moveForward.abs();
 					if (moveForwardAbs.x() > sizeX) {
 						moveForward = moveForward.scale(sizeX / moveForwardAbs.x());
 					}
@@ -446,7 +449,7 @@ public class Demo3dFrameExample {
 					// увеличить размеры
 					humanMoved = new AABB(humanMoved.minX, humanMoved.minY, humanMoved.minZ, humanMoved.maxX, humanMoved.minY + human.sizeY(), humanMoved.maxZ);
 
-					// назад
+					// коллизия назад
 					Vec3 moveBackward = moveForward.inverse();
 					final Collision crBackward = collide(humanMoved, moveBackward);
 					if (crBackward != null) {
@@ -469,10 +472,7 @@ public class Demo3dFrameExample {
 					if (crForward == null) {
 						break f1;
 					} else {
-						System.out.println("gloabl " + move);
-						System.out.println("local " + moveForward);
 						move = move.sub(moveForward);
-						System.out.println("gloabl after " + move);
 						normal = null;
 					}
 				} else {
@@ -610,6 +610,52 @@ public class Demo3dFrameExample {
 		protected final void reset() {
 			this.shapes[1].setShape(this.peopleBox);
 			this.onGround = false;
+		}
+	}
+
+	public static void initCollisionFuck(Demo3dShapeCollector frame) {
+		FuckCollide collision = new FuckCollide();
+		frame.addShape(collision);
+	}
+
+	private static class FuckCollide extends Demo3dShape.Demo3dShapeInterractable {
+
+		public FuckCollide() {
+			reset();
+		}
+
+		@Override
+		protected Shape initStaticBox() {
+			return AABB.ONE;
+		}
+
+		@Override
+		protected void tick(Demo3dFrame demo) {
+			if (this.move == 0) {
+				return;
+			}
+			Collision cr = this.collide(Vec3.of(0.03321531436902421, 0.535343, 0.2219234683112594));
+			System.out.println(cr);
+			this.move = 0;
+		}
+
+		@Override
+		protected void reset() {
+			Demo3dShapeCollectorImpl shapes = new Demo3dShapeCollectorImpl();
+			Demo3dToolPanel.read(shapes);
+			Iterator<Shape> iterator = shapes.array.iterator();
+			Shape human = null;
+			while (iterator.hasNext()) {
+				Shape next = iterator.next();
+				if (next.getAttachment() instanceof String key) {
+					if (key.contains("eblab")) {
+						human = next;
+					}
+					iterator.remove();
+				}
+			}
+			this.shapes[0].setShape(CompositeSuperShape.of(shapes.array.toArray(Shape[]::new), Vec3.ZERO));
+			this.setHuman(human);
 		}
 	}
 }

@@ -1,8 +1,7 @@
 package net.skds.lib2.io.json.test;
 
 import lombok.ToString;
-import net.skds.lib2.io.json.JsonUtils;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 import net.skds.lib2.mat.vec2.Vec2;
 import net.skds.lib2.mat.vec2.Vec2D;
 import net.skds.lib2.mat.vec2.Vec2F;
@@ -15,10 +14,10 @@ import net.skds.lib2.mat.vec3.Vec3I;
 @ToString
 public class JsonTestVec3 {
 
-	public static void test(JsonCodecRegistry registry) {
-		String vecTest = JsonUtils.toJson(new JsonTestVec3());
+	public static void test(JsonTestRegistry registry) {
+		String vecTest = registry.toJson(new JsonTestVec3());
 		System.out.println(vecTest);
-		System.out.println(JsonUtils.parseJson(vecTest, JsonTestVec3.class));
+		System.out.println(registry.parseJson(vecTest, JsonTestVec3.class));
 	}
 
 	private Vec3I i3 = new Vec3I(1);

@@ -84,6 +84,18 @@ public sealed class VoxelShape implements CompositeShape {
 		return false;
 	}
 
+	public boolean intersects(AABB box) {
+		if (isEmpty()) {
+			return false;
+		}
+		for (int i = 0; i < boxes.length; i++) {
+			if (boxes[i].intersects(box)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public ConvexShape[] simplify(AABB bounding) {
 		if (bounding == null) return boxes;
@@ -154,12 +166,12 @@ public sealed class VoxelShape implements CompositeShape {
 
 	@Override
 	public Vec3 getCenter() {
-		return center;
+		return this.center;
 	}
 
 	@Override
 	public AABB getBoundingBox() {
-		return bounding;
+		return this.bounding;
 	}
 
 	@Override
@@ -169,7 +181,7 @@ public sealed class VoxelShape implements CompositeShape {
 
 	@Override
 	public Object getAttachment() {
-		return attachment;
+		return this.attachment;
 	}
 
 	/**
@@ -180,6 +192,24 @@ public sealed class VoxelShape implements CompositeShape {
 	@Override
 	public void setAttachment(Object attachment) {
 		this.attachment = attachment;
+	}
+
+	/**
+	 * Don't use it
+	 *
+	 * @see VoxelShape#withAttachment
+	 */
+	public void setAttachmentRecursive(Object attachment, boolean cloneChild) {
+		this.attachment = attachment;
+		if (cloneChild) {
+			for (int i = 0; i < this.boxes.length; i++) {
+				this.boxes[i] = this.boxes[i].withAttachment(attachment);
+			}
+		} else {
+			for (AABB aabb : this.boxes) {
+				aabb.setAttachment(attachment);
+			}
+		}
 	}
 
 	@Override

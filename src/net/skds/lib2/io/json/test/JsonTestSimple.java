@@ -5,16 +5,15 @@ import java.util.List;
 
 import net.skds.lib2.io.json.JsonPostDeserializeCall;
 import net.skds.lib2.io.json.JsonPreSerializeCall;
-import net.skds.lib2.io.json.JsonUtils;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.io.json.elements.JsonObject;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 public class JsonTestSimple {
-	public static void test(JsonCodecRegistry registry) {
+	public static void test(JsonTestRegistry registry) {
 		JsonObject jsonNullTest = new JsonObject();
 		jsonNullTest.putNull("count");
-		System.out.println(JsonUtils.toJson(jsonNullTest));
+		System.out.println(registry.toJson(jsonNullTest));
 
 		System.out.println(Integer.valueOf(1).equals(1));
 		System.out.println(long.class == Long.TYPE);
@@ -38,10 +37,10 @@ public class JsonTestSimple {
 				}
 			}
 		  """;
-		System.out.println(JsonUtils.parseJson(test, JsonElement.class));
+		System.out.println(registry.parseJson(test, JsonElement.class));
 
-		String prePostTest = JsonUtils.toJson(new PrePostList());
-		JsonUtils.parseJson(prePostTest, PrePostList.class);
+		String prePostTest = registry.toJson(new PrePostList());
+		registry.parseJson(prePostTest, PrePostList.class);
 	}
 
 	private static class PrePostList {

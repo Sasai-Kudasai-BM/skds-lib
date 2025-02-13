@@ -3,11 +3,11 @@ package net.skds.lib2.io.json.test;
 import net.skds.lib2.io.json.annotation.JsonAlias;
 import net.skds.lib2.io.json.annotation.TransientComponent;
 import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 public record JsonTestRecord(@JsonAlias("hui") int a, @TransientComponent char b, @TransientComponent boolean c) {
 	
-	public static void test(JsonCodecRegistry registry) {
+	public static void test(JsonTestRegistry registry) {
 		String test4 = """
 				  {
 				  }

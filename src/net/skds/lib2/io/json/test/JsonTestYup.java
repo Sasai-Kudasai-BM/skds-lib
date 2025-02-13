@@ -11,34 +11,36 @@ import net.skds.lib2.io.json.annotation.SkipSerialization;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 @SuppressWarnings("unused")
 public abstract class JsonTestYup implements TypedConfig {
 
-	public static void test(JsonCodecRegistry registry) {
+	public static void test(JsonTestRegistry registry) {
 		Map<String, YupCT> yupMap = Map.of(
 				y1.key, y1,
 				y2.key, y2,
 				y3.key, y3
 		);
 
-		JsonUtils.addTypedAdapter(JsonTestYup.class, yupMap);
-		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup0Error.class);
-		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup0.class);
-		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup1.class);
-		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup2.class);
-		//JsonUtils.getFancyRegistry().getCodec(Yup.Yup3.class);
+		registry.addTypedAdapter(JsonTestYup.class, yupMap);
+
+		//registry.getCodec(Yup.Yup0Error.class);
+		//registry.getCodec(Yup.Yup0.class);
+		//registry.getCodec(Yup.Yup1.class);
+		//registry.getCodec(Yup.Yup2.class);
+		//registry.getCodec(Yup.Yup3.class);
 
 		JsonTestYup.Yup0 yup0 = new JsonTestYup.Yup0();
-		String yupRead = JsonUtils.toJson(yup0);
+		String yupRead = registry.toJson(yup0);
 		System.out.println(yupRead);
-		yup0 = JsonUtils.parseJson(yupRead, yup0.getClass());
+		yup0 = registry.parseJson(yupRead, yup0.getClass());
 		System.out.println(yup0);
 
 		JsonTestYup.Yup0Error yup0Error = new JsonTestYup.Yup0Error();
-		String yup0ErrorRead = JsonUtils.toJson(yup0Error);
+		String yup0ErrorRead = registry.toJson(yup0Error);
 		System.out.println(yup0ErrorRead);
-		yup0Error = JsonUtils.parseJson(yup0ErrorRead, yup0Error.getClass());
+		yup0Error = registry.parseJson(yup0ErrorRead, yup0Error.getClass());
 		System.out.println(yup0Error);
 
 		Pizdun p = new Pizdun();
@@ -48,9 +50,9 @@ public abstract class JsonTestYup implements TypedConfig {
 		p.yup.add(new JsonTestYup.Yup1());
 		p.yup.add(new JsonTestYup.Yup2());
 		p.yup.add(new JsonTestYup.Yup3());
-		String yupJson = JsonUtils.toJson(p);
+		String yupJson = registry.toJson(p);
 		System.out.println(yupJson);
-		System.out.println(JsonUtils.parseJson(yupJson, Pizdun.class));
+		System.out.println(registry.parseJson(yupJson, Pizdun.class));
 
 		//JsonUtils.saveJson(new File("yup.json"), p);
 	}

@@ -9,32 +9,32 @@ import java.util.Map;
 
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonUtils;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 public class JsonTestCollections {
-	public static void test(JsonCodecRegistry registry) {
+	public static void test(JsonTestRegistry registry) {
 		List<String> list = new ArrayList<>();
 		list.add("null");
 		list.add("1");
 
-		System.out.println(JsonUtils.toJson(list));
-		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder1()));
-		System.out.println(JsonUtils.toJson(new HashMap<String, Boolean>()));
+		System.out.println(registry.toJson(list));
+		System.out.println(registry.toJson(new Obj2BoolMapHolder1()));
+		System.out.println(registry.toJson(new HashMap<String, Boolean>()));
 
-		System.out.println(JsonUtils.toJson(new Obj2BoolMapHolder2()));
-		System.out.println(JsonUtils.toJson(new Obj2BoolMap<String>()));
+		System.out.println(registry.toJson(new Obj2BoolMapHolder2()));
+		System.out.println(registry.toJson(new Obj2BoolMap<String>()));
 
 		DefaultCodecExtendsCollection defCollectionCodec = new DefaultCodecExtendsCollection();
 		defCollectionCodec.add("a");
 		defCollectionCodec.add("b");
 		defCollectionCodec.add("c");
-		String defCollectionCodecJson = JsonUtils.toJson(defCollectionCodec);
+		String defCollectionCodecJson = registry.toJson(defCollectionCodec);
 		System.out.println(defCollectionCodecJson);
-		JsonUtils.parseJson(defCollectionCodecJson, DefaultCodecExtendsCollection.class);
+		registry.parseJson(defCollectionCodecJson, DefaultCodecExtendsCollection.class);
 	}
 
 	private static class Obj2BoolMapHolder1 {

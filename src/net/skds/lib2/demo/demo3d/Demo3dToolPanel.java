@@ -121,6 +121,14 @@ public class Demo3dToolPanel extends JPanel {
 		setPreferredSize(new Dimension(300, 0));
 	}
 
+	public static void read(Demo3dShapeCollector shapes) {
+		Demo3dShapeCollectorImpl collector = JsonUtils.readJson("demo/shapes.json", Demo3dShapeCollectorImpl.class);
+		shapes.clear();
+		for (Shape shape : collector.array) {
+			shapes.addShape(shape);
+		}
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
