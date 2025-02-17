@@ -135,7 +135,7 @@ public final class Sphere implements ConvexShape {
 	}
 
 	@Override
-	public Collision raytrace(Vec3 from, Vec3 to) {
+	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 
 		double dist = from.distanceTo(center);
 		double dirL = from.distanceTo(to);

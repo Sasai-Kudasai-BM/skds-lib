@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.shapes.Collision;
+import net.skds.lib2.shapes.CollisionContext;
 import net.skds.lib2.shapes.Shape;
 
 public abstract class Demo3dShape {
@@ -154,7 +155,11 @@ public abstract class Demo3dShape {
 		}
 
 		protected final Collision collide(Shape human, Vec3 way) {
-			return this.staticBox.collide(human, way);
+			return this.collide(human, way, CollisionContext.DEFAULT);
+		}
+
+		protected final Collision collide(Shape human, Vec3 way, CollisionContext context) {
+			return this.staticBox.collide(human, way, context);
 		}
 
 		@SuppressWarnings("unchecked")

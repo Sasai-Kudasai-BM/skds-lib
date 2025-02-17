@@ -5,6 +5,7 @@ import net.skds.lib2.mat.MatrixStack;
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.shapes.Collision;
+import net.skds.lib2.shapes.CollisionContext;
 import net.skds.lib2.shapes.CompositeShape;
 import net.skds.lib2.shapes.ConvexShape;
 import net.skds.lib2.shapes.Shape;
@@ -65,7 +66,7 @@ public class RenderDemo3dPanel extends JPanel {
 		for (DemoShape3dHolder s : list) {
 			Shape shape = s.getShape();
 			Collision collision = shape.raytrace(startPos, 
-				endPos
+				endPos, CollisionContext.DEFAULT
 			);
 
 			if (collision != null && collision.distance() <= distance) {

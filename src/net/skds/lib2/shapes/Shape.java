@@ -32,13 +32,13 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	AABB getBoundingBox();
 
-	Collision raytrace(Vec3 from, Vec3 to);
+	Collision raytrace(Vec3 from, Vec3 to, CollisionContext context);
 
 	default boolean isConvex() {
 		return false;
 	}
 
-	Collision collide(Shape shapeB, Vec3 velocityBA);
+	Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context);
 
 	Object getAttachment();
 

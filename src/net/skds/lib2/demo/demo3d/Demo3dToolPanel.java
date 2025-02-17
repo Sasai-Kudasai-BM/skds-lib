@@ -9,6 +9,7 @@ import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.AABBBuilder;
 import net.skds.lib2.shapes.Collision;
+import net.skds.lib2.shapes.CollisionContext;
 import net.skds.lib2.shapes.Shape;
 
 import java.awt.*;
@@ -58,7 +59,7 @@ public class Demo3dToolPanel extends JPanel {
 				if (shape == h) {
 					continue;
 				}
-				Collision cr = shape.collide(h, Vec3.ZERO);
+				Collision cr = shape.collide(h, Vec3.ZERO, CollisionContext.DEFAULT);
 				if (cr != null) {
 					System.out.println(cr);
 				}

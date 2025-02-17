@@ -31,36 +31,38 @@ public non-sealed interface CompositeShape extends Shape {
 	Shape[] getAllShapes();
 
 	@Override
-	default Collision raytrace(Vec3 from, Vec3 to) {
+	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
 		if (shapes.length == 0) return null;
 		Collision nearest = null;
+		Vec3 velocity = to.sub(from);
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape subShape = shapes[i];
-			Collision c = subShape.raytrace(from, to);
-			if (c != null && c.compareTo(nearest) < 0) {
+			Collision c = subShape.raytrace(from, to, context);
+			if (c != null && context.compare(c, nearest, velocity) < 0) {
 				nearest = c;
 			}
 		}
 		return nearest;
 	}
 
-	static Collision collideConvex(CompositeShape composite, ConvexShape convex, Vec3 velocityBA) {
+	// TODO почему при вызове a и b меняются местами и velocity инверсируется
+	static Collision collideConvex(CompositeShape composite, ConvexShape convex, Vec3 velocityBA, CollisionContext context) {
 		AABB convexAABB = convex.getBoundingBox().stretch(velocityBA.x(), velocityBA.y(), velocityBA.z());
 		ConvexShape[] shapes = composite.simplify(convexAABB);
 		if (shapes.length == 0) return null;
 		Collision nearest = null;
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape subShape = shapes[i];
-			Collision c = subShape.collide(convex, velocityBA);
-			if (c != null && c.compareTo(nearest) < 0) {
+			Collision c = subShape.collide(convex, velocityBA, context);
+			if (c != null && context.compare(c, nearest, velocityBA) < 0) {
 				nearest = c;
 			}
 		}
 		return nearest;
 	}
 
-	static Collision collideComposite(CompositeShape shapeA, CompositeShape shapeB, Vec3 velocityBA) {
+	static Collision collideComposite(CompositeShape shapeA, CompositeShape shapeB, Vec3 velocityBA, CollisionContext context) {
 		final AABB bAABB = shapeB.getBoundingBox();
 		final ConvexShape[] shapesA = shapeA.simplify(bAABB);
 		if (shapesA.length == 0) return null;
@@ -75,8 +77,8 @@ public non-sealed interface CompositeShape extends Shape {
 			for (int j = 0; j < shapesB.length; j++) {
 				final ConvexShape subShapeB = shapesB[i];
 				if (subShapeAAABB.intersects(subShapeB.getBoundingBox())) {
-					final Collision c = subShapeA.collide(subShapeB, velocityBA);
-					if (c != null && c.compareTo(nearest) < 0) {
+					final Collision c = subShapeA.collide(subShapeB, velocityBA, context);
+					if (c != null && context.compare(c, nearest, velocityBA) < 0) {
 						nearest = c;
 					}
 				}
@@ -86,11 +88,11 @@ public non-sealed interface CompositeShape extends Shape {
 	}
 
 	@Override
-	default Collision collide(Shape shapeB, Vec3 velocityBA) {
+	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
 		if (shapeB instanceof ConvexShape convex) {
-			return collideConvex(this, convex, velocityBA);
+			return collideConvex(this, convex, velocityBA, context);
 		} else if (shapeB instanceof CompositeShape composite) {
-			return collideComposite(this, composite, velocityBA.inverse());
+			return collideComposite(this, composite, velocityBA.inverse(), context);
 		}
 		throw new UnsupportedOperationException("Unable to collide \"%s\" with \"%s\"".formatted(this, shapeB));
 

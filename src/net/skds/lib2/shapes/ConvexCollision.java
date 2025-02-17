@@ -11,7 +11,7 @@ import java.util.List;
 @UtilityClass
 public class ConvexCollision {
 
-	public static Collision collide(ConvexShape s1, ConvexShape s2, Vec3 velocity21) {
+	public static Collision collide(ConvexShape s1, ConvexShape s2, Vec3 velocity21, CollisionContext context) {
 
 		Vec3[] s1Norm = s1.getNormals();
 		Vec3[] s2Norm = s2.getNormals();
@@ -121,7 +121,7 @@ public class ConvexCollision {
 		return new Collision(distance, termLen, minTerm, Vec3.ZERO, null, a, b);
 	}
 
-	public static Collision collideAABB(AABB a, AABB b, Vec3 velocityBA) {
+	public static Collision collideAABB(AABB a, AABB b, Vec3 velocityBA, CollisionContext context) {
 
 		double pMin = 0;
 		double pMax = 1;

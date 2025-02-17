@@ -96,17 +96,17 @@ public non-sealed interface ConvexShape extends Shape {
 	ConvexShape scale(double scale);
 
 	@Override
-	default Collision collide(Shape shapeB, Vec3 velocityBA) {
+	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
 		if (shapeB instanceof ConvexShape convex) {
-			return ConvexCollision.collide(this, convex, velocityBA);
+			return ConvexCollision.collide(this, convex, velocityBA, context);
 		} else if (shapeB instanceof CompositeShape composite) {
-			return CompositeShape.collideConvex(composite, this, velocityBA.inverse());
+			return CompositeShape.collideConvex(composite, this, velocityBA.inverse(), context);
 		}
 		throw new UnsupportedOperationException("Unable to collide \"%s\" with \"%s\"".formatted(this, shapeB));
 	}
 
 	@Override
-	default Collision raytrace(Vec3 from, Vec3 to) {
+	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
 
 		double tMax = Double.POSITIVE_INFINITY;

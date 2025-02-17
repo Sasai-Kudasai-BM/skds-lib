@@ -12,18 +12,19 @@ import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.Collision;
+import net.skds.lib2.shapes.CollisionContext;
 import net.skds.lib2.shapes.CompositeSuperShape;
 import net.skds.lib2.shapes.Shape;
 
 @CustomLog
 @SuppressWarnings("unused")
-public class Demo3dFrameExample {
+public class Demo3dExample {
 
 	// BotAiModule#lookupEnemies
 	// HumanoidRig //sit//arms
 
 	public static <T extends Demo3dShapeCollector> T init(T frame) {
-		initCollisionFile(frame);
+		initCollisionPeople(frame);
 		return frame;
 	}
 
@@ -96,7 +97,7 @@ public class Demo3dFrameExample {
 	}
 
 	public static void initCollisionPeople(Demo3dShapeCollector frame) {
-		Demo3dFrameCollisionPeople collision = new Demo3dFrameCollisionPeople();
+		Demo3dFrameCollisionPeople collision = new Demo3dFrameCollisionPeople(false);
 		frame.addShape(collision);
 	}
 
@@ -182,7 +183,7 @@ public class Demo3dFrameExample {
 		private final AABB peopleBox;
 		private boolean onGround;
 
-		public Demo3dFrameCollisionPeople() {
+		public Demo3dFrameCollisionPeople(boolean stuck) {
 			float wallY = HEIGHT / 2 - WIDTH * 2;
 
 			float objY = wallY + WIDTH / 2;
@@ -192,8 +193,12 @@ public class Demo3dFrameExample {
 
 			float h2 = HEIGHT / 2;
 
+			this.peopleBox = stuck ?
+			AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human") :
+			AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
+
 			//this.peopleBox = AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
-			this.peopleBox = AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human");
+			//this.peopleBox = AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human");
 
 			this.reset();
 		}
@@ -245,95 +250,96 @@ public class Demo3dFrameExample {
 				onGround = true;
 			}
 			Vec3 pos = this.getHuman().getCenter();
-			tickMove(demo);
+			tickMoveWithUp(demo);
 			log.debug(this.getHuman().getCenter().sub(pos));
 		}
 
 		private void tickMove(Demo3dFrame demo) {
-			if (move != 0) {
-				Shape human = this.shapes[1].getShape();
-
-				float yaw = demo.getCameraYaw();
-				if (this.move > 0) {
-					yaw += 180;
-				}
-
-				Vec3 vel = Vec3.of(0, -0.01, 0);
-				if (this.onGround) {
-					vel = vel.add(Vec3.ZN.scale(0.02).rotateYaw(yaw));
-				}
-
-				double depth = 1;
-
-				boolean hitGround = false;
-
-				//log.warn("tick");
-
-				int i = 5;
-
-				while (depth > 1E-7 && vel.lengthSquared() > 1E-7) {
-					i--;
-					if (i == 0) {
-						log.error("fuck error");
-						break;
-					}
-					//System.out.println();
-					Vec3 way = vel.scale(depth);
-					//System.out.println("way " + way);
-					Collision cr = collide(human, way);
-					if (cr != null && cr.normal().dot(way) <= 0) {
-						//log.info(cr);
-						if (cr.depth() != 0) {
-							//human = human.move(cr.normal().scale(cr.depth()));
-							//log.error("break");
-							//break;
-						}
-						if (cr.normal().x() != 0) {
-							vel = vel.scale(0, 1, 1);
-						}
-						if (cr.normal().z() != 0) {
-							vel = vel.scale(1, 1, 0);
-						}
-						if (cr.normal().y() != 0) {
-							if (cr.normal().y() > 0 && vel.y() <= 0) {
-								hitGround = true;
-								vel = vel.scale(0.5, 0, 0.5);
-							} else {
-								vel = vel.scale(1, 0, 1);
-							}
-						}
-						//if (cr.depth() != 0) {
-						//	hitGround = true;
-						//	vel = vel.scale(1, 0, 1);
-						//}
-
-						depth *= (1 - cr.distance());
-						human = human.move(way.scale(cr.distance()));
-					} else {
-						human = human.move(way);
-						//System.out.println("done");
-						break;
-					}
-				}
-	
-				//System.out.println("onGround " + hitGround);
-				this.shapes[1].setShape(human);
-				this.onGround = hitGround;
+			if (move == 0) {
+				return;
 			}
+			Shape human = this.shapes[1].getShape();
+
+			float yaw = demo.getCameraYaw();
+			if (this.move > 0) {
+				yaw += 180;
+			}
+
+			Vec3 vel = Vec3.of(0, -0.01, 0);
+			if (this.onGround) {
+				vel = vel.add(Vec3.ZN.scale(0.02).rotateYaw(yaw));
+			}
+
+			double depth = 1;
+
+			boolean hitGround = false;
+
+			//log.warn("tick");
+
+			int i = 5;
+
+			while (depth > 1E-7 && vel.lengthSquared() > 1E-7) {
+				i--;
+				if (i == 0) {
+					log.error("fuck error");
+					break;
+				}
+				//System.out.println();
+				Vec3 way = vel.scale(depth);
+				//System.out.println("way " + way);
+				Collision cr = collide(human, way);
+				if (cr != null && cr.normal().dot(way) <= 0) {
+					//log.info(cr);
+					if (cr.depth() != 0) {
+						//human = human.move(cr.normal().scale(cr.depth()));
+						//log.error("break");
+						//break;
+					}
+					if (cr.normal().x() != 0) {
+						vel = vel.scale(0, 1, 1);
+					}
+					if (cr.normal().z() != 0) {
+						vel = vel.scale(1, 1, 0);
+					}
+					if (cr.normal().y() != 0) {
+						if (cr.normal().y() > 0 && vel.y() <= 0) {
+							hitGround = true;
+							vel = vel.scale(0.5, 0, 0.5);
+						} else {
+							vel = vel.scale(1, 0, 1);
+						}
+					}
+					//if (cr.depth() != 0) {
+					//	hitGround = true;
+					//	vel = vel.scale(1, 0, 1);
+					//}
+
+					depth *= (1 - cr.distance());
+					human = human.move(way.scale(cr.distance()));
+				} else {
+					human = human.move(way);
+					//System.out.println("done");
+					break;
+				}
+			}
+
+			//System.out.println("onGround " + hitGround);
+			this.shapes[1].setShape(human);
+			this.onGround = hitGround;
 		}
 
 		private float getClimbHeight() {
 			return 0.25f;
 		}
 
-		private void upTick(Demo3dFrame demo) {
+		private void tickMoveWithUp(Demo3dFrame demo) {
 			if (this.move == 0) {
 				return;
 			}
 			AABB human = getHuman();
 			if (!this.onGround) {
 				Vec3 move = Vec3.of(0, -0.02, 0);
-				Collision cr = this.staticBox.collide(human, move);
+				Collision cr = this.collide(human, move);
 				if (cr == null || cr.direction() == Direction.UP) {
 					if (cr != null) {
 						if (cr.distance() == 0) {

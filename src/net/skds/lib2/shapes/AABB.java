@@ -490,7 +490,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 	}
 
 	@Override
-	public Collision raytrace(Vec3 from, Vec3 to) {
+	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
 
 		double tMax = Double.POSITIVE_INFINITY;
@@ -536,11 +536,11 @@ public final class AABB implements ConvexShape, TypedConfig {
 	}
 
 	@Override
-	public Collision collide(Shape shapeB, Vec3 velocityBA) {
+	public Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
 		if (shapeB instanceof AABB sb) {
-			return ConvexCollision.collideAABB(this, sb, velocityBA);
+			return ConvexCollision.collideAABB(this, sb, velocityBA, context);
 		}
-		return ConvexShape.super.collide(shapeB, velocityBA);
+		return ConvexShape.super.collide(shapeB, velocityBA, context);
 	}
 
 	@Override
