@@ -22,6 +22,10 @@ public class FastMath {
 
 	private static final float[] sinTable = new float[1024 * 4];
 
+	public boolean isPowerOf2(int value) {
+		return 1 << Integer.numberOfTrailingZeros(value) == value;
+	}
+
 	public static boolean roll(double chance) {
 		if (chance <= 0) {
 			return false;
