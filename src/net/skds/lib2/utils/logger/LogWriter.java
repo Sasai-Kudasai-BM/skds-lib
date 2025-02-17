@@ -22,7 +22,6 @@ class LogWriter extends Thread {
 	private final LinkedBlockingQueue<LogWriteable> entries = new LinkedBlockingQueue<>();
 	private final FileLogWriter fileWriter;
 
-
 	public LogWriter() {
 		super("SKDS-LogWriter");
 		this.fileWriter = new FileLogWriter();
@@ -53,7 +52,7 @@ class LogWriter extends Thread {
 		}
 	}
 
-	static void write(Date date, String msg, LoggerLevel level, PrintStream[] attachedStreams, boolean useGlobalPrintStream, boolean useFileOut) {
+	static void write(Date date, String msg, LoggerLevel level, PrintStream[] attachedStreams, boolean useGlobalPrintStream, String fileOut) {
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
 		try {
 			if (useGlobalPrintStream) {
@@ -65,13 +64,10 @@ class LogWriter extends Thread {
 			for (PrintStream ps : attachedStreams) {
 				ps.print(msg);
 			}
-			if (useFileOut) {
+			if (fileOut != null) {
 				String logName = config.getLogDir() + '/' + config.getDateFormat().format(date) + ".log";
 				Path path = Path.of(logName);
-				if (msg.length() > 3) {
-					msg = msg.substring(level.getColor().length(), msg.length() - LogEntry.TERMINATION_LENGTH);
-				}
-				INSTANCE.fileWriter.addMsg(path, msg);
+				INSTANCE.fileWriter.addMsg(path, fileOut);
 			}
 		} catch (Exception e) {
 			e.printStackTrace(SKDSLogger.ORIGINAL_ERR);

@@ -3,9 +3,12 @@ package net.skds.lib2.utils;
 import net.skds.lib2.mat.FastMath;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 @SuppressWarnings("unused")
 public class ArrayUtils {
@@ -28,6 +31,11 @@ public class ArrayUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T[] createGenericArray(Class<T> type, int size) {
 		return (T[]) Array.newInstance(type, size);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[][] createGenericArray2(Class<?> type, int size) {
+		return (T[][]) Array.newInstance(type, size);
 	}
 
 	public static void copySameSize(Object from, Object to, int size) {
@@ -98,40 +106,80 @@ public class ArrayUtils {
 		return list.get(FastMath.RANDOM.nextInt(list.size()));
 	}
 
+	public static <T> T getRandom(List<T> list, Random random) {
+		return list.get(random.nextInt(list.size()));
+	}
+
 	public static <T> T getRandom(T[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static <T> T getRandom(T[] array, Random random) {
+		return array[random.nextInt(array.length)];
 	}
 
 	public static byte getRandom(byte[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
+	public static byte getRandom(byte[] array, Random random) {
+		return array[random.nextInt(array.length)];
+	}
+
 	public static boolean getRandom(boolean[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static boolean getRandom(boolean[] array, Random random) {
+		return array[random.nextInt(array.length)];
 	}
 
 	public static short getRandom(short[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
+	public static short getRandom(short[] array, Random random) {
+		return array[random.nextInt(array.length)];
+	}
+
 	public static char getRandom(char[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static char getRandom(char[] array, Random random) {
+		return array[random.nextInt(array.length)];
 	}
 
 	public static int getRandom(int[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
+	public static int getRandom(int[] array, Random random) {
+		return array[random.nextInt(array.length)];
+	}
+
 	public static float getRandom(float[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static float getRandom(float[] array, Random random) {
+		return array[random.nextInt(array.length)];
 	}
 
 	public static long getRandom(long[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
+	public static long getRandom(long[] array, Random random) {
+		return array[random.nextInt(array.length)];
+	}
+
 	public static double getRandom(double[] array) {
 		return array[FastMath.RANDOM.nextInt(array.length)];
+	}
+
+	public static double getRandom(double[] array, Random random) {
+		return array[random.nextInt(array.length)];
 	}
 
 	public static <T> boolean containsAll(Collection<T> collection, T[] array) {
@@ -568,4 +616,64 @@ public class ArrayUtils {
 			return Arrays.copyOf(array, pos);
 		}
 	}
+
+	public static <T> T[][] shuffleArray(T[] inArray) {
+		ShuffleBitSet set = new ShuffleBitSet(inArray.length);
+		List<T[]> list = new ArrayList<>();
+		shuffleArray(inArray, set, 0, list);
+
+		T[][] outArray = ArrayUtils.createGenericArray2(inArray.getClass(), list.size());
+		for (int i = 0; i < list.size(); i++) {
+			outArray[i] = list.get(i);
+		}
+
+		return outArray;
+	}
+
+	private static <T> void shuffleArray(T[] inArray, ShuffleBitSet bitSet, int depth, List<T[]> outList) {
+		depth++;
+		for (int i = 0; i < inArray.length; i++) {
+			if (depth != 1 && bitSet.get(i)) {
+				continue;
+			}
+			bitSet.set(i);
+			if (depth >= inArray.length) {
+				@SuppressWarnings("unchecked")
+				T[] array = (T[])ArrayUtils.createGenericArray(inArray.getClass().getComponentType(), inArray.length);
+				for (int j = 0; j < inArray.length; j++) {
+					array[j] = inArray[bitSet.indexes[j]];
+				}
+				outList.add(array);
+			} else {
+				shuffleArray(inArray, bitSet, depth, outList);
+			}
+			
+			bitSet.clear(i);
+		}
+	}
+
+	private static class ShuffleBitSet extends BitSet {
+
+		private final int[] indexes;
+		private int pos;
+	
+		public ShuffleBitSet(int size) {
+			super(size);
+			this.indexes = new int[size];
+		}
+
+		@Override
+		public void set(int bitIndex) {
+			this.indexes[this.pos] = bitIndex;
+			this.pos++;
+			super.set(bitIndex);
+		}
+
+		@Override
+		public void clear(int bitIndex) {
+			this.pos--;
+			super.clear(bitIndex);
+		}
+	}
+
 }

@@ -1,5 +1,6 @@
 package net.skds.lib2.utils.logger;
 
+import net.skds.lib2.utils.logger.LogWriter.LogWriteable;
 
 final class SKDSLoggerImpl extends SKDSLogger {
 
@@ -10,7 +11,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 	}
 
 	@Override
-	protected void log0(LoggerLevel level, int depth, Object msg) {
+	protected void log0(LoggerLevel level, int depth, boolean ln, Object msg) {
 		if (!isLoggingLevel(level)) return;
 		String message = String.valueOf(msg);
 		long time = System.currentTimeMillis();
@@ -28,7 +29,9 @@ final class SKDSLoggerImpl extends SKDSLogger {
 			var trace = Thread.currentThread().getStackTrace();
 			stackTop = trace[depth];
 		}
-		LogEntry e = new LogEntry(
+		LogWriteable e;
+		if (ln) {
+			e = new LogLnEntry(
 				time,
 				message,
 				level,
@@ -38,7 +41,10 @@ final class SKDSLoggerImpl extends SKDSLogger {
 				attachedPrintStreams.toArray(printStreamArray),
 				useGlobalPrintStream,
 				useFileOut
-		);
+			);
+		} else {
+			e = new LogEntry(time, message, level, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut);
+		}
 		LogWriter.INSTANCE.add(e);
 	}
 

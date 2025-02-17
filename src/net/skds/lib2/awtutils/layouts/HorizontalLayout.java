@@ -1,24 +1,23 @@
 package net.skds.lib2.awtutils.layouts;
 
-import lombok.Setter;
-
-import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
+
+import javax.swing.JComponent;
+import javax.swing.border.Border;
 
 public class HorizontalLayout implements LayoutManager {
 
 	private final int spacer;
-	@Setter
-	private boolean centered = false;
+	private final LayoutMode mode;
 
 	public HorizontalLayout() {
 		this.spacer = 0;
+		this.mode = LayoutMode.NONE;
 	}
 
-	public HorizontalLayout(int spacer, boolean centered) {
+	public HorizontalLayout(int spacer, LayoutMode mode) {
 		this.spacer = spacer;
-		this.centered = centered;
+		this.mode = mode;
 	}
 
 	@Override
@@ -66,30 +65,36 @@ public class HorizontalLayout implements LayoutManager {
 		}
 		Component[] components = parent.getComponents();
 		int x = spacer;
+
+		int max = 0;
+		if (this.mode == LayoutMode.FILL) {
+			max = preferredLayoutSize(parent).width;
+		}
+
 		for (Component component : components) {
 			if (!component.isVisible()) {
 				continue;
 			}
 			Dimension pref = component.getPreferredSize();
 			int x2 = 0;
-			int y = 0;
+			int y2 = 0;
 
 			if (border != null) {
 				Insets insets = border.getBorderInsets(component);
-				y += insets.top;
+				y2 += insets.top;
 				x += insets.left;
 				x2 = insets.right;
 			}
 
-			if (centered) {
-				y += (parent.getHeight() - pref.height) / 2;
+			if (mode == LayoutMode.CENTER) {
+				y2 += (parent.getHeight() - pref.height) / 2;
 			}
-			component.setBounds(x, y, pref.width, pref.height);
+			component.setBounds(x, y2, pref.width, Math.max(pref.height, max));
 			x += spacer + pref.width + x2;
 		}
 		Dimension size = preferredLayoutSize(parent);
 		parent.setPreferredSize(size);
-		//parent.setSize(size);
+		parent.repaint();
 	}
 
 	@Override

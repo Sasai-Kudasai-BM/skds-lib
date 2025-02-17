@@ -7,6 +7,7 @@ import net.skds.lib2.utils.linkiges.Obj2FloatPair;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
@@ -86,6 +87,14 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 
 	public T getAndRemoveRandom() {
 		return getAndRemove(FastMath.RANDOM.nextFloat());
+	}
+
+	public T getRandom(Random random) {
+		return get(random.nextFloat());
+	}
+
+	public T getAndRemoveRandom(Random random) {
+		return getAndRemove(random.nextFloat());
 	}
 
 	public T get(float f) {

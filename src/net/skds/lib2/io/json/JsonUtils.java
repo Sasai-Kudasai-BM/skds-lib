@@ -65,14 +65,14 @@ public class JsonUtils {
 
 	public static <CT, E extends Enum<E> & ConfigEnumType<CT>> void addTypedAdapter(Class<CT> type, Class<E> typeClass) {
 		userMapCodecFactory.addFactory(type, (t, r) -> new TypedEnumAdapter<>(t, typeClass, r));
-		//fancyRegistry.getCodec(type);
 		rebuild();
+		//fancyRegistry.getCodec(type);
 	}
 
 	public static <CT> void addTypedAdapter(Class<CT> type, Map<String, ? extends ConfigType<?>> typeMap) {
 		userMapCodecFactory.addFactory(type, (t, r) -> new TypedMapAdapter<>(t, typeMap, r));
-		//fancyRegistry.getCodec(type);
 		rebuild();
+		//fancyRegistry.getCodec(type);
 	}
 
 	public static <T> T parseJson(String text, Class<T> type) {

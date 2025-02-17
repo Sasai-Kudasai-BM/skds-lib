@@ -15,42 +15,42 @@ import java.util.List;
 
 public class DemoFrame extends JFrame {
 
-	DemoFrame() {
+	public DemoFrame() {
 		super("SKDS Lib v2 demo");
 		SKDSLogger.replaceOuts();
 
 		setLayout(new GridBagLayout());
 
 		JButton button = new JButton("Color");
-		button.addActionListener(e -> new ColorDemoFrame());
+		button.addActionListener(e -> new ColorDemoFrame().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("Natives");
-		button.addActionListener(e -> new NativesDemo());
+		button.addActionListener(e -> new NativesDemo().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("Noise");
-		button.addActionListener(e -> new NoiseFrame());
+		button.addActionListener(e -> new NoiseFrame().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("Logger");
-		button.addActionListener(e -> new LoggerDemoFrame());
+		button.addActionListener(e -> new LoggerDemoFrame().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("Classloader");
-		button.addActionListener(e -> new DemoClassloaderFrame(this));
+		button.addActionListener(e -> new DemoClassloaderFrame(this).setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("WeightedPool");
-		button.addActionListener(e -> new WeightedPoolDemoFrame());
+		button.addActionListener(e -> new WeightedPoolDemoFrame().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("Overlay");
-		button.addActionListener(e -> new WindowOverlay());
+		button.addActionListener(e -> new WindowOverlay().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("Font");
-		button.addActionListener(e -> new FontDemoFrame());
+		button.addActionListener(e -> new FontDemoFrame().setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("floor");
@@ -68,12 +68,16 @@ public class DemoFrame extends JFrame {
 
 		button = new JButton("Demo3d");
 		button.addActionListener(e ->
-			Demo3dFrameExample.init(new Demo3dFrame())
+			Demo3dFrameExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
 		);
 		add(button);
 
 		button = new JButton("GraphicBuilder");
-		button.addActionListener(e -> new GraphicBuilder());
+		button.addActionListener(e -> new GraphicBuilder().setLocationRelativeTo(this));
+		add(button);
+
+		button = new JButton("Json");
+		button.addActionListener(e -> new JsonDemoFrame().setLocationRelativeTo(this));
 		add(button);
 
 

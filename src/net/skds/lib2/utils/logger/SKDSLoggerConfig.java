@@ -20,17 +20,17 @@ public final class SKDSLoggerConfig {
 	@Getter(AccessLevel.PACKAGE)
 	private static EnumSet<LoggerLevel> levels = EnumSet.allOf(LoggerLevel.class);
 
-	@Getter(AccessLevel.PACKAGE)
+	@Getter()
 	private final SimpleDateFormat timeFormat;
-	@Getter(AccessLevel.PACKAGE)
+	@Getter()
 	private final SimpleDateFormat dateFormat;
-	@Getter(AccessLevel.PACKAGE)
+	@Getter()
 	private final boolean logThread;
-	@Getter(AccessLevel.PACKAGE)
+	@Getter()
 	private final boolean logStackTop;
-	@Getter(AccessLevel.PACKAGE)
+	@Getter()
 	private final boolean includeLoggerClass;
-	@Getter(AccessLevel.PACKAGE)
+	@Getter()
 	private final String logDir;
 
 	private SKDSLoggerConfig(Cfg cfg) {

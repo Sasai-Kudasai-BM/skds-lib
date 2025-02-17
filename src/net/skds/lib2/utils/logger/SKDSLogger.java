@@ -16,26 +16,26 @@ public abstract class SKDSLogger {
 	private static final int DEPTH = 3;
 	static final PrintStream[] printStreamArray = {};
 
-	protected abstract void log0(LoggerLevel level, int depth, Object msg);
+	protected abstract void log0(LoggerLevel level, int depth, boolean ln, Object msg);
 
 	public void debug(Object msg) {
-		log0(LoggerLevel.DEBUG, DEPTH, msg);
+		log0(LoggerLevel.DEBUG, DEPTH, true, msg);
 	}
 
 	public void info(Object msg) {
-		log0(LoggerLevel.INFO, DEPTH, msg);
+		log0(LoggerLevel.INFO, DEPTH, true, msg);
 	}
 
 	public void log(Object msg) {
-		log0(LoggerLevel.LOG, DEPTH, msg);
+		log0(LoggerLevel.LOG, DEPTH, true, msg);
 	}
 
 	public void warn(Object msg) {
-		log0(LoggerLevel.WARN, DEPTH, msg);
+		log0(LoggerLevel.WARN, DEPTH, true, msg);
 	}
 
 	public void error(Object msg) {
-		log0(LoggerLevel.ERROR, DEPTH, msg);
+		log0(LoggerLevel.ERROR, DEPTH, true, msg);
 	}
 
 	public static boolean attachPrintStream(PrintStream ps) {

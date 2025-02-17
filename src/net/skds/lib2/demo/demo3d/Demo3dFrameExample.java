@@ -23,12 +23,7 @@ public class Demo3dFrameExample {
 	// HumanoidRig //sit//arms
 
 	public static <T extends Demo3dShapeCollector> T init(T frame) {
-		/*Vec3 a = Vec3.of(999, 1, 1);
-		Vec3 b = Vec3.of(1, -1, 0);
-
-		System.out.println(a.dot(b));*/
-
-		initCollisionFuck(frame);
+		initCollisionFile(frame);
 		return frame;
 	}
 
@@ -100,6 +95,16 @@ public class Demo3dFrameExample {
 		frame.addShape(collision);
 	}
 
+	public static void initCollisionPeople(Demo3dShapeCollector frame) {
+		Demo3dFrameCollisionPeople collision = new Demo3dFrameCollisionPeople();
+		frame.addShape(collision);
+	}
+
+	public static void initCollisionFile(Demo3dShapeCollector frame) {
+		FileCollide collision = new FileCollide();
+		frame.addShape(collision);
+	}
+
 	private static class Demo3dFrameCollisionBox extends Demo3dShape.Demo3dShapeInterractable {
 		private final Shape baseBox;
 		private final float speed;
@@ -166,11 +171,6 @@ public class Demo3dFrameExample {
 			//this.shapes[1].setShape(AABB.fromSize(.5, 0, 0.5).move(directions[0].getOpposite().scale(1)));
 			//this.shapes[1].setShape(this.baseBox.move(directions[0].getOpposite().scale(1)));
 		}
-	}
-
-	public static void initCollisionPeople(Demo3dShapeCollector frame) {
-		Demo3dFrameCollisionPeople collision = new Demo3dFrameCollisionPeople();
-		frame.addShape(collision);
 	}
 
 	private static class Demo3dFrameCollisionPeople extends Demo3dShape.Demo3dShapeInterractable {
@@ -613,14 +613,9 @@ public class Demo3dFrameExample {
 		}
 	}
 
-	public static void initCollisionFuck(Demo3dShapeCollector frame) {
-		FuckCollide collision = new FuckCollide();
-		frame.addShape(collision);
-	}
+	private static class FileCollide extends Demo3dShape.Demo3dShapeInterractable {
 
-	private static class FuckCollide extends Demo3dShape.Demo3dShapeInterractable {
-
-		public FuckCollide() {
+		public FileCollide() {
 			reset();
 		}
 

@@ -29,6 +29,7 @@ public class JsonTest {
 		runs.add(new JsonTestRun("vec3", JsonTestVec3::test));
 		runs.add(new JsonTestRun("shape", JsonTestShapes::test));
 		runs.add(new JsonTestRun("replaceDefault", JsonTestReplaceDefault::test));
+		runs.add(new JsonTestRun("nest", JsonTestNest::test));
 
 		Map<String, JsonTestRun> map = new LinkedHashMap<>();
 

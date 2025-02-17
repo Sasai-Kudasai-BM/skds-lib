@@ -16,7 +16,7 @@ import net.skds.lib2.io.json.codec.JsonSerializer;
 
 public class TypedMapAdapter<CT> extends AbstractJsonCodec<CT> {
 
-	private Map<String, ? extends ConfigType<?>> typeMap;
+	private final Map<String, ? extends ConfigType<?>> typeMap;
 
 	public TypedMapAdapter(Type type, Map<String, ? extends ConfigType<?>> typeMap, JsonCodecRegistry registry) {
 		super(type, registry);

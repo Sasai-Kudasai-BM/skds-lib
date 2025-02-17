@@ -8,8 +8,8 @@ record LogPrintln(long time, LoggerLevel level, PrintStream[] attachedStreams, b
 
 	@Override
 	public void write() {
-		Date date = new Date(time);
+		Date date = new Date(this.time);
 		String decoratedMsg = "\n";
-		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, useFileOut);
+		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, useFileOut ? decoratedMsg : null);
 	}
 }
