@@ -47,13 +47,18 @@ public class OBB implements ConvexShape, TypedConfig {
 	}
 
 	@Override
+	public OBB move(Vec3 delta) {
+		return new OBB(center.add(delta), this.dimensions, normals, attachment);
+	}
+
+	@Override
 	public OBB rotate(Matrix3 m3) {
 		return new OBB(center, this.dimensions, m3.multiply(normals), attachment);
 	}
 
 	@Override
-	public OBB move(Vec3 delta) {
-		return new OBB(center.add(delta), this.dimensions, normals, attachment);
+	public OBB rotate(Quat q) {
+		return new OBB(center, this.dimensions, Matrix3.fromQuat(q).multiply(normals), attachment);
 	}
 
 	@Override
@@ -64,6 +69,11 @@ public class OBB implements ConvexShape, TypedConfig {
 	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
 		return new OBB(center.add(pos), this.dimensions.scale(scale), m3.multiply(normals), attachment);
+	}
+
+	@Override
+	public OBB moveRotScale(Vec3 pos, Quat q, double scale) {
+		return new OBB(center.add(pos), this.dimensions.scale(scale), Matrix3.fromQuat(q).multiply(normals), attachment);
 	}
 
 	@Override

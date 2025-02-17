@@ -104,18 +104,6 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 	}
 
 	@Override
-	public CompositeSuperShape scale(double scale) {
-		final Shape[] shapes = new Shape[this.shapes.length];
-		for (int i = 0; i < shapes.length; i++) {
-			Shape shape = this.shapes[i];
-			Vec3 od = shape.getCenter().sub(center);
-			Vec3 nd = od.scale(scale);
-			shapes[i] = shape.move(nd.sub(od)).scale(scale);
-		}
-		return new CompositeSuperShape(shapes, center, attachment);
-	}
-
-	@Override
 	public CompositeSuperShape rotate(Matrix3 m3) {
 		final Shape[] shapes = new Shape[this.shapes.length];
 		for (int i = 0; i < shapes.length; i++) {
@@ -125,6 +113,23 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 			shapes[i] = shape.moveRotScale(nd.sub(od), m3, 1);
 		}
 		return new CompositeSuperShape(shapes, this.center, this.attachment);
+	}
+
+	@Override
+	public Shape rotate(Quat q) {
+		return rotate(Matrix3.fromQuat(q));
+	}
+
+	@Override
+	public CompositeSuperShape scale(double scale) {
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			Shape shape = this.shapes[i];
+			Vec3 od = shape.getCenter().sub(center);
+			Vec3 nd = od.scale(scale);
+			shapes[i] = shape.move(nd.sub(od)).scale(scale);
+		}
+		return new CompositeSuperShape(shapes, center, attachment);
 	}
 
 	@Override
@@ -139,6 +144,11 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 		return new CompositeSuperShape(shapes, center.add(pos), attachment);
 	}
 
+	@Override
+	public CompositeShape moveRotScale(Vec3 pos, Quat q, double scale) {
+		return moveRotScale(pos, Matrix3.fromQuat(q), scale);
+	}
+
 	public CompositeSuperShape setPose(PoseFunction pf, final Vec3 parentPos, final Quat parentRot, final double parentScale) {
 		final Shape[] shapes = new Shape[this.shapes.length];
 
@@ -146,7 +156,6 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 
 		for (int i = 0; i < shapes.length; i++) {
 			Shape shape = this.shapes[i];
-			Vec3 od = shape.getCenter().sub(this.center);
 
 			pc.setPos(Vec3.ZERO);
 			pc.setRot(Quat.ONE);
@@ -154,6 +163,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 
 			pf.applyPose(shape, parentPos, parentRot, parentScale, pc);
 
+			Vec3 od = shape.getCenter().sub(this.center);
 			if (pc.pos != Vec3.ZERO) {
 				od = od.add(pc.pos);
 			}
@@ -170,6 +180,9 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 			Vec3 nd = od.transform(parentRot);
 			if (pc.scale != 1) {
 				nd = nd.scale(pc.scale);
+			}
+			if (pc.pos != Vec3.ZERO) {
+				nd = nd.add(pc.pos);
 			}
 			nd = nd.add(parentPos).sub(od);
 

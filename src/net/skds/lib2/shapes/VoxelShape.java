@@ -2,6 +2,7 @@ package net.skds.lib2.shapes;
 
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.mat.vec4.Quat;
 
 import java.util.Arrays;
 
@@ -118,7 +119,6 @@ public sealed class VoxelShape implements CompositeShape {
 		return shapes;
 	}
 
-
 	@Override
 	public VoxelShape move(Vec3 delta) {
 		final AABB[] offBoxes = new AABB[boxes.length];
@@ -126,6 +126,35 @@ public sealed class VoxelShape implements CompositeShape {
 			offBoxes[i] = boxes[i].move(delta);
 		}
 		return new VoxelShape(offBoxes, center.add(delta), attachment);
+	}
+	
+	@Override
+	public CompositeSuperShape rotate(Matrix3 m3) {
+		final ConvexShape[] convexShapes = new ConvexShape[boxes.length];
+		for (int i = 0; i < convexShapes.length; i++) {
+			AABB box = boxes[i];
+			Vec3 od = box.getCenter().sub(center);
+			Vec3 nd = od.transform(m3);
+			convexShapes[i] = box.moveRotScale(nd.sub(od), m3, 1);
+		}
+		return new CompositeSuperShape(convexShapes, center, attachment);
+	}
+
+	@Override
+	public Shape rotate(Quat q) {
+		return rotate(Matrix3.fromQuat(q));
+	}
+	
+	@Override
+	public VoxelShape scale(double scale) {
+		final AABB[] offBoxes = new AABB[boxes.length];
+		for (int i = 0; i < offBoxes.length; i++) {
+			AABB box = boxes[i];
+			Vec3 od = box.getCenter().sub(center);
+			Vec3 nd = od.scale(scale);
+			offBoxes[i] = box.move(nd.sub(od));
+		}
+		return new VoxelShape(offBoxes, center, attachment);
 	}
 
 	@Override
@@ -141,27 +170,8 @@ public sealed class VoxelShape implements CompositeShape {
 	}
 
 	@Override
-	public CompositeSuperShape rotate(Matrix3 m3) {
-		final ConvexShape[] convexShapes = new ConvexShape[boxes.length];
-		for (int i = 0; i < convexShapes.length; i++) {
-			AABB box = boxes[i];
-			Vec3 od = box.getCenter().sub(center);
-			Vec3 nd = od.transform(m3);
-			convexShapes[i] = box.moveRotScale(nd.sub(od), m3, 1);
-		}
-		return new CompositeSuperShape(convexShapes, center, attachment);
-	}
-
-	@Override
-	public VoxelShape scale(double scale) {
-		final AABB[] offBoxes = new AABB[boxes.length];
-		for (int i = 0; i < offBoxes.length; i++) {
-			AABB box = boxes[i];
-			Vec3 od = box.getCenter().sub(center);
-			Vec3 nd = od.scale(scale);
-			offBoxes[i] = box.move(nd.sub(od));
-		}
-		return new VoxelShape(offBoxes, center, attachment);
+	public CompositeShape moveRotScale(Vec3 pos, Quat q, double scale) {
+		return moveRotScale(pos, Matrix3.fromQuat(q), scale);
 	}
 
 	@Override

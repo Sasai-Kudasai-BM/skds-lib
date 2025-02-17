@@ -213,7 +213,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 
 	@Override
 	public final int compareTo(Vec3 o) {
-		return Vec3.compareTo(this, o);
+		return Vec3.compare(this, o);
 	}
 
 	static final class JCodec extends AbstractJsonCodec<Vec3> {

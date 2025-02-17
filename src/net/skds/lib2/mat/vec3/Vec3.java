@@ -1700,7 +1700,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		}
 	}
 
-	static int compareTo(Vec3 a, Vec3 b) {
+	static int compare(Vec3 a, Vec3 b) {
 		if ((a instanceof Vec3I || a instanceof Direction) && (b instanceof Vec3I || b instanceof Direction)) {
 			if (a.xi() > b.xi()) {
 				return 1;

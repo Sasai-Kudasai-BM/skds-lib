@@ -11,6 +11,7 @@ import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec4.Quat;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -182,28 +183,6 @@ public final class AABB implements ConvexShape, TypedConfig {
 	@Override
 	public AABB getBoundingBox() {
 		return this;
-	}
-
-	@Override
-	public AABB scale(double scale) {
-		Vec3 center = getCenter();
-		AABB box = fromCenter(getCenter(), sizeX() * scale, sizeY() * scale, sizeZ() * scale);
-		box.setAttachment(attachment);
-		return box;
-	}
-
-	@Override
-	public OBB rotate(Matrix3 m3) {
-		OBB obb = new OBB(getCenter(), this.dimensions(), m3);
-		obb.setAttachment(attachment);
-		return obb;
-	}
-
-	@Override
-	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
-		OBB obb = new OBB(getCenter().add(pos), this.dimensions().scale(scale), m3);
-		obb.setAttachment(attachment);
-		return obb;
 	}
 
 	@Override
@@ -406,6 +385,42 @@ public final class AABB implements ConvexShape, TypedConfig {
 	@Override
 	public AABB move(Vec3 vec) {
 		return this.move(vec.x(), vec.y(), vec.z());
+	}
+
+	@Override
+	public OBB rotate(Quat q) {
+		OBB obb = new OBB(getCenter(), this.dimensions(), Matrix3.fromQuat(q));
+		obb.setAttachment(attachment);
+		return obb;
+	}
+
+	@Override
+	public OBB rotate(Matrix3 m3) {
+		OBB obb = new OBB(getCenter(), this.dimensions(), m3);
+		obb.setAttachment(attachment);
+		return obb;
+	}
+
+	@Override
+	public AABB scale(double scale) {
+		Vec3 center = getCenter();
+		AABB box = fromCenter(getCenter(), sizeX() * scale, sizeY() * scale, sizeZ() * scale);
+		box.setAttachment(attachment);
+		return box;
+	}
+
+	@Override
+	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
+		OBB obb = new OBB(getCenter().add(pos), this.dimensions().scale(scale), m3);
+		obb.setAttachment(attachment);
+		return obb;
+	}
+
+	@Override
+	public OBB moveRotScale(Vec3 pos, Quat q, double scale) {
+		OBB obb = new OBB(getCenter().add(pos), this.dimensions().scale(scale), Matrix3.fromQuat(q));
+		obb.setAttachment(attachment);
+		return obb;
 	}
 
 	public boolean intersects(AABB box) {

@@ -1,5 +1,7 @@
 package net.skds.lib2.shapes;
 
+import java.util.function.Consumer;
+
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec4.Quat;
@@ -29,6 +31,15 @@ public non-sealed interface CompositeShape extends Shape {
 	AABB getBoundingBox();
 
 	Shape[] getAllShapes();
+
+	default void forEachShapeRecursive(Consumer<Shape> consumer) {
+		for (Shape shape : getAllShapes()) {
+			consumer.accept(shape);
+			if (shape instanceof CompositeShape compositeShape) {
+				compositeShape.forEachShapeRecursive(consumer);
+			}
+		}
+	}
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {

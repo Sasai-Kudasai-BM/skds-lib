@@ -12,13 +12,13 @@ import net.skds.lib2.mat.vec4.Quat;
 @DefaultJsonCodec(Shape.JCodec.class)
 public sealed interface Shape permits ConvexShape, CompositeShape {
 
+	Shape move(Vec3 delta);
+
 	Shape rotate(Matrix3 m3);
 
 	default Shape rotate(Quat q) {
 		return rotate(Matrix3.fromQuat(q));
 	}
-
-	Shape move(Vec3 delta);
 
 	Shape scale(double scale);
 

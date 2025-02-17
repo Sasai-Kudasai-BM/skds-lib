@@ -78,13 +78,18 @@ public final class Sphere implements ConvexShape {
 	}
 
 	@Override
+	public Sphere move(Vec3 delta) {
+		return new Sphere(center.add(delta), radius, attachment);
+	}
+
+	@Override
 	public Sphere rotate(Matrix3 m3) {
 		return this;
 	}
 
 	@Override
-	public Sphere move(Vec3 delta) {
-		return new Sphere(center.add(delta), radius, attachment);
+	public Sphere scale(double scale) {
+		return new Sphere(center, radius * scale, attachment);
 	}
 
 	@Override
@@ -95,12 +100,6 @@ public final class Sphere implements ConvexShape {
 	@Override
 	public Sphere moveRotScale(Vec3 pos, Quat q, double scale) {
 		return new Sphere(center.add(pos), radius * scale, attachment);
-	}
-
-
-	@Override
-	public Sphere scale(double scale) {
-		return new Sphere(center, radius * scale, attachment);
 	}
 
 	@Override

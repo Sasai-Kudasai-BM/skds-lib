@@ -20,9 +20,6 @@ import net.skds.lib2.shapes.Shape;
 @SuppressWarnings("unused")
 public class Demo3dExample {
 
-	// BotAiModule#lookupEnemies
-	// HumanoidRig //sit//arms
-
 	public static <T extends Demo3dShapeCollector> T init(T frame) {
 		initCollisionPeople(frame);
 		return frame;
@@ -49,43 +46,52 @@ public class Demo3dExample {
 			}, Vec3.ZERO, "body")
 		}, Vec3.ZERO);
 
-		CompositeSuperShape rotated = superShape
-				.move(Vec3.of(2, 0, 0))
-				.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XN, 30)))
-				;
+		frame.addShape(superShape.move(Vec3.of(2, 0, 0)));
 
-		frame.addShape(() -> rotated.rotate(Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 50d) % 360)));
-		frame.addShape(superShape.move(Vec3.of(4, 0, 0)));
+		//CompositeSuperShape rotated = superShape
+		//	.move(Vec3.of(4, 0, 0))
+		//	.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XN, 30)))
+		//;
+		//frame.addShape(() -> rotated.rotate(Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 50d) % 360)));
+		
 
-		CompositeSuperShape scaled = superShape.move(Vec3.of(6, 0, 0));
+		//CompositeSuperShape scaled = superShape.move(Vec3.of(6, 0, 0));
+		//frame.addShape(() -> scaled.scale(FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360) / 2d + .5));
 
-		frame.addShape(() -> scaled.scale(FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360) / 2d + .5));
+		//CompositeSuperShape moveRotScale = superShape.move(Vec3.of(8, 0, 0));
+		//frame.addShape(() -> {
+		//	Quat rot = Quat.fromAxisDegrees(Vec3.YN, (System.currentTimeMillis() / 10d) % 360);
+		//	return moveRotScale.moveRotScale(Vec3.of(0, 0, FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360)), rot, 1);
+		//});
 
-		CompositeSuperShape moveRotScale = superShape.move(Vec3.of(8, 0, 0));
+		//CompositeSuperShape posed1 = superShape.move(Vec3.of(10, 0, 0));
+		//frame.addShape(() -> {
+		//	Quat rot = Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 10d) % 360);
+		//	return posed1.setPose((sh, p, r, s, c) -> {}, Vec3.ZP.scale(0.5).transform(rot), rot, 1);
+		//});
 
-		frame.addShape(() -> {
-			Quat rot = Quat.fromAxisDegrees(Vec3.YN, (System.currentTimeMillis() / 10d) % 360);
-			return moveRotScale.moveRotScale(Vec3.of(0, 0, FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360)), rot, 1);
-		});
+		//CompositeSuperShape posed2 = superShape.move(Vec3.of(12, 0, 0));
+		//frame.addShape(() -> {
+		//	return posed2.setPose((sh, p, r, s, c) -> {
+		//		Object attachment = sh.getAttachment();
+		//		if (attachment != null) {
+		//			if (attachment.equals("head")) {
+		//				c.setRot(Quat.fromAxisDegrees(Vec3.XP, 50));
+		//			}
+		//		}
+		//	}, Vec3.ZERO, Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 100d) % 360), 1);
+		//});
 
-		CompositeSuperShape posed1 = superShape.move(Vec3.of(10, 0, 0));
-
+		CompositeSuperShape posed1 = superShape.move(Vec3.of(14, 0, 0));
 		frame.addShape(() -> {
 			Quat rot = Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 10d) % 360);
-			return posed1.setPose((sh, p, r, s, c) -> {}, Vec3.ZP.scale(0.5).transform(rot), rot, 1);
-		});
-
-		CompositeSuperShape posed2 = superShape.move(Vec3.of(12, 0, 0));
-
-		frame.addShape(() -> {
-			return posed2.setPose((sh, p, r, s, c) -> {
+			return posed1.setPose((sh, p, r, s, c) -> {
 				Object attachment = sh.getAttachment();
-				if (attachment != null) {
-					if (attachment.equals("head")) {
-						c.setRot(Quat.fromAxisDegrees(Vec3.XP, 50));
-					}
+				if (!(attachment instanceof String key && key.equals("body"))) {
+					return;
 				}
-			}, Vec3.ZERO, Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 100d) % 360), 1);
+				c.setPos(Vec3.ZP);
+			}, Vec3.ZERO, rot, 1);
 		});
 	}
 
@@ -250,7 +256,7 @@ public class Demo3dExample {
 				onGround = true;
 			}
 			Vec3 pos = this.getHuman().getCenter();
-			tickMoveWithUp(demo);
+			tickMove(demo);
 			log.debug(this.getHuman().getCenter().sub(pos));
 		}
 
@@ -296,17 +302,17 @@ public class Demo3dExample {
 						//break;
 					}
 					if (cr.normal().x() != 0) {
-						vel = vel.scale(0, 1, 1);
+						vel = vel.scale(cr.distance(), 1, 1);
 					}
 					if (cr.normal().z() != 0) {
-						vel = vel.scale(1, 1, 0);
+						vel = vel.scale(1, 1, cr.distance());
 					}
 					if (cr.normal().y() != 0) {
 						if (cr.normal().y() > 0 && vel.y() <= 0) {
 							hitGround = true;
-							vel = vel.scale(0.5, 0, 0.5);
+							vel = vel.scale(0.5, cr.distance(), 0.5);
 						} else {
-							vel = vel.scale(1, 0, 1);
+							//vel = vel.scale(1, 0, 1);
 						}
 					}
 					//if (cr.depth() != 0) {
