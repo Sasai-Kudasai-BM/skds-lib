@@ -66,6 +66,16 @@ public class DemoFrame extends JFrame {
 		});
 		add(button);
 
+		button = new JButton("Pow2");
+		button.addActionListener(e -> {
+			var list = List.of(1, 1024, 1025, 1023, 1 << 20);
+			for (int i : list) {
+				System.out.println("==========");
+				System.out.println(FastMath.isPowerOf2(i) + " " + i);
+			}
+		});
+		add(button);
+
 		button = new JButton("Demo3d");
 		button.addActionListener(e ->
 			Demo3dFrameExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
