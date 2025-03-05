@@ -17,6 +17,11 @@ public class StringCharInput implements CharInput {
 	}
 
 	@Override
+	public int available() {
+		return this.value.length() - pos;
+	}
+
+	@Override
 	public void setPos(int newPos) {
 		this.pos = newPos;
 	}
@@ -28,12 +33,12 @@ public class StringCharInput implements CharInput {
 
 	@Override
 	public boolean isAvailable(int indexFrom, int count) {
-		return indexFrom + count < value.length();
+		return indexFrom + count <= value.length();
 	}
 
 	@Override
 	public boolean isAvailable(int count) {
-		return pos + count < value.length();
+		return pos + count <= value.length();
 	}
 
 	@Override

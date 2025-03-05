@@ -4,8 +4,10 @@ import java.io.IOException;
 
 public interface JsonReader {
 
+	void print();
+
 	JsonEntryType nextEntryType() throws IOException;
-	
+
 	String readName() throws IOException;
 
 	void beginObject() throws IOException;

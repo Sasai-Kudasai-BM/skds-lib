@@ -194,7 +194,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				try {
 					fc.read(reader, o);
 				} catch (Exception e) {
-					throw new RuntimeException("Field read error: " + this.tClass + ":" + fc.name, e);
+					throw new RuntimeException("Field read error: " + this.tClass + ":" + fc.name + "(" + fc.field.getType() + ")", e);
 				}
 			}
 			reader.endObject();

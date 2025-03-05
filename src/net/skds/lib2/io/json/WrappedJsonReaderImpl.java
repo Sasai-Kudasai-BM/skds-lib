@@ -20,6 +20,11 @@ public class WrappedJsonReaderImpl implements JsonReader {
 		//this.stack = new StackEntry(null, input);
 	}
 
+	@Override
+	public void print() {
+		throw new UnsupportedOperationException("");
+	}
+
 	private void validateEntryType(JsonEntryType expected) throws IOException {
 		JsonEntryType next = nextEntryType();
 		if (next != expected) {

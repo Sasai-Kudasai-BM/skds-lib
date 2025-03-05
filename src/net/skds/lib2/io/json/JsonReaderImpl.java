@@ -26,6 +26,15 @@ public final class JsonReaderImpl implements JsonReader {
 		this.skipCodec = registry.getCodec(JsonElement.class);
 	}
 
+	@Override
+	public void print() {
+		try {
+			System.out.println(input.subString(input.getPos(), input.getPos() + input.available()));
+		} catch (EndOfInputException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private void validateEntryType(JsonEntryType expected) throws IOException {
 		JsonEntryType next = nextEntryType();
 		if (next != expected) {

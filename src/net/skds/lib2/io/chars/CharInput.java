@@ -6,6 +6,8 @@ public interface CharInput {
 
 	int getPos();
 
+	int available();
+
 	void setPos(int newPos);
 
 	void skip(int n);
