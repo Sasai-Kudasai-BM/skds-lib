@@ -6,10 +6,14 @@ import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.annotation.DefaultJsonEnumTypedCodec;
+import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
+import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.json.elements.*;
 import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.ArrayUtils;
+import net.skds.lib2.utils.AutoCast;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 import net.skds.lib2.utils.function.MultiSupplier;
@@ -150,6 +154,12 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, ArrayList::new);
 				}
 			}
+		} else if (type instanceof GenericArrayType gat) {
+			Type cle = gat.getGenericComponentType();
+			Class<?> raw = ReflectUtils.getRawType(cle);
+			JsonDeserializer<Object> deserializer = registry.getDeserializerIndirect(cle);
+			JsonSerializer<Object> serializer = getUniversalSerializer(cle, registry);
+			return new ArrayCodec(raw, deserializer, serializer, registry);
 		}
 
 		return ReflectiveJsonCodecFactory.INSTANCE.createCodec(type, registry);
@@ -193,7 +203,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 	public static JsonCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, JsonCodecRegistry
 			registry) {
 		DefaultJsonCodec defaultCodec = annotatedElement.getAnnotation(DefaultJsonCodec.class);
-		if (defaultCodec == null) return null;
+		if (defaultCodec == null) return getDefaultEnumTypedCodec(annotatedElement, type, registry);
 		Class<?> factoryClass = defaultCodec.value();
 		if (JsonCodecFactory.class.isAssignableFrom(factoryClass)) {
 			Supplier<JsonCodecFactory> constructor = (Supplier<JsonCodecFactory>) ReflectUtils.getConstructor(factoryClass);
@@ -232,6 +242,17 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 		log.error("Invalid @DefaultJsonCodec on \"" + annotatedElement + "\"");
 		return null;
+	}
+
+	public static JsonCodec<Object> getDefaultEnumTypedCodec(AnnotatedElement annotatedElement, Type type, JsonCodecRegistry registry) {
+		DefaultJsonEnumTypedCodec defaultCodec = annotatedElement.getAnnotation(DefaultJsonEnumTypedCodec.class);
+		if (defaultCodec == null) return null;
+		Class<?> enumClass = defaultCodec.value();
+		if (!(Enum.class.isAssignableFrom(enumClass) && ConfigEnumType.class.isAssignableFrom(enumClass))) {
+			log.error("Invalid @DefaultJsonEnumTypedCodec on \"" + annotatedElement + "\"");
+			return null;
+		}
+		return new TypedEnumAdapter<>(ReflectUtils.getRawType(type), AutoCast.cast(enumClass), registry);
 	}
 
 

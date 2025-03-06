@@ -2,17 +2,18 @@ package net.skds.lib2.io.json;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.io.json.codec.*;
+import net.skds.lib2.io.json.codec.JsonCodecFactory;
+import net.skds.lib2.io.json.codec.JsonCodecOptions;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.codec.JsonDeserializer;
 import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.json.codec.typed.TypedMapAdapter;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -63,7 +64,7 @@ public class JsonUtils {
 		rebuild();
 	}
 
-	public static <CT, E extends Enum<E> & ConfigEnumType<CT>> void addTypedAdapter(Class<CT> type, Class<E> typeClass) {
+	public static <CT, E extends Enum<E> & ConfigEnumType<? extends CT>> void addTypedAdapter(Class<CT> type, Class<E> typeClass) {
 		userMapCodecFactory.addFactory(type, (t, r) -> new TypedEnumAdapter<>(t, typeClass, r));
 		rebuild();
 		//fancyRegistry.getCodec(type);
@@ -84,7 +85,6 @@ public class JsonUtils {
 		}
 		return null;
 	}
-
 
 	public static <T> T parseJson(JsonElement json, Class<T> type) {
 		try {
@@ -180,7 +180,7 @@ public class JsonUtils {
 		if (object == null) {
 			return "null";
 		}
-		Class<Object> type = (Class<Object>)object.getClass();
+		Class<Object> type = (Class<Object>) object.getClass();
 		return fancyRegistry.getSerializer(type).toJson(object);
 	}
 

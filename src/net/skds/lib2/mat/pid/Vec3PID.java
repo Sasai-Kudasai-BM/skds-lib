@@ -24,7 +24,7 @@ public final class Vec3PID extends AbstractPID {
 		Vec3 d = in.sub(this.lastD).scale(this.d);
 		this.lastD = in;
 		this.sumI = this.sumI.add(in);
-		Vec3 i = sumI.scale(this.i);
+		Vec3 i = this.sumI.scale(this.i);
 		return in.scale(p).add(d).add(i);
 	}
 

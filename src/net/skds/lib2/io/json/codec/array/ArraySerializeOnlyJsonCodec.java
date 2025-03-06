@@ -7,12 +7,13 @@ import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.SerializeOnlyJsonCodec;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public class ArraySerializeOnlyJsonCodec extends SerializeOnlyJsonCodec<Object> {
 
 	private final JsonCodec<Object> writer;
 
-	public ArraySerializeOnlyJsonCodec(Class<?> type, JsonCodecRegistry registry) {
+	public ArraySerializeOnlyJsonCodec(Type type, JsonCodecRegistry registry) {
 		super(type, registry);
 		this.writer = registry.getCodecIndirect(type);
 	}

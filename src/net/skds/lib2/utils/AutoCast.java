@@ -7,4 +7,9 @@ public interface AutoCast {
 	default <T> T cast() {
 		return (T) this;
 	}
+
+	@SuppressWarnings("unchecked")
+	static <T> T cast(Object object) {
+		return (T) object;
+	}
 }

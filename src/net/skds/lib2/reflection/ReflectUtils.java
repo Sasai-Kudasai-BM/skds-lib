@@ -55,7 +55,6 @@ public class ReflectUtils {
 		}
 	}
 
-
 	public static <T> HiddenField<T> getField(Class<?> clazz, FindOptions options) {
 		final Field[] fields = clazz.getDeclaredFields();
 		int currentOrdinal = 0;
@@ -134,4 +133,44 @@ public class ReflectUtils {
 			throw new RuntimeException(e);
 		}
 	}
+
+	@SuppressWarnings("rawtypes")
+	public static Class<?> getRawType(Type type) {
+		if (type instanceof Class<?>) {
+			// type is a normal class.
+			return (Class<?>) type;
+
+		} else if (type instanceof ParameterizedType parameterizedType) {
+			// I'm not exactly sure why getRawType() returns Type instead of Class.
+			// Neal isn't either but suspects some pathological case related
+			// to nested classes exists.
+			Type rawType = parameterizedType.getRawType();
+			if (rawType instanceof Class cl) {
+				return cl;
+			} else {
+				throw new IllegalArgumentException();
+			}
+
+		} else if (type instanceof GenericArrayType) {
+			Type componentType = ((GenericArrayType) type).getGenericComponentType();
+			return Array.newInstance(getRawType(componentType), 0).getClass();
+
+		} else if (type instanceof TypeVariable) {
+			// we could use the variable's bounds, but that won't work if there are multiple.
+			// having a raw type that's more general than necessary is okay
+			return Object.class;
+
+		} else if (type instanceof WildcardType) {
+			Type[] bounds = ((WildcardType) type).getUpperBounds();
+			// Currently the JLS only permits one bound for wildcards so using first bound is safe
+			assert bounds.length == 1;
+			return getRawType(bounds[0]);
+
+		} else {
+			String className = type == null ? "null" : type.getClass().getName();
+			throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
+					+ "GenericArrayType, but <" + type + "> is of type " + className);
+		}
+	}
+
 }

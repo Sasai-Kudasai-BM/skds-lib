@@ -161,7 +161,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			} else {
 				tmpC = ReflectUtils.getConstructor((Class<Object>) tClass);
 				if (tmpC == null) {
-					throw new IllegalArgumentException("Class \"" +
+					throw new RuntimeException("Class \"" +
 							tClass.getName() +
 							"\" have no empty constructor and can not be created by ReflectiveCodec");
 				}

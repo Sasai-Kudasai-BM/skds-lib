@@ -13,9 +13,10 @@ public class TypedEnumAdapter<CT, E extends Enum<E> & ConfigEnumType<CT>> extend
 
 	private final Class<E> typeClass;
 
-	public TypedEnumAdapter(Type type, Class<E> typeClass, JsonCodecRegistry registry) {
+	@SuppressWarnings("unchecked")
+	public <VE extends Enum<VE> & ConfigEnumType<? extends CT>> TypedEnumAdapter(Type type, Class<VE> typeClass, JsonCodecRegistry registry) {
 		super(type, registry);
-		this.typeClass = typeClass;
+		this.typeClass = (Class<E>) typeClass;
 	}
 
 	@Override
