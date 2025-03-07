@@ -2,7 +2,9 @@ package net.skds.lib2.utils;
 
 import lombok.experimental.UtilityClass;
 import net.skds.lib2.io.chars.CharInput;
+import net.skds.lib2.io.chars.CharOutput;
 import net.skds.lib2.io.exception.EndOfInputException;
+import net.skds.lib2.io.exception.EndOfOutputException;
 
 import java.io.IOException;
 import java.util.HexFormat;
@@ -14,6 +16,7 @@ public class StringUtils {
 	public static final HexFormat HEX_FORMAT_LC = HexFormat.of();
 	public static final HexFormat HEX_FORMAT_UC = HexFormat.of().withUpperCase();
 
+	// TODO check calls
 	public static String quote(String s) {
 		return '"' + s.replace("\"", "\\\"") + '"';
 	}
@@ -88,6 +91,61 @@ public class StringUtils {
 			return "";
 		}
 		return str.substring(i + 1);
+	}
+
+	public static void writeQuoted(CharOutput output, String value, char quote) throws EndOfOutputException {
+		output.append(quote);
+		final int length = value.length();
+		int escapeStack = 0;
+		for (int i = 0; i < length; i++) {
+			char c = value.charAt(i);
+			if (c == quote) {
+				if (escapeStack == 0) {
+					output.append('\\');
+				} else {
+					for (int j = -1; j < escapeStack; j++) {
+						output.append('\\');
+					}
+				}
+				output.append(quote);
+			} else if (c == '\\') {
+				escapeStack++;
+			} else {
+				if (escapeStack > 0) {
+					for (int j = -1; j < escapeStack; j++) {
+						output.append('\\');
+					}
+				}
+				switch (c) {
+					case '\t' -> {
+						output.append('\\');
+						output.append('t');
+					}
+					case '\b' -> {
+						output.append('\\');
+						output.append('b');
+					}
+					case '\n' -> {
+						output.append('\\');
+						output.append('n');
+					}
+					case '\r' -> {
+						output.append('\\');
+						output.append('r');
+					}
+					case '\f' -> {
+						output.append('\\');
+						output.append('f');
+					}
+					default -> {
+						output.append(c);
+					}
+				}
+				escapeStack = 0;
+			}
+		}
+		//value = value.replace("" + quote, "\\" + quote);
+		output.append(quote);
 	}
 
 	public static String readQuoted(CharInput input, char quote) throws IOException {

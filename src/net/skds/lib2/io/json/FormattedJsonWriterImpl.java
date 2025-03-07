@@ -64,14 +64,14 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	@Override
 	public void writeName(String name) throws IOException {
 		pushName();
-		output.append(StringUtils.quote(name));
+		StringUtils.writeQuoted(output, name, '"');
 		output.append(": ");
 	}
 
 	@Override
 	public void writeString(String s) throws IOException {
 		pushValue();
-		output.append(StringUtils.quote(s));
+		StringUtils.writeQuoted(output, s, '"');
 	}
 
 	@Override

@@ -946,9 +946,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		public void write(File value, JsonWriter writer) throws IOException {
 			URI uri = value.toURI();
 			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
-				writer.writeString(value.toString());
+				writer.writeString(value.toString().replace("\\", "/"));
 				return;
 			}
+			// TODO думай сасай, надо ли бекслеши
 			writer.writeString(value.toURI().toString());
 		}
 	}

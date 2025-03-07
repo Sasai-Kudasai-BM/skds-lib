@@ -9,10 +9,14 @@ import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.json.codec.typed.TypedMapAdapter;
 import net.skds.lib2.utils.AnsiEscape;
 import net.skds.lib2.utils.logger.SKDSLogger;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @CustomLog
@@ -20,7 +24,7 @@ public class JsonTest {
 
 	public static Map<String, JsonTestRun> createRuns() {
 		List<JsonTestRun> runs = new ArrayList<>();
-		runs.add(new JsonTestRun("amogus",  JsonTestAmogus::test));
+		runs.add(new JsonTestRun("amogus", JsonTestAmogus::test));
 		runs.add(new JsonTestRun("record", JsonTestRecord::test));
 		runs.add(new JsonTestRun("yup", JsonTestYup::test));
 		runs.add(new JsonTestRun("dg", JsonTestDg::test));
@@ -30,6 +34,7 @@ public class JsonTest {
 		runs.add(new JsonTestRun("shape", JsonTestShapes::test));
 		runs.add(new JsonTestRun("replaceDefault", JsonTestReplaceDefault::test));
 		runs.add(new JsonTestRun("nest", JsonTestNest::test));
+		runs.add(new JsonTestRun("escape", JsonTestEscape::test));
 
 		Map<String, JsonTestRun> map = new LinkedHashMap<>();
 
@@ -43,12 +48,13 @@ public class JsonTest {
 	public static record JsonTestRun(String key, Consumer<JsonTestRegistry> function) {
 
 		private static final String SPLIT;
+
 		static {
 			String split = AnsiEscape.MAGENTA.sequence + "#";
 			split = split + AnsiEscape.GREEN.sequence + "=".repeat(40) + split;
 			SPLIT = split;
 		}
-	
+
 		public void run(JsonTestRegistry registry) {
 			log.info(this.key);
 			this.function.accept(registry);
@@ -66,17 +72,17 @@ public class JsonTest {
 			options.setDecorationType(JsonCodecOptions.DecorationType.FANCY);
 			OPTIONS = options;
 		}
-		
+
 		private final MapJsonFactory map;
-	
+
 		public JsonTestRegistry() {
 			this(OPTIONS);
 		}
-		
+
 		public JsonTestRegistry(JsonCodecOptions options) {
 			this(options, JsonCodecFactory.newMapFactory());
 		}
-		
+
 		public JsonTestRegistry(JsonCodecOptions options, MapJsonFactory map) {
 			super(options, map);
 			this.map = map;
@@ -99,7 +105,7 @@ public class JsonTest {
 			if (object == null) {
 				return "null";
 			}
-			Class<Object> type = (Class<Object>)object.getClass();
+			Class<Object> type = (Class<Object>) object.getClass();
 			return this.getSerializer(type).toJson(object);
 		}
 
