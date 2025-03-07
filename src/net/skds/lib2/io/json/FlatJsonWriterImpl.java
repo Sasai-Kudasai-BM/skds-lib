@@ -130,6 +130,10 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 
 	private void pushValue() throws IOException {
 		StackEntry e = this.stack;
+		if (e == null && this.output.getPos() == 0) {
+			this.stack = new StackEntry(null, false);
+			return;
+		}
 		if (e == null) throw new StackUnderflowException();
 		if (e.isList) {
 			if (e.n++ > 0) {
