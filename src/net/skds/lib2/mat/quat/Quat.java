@@ -1,4 +1,4 @@
-package net.skds.lib2.mat.vec4;
+package net.skds.lib2.mat.quat;
 
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
@@ -7,9 +7,58 @@ import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
 
 @SuppressWarnings("unused")
-public sealed interface Quat extends Vec4 permits QuatD, QuatF {
+public sealed interface Quat permits QuatD, QuatF {
 
 	Quat ONE = QuatD.ONE;
+
+	double x();
+
+	double y();
+
+	double z();
+
+	double w();
+
+	default float xf() {
+		return (float) x();
+	}
+
+	default float yf() {
+		return (float) y();
+	}
+
+	default float zf() {
+		return (float) z();
+	}
+
+	default float wf() {
+		return (float) w();
+	}
+
+	static boolean equals(Quat q1, Quat q2) {
+		if (q1 == q2) {
+			return true;
+		} else if ((q1 == null) != (q2 == null)) {
+			return false;
+		} else {
+			if (q1.x() != q2.x()) {
+				return false;
+			} else if (q1.y() != q2.y()) {
+				return false;
+			} else if (q1.z() != q2.z()) {
+				return false;
+			} else {
+				return q1.w() == q2.w();
+			}
+		}
+	}
+
+	static int hashCode(Quat q) {
+		int i = Double.hashCode(q.x());
+		i = 31 * i + Double.hashCode(q.y());
+		i = 31 * i + Double.hashCode(q.z());
+		return 31 * i + Double.hashCode(q.w());
+	}
 
 	static QuatD fromAxisDegrees(Vec3 axis, double angle) {
 		if (Math.abs(angle) < 1E-30) {
@@ -135,6 +184,7 @@ public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 		return new QuatF(x, y, z, w);
 	}
 
+	/*
 	default Quat rotate(Vec3 axial, boolean degrees) {
 		double length = axial.length();
 		if (length < 1E-20) {
@@ -238,40 +288,65 @@ public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 		float w = f3 * wf() - f * xf() - f1 * yf() - f2 * zf();
 		return new QuatF(x, y, z, w);
 	}
+	 */
 
 	default QuatD multiply(Quat q) {
+		double qx = q.x();
+		double qy = q.y();
+		double qz = q.z();
+		double qw = q.w();
+		double x = this.x();
+		double y = this.y();
+		double z = this.z();
+		double w = this.w();
 		return new QuatD(
-				w() * q.x() + x() * q.w() + y() * q.z() - z() * q.y(),
-				w() * q.y() - x() * q.z() + y() * q.w() + z() * q.x(),
-				w() * q.z() + x() * q.y() - y() * q.x() + z() * q.w(),
-				w() * q.w() - x() * q.x() - y() * q.y() - z() * q.z()
+				w * qx + x * qw + y * qz - z * qy,
+				w * qy - x * qz + y * qw + z * qx,
+				w * qz + x * qy - y * qx + z * qw,
+				w * qw - x * qx - y * qy - z * qz
 		);
 	}
 
 	default QuatD multiply(double qx, double qy, double qz, double qw) {
+		double x = this.x();
+		double y = this.y();
+		double z = this.z();
+		double w = this.w();
 		return new QuatD(
-				w() * qx + x() * qw + y() * qz - z() * qy,
-				w() * qy - x() * qz + y() * qw + z() * qx,
-				w() * qz + x() * qy - y() * qx + z() * qw,
-				w() * qw - x() * qx - y() * qy - z() * qz
+				w * qx + x * qw + y * qz - z * qy,
+				w * qy - x * qz + y * qw + z * qx,
+				w * qz + x * qy - y * qx + z * qw,
+				w * qw - x * qx - y * qy - z * qz
 		);
 	}
 
 	default QuatF multiplyF(Quat q) {
+		float qx = q.xf();
+		float qy = q.yf();
+		float qz = q.zf();
+		float qw = q.wf();
+		float x = this.xf();
+		float y = this.yf();
+		float z = this.zf();
+		float w = this.wf();
 		return new QuatF(
-				wf() * q.xf() + xf() * q.wf() + yf() * q.zf() - zf() * q.yf(),
-				wf() * q.yf() - xf() * q.zf() + yf() * q.wf() + zf() * q.xf(),
-				wf() * q.zf() + xf() * q.yf() - yf() * q.xf() + zf() * q.wf(),
-				wf() * q.wf() - xf() * q.xf() - yf() * q.yf() - zf() * q.zf()
+				w * qx + x * qw + y * qz - z * qy,
+				w * qy - x * qz + y * qw + z * qx,
+				w * qz + x * qy - y * qx + z * qw,
+				w * qw - x * qx - y * qy - z * qz
 		);
 	}
 
 	default QuatF multiplyF(float qx, float qy, float qz, float qw) {
+		float x = this.xf();
+		float y = this.yf();
+		float z = this.zf();
+		float w = this.wf();
 		return new QuatF(
-				wf() * qx + xf() * qw + yf() * qz - zf() * qy,
-				wf() * qy - xf() * qz + yf() * qw + zf() * qx,
-				wf() * qz + xf() * qy - yf() * qx + zf() * qw,
-				wf() * qw - xf() * qx - yf() * qy - zf() * qz
+				w * qx + x * qw + y * qz - z * qy,
+				w * qy - x * qz + y * qw + z * qx,
+				w * qz + x * qy - y * qx + z * qw,
+				w * qw - x * qx - y * qy - z * qz
 		);
 	}
 
@@ -316,6 +391,55 @@ public sealed interface Quat extends Vec4 permits QuatD, QuatF {
 				f3 * w - f * x - f1 * y - f2 * z
 		);
 	}
+
+	default QuatD spin(Vec3 spin) {
+
+		double angle = spin.length();
+
+		double f0 = FastMath.sinRad(angle / 2.0);
+
+		double f = spin.x() * f0 / angle;
+		double f1 = spin.y() * f0 / angle;
+		double f2 = spin.z() * f0 / angle;
+		double f3 = FastMath.cosRad(angle / 2.0);
+
+		double x = this.x();
+		double y = this.y();
+		double z = this.z();
+		double w = this.w();
+
+		return new QuatD(
+				f3 * x + f * w + f1 * z - f2 * y,
+				f3 * y - f * z + f1 * w + f2 * x,
+				f3 * z + f * y - f1 * x + f2 * w,
+				f3 * w - f * x - f1 * y - f2 * z
+		);
+	}
+
+	default QuatF spinF(Vec3 spin) {
+
+		float angle = spin.lengthF();
+
+		float f0 = FastMath.sinRad(angle / 2.0f);
+
+		float f = spin.xf() * f0 / angle;
+		float f1 = spin.yf() * f0 / angle;
+		float f2 = spin.zf() * f0 / angle;
+		float f3 = FastMath.cosRad(angle / 2.0f);
+
+		float x = this.xf();
+		float y = this.yf();
+		float z = this.zf();
+		float w = this.wf();
+
+		return new QuatF(
+				f3 * x + f * w + f1 * z - f2 * y,
+				f3 * y - f * z + f1 * w + f2 * x,
+				f3 * z + f * y - f1 * x + f2 * w,
+				f3 * w - f * x - f1 * y - f2 * z
+		);
+	}
+
 
 	default QuatD conjugate() {
 		return new QuatD(

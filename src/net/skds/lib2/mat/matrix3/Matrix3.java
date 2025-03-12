@@ -1,8 +1,5 @@
 package net.skds.lib2.mat.matrix3;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -10,12 +7,15 @@ import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.linkiges.Obj2DoublePairRecord;
 import net.skds.lib2.utils.linkiges.Obj2FloatPairRecord;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Matrix3.JCodec.class)
@@ -686,9 +686,9 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 			}
 			reader.endArray();
 			return Matrix3.fromNormals(new Vec3[]{
-				new Vec3D(array[0], array[1], array[2]),
-				new Vec3D(array[3], array[4], array[5]),
-				new Vec3D(array[6], array[7], array[8]),
+					new Vec3D(array[0], array[1], array[2]),
+					new Vec3D(array[3], array[4], array[5]),
+					new Vec3D(array[6], array[7], array[8]),
 			});
 		}
 	}

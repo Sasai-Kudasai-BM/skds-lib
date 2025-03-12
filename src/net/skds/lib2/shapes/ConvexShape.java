@@ -1,10 +1,10 @@
 package net.skds.lib2.shapes;
 
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec2.Vec2D;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.linkiges.Pair;
 
 public non-sealed interface ConvexShape extends Shape {
@@ -160,24 +160,24 @@ public non-sealed interface ConvexShape extends Shape {
 	default Pair<Vec3, Vec3>[] getLines() {
 		Vec3[] points = getPoints();
 		if (points.length == 8) {
-			return new Pair[] {
-				new Pair<>(points[0], points[1]), //000 001
-				new Pair<>(points[1], points[5]), //001 101
-				new Pair<>(points[5], points[4]), //101 100
-				new Pair<>(points[4], points[0]), //100 000
+			return new Pair[]{
+					new Pair<>(points[0], points[1]), //000 001
+					new Pair<>(points[1], points[5]), //001 101
+					new Pair<>(points[5], points[4]), //101 100
+					new Pair<>(points[4], points[0]), //100 000
 
-				new Pair<>(points[2], points[3]), //010 011
-				new Pair<>(points[3], points[7]), //011 111
-				new Pair<>(points[7], points[6]), //111 110
-				new Pair<>(points[6], points[2]), //110 010
+					new Pair<>(points[2], points[3]), //010 011
+					new Pair<>(points[3], points[7]), //011 111
+					new Pair<>(points[7], points[6]), //111 110
+					new Pair<>(points[6], points[2]), //110 010
 
-				new Pair<>(points[0], points[2]), //000 010
-				new Pair<>(points[1], points[3]), //001 011
-				new Pair<>(points[4], points[6]), //100 110
-				new Pair<>(points[5], points[7]), //101 111
+					new Pair<>(points[0], points[2]), //000 010
+					new Pair<>(points[1], points[3]), //001 011
+					new Pair<>(points[4], points[6]), //100 110
+					new Pair<>(points[5], points[7]), //101 111
 			};
 		}
-		return new Pair[] {};
+		return new Pair[]{};
 	}
 
 	@Override

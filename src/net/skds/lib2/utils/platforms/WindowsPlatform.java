@@ -1,6 +1,7 @@
 package net.skds.lib2.utils.platforms;
 
 import lombok.CustomLog;
+import net.skds.lib2.natives.SafeAnal;
 import net.skds.lib2.natives.windows.Kernel32;
 import net.skds.lib2.natives.windows.User32;
 import net.skds.lib2.utils.ThreadUtils;
@@ -14,7 +15,6 @@ import java.awt.event.MouseListener;
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.util.LinkedList;
 
 import static java.awt.event.KeyEvent.ALT_DOWN_MASK;
@@ -179,8 +179,8 @@ final class WindowsPlatform extends PlatformFeatures {
 			boolean down;
 			int k;
 			if (wp >= 11) {
-				MemorySegment ms = MemorySegment.ofAddress(ptr).reinterpret(MSLLHOOK_STRUCT.byteSize());
-				int md = ms.get(ValueLayout.JAVA_INT, 8L);
+				//MemorySegment ms = MemorySegment.ofAddress(ptr).reinterpret(MSLLHOOK_STRUCT.byteSize());
+				int md = SafeAnal.getInt(ptr + 8);// ms.get(ValueLayout.JAVA_INT, 8L);
 				k = (md >> 16) + 3;
 				down = wp == 11;
 			} else {
@@ -202,10 +202,10 @@ final class WindowsPlatform extends PlatformFeatures {
 
 	private KeyEvent processKeyEventLL(long ptr, long callTime, KeyListenerThread thread) {
 
-		MemorySegment ms = MemorySegment.ofAddress(ptr).reinterpret(KBDLLHOOK_STRUCT.byteSize());
+		//MemorySegment ms = MemorySegment.ofAddress(ptr).reinterpret(KBDLLHOOK_STRUCT.byteSize());
 
-		int vkCode = ms.get(ValueLayout.JAVA_INT, 0L);
-		int flags = ms.get(ValueLayout.JAVA_INT, 8L);
+		int vkCode = SafeAnal.getInt(ptr);
+		int flags = SafeAnal.getInt(ptr + 8);
 
 		boolean up = (flags & 128) != 0;
 		int id = up ? KEY_RELEASED : KEY_PRESSED;

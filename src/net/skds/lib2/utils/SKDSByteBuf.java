@@ -1,11 +1,11 @@
 package net.skds.lib2.utils;
 
 import lombok.Getter;
-import net.skds.lib2.mat.*;
+import net.skds.lib2.mat.VarInt;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
-import net.skds.lib2.mat.vec4.Quat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -200,6 +200,10 @@ public final class SKDSByteBuf {
 
 	public int readUnsignedShort() {
 		return buffer.getShort() & 0xFFFF;
+	}
+
+	public int readUnsignedByte() {
+		return buffer.get() & 0xFF;
 	}
 
 	public String readSizedString() {

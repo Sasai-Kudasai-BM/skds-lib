@@ -10,8 +10,8 @@ import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.AutoString;
 
 import java.lang.reflect.Type;
@@ -176,7 +176,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 			if (pc.scale != 1 || parentScale != 1) {
 				pc.scale *= parentScale;
 			}
-			
+
 			Vec3 nd = od.transform(parentRot);
 			if (pc.scale != 1) {
 				nd = nd.scale(pc.scale);

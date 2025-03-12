@@ -1,7 +1,5 @@
 package net.skds.lib2.shapes;
 
-import java.lang.reflect.Type;
-
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
@@ -10,9 +8,11 @@ import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.AutoString;
+
+import java.lang.reflect.Type;
 
 @DefaultJsonCodec(OBB.JCodec.class)
 public class OBB implements ConvexShape, TypedConfig {

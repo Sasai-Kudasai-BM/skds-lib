@@ -1,9 +1,5 @@
 package net.skds.lib2.mat.vec3;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Random;
-
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -15,12 +11,16 @@ import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec2.Vec2D;
 import net.skds.lib2.mat.vec2.Vec2F;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.mat.vec4.Vec4D;
 import net.skds.lib2.mat.vec4.Vec4F;
 import net.skds.lib2.mat.vec4.Vec4I;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Random;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")

@@ -1,4 +1,4 @@
-package net.skds.lib2.mat.vec4;
+package net.skds.lib2.mat.quat;
 
 public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 
@@ -24,19 +24,19 @@ public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 		return wf;
 	}
 
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (obj instanceof Vec4 vec) {
-			return Vec4.equals(this, vec);
+		} else if (obj instanceof Quat q) {
+			return Quat.equals(this, q);
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return Vec4.hashCode(this);
+		return Quat.hashCode(this);
 	}
+
 }

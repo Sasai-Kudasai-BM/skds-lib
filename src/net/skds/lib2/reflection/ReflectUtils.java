@@ -13,6 +13,14 @@ import java.util.function.Supplier;
 @UtilityClass
 public class ReflectUtils {
 
+	public static void forceInitialize(Class<?> cl) {
+		try {
+			Class.forName(cl.getName(), true, cl.getClassLoader());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> Supplier<T> getConstructor(Class<T> tClass) {
 		Constructor<?> c = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(tClass);

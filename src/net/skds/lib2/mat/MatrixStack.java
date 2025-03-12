@@ -1,14 +1,14 @@
 package net.skds.lib2.mat;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.matrix4.Matrix4F;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.exception.StackOverflowException;
 import net.skds.lib2.utils.exception.StackUnderflowException;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class MatrixStack implements AutoCloseable {
 	private final Deque<Matrix4F> stack = new ArrayDeque<>();

@@ -3,8 +3,8 @@ package net.skds.lib2.shapes;
 import java.util.function.Consumer;
 
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 
 public non-sealed interface CompositeShape extends Shape {
 

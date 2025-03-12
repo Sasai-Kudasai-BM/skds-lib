@@ -1,18 +1,18 @@
 package net.skds.lib2.demo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import lombok.CustomLog;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.CompositeSuperShape;
 import net.skds.lib2.shapes.CompositeSuperShape.PoseCallback;
 import net.skds.lib2.shapes.CompositeSuperShape.PoseFunction;
 import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.utils.logger.SKDSLogger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @CustomLog
 public class DemoShape {
@@ -35,7 +35,7 @@ public class DemoShape {
 				}, Vec3.ZERO, "root"),
 				AABB.fromSize(2).withAttachment("box")
 		}, Vec3.ZERO, null);
-		log.info("Base box: " +	shape.getBoundingBox());
+		log.info("Base box: " + shape.getBoundingBox());
 
 		log.warn("shape1");
 		print(shape, 1);

@@ -1,33 +1,21 @@
 package net.skds.lib2.demo.demo3d;
 
-import javax.swing.*;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import net.w3e.lib.awtutils.SwingKeyListener;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.matrix4.Matrix4F;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.ThreadUtils;
+import net.w3e.lib.awtutils.SwingKeyListener;
 import net.w3e.lib.utils.RobotUtils;
 
-import java.awt.AWTException;
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListener, MouseListener, MouseWheelListener, Demo3dShapeCollector {
 
 	private static final Cursor BLANK_CURSOR;
-	
+
 	static {
 		BufferedImage cursorImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		BLANK_CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
@@ -117,7 +105,7 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 			return true;
 		}, "tick", 10);
 
-		JComponent root = ((JComponent)this.getContentPane());
+		JComponent root = ((JComponent) this.getContentPane());
 		new SwingKeyListener(root, KeyEvent.VK_ESCAPE, this).install();
 
 		this.renderPanel.addKeyListener(this);
@@ -189,7 +177,7 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 	}
 
 	public final Matrix4F getMatrix() {
-		Matrix4F proj = Matrix4.perspectiveInfinityF(this.cameraFov, (float)this.renderPanel.getWidth() / this.renderPanel.getHeight(), .2f);
+		Matrix4F proj = Matrix4.perspectiveInfinityF(this.cameraFov, (float) this.renderPanel.getWidth() / this.renderPanel.getHeight(), .2f);
 		Quat q = Quat.fromAxisDegrees(Vec3.YP, this.cameraYaw + 180).rotateAxisDegrees(Vec3.XP, cameraPitch);
 		this.lastRot = Matrix3.fromQuat(q);
 
@@ -341,7 +329,8 @@ public class Demo3dFrame extends JFrame implements KeyListener, MouseMotionListe
 	}
 
 	@Override
-	public final void mouseEntered(MouseEvent e) {}
+	public final void mouseEntered(MouseEvent e) {
+	}
 
 	@Override
 	public final void mouseExited(MouseEvent e) {

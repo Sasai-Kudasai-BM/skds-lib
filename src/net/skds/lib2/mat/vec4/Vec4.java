@@ -2,7 +2,6 @@ package net.skds.lib2.mat.vec4;
 
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
-import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
@@ -10,7 +9,7 @@ import net.skds.lib2.mat.vec3.Vec3I;
 
 // TODO json
 @SuppressWarnings("unused")
-public sealed interface Vec4 extends Vector permits Vec4D, Vec4F, Vec4I, Quat {
+public sealed interface Vec4 extends Vector permits Vec4D, Vec4F, Vec4I {
 
 	@Override
 	default int dimension() {
@@ -57,7 +56,7 @@ public sealed interface Vec4 extends Vector permits Vec4D, Vec4F, Vec4I, Quat {
 		return (int) z();
 	}
 
-	
+
 	default int floorX() {
 		return FastMath.floor(x());
 	}
@@ -264,7 +263,7 @@ public sealed interface Vec4 extends Vector permits Vec4D, Vec4F, Vec4I, Quat {
 
 	default Vec3I getAsIntVec3() {
 		int w = this.wi();
-		return new Vec3I(this.xi()/ w, this.yi() / w, this.zi() / w);
+		return new Vec3I(this.xi() / w, this.yi() / w, this.zi() / w);
 	}
 
 	default Vec3F getAsFloatVec3() {

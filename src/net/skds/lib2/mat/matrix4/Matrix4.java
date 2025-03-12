@@ -3,8 +3,8 @@ package net.skds.lib2.mat.matrix4;
 
 import lombok.NoArgsConstructor;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
 import net.skds.lib2.utils.linkiges.Obj2DoublePairRecord;
 import net.skds.lib2.utils.linkiges.Obj2FloatPairRecord;
 
@@ -280,10 +280,10 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 
 		double det = f00 * f11 - f01 * f10 + f02 * f09 + f03 * f08 - f04 * f07 + f05 * f06;
 		Matrix4D m = new Matrix4D(
-			f12, f13, f14, f15,
-			f16, f17, f18, f19,
-			f20, f21, f22, f23,
-			f24, f25, f26, f27
+				f12, f13, f14, f15,
+				f16, f17, f18, f19,
+				f20, f21, f22, f23,
+				f24, f25, f26, f27
 		);
 		return new Obj2DoublePairRecord<>(m, det);
 	}
@@ -320,10 +320,10 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 
 		float det = f00 * f11 - f01 * f10 + f02 * f09 + f03 * f08 - f04 * f07 + f05 * f06;
 		Matrix4F m = new Matrix4F(
-			f12, f13, f14, f15,
-			f16, f17, f18, f19,
-			f20, f21, f22, f23,
-			f24, f25, f26, f27
+				f12, f13, f14, f15,
+				f16, f17, f18, f19,
+				f20, f21, f22, f23,
+				f24, f25, f26, f27
 		);
 		return new Obj2FloatPairRecord<>(m, det);
 	}
@@ -695,19 +695,19 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 
 	static Matrix4D makeScale(float x, float y, float z) {
 		return new Matrix4D(
-			x, 0, 0, 0,
-			0, y, 0, 0,
-			0, 0, z, 0,
-			0, 0, 0, 1
+				x, 0, 0, 0,
+				0, y, 0, 0,
+				0, 0, z, 0,
+				0, 0, 0, 1
 		);
 	}
 
 	static Matrix4F makeScaleF(float x, float y, float z) {
 		return new Matrix4F(
-			x, 0, 0, 0,
-			0, y, 0, 0,
-			0, 0, z, 0,
-			0, 0, 0, 1
+				x, 0, 0, 0,
+				0, y, 0, 0,
+				0, 0, z, 0,
+				0, 0, 0, 1
 		);
 	}
 
