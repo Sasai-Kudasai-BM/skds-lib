@@ -1,13 +1,10 @@
 package net.skds.lib2.demo;
 
 import net.skds.lib2.demo.classloader.DemoClassloaderFrame;
-import net.skds.lib2.demo.demo3d.Demo3dFrame;
-import net.skds.lib2.demo.demo3d.Demo3dExample;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.misc.font.demo.FontDemoFrame;
 import net.skds.lib2.misc.graph.GraphicBuilder;
 import net.skds.lib2.natives.NativesDemo;
-import net.skds.lib2.natives.struct.TestStruct;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.swing.*;
@@ -77,23 +74,21 @@ public class DemoFrame extends JFrame {
 		});
 		add(button);
 
-		button = new JButton("TestStruct");
-		button.addActionListener(e -> {
-			TestStruct.test();
-		});
-		add(button);
-
-		button = new JButton("Test natives");
-		button.addActionListener(e -> {
-			TestStruct.test2(this);
-		});
-		add(button);
-
-		button = new JButton("Demo3d");
-		button.addActionListener(e ->
-				Demo3dFrameExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
-		);
-		add(button);
+		//button = new JButton("TestStruct");
+		//button.addActionListener(e -> {
+		//	TestStruct.test();
+		//});
+		//add(button);
+		//button = new JButton("Test natives");
+		//button.addActionListener(e -> {
+		//	TestStruct.test2(this);
+		//});
+		//add(button);
+		//button = new JButton("Demo3d");
+		//button.addActionListener(e ->
+		//		Demo3dFrameExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
+		//);
+		//add(button);
 
 		button = new JButton("GraphicBuilder");
 		button.addActionListener(e -> new GraphicBuilder().setLocationRelativeTo(this));

@@ -1199,66 +1199,87 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double x = this.x();
 		double y = this.y();
 		double z = this.z();
+		boolean change = false;
 		if (x > max) {
 			x = max;
+			change = true;
 		} else if (x < min) {
 			x = min;
+			change = true;
 		}
 		if (y > max) {
 			y = max;
+			change = true;
 		} else if (y < min) {
 			y = min;
+			change = true;
 		}
 		if (z > max) {
 			z = max;
+			change = true;
 		} else if (z < min) {
 			z = min;
+			change = true;
 		}
-		return new Vec3D(x, y, z);
+		return change ? new Vec3D(x, y, z) : this.getAsDoubleVec();
 	}
 
 	default Vec3I clampI(int min, int max) {
 		int x = this.xi();
 		int y = this.yi();
 		int z = this.zi();
+		boolean change = false;
 		if (x > max) {
 			x = max;
+			change = true;
 		} else if (x < min) {
 			x = min;
+			change = true;
 		}
 		if (y > max) {
 			y = max;
+			change = true;
 		} else if (y < min) {
 			y = min;
+			change = true;
 		}
 		if (z > max) {
 			z = max;
+			change = true;
 		} else if (z < min) {
 			z = min;
+			change = true;
 		}
-		return new Vec3I(x, y, z);
+		return change ? new Vec3I(x, y, z) : this.getAsIntVec();
 	}
 
 	default Vec3F clampF(float min, float max) {
 		float x = this.xf();
 		float y = this.yf();
 		float z = this.zf();
+		boolean change = false;
 		if (x > max) {
 			x = max;
+			change = true;
 		} else if (x < min) {
 			x = min;
+			change = true;
 		}
 		if (y > max) {
 			y = max;
+			change = true;
 		} else if (y < min) {
 			y = min;
+			change = true;
 		}
 		if (z > max) {
 			z = max;
+			change = true;
 		} else if (z < min) {
 			z = min;
+			change = true;
 		}
-		return new Vec3F(x, y, z);
+		return change ? new Vec3F(x, y, z) : this.getAsFloatVec();
 	}
 
 

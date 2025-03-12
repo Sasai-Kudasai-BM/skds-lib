@@ -9,7 +9,7 @@ import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.Collision;
 import net.skds.lib2.shapes.CollisionContext;
@@ -30,20 +30,20 @@ public class Demo3dExample {
 		frame.addShape(AABB.fromCenter(0, -1, 0, 2, 1, 2));
 
 		CompositeSuperShape superShape = CompositeSuperShape.of(new Shape[]{
-			CompositeSuperShape.of(new Shape[]{
-				AABB.fromCenter(Vec3.of(0, 1, 0), Vec3.of(1, 2, .5)),
-
 				CompositeSuperShape.of(new Shape[]{
-					AABB.fromCenter(Vec3.of(0, 0.75 / 2, 0), 0.75)
-				}, Vec3.ZERO, "head").move(Vec3.of(0, 2, 0))
-					.rotate(Quat.fromAxisDegrees(Vec3.ZN, 10))
-				,
+						AABB.fromCenter(Vec3.of(0, 1, 0), Vec3.of(1, 2, .5)),
 
-				CompositeSuperShape.of(new Shape[]{
-					AABB.fromCenter(Vec3.of(0, 0, 0), Vec3.of(0.25, 1.75, 0.25))
-				}, Vec3.of(0.25 / 2, 1.75 / 2 - 0.1, 0), "hand").move(Vec3.of(-1f / 2 - 0.25 / 2, 1.1, 0)).rotate(Quat.fromAxisDegrees(Vec3.XN, 30))
+						CompositeSuperShape.of(new Shape[]{
+								AABB.fromCenter(Vec3.of(0, 0.75 / 2, 0), 0.75)
+						}, Vec3.ZERO, "head").move(Vec3.of(0, 2, 0))
+								.rotate(Quat.fromAxisDegrees(Vec3.ZN, 10))
+						,
 
-			}, Vec3.ZERO, "body")
+						CompositeSuperShape.of(new Shape[]{
+								AABB.fromCenter(Vec3.of(0, 0, 0), Vec3.of(0.25, 1.75, 0.25))
+						}, Vec3.of(0.25 / 2, 1.75 / 2 - 0.1, 0), "hand").move(Vec3.of(-1f / 2 - 0.25 / 2, 1.1, 0)).rotate(Quat.fromAxisDegrees(Vec3.XN, 30))
+
+				}, Vec3.ZERO, "body")
 		}, Vec3.ZERO);
 
 		frame.addShape(superShape.move(Vec3.of(2, 0, 0)));
@@ -53,7 +53,7 @@ public class Demo3dExample {
 		//	.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XN, 30)))
 		//;
 		//frame.addShape(() -> rotated.rotate(Quat.fromAxisDegrees(Vec3.YP, (System.currentTimeMillis() / 50d) % 360)));
-		
+
 
 		//CompositeSuperShape scaled = superShape.move(Vec3.of(6, 0, 0));
 		//frame.addShape(() -> scaled.scale(FastMath.sinDegr((System.currentTimeMillis() / 50d) % 360) / 2d + .5));
@@ -97,7 +97,7 @@ public class Demo3dExample {
 
 	public static void initCollisionBox(Demo3dShapeCollector frame) {
 		Demo3dFrameCollisionBox collision = new Demo3dFrameCollisionBox(AABB.fromSize(.5)
-			.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XP, 45)))
+				.rotate(Matrix3.fromQuat(Quat.fromAxisDegrees(Vec3.XP, 45)))
 		);
 		frame.addShape(collision);
 	}
@@ -154,8 +154,8 @@ public class Demo3dExample {
 							System.out.println("move dir " + move);
 							System.out.println("normal " + cr.normal());
 							System.out.println(String.format(
-								"{distance:%s, depth:%s, normal:%s, point:%s, direction:%s}",
-								String.format("%.2f", cr.distance()), cr.depth(), cr.normal(), cr.point(), cr.direction()
+									"{distance:%s, depth:%s, normal:%s, point:%s, direction:%s}",
+									String.format("%.2f", cr.distance()), cr.depth(), cr.normal(), cr.point(), cr.direction()
 							));
 							System.out.println(shape.getClass());
 							holder.setShape(shape.move(move.scale(cr.distance())));
@@ -200,8 +200,8 @@ public class Demo3dExample {
 			float h2 = HEIGHT / 2;
 
 			this.peopleBox = stuck ?
-			AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human") :
-			AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
+					AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human") :
+					AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
 
 			//this.peopleBox = AABB.fromCenter(0, objY + 1, 0, objw, h2, objw).withAttachment("human");
 			//this.peopleBox = AABB.fromCenter(objP / 2 + 0.1, objY, objP / 3, objw, h2, objw).withAttachment("human");
@@ -228,20 +228,20 @@ public class Demo3dExample {
 			float dsUp = heightUp / 2;
 
 			return CompositeSuperShape.of(new Shape[]{
-				AABB.fromCenter(0, -WIDTH, 0, PLATFORM_SIZE, WIDTH, PLATFORM_SIZE),
+					AABB.fromCenter(0, -WIDTH, 0, PLATFORM_SIZE, WIDTH, PLATFORM_SIZE),
 
-				AABB.fromCenter(0, wallY, s2, PLATFORM_SIZE, HEIGHT, WIDTH),
-				AABB.fromCenter(s2, wallY, 0, WIDTH, HEIGHT, PLATFORM_SIZE),
-				AABB.fromCenter(0, wallY, -s2, PLATFORM_SIZE, HEIGHT, WIDTH),
-				AABB.fromCenter(-s2, wallY, 0, WIDTH, HEIGHT, PLATFORM_SIZE),
+					AABB.fromCenter(0, wallY, s2, PLATFORM_SIZE, HEIGHT, WIDTH),
+					AABB.fromCenter(s2, wallY, 0, WIDTH, HEIGHT, PLATFORM_SIZE),
+					AABB.fromCenter(0, wallY, -s2, PLATFORM_SIZE, HEIGHT, WIDTH),
+					AABB.fromCenter(-s2, wallY, 0, WIDTH, HEIGHT, PLATFORM_SIZE),
 
-				AABB.fromCenter(objP / 2, objY, objP / 3, objw, HEIGHT, objw),
-				AABB.fromCenter(-objP / 2, objY + h2, objP / 5 * 3, objw, h2, objw),
+					AABB.fromCenter(objP / 2, objY, objP / 3, objw, HEIGHT, objw),
+					AABB.fromCenter(-objP / 2, objY + h2, objP / 5 * 3, objw, h2, objw),
 
-				AABB.fromCenter(xUp, 0, zUp, objw, heightUp, objw),
-				//AABB.fromCenter(xUp, heightUp, zUp - dsUp / 2, objw, heightUp * 5, objw),
-				AABB.fromCenter(xUp + dxUp, h2, zUp, objw, heightUp, objw),
-				AABB.fromCenter(xUp - dxUp, h2 + dsUp, zUp, objw, heightUp, objw),
+					AABB.fromCenter(xUp, 0, zUp, objw, heightUp, objw),
+					//AABB.fromCenter(xUp, heightUp, zUp - dsUp / 2, objw, heightUp * 5, objw),
+					AABB.fromCenter(xUp + dxUp, h2, zUp, objw, heightUp, objw),
+					AABB.fromCenter(xUp - dxUp, h2 + dsUp, zUp, objw, heightUp, objw),
 			}, Vec3.of(0, -.1, 0));
 		}
 
@@ -418,7 +418,7 @@ public class Demo3dExample {
 					AABB humanMoved = new AABB(human.minX, human.minY, human.minZ, human.maxX, human.minY + 0.01, human.maxZ);
 					Collision cr1 = cr;
 					while (cr1 != null && cr1.distance() < 1E-7) {
-						AABB block = (AABB)cr1.shapeA();
+						AABB block = (AABB) cr1.shapeA();
 						double climbL = block.maxY - humanMoved.minY;
 						climb += climbL;
 						if (climb > climbHeight) {
@@ -431,7 +431,7 @@ public class Demo3dExample {
 						log.error("climb must be positive");
 						return;
 					}
-					
+
 					// вперед
 					Vec3 moveForward = move;
 					Vec3 moveForwardAbs = moveForward.abs();

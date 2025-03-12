@@ -2,7 +2,7 @@ package net.skds.lib2.shapes;
 
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.mat.quat.Quat;
 
 import java.util.Arrays;
 
@@ -127,7 +127,7 @@ public sealed class VoxelShape implements CompositeShape {
 		}
 		return new VoxelShape(offBoxes, center.add(delta), attachment);
 	}
-	
+
 	@Override
 	public CompositeSuperShape rotate(Matrix3 m3) {
 		final ConvexShape[] convexShapes = new ConvexShape[boxes.length];
@@ -144,7 +144,7 @@ public sealed class VoxelShape implements CompositeShape {
 	public Shape rotate(Quat q) {
 		return rotate(Matrix3.fromQuat(q));
 	}
-	
+
 	@Override
 	public VoxelShape scale(double scale) {
 		final AABB[] offBoxes = new AABB[boxes.length];

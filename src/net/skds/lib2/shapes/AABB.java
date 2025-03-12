@@ -11,7 +11,7 @@ import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
-import net.skds.lib2.mat.vec4.Quat;
+import net.skds.lib2.mat.quat.Quat;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -582,7 +582,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 	@Override
 	public String toString() {
 		String message = "AABB[" + this.minX + ", " + this.minY + ", " + this.minZ + "] -> [" + this.maxX + ", " + this.maxY
-		+ ", " + this.maxZ + "]";
+				+ ", " + this.maxZ + "]";
 		if (this.attachment != null) {
 			message += "(" + this.attachment + ")";
 		}
@@ -636,7 +636,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 		private static class AABBAdapter extends AABBBuilder implements JsonDeserializeBuilder<AABB> {
 
 			private String attachment;
-		
+
 			@Override
 			public AABB build() {
 				AABB aabb = super.build();
