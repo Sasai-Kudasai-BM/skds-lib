@@ -442,11 +442,21 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 	}
 
 	default Matrix4D scale(double x, double y, double z) {
-		return multiply(new Matrix4Builder().m00(x).m11(y).m22(z).buildD());
+		return multiply(new Matrix4D(
+			x, this.m01(), this.m02(), this.m03(),
+			this.m10(), y, this.m12(), this.m13(),
+			this.m20(), this.m21(), z, this.m23(),
+			this.m30(), this.m31(), this.m32(), this.m33()
+		));
 	}
 
 	default Matrix4F scaleF(float x, float y, float z) {
-		return multiplyF(new Matrix4Builder().m00(x).m11(y).m22(z).buildF());
+		return multiplyF(new Matrix4F(
+			x, this.m01f(), this.m02f(), this.m03f(),
+			this.m10f(), y, this.m12f(), this.m13f(),
+			this.m20f(), this.m21f(), z, this.m23f(),
+			this.m30f(), this.m31f(), this.m32f(), this.m33f()
+		));
 	}
 
 	default Matrix4D transpose() {
@@ -473,7 +483,15 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		if (Math.abs(f.doubleValue()) > 1.0E-16F) {
 			return f.objectValue().multiply(1 / f.doubleValue());
 		}
-		return new Matrix4Builder(this).buildD();
+		if (!(this instanceof Matrix4D matrix4d)) {
+			return new Matrix4D(
+				this.m00(), this.m01(), this.m02(), this.m03(),
+				this.m10(), this.m11(), this.m12(), this.m13(),
+				this.m20(), this.m21(), this.m22(), this.m23(),
+				this.m30(), this.m31(), this.m32(), this.m33()
+			);
+		}
+		return matrix4d;
 	}
 
 	default Matrix4F inverseF() {
@@ -482,7 +500,15 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 		if (Math.abs(f.floatValue()) > 1.0E-16F) {
 			return f.objectValue().multiplyF(1 / f.floatValue());
 		}
-		return new Matrix4Builder(this).buildF();
+		if (!(this instanceof Matrix4F matrix4f)) {
+			return new Matrix4F(
+				this.m00f(), this.m01f(), this.m02f(), this.m03f(),
+				this.m10f(), this.m11f(), this.m12f(), this.m13f(),
+				this.m20f(), this.m21f(), this.m22f(), this.m23f(),
+				this.m30f(), this.m31f(), this.m32f(), this.m33f()
+			);
+		}
+		return matrix4f;
 	}
 
 	default Matrix4D multiply(Matrix4 m) {
@@ -595,76 +621,62 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 
 	static Matrix4D perspective(double fov, double aspectRatio, double nearPlane, double farPlane) {
 		double f = (1.0D / Math.tan(fov * Math.PI / 180F / 2.0D));
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = f / aspectRatio;
-		matrix4.m11 = f;
-		matrix4.m22 = (farPlane + nearPlane) / (nearPlane - farPlane);
-		matrix4.m33 = 0.0F;
-		matrix4.m32 = -1.0F;
-		matrix4.m23 = 2.0F * farPlane * nearPlane / (nearPlane - farPlane);
-		return matrix4.buildD();
+		return new Matrix4D(
+			f / aspectRatio, 0, 0, 0,
+			0, f, 0, 0,
+			0, 0, (farPlane + nearPlane) / (nearPlane - farPlane), 2.0F * farPlane * nearPlane / (nearPlane - farPlane),
+			0, 0, -1, 0
+		);
 	}
 
 	static Matrix4F perspectiveF(double fov, float aspectRatio, float nearPlane, float farPlane) {
-		double f = (float) (1.0D / Math.tan(fov * Math.PI / 180F / 2.0D));
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = f / aspectRatio;
-		matrix4.m11 = f;
-		matrix4.m22 = (farPlane + nearPlane) / (nearPlane - farPlane);
-		matrix4.m33 = 0.0F;
-		matrix4.m32 = -1.0F;
-		matrix4.m23 = 2.0F * farPlane * nearPlane / (nearPlane - farPlane);
-		return matrix4.buildF();
+		float f = (float) (1.0D / Math.tan(fov * Math.PI / 180F / 2.0D));
+		return new Matrix4F(
+			f / aspectRatio, 0, 0, 0,
+			0, f, 0, 0,
+			0, 0, (farPlane + nearPlane) / (nearPlane - farPlane), 2.0F * farPlane * nearPlane / (nearPlane - farPlane),
+			0, 0, -1, 0
+		);
 	}
 
 	static Matrix4D perspectiveInfinity(double fov, double aspectRatio, double nearPlane) {
 		double f = (1.0D / Math.tan(fov * Math.PI / 180F / 2.0D));
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = f / aspectRatio;
-		matrix4.m11 = f;
-		matrix4.m22 = -1.0F;
-		matrix4.m33 = 0.0F;
-		matrix4.m32 = -1.0F;
-		matrix4.m23 = -2.0F * nearPlane;
-		return matrix4.buildD();
+		return new Matrix4D(
+			f / aspectRatio, 0, 0, 0,
+			0, f, 0, 0,
+			0, 0, -1, -2.0F * nearPlane,
+			0, 0, -1, 0
+		);
 	}
 
 	static Matrix4F perspectiveInfinityF(double fov, float aspectRatio, float nearPlane) {
 		float f = (float) (1.0D / Math.tan(fov * Math.PI / 180F / 2.0D));
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = f / aspectRatio;
-		matrix4.m11 = f;
-		matrix4.m22 = -1.0F;
-		matrix4.m33 = 0.0F;
-		matrix4.m32 = -1.0F;
-		matrix4.m23 = -2.0F * nearPlane;
-		return matrix4.buildF();
+		return new Matrix4F(
+			f / aspectRatio, 0, 0, 0,
+			0, f, 0, 0,
+			0, 0, -1, -2.0F * nearPlane,
+			0, 0, -1, 0
+		);
 	}
 
 	static Matrix4D orthographic(double width, double height, double nearPlane, double farPlane) {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = 2.0F / width;
-		matrix4.m11 = 2.0F / height;
 		double f = farPlane - nearPlane;
-		matrix4.m22 = -2.0F / f;
-		matrix4.m33 = 1.0F;
-		matrix4.m03 = -1.0F;
-		matrix4.m13 = -1.0F;
-		matrix4.m23 = -(farPlane + nearPlane) / f;
-		return matrix4.buildD();
+		return new Matrix4D(
+			2.0F / width, 0, 0, -1,
+			0, 2.0F / height, 0, -1,
+			0, 0, -2.0F / f, -(farPlane + nearPlane) / f,
+			0, 0, 0, 1
+		);
 	}
 
 	static Matrix4F orthographicF(float width, float height, float nearPlane, float farPlane) {
-		Matrix4Builder matrix4 = new Matrix4Builder();
-		matrix4.m00 = 2.0F / width;
-		matrix4.m11 = 2.0F / height;
 		float f = farPlane - nearPlane;
-		matrix4.m22 = -2.0F / f;
-		matrix4.m33 = 1.0F;
-		matrix4.m03 = -1.0F;
-		matrix4.m13 = -1.0F;
-		matrix4.m23 = -(farPlane + nearPlane) / f;
-		return matrix4.buildF();
+		return new Matrix4F(
+			2.0F / width, 0, 0, -1,
+			0, 2.0F / height, 0, -1,
+			0, 0, -2.0F / f, -(farPlane + nearPlane) / f,
+			0, 0, 0, 1
+		);
 	}
 
 	default Matrix4D add(Matrix4 other) {
@@ -727,143 +739,5 @@ public sealed interface Matrix4 permits Matrix4D, Matrix4F {
 				0, 0, 1, z,
 				0, 0, 0, 1
 		);
-	}
-
-	@Deprecated
-	@NoArgsConstructor
-	class Matrix4Builder {
-		private double m00 = 1;
-		private double m01 = 0;
-		private double m02 = 0;
-		private double m03 = 0;
-		private double m10 = 0;
-		private double m11 = 1;
-		private double m12 = 0;
-		private double m13 = 0;
-		private double m20 = 0;
-		private double m21 = 0;
-		private double m22 = 1;
-		private double m23 = 0;
-		private double m30 = 0;
-		private double m31 = 0;
-		private double m32 = 0;
-		private double m33 = 1;
-
-		public Matrix4Builder(Matrix4 m) {
-			this.m00 = m.m00();
-			this.m01 = m.m01();
-			this.m02 = m.m02();
-			this.m03 = m.m03();
-			this.m10 = m.m10();
-			this.m11 = m.m11();
-			this.m12 = m.m12();
-			this.m13 = m.m13();
-			this.m20 = m.m20();
-			this.m21 = m.m21();
-			this.m22 = m.m22();
-			this.m23 = m.m23();
-			this.m30 = m.m30();
-			this.m31 = m.m31();
-			this.m32 = m.m32();
-			this.m33 = m.m33();
-		}
-
-		public Matrix4Builder m00(double m00) {
-			this.m00 = m00;
-			return this;
-		}
-
-		public Matrix4Builder m01(double m01) {
-			this.m01 = m01;
-			return this;
-		}
-
-		public Matrix4Builder m02(double m02) {
-			this.m02 = m02;
-			return this;
-		}
-
-		public Matrix4Builder m03(double m03) {
-			this.m03 = m03;
-			return this;
-		}
-
-		public Matrix4Builder m10(double m10) {
-			this.m10 = m10;
-			return this;
-		}
-
-		public Matrix4Builder m11(double m11) {
-			this.m11 = m11;
-			return this;
-		}
-
-		public Matrix4Builder m12(double m12) {
-			this.m12 = m12;
-			return this;
-		}
-
-		public Matrix4Builder m13(double m13) {
-			this.m13 = m13;
-			return this;
-		}
-
-		public Matrix4Builder m20(double m20) {
-			this.m20 = m20;
-			return this;
-		}
-
-		public Matrix4Builder m21(double m21) {
-			this.m21 = m21;
-			return this;
-		}
-
-		public Matrix4Builder m22(double m22) {
-			this.m22 = m22;
-			return this;
-		}
-
-		public Matrix4Builder m23(double m23) {
-			this.m23 = m23;
-			return this;
-		}
-
-		public Matrix4Builder m30(double m30) {
-			this.m30 = m30;
-			return this;
-		}
-
-		public Matrix4Builder m31(double m31) {
-			this.m31 = m31;
-			return this;
-		}
-
-		public Matrix4Builder m32(double m32) {
-			this.m32 = m32;
-			return this;
-		}
-
-		public Matrix4Builder m33(double m33) {
-			this.m33 = m33;
-			return this;
-		}
-
-		public Matrix4D buildD() {
-			return new Matrix4D(
-					m00, m01, m02, m03,
-					m10, m11, m12, m13,
-					m20, m21, m22, m23,
-					m30, m31, m32, m33
-			);
-		}
-
-		public Matrix4F buildF() {
-			return new Matrix4F(
-					(float) m00, (float) m01, (float) m02, (float) m03,
-					(float) m10, (float) m11, (float) m12, (float) m13,
-					(float) m20, (float) m21, (float) m22, (float) m23,
-					(float) m30, (float) m31, (float) m32, (float) m33
-			);
-		}
 	}
 }
