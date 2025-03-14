@@ -66,6 +66,7 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		this.entries = ArrayUtils.createGenericArray(Entry.class, 0);
 	}
 
+	@SuppressWarnings("unchecked")
 	private WeightedPool(WeightedPool<T> parent) {
 		final var pes = parent.entries;
 		final var entries = ArrayUtils.createGenericArray(Entry.class, pes.length);

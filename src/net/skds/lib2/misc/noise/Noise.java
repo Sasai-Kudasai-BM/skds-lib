@@ -5,7 +5,6 @@ import net.skds.lib2.misc.random.StateFuncRandom;
 
 public class Noise {
 
-
 	private final float weightCorrection;
 	private final float exponent;
 	private final float phaseScale;
@@ -188,5 +187,28 @@ public class Noise {
 
 	public interface AmplitudeFunction {
 		float amplitude(int layer, float exponent);
+
+		AmplitudeFunction EXPONENT = (l, e) -> {
+			float amp = e;
+			for (int i = 1; i < l; i++) {
+				amp *= e;
+			}
+			return 1 / amp;
+		};
+		AmplitudeFunction SQUARE = (l, e) -> {
+			float a = (l + 1) * e;
+			return 1f / (a * a);
+		};
+		AmplitudeFunction LINEAR = (l, e) -> 1f / (l + 1);
+		AmplitudeFunction FIBONACCI = (l, e) -> {
+			float a = 1;
+			float a0 = 1;
+			for (int i = 1; i < l; i++) {
+				float b = a;
+				a += a0;
+				a0 = b;
+			}
+			return 1f / a;
+		};
 	}
 }

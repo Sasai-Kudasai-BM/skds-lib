@@ -72,28 +72,10 @@ public class NoiseFrame extends JFrame {
 	};
 
 	private static final AmplitudeFuncHolder[] amplitudeFunctions = {
-			new AmplitudeFuncHolder((l, e) -> {
-				float amp = e;
-				for (int i = 1; i < l; i++) {
-					amp *= e;
-				}
-				return 1 / amp;
-			}, "EXPONENT"),
-			new AmplitudeFuncHolder((l, e) -> {
-				float a = (l + 1) * e;
-				return 1f / (a * a);
-			}, "SQUARE"),
-			new AmplitudeFuncHolder((l, e) -> 1f / (l + 1), "LINEAR"),
-			new AmplitudeFuncHolder((l, e) -> {
-				float a = 1;
-				float a0 = 1;
-				for (int i = 1; i < l; i++) {
-					float b = a;
-					a += a0;
-					a0 = b;
-				}
-				return 1f / a;
-			}, "FIBONACCI"),
+			new AmplitudeFuncHolder(Noise.AmplitudeFunction.EXPONENT, "EXPONENT"),
+			new AmplitudeFuncHolder(Noise.AmplitudeFunction.SQUARE, "SQUARE"),
+			new AmplitudeFuncHolder(Noise.AmplitudeFunction.LINEAR, "LINEAR"),
+			new AmplitudeFuncHolder(Noise.AmplitudeFunction.FIBONACCI, "FIBONACCI"),
 	};
 
 	private record InterpolationHolder(FastMath.FloatInterpolation interpolation, String name) {
