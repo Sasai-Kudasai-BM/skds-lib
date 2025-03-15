@@ -44,6 +44,11 @@ public class SKDSUtils {
 
 	public static final Random R = new Random();
 
+	public static <T> T caught(Throwable t) {
+		t.printStackTrace();
+		return null;
+	}
+
 	private static MessageDigest getMDSafe(String algorithm) {
 		try {
 			return MessageDigest.getInstance(algorithm);
