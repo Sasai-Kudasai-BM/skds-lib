@@ -9,7 +9,5 @@ public interface CollisionContext {
 		return true;
 	}
 
-	public static final CollisionContext DEFAULT = (a, b, v) -> {
-		return a.compareTo(b);
-	};
+	CollisionContext DEFAULT = (a, b, v) -> a.compareTo(b);
 }
