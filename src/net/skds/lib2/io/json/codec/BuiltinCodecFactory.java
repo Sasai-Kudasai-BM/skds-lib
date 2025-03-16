@@ -430,14 +430,18 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		final JsonDeserializer<Object> deserializer;
 		final JsonSerializer<Object> serializer;
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		public CollectionCodec(Class<?> tClass, Type[] parameters, JsonCodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
 			super(tClass, registry);
 			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
 			this.serializer = getUniversalSerializer(parameters[0], registry);
 			Supplier<Collection<Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
-				tmpC = defaultSupplier;
+				if (EnumSet.class.isAssignableFrom(tClass)) {
+					tmpC = () -> EnumSet.noneOf(((Class<? extends Enum>) parameters[0]));
+				} else {
+					tmpC = defaultSupplier;
+				}
 			} else {
 				tmpC = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
 				if (tmpC == null) {
@@ -446,6 +450,10 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				}
 			}
 			this.constructor = tmpC;
+		}
+
+		private <E extends Enum<E>> Class<E> castEnum(Class<?> tClass) {
+			return AutoCast.cast(tClass);
 		}
 
 		@Override
