@@ -1,9 +1,5 @@
 package net.skds.lib2.mat.vec2;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.Random;
-
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -15,11 +11,16 @@ import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Random;
+
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec2.JCodec.class)
 public sealed interface Vec2 extends Vector permits Vec2D, Vec2F, Vec2I {
 
 	Vec2 ZERO = Vec2D.ZERO;
+	Vec2 SINGLE = Vec2D.SINGLE;
 
 	@Override
 	default int dimension() {

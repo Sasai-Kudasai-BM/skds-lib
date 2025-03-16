@@ -1,8 +1,5 @@
 package net.skds.lib2.mat.vec2;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-
 import net.skds.lib2.io.json.JsonEntryType;
 import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
@@ -11,9 +8,14 @@ import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
 import net.skds.lib2.io.json.exception.JsonReadException;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+
 @DefaultJsonCodec(Vec2D.JCodec.class)
 public record Vec2D(double x, double y) implements Vec2 {
+	
 	public static final Vec2D ZERO = new Vec2D(0.0D, 0.0D);
+	public static final Vec2D SINGLE = new Vec2D(1, 1);
 
 	public Vec2D(double size) {
 		this(size, size);
