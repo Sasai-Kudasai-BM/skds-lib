@@ -7,6 +7,7 @@ import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.annotation.DefaultJsonEnumTypedCodec;
+import net.skds.lib2.io.json.codec.nulls.NullJsonCodec;
 import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.json.elements.*;
@@ -39,6 +40,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			JsonNumber.class, (JsonCodecFactory) JsonNumber.Codec::new,
 			JsonBoolean.class, (JsonCodecFactory) JsonBoolean.Codec::new,
 			JsonArray.class, (JsonCodecFactory) JsonArray.Codec::new,
+			JsonElement.JsonNull.class, (JsonCodecFactory) NullJsonCodec::new,
 
 			String.class, (JsonCodecFactory) StringCodec::new,
 			Object.class, (JsonCodecFactory) ObjectCodec::new,
