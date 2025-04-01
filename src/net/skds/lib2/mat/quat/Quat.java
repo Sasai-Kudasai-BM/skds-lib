@@ -392,9 +392,13 @@ public sealed interface Quat permits QuatD, QuatF {
 		);
 	}
 
-	default QuatD spin(Vec3 spin) {
+	default Quat spin(Vec3 spin) {
 
 		double angle = spin.length();
+
+		if (angle < 1E-7) {
+			return this;
+		}
 
 		double f0 = FastMath.sinRad(angle / 2.0);
 
@@ -416,7 +420,7 @@ public sealed interface Quat permits QuatD, QuatF {
 		);
 	}
 
-	default QuatF spinF(Vec3 spin) {
+	default Quat spinF(Vec3 spin) {
 
 		float angle = spin.lengthF();
 
@@ -505,6 +509,26 @@ public sealed interface Quat permits QuatD, QuatF {
 		float vz = 1.0f - f4 - f5;
 
 		return new Vec3F(vx, vy, vz);
+	}
+
+	default Vec3D up() {
+		// TODO
+		return Matrix3.fromQuat(this).up();
+	}
+
+	default Vec3F upF() {
+		// TODO
+		return Matrix3.fromQuat(this).upF();
+	}
+
+	default Vec3D left() {
+		// TODO
+		return Matrix3.fromQuat(this).left();
+	}
+
+	default Vec3F leftF() {
+		// TODO
+		return Matrix3.fromQuat(this).leftF();
 	}
 
 	static Quat sLerp(Quat qa, Quat qb, double t) {
