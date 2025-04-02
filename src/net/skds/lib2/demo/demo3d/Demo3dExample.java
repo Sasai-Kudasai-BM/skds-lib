@@ -1,20 +1,17 @@
 package net.skds.lib2.demo.demo3d;
 
-import java.util.Iterator;
-import java.util.List;
-
 import lombok.CustomLog;
 import net.skds.lib2.demo.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
-import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.shapes.AABB;
 import net.skds.lib2.shapes.Collision;
-import net.skds.lib2.shapes.CollisionContext;
 import net.skds.lib2.shapes.CompositeSuperShape;
 import net.skds.lib2.shapes.Shape;
+
+import java.util.Iterator;
 
 @CustomLog
 @SuppressWarnings("unused")
