@@ -1,5 +1,9 @@
 package net.skds.lib2.mat.pid;
 
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.UnsupportedJsonCodec;
+
+@DefaultJsonCodec(UnsupportedJsonCodec.class)
 public final class PID extends AbstractPID {
 
 	private transient double lastD;
@@ -23,10 +27,5 @@ public final class PID extends AbstractPID {
 		this.lastD = in;
 		double i = (this.sumI += in) * this.i;
 		return this.p * in + d + i;
-	}
-
-	@Override
-	public PID clone() {
-		return new PID(p, i, d);
 	}
 }

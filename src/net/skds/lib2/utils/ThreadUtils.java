@@ -133,8 +133,12 @@ public class ThreadUtils {
 	private static boolean tick(FiniteTickable tickable, int period) {
 		long t0 = System.nanoTime();
 		boolean tick = tickable.tick();
-		long waitTime = t0 + (long) period * 1000_000L - System.nanoTime();
+		long endTime = t0 + (long) period * 1000_000L;
+		long waitTime = endTime - System.nanoTime();
 		LockSupport.parkNanos(waitTime);
+		while (endTime - System.nanoTime() > 5000L) {
+			Thread.yield();
+		}
 		return tick;
 	}
 

@@ -1,7 +1,10 @@
 package net.skds.lib2.mat.pid;
 
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.UnsupportedJsonCodec;
 import net.skds.lib2.mat.vec3.Vec3;
 
+@DefaultJsonCodec(UnsupportedJsonCodec.class)
 public final class Vec3PID extends AbstractPID {
 
 	private transient Vec3 lastD = Vec3.ZERO;
@@ -26,10 +29,5 @@ public final class Vec3PID extends AbstractPID {
 		this.sumI = this.sumI.add(in);
 		Vec3 i = this.sumI.scale(this.i);
 		return in.scale(p).add(d).add(i);
-	}
-
-	@Override
-	public Vec3PID clone() {
-		return new Vec3PID(p, i, d);
 	}
 }

@@ -238,18 +238,15 @@ public class FastMath {
 	}
 
 	public static double angleDiffDeg(double a1, double a2) {
-		double diff = (a1 - a2) % 360;
-		return diff > 180 ? diff - 360 : diff;
+		a1 = wrapDegrees(a1);
+		a2 = wrapDegrees(a2);
+		return wrapDegrees(a1 - a2);
 	}
 
 	public static float angleDiffDeg(float a1, float a2) {
-		float diff = (a1 - a2) % 360;
-		if (diff > 180) {
-			diff -= 360;
-		} else if (diff < -180) {
-			diff += 360;
-		}
-		return diff;
+		a1 = wrapDegrees(a1);
+		a2 = wrapDegrees(a2);
+		return wrapDegrees(a1 - a2);
 	}
 
 	public static double cosInterpolate(double t, double min, double max) {
