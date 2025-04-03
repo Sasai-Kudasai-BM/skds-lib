@@ -1,6 +1,8 @@
 package net.skds.lib2.demo;
 
 import net.skds.lib2.demo.classloader.DemoClassloaderFrame;
+import net.skds.lib2.demo.demo3d.Demo3dExample;
+import net.skds.lib2.demo.demo3d.Demo3dFrame;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.misc.font.demo.FontDemoFrame;
 import net.skds.lib2.misc.graph.GraphicBuilder;
@@ -84,11 +86,11 @@ public class DemoFrame extends JFrame {
 		//	TestStruct.test2(this);
 		//});
 		//add(button);
-		//button = new JButton("Demo3d");
-		//button.addActionListener(e ->
-		//		Demo3dFrameExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
-		//);
-		//add(button);
+		button = new JButton("Demo3d");
+		button.addActionListener(e ->
+			Demo3dExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
+		);
+		add(button);
 
 		button = new JButton("GraphicBuilder");
 		button.addActionListener(e -> new GraphicBuilder().setLocationRelativeTo(this));

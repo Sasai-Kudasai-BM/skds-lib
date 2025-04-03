@@ -243,6 +243,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	}
 
 	default Vec3D normalizeScale(double scale) {
+		if (scale == 0) return Vec3D.ZERO;
 		double x = x();
 		double y = y();
 		double z = z();
@@ -252,10 +253,12 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	}
 
 	default Vec3I normalizeScaleI(int scale) {
+		if (scale == 0) return Vec3I.ZERO;
 		return Direction.getFacing(xi(), yi(), zi()).scaleI(scale);
 	}
 
 	default Vec3F normalizeScaleF(float scale) {
+		if (scale == 0) return Vec3F.ZERO;
 		float x = xf();
 		float y = yf();
 		float z = zf();

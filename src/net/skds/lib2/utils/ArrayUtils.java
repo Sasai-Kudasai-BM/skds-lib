@@ -3,12 +3,7 @@ package net.skds.lib2.utils;
 import net.skds.lib2.mat.FastMath;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class ArrayUtils {
@@ -216,7 +211,6 @@ public class ArrayUtils {
 			this.hash = Arrays.hashCode(array);
 		}
 
-
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {
@@ -243,7 +237,6 @@ public class ArrayUtils {
 			this.array = array;
 			this.hash = Arrays.hashCode(array);
 		}
-
 
 		@Override
 		public boolean equals(Object o) {
@@ -299,7 +292,6 @@ public class ArrayUtils {
 			this.hash = Arrays.hashCode(array);
 		}
 
-
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {
@@ -326,7 +318,6 @@ public class ArrayUtils {
 			this.array = array;
 			this.hash = Arrays.hashCode(array);
 		}
-
 
 		@Override
 		public boolean equals(Object o) {
@@ -355,7 +346,6 @@ public class ArrayUtils {
 			this.hash = Arrays.hashCode(array);
 		}
 
-
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {
@@ -382,7 +372,6 @@ public class ArrayUtils {
 			this.array = array;
 			this.hash = Arrays.hashCode(array);
 		}
-
 
 		@Override
 		public boolean equals(Object o) {
@@ -411,7 +400,6 @@ public class ArrayUtils {
 			this.hash = Arrays.hashCode(array);
 		}
 
-
 		@Override
 		public boolean equals(Object o) {
 			if (this == o) {
@@ -438,7 +426,6 @@ public class ArrayUtils {
 			this.array = array;
 			this.hash = Arrays.hashCode(array);
 		}
-
 
 		@Override
 		public boolean equals(Object o) {
@@ -639,7 +626,7 @@ public class ArrayUtils {
 			bitSet.set(i);
 			if (depth >= inArray.length) {
 				@SuppressWarnings("unchecked")
-				T[] array = (T[])ArrayUtils.createGenericArray(inArray.getClass().getComponentType(), inArray.length);
+				T[] array = (T[]) ArrayUtils.createGenericArray(inArray.getClass().getComponentType(), inArray.length);
 				for (int j = 0; j < inArray.length; j++) {
 					array[j] = inArray[bitSet.indexes[j]];
 				}
@@ -647,7 +634,7 @@ public class ArrayUtils {
 			} else {
 				shuffleArray(inArray, bitSet, depth, outList);
 			}
-			
+
 			bitSet.clear(i);
 		}
 	}
@@ -656,7 +643,7 @@ public class ArrayUtils {
 
 		private final int[] indexes;
 		private int pos;
-	
+
 		public ShuffleBitSet(int size) {
 			super(size);
 			this.indexes = new int[size];
