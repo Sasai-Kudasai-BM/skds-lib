@@ -1,5 +1,7 @@
 package net.skds.lib2.mat.vec3;
 
+import lombok.Getter;
+import net.skds.lib2.mat.AxisDirection;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.ArrayUtils;
 
@@ -18,11 +20,15 @@ public enum Direction implements Vec3 {
 	public static final Direction[] VALUES = values();
 	public static final Direction[] HORIZONTAL = {BACKWARD, FORWARD, RIGHT, LEFT};
 
+	@Getter
 	private final int id;
 	private final int idOpposite;
 	private final int idHorizontal;
+	@Getter
 	private final String name;
+	@Getter
 	private final Axis axis;
+	@Getter
 	private final AxisDirection direction;
 	private final Vec3I vector;
 
@@ -39,30 +45,30 @@ public enum Direction implements Vec3 {
 	public static final Direction ZN = NORTH;
 
 	private static final Direction[][] shuffleH = {
-		{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH},
-		{Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH},
-		{Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST},
-		{Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH},
-		{Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH},
-		{Direction.EAST, Direction.SOUTH, Direction.NORTH, Direction.WEST},
-		{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH},
-		{Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH},
-		{Direction.WEST, Direction.NORTH, Direction.SOUTH, Direction.EAST},
-		{Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH},
-		{Direction.WEST, Direction.SOUTH, Direction.EAST, Direction.NORTH},
-		{Direction.WEST, Direction.SOUTH, Direction.NORTH, Direction.EAST},
-		{Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH},
-		{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST},
-		{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST},
-		{Direction.NORTH, Direction.WEST, Direction.EAST, Direction.SOUTH},
-		{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST},
-		{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST},
-		{Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.NORTH},
-		{Direction.SOUTH, Direction.EAST, Direction.NORTH, Direction.WEST},
-		{Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.EAST},
-		{Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.NORTH},
-		{Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST},
-		{Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST},
+			{Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH},
+			{Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH},
+			{Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST},
+			{Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH},
+			{Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH},
+			{Direction.EAST, Direction.SOUTH, Direction.NORTH, Direction.WEST},
+			{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH},
+			{Direction.WEST, Direction.EAST, Direction.SOUTH, Direction.NORTH},
+			{Direction.WEST, Direction.NORTH, Direction.SOUTH, Direction.EAST},
+			{Direction.WEST, Direction.NORTH, Direction.EAST, Direction.SOUTH},
+			{Direction.WEST, Direction.SOUTH, Direction.EAST, Direction.NORTH},
+			{Direction.WEST, Direction.SOUTH, Direction.NORTH, Direction.EAST},
+			{Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH},
+			{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST},
+			{Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST},
+			{Direction.NORTH, Direction.WEST, Direction.EAST, Direction.SOUTH},
+			{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST},
+			{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST},
+			{Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.NORTH},
+			{Direction.SOUTH, Direction.EAST, Direction.NORTH, Direction.WEST},
+			{Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.EAST},
+			{Direction.SOUTH, Direction.WEST, Direction.EAST, Direction.NORTH},
+			{Direction.SOUTH, Direction.NORTH, Direction.EAST, Direction.WEST},
+			{Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST},
 	};
 
 	private static Direction[][] shuffleA;
@@ -78,19 +84,12 @@ public enum Direction implements Vec3 {
 		this.vector = vector;
 	}
 
-	public int getId() {
-		return this.id;
-	}
-
 	public int getHorizontal() {
 		return this.idHorizontal;
 	}
+
 	public boolean isHorizontal() {
 		return this.idHorizontal != -1;
-	}
-
-	public AxisDirection getDirection() {
-		return this.direction;
 	}
 
 	public Direction getOpposite() {
@@ -319,22 +318,27 @@ public enum Direction implements Vec3 {
 	public Vec3I up() {
 		return addI(0, 1, 0);
 	}
+
 	@Override
 	public Vec3I down() {
 		return addI(0, -1, 0);
 	}
+
 	@Override
 	public Vec3I left() {
 		return addI(1, 0, 0);
 	}
+
 	@Override
 	public Vec3I right() {
 		return addI(-1, 0, 0);
 	}
+
 	@Override
 	public Vec3I forward() {
 		return addI(0, 0, 1);
 	}
+
 	@Override
 	public Vec3I backward() {
 		return addI(0, 0, -1);
@@ -344,22 +348,27 @@ public enum Direction implements Vec3 {
 	public Vec3I up(int i) {
 		return addI(0, i, 0);
 	}
+
 	@Override
 	public Vec3I down(int i) {
 		return addI(0, -i, 0);
 	}
+
 	@Override
 	public Vec3I left(int i) {
 		return addI(i, 0, 0);
 	}
+
 	@Override
 	public Vec3I right(int i) {
 		return addI(-i, 0, 0);
 	}
+
 	@Override
 	public Vec3I forward(int i) {
 		return addI(0, 0, i);
 	}
+
 	@Override
 	public Vec3I backward(int i) {
 		return addI(0, 0, -i);
@@ -369,33 +378,30 @@ public enum Direction implements Vec3 {
 	public Vec3I up(double i) {
 		return addI(0, FastMath.round(i), 0);
 	}
+
 	@Override
 	public Vec3I down(double i) {
 		return addI(0, FastMath.round(-i), 0);
 	}
+
 	@Override
 	public Vec3I left(double i) {
 		return addI(FastMath.round(i), 0, 0);
 	}
+
 	@Override
 	public Vec3I right(double i) {
 		return addI(FastMath.round(-i), 0, 0);
 	}
+
 	@Override
 	public Vec3I forward(double i) {
 		return addI(0, 0, FastMath.round(i));
 	}
+
 	@Override
 	public Vec3I backward(double i) {
 		return addI(0, 0, FastMath.round(-i));
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public Axis getAxis() {
-		return this.axis;
 	}
 
 	public static Direction byId(int id) {
@@ -469,7 +475,7 @@ public enum Direction implements Vec3 {
 		}
 		return direction;
 	}
-	
+
 	public static Direction getFacing(int x, int y, int z) {
 		Direction direction = NORTH;
 		int f = Integer.MIN_VALUE;
@@ -565,6 +571,7 @@ public enum Direction implements Vec3 {
 	}
 
 
+	@Getter
 	public enum Axis implements Predicate<Direction> {
 		X("xf") {
 			@Override
@@ -652,10 +659,6 @@ public enum Direction implements Vec3 {
 			this.name = name;
 		}
 
-		public String getName() {
-			return this.name;
-		}
-
 		public boolean isVertical() {
 			return this == Y;
 		}
@@ -693,35 +696,6 @@ public enum Direction implements Vec3 {
 
 		static {
 			VALUES = Axis.values();
-		}
-	}
-
-	public enum AxisDirection {
-		POSITIVE(1, "Towards positive"),
-		NEGATIVE(-1, "Towards negative");
-
-		private final int offset;
-		private final String description;
-
-		AxisDirection(int offset, String description) {
-			this.offset = offset;
-			this.description = description;
-		}
-
-		public int offset() {
-			return this.offset;
-		}
-
-		public String getDescription() {
-			return this.description;
-		}
-
-		public String toString() {
-			return this.description;
-		}
-
-		public AxisDirection getOpposite() {
-			return this == POSITIVE ? NEGATIVE : POSITIVE;
 		}
 	}
 

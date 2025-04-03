@@ -6,7 +6,6 @@ import net.skds.lib2.io.json.JsonWriter;
 import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
 import net.skds.lib2.io.json.codec.AbstractJsonCodec;
 import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
@@ -651,7 +650,7 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		);
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Matrix3> {
+	final class JCodec extends AbstractJsonCodec<Matrix3> {
 
 		public JCodec(Type type, JsonCodecRegistry registry) {
 			super(type, registry);
@@ -660,11 +659,15 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		@Override
 		public void write(Matrix3 value, JsonWriter writer) throws IOException {
 			writer.beginArray();
-			for (Vec3D row : value.asNormals()) {
-				writer.writeFloat(row.x());
-				writer.writeFloat(row.y());
-				writer.writeFloat(row.z());
-			}
+			writer.writeFloat(value.m00());
+			writer.writeFloat(value.m01());
+			writer.writeFloat(value.m02());
+			writer.writeFloat(value.m10());
+			writer.writeFloat(value.m11());
+			writer.writeFloat(value.m12());
+			writer.writeFloat(value.m20());
+			writer.writeFloat(value.m21());
+			writer.writeFloat(value.m22());
 			writer.endArray();
 		}
 
@@ -674,22 +677,13 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 				return Matrix3.SINGLE;
 			}
 			reader.beginArray();
-
-			double[] array = new double[9];
-			int i = 0;
-			while (i < 9) {
-				array[i] = reader.readDouble();
-				i++;
-			}
-			if (i != 9) {
-				throw new JsonReadException("matrix3 is not full, expected size 9, got %s".formatted(i));
-			}
+			Matrix3D m = new Matrix3D(
+					reader.readDouble(), reader.readDouble(), reader.readDouble(),
+					reader.readDouble(), reader.readDouble(), reader.readDouble(),
+					reader.readDouble(), reader.readDouble(), reader.readDouble()
+			);
 			reader.endArray();
-			return Matrix3.fromNormals(new Vec3[]{
-					new Vec3D(array[0], array[1], array[2]),
-					new Vec3D(array[3], array[4], array[5]),
-					new Vec3D(array[6], array[7], array[8]),
-			});
+			return m;
 		}
 	}
 }

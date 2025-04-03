@@ -17,7 +17,12 @@ import java.util.Random;
 
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec2.JCodec.class)
-public sealed interface Vec2 extends Vector permits Vec2D, Vec2F, Vec2I {
+public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, Vec2I {
+
+	Vec2 XP = Vec2D.XP;
+	Vec2 XN = Vec2D.XN;
+	Vec2 YP = Vec2D.YP;
+	Vec2 YN = Vec2D.YN;
 
 	Vec2 ZERO = Vec2D.ZERO;
 	Vec2 SINGLE = Vec2D.SINGLE;
@@ -413,6 +418,42 @@ public sealed interface Vec2 extends Vector permits Vec2D, Vec2F, Vec2I {
 
 	static float dotF(float x1, float y1, float x2, float y2) {
 		return x1 * x2 + y1 * y2;
+	}
+
+	default double cross(Vec2 vec) {
+		return this.x() * vec.y() + this.y() * vec.x();
+	}
+
+	default double cross(double x2, double y2) {
+		return this.x() * y2 + this.y() * x2;
+	}
+
+	static double cross(double x1, double y1, double x2, double y2) {
+		return x1 * y2 - y1 * x2;
+	}
+
+	default float crossF(Vec2 vec) {
+		return this.xf() * vec.yf() + this.yf() * vec.xf();
+	}
+
+	default float crossF(float x2, float y2) {
+		return this.xf() * y2 + this.yf() * x2;
+	}
+
+	static float crossF(float x1, float y1, float x2, float y2) {
+		return x1 * y2 - y1 * x2;
+	}
+
+	default int crossI(Vec2 vec) {
+		return this.xi() * vec.yi() + this.yi() * vec.xi();
+	}
+
+	default int crossI(int x2, int y2) {
+		return this.xi() * y2 + this.yi() * x2;
+	}
+
+	static int crossI(int x1, int y1, int x2, int y2) {
+		return x1 * y2 - y1 * x2;
 	}
 
 	default Vec2D add(Vec2 vec) {

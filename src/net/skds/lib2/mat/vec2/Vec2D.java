@@ -13,7 +13,12 @@ import java.lang.reflect.Type;
 
 @DefaultJsonCodec(Vec2D.JCodec.class)
 public record Vec2D(double x, double y) implements Vec2 {
-	
+
+	public static final Vec2D XP = new Vec2D(1, 0);
+	public static final Vec2D XN = new Vec2D(-1, 0);
+	public static final Vec2D YP = new Vec2D(0, 1);
+	public static final Vec2D YN = new Vec2D(0, -1);
+
 	public static final Vec2D ZERO = new Vec2D(0.0D, 0.0D);
 	public static final Vec2D SINGLE = new Vec2D(1, 1);
 
