@@ -1,21 +1,33 @@
 package net.w3e.lib.utils.suppliers;
 
+import lombok.RequiredArgsConstructor;
+
 import java.util.function.Supplier;
 
-public class CacheSupplier<T> implements Supplier<T> {
+public interface CacheSupplier<T> extends Supplier<T> {
 
-	private final Supplier<T> sup;
-	private T value = null;
+	void resetCache();
 
-	public CacheSupplier(Supplier<T> sup) {
-		this.sup = sup;
+	static <T> CacheSupplier<T> of(Supplier<T> sup) {
+		return new CacheSupplierImpl<>(sup);
 	}
 
-	@Override
-	public final T get() {
-		if (this.value == null) {
-			this.value = sup.get();
+	@RequiredArgsConstructor
+	class CacheSupplierImpl<T> implements CacheSupplier<T> {
+		private final Supplier<T> sup;
+		private T value = null;
+
+		@Override
+		public void resetCache() {
+			this.value = null;
 		}
-		return this.value;
+
+		@Override
+		public final T get() {
+			if (this.value == null) {
+				this.value = sup.get();
+			}
+			return this.value;
+		}
 	}
 }
