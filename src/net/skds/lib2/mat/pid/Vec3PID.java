@@ -14,6 +14,10 @@ public final class Vec3PID extends AbstractPID {
 		super(p, i, d);
 	}
 
+	public Vec3PID(double p, double i, double d, double min, double max) {
+		super(p, i, d, min, max);
+	}
+
 	public Vec3PID() {
 	}
 
@@ -26,8 +30,8 @@ public final class Vec3PID extends AbstractPID {
 	public Vec3 loop(Vec3 in) {
 		Vec3 d = in.sub(this.lastD).scale(this.d);
 		this.lastD = in;
-		this.sumI = this.sumI.add(in);
-		Vec3 i = this.sumI.scale(this.i);
+		Vec3 i = this.sumI.add(in.scale(this.i)).clamp(iLimMin, iLimMax);
+		this.sumI = i;
 		return in.scale(p).add(d).add(i);
 	}
 }
