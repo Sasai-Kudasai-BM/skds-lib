@@ -73,10 +73,7 @@ public class StringUtils {
 		if (i == -1) {
 			return str;
 		}
-		if (i == str.length() - 1) {
-			return str;
-		}
-		return str.substring(0, i + 1);
+		return str.substring(0, i);
 	}
 
 	public static String cutStringAfterFromEnd(String str, char split) {
