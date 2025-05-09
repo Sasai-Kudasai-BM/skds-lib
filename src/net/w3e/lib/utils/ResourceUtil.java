@@ -37,9 +37,13 @@ public class ResourceUtil {
 				Path p = it.next();
 				if (!Files.isDirectory(p)) {
 					if (rootPath != null) {
-						p = rootPath.relativize(p);
+						try {
+							p = rootPath.relativize(p);
+						} catch (Exception e) {}
 					}
 					collection.add(p);
+				} else if (!path.equals(p)) {
+					walk(p, collection);
 				}
 			}
 		} catch (IOException e) {
@@ -47,13 +51,13 @@ public class ResourceUtil {
 		}
 	}
 
-	public static List<Path> getResourceFiles(String root) {
-		List<Path> list = new ArrayList<>();
+	public static Set<Path> getResourceFiles(String root) {
+		Set<Path> list = new HashSet<>();
 		getResourceFiles(list, root);
 		return list;
 	}
 
-	public static void getResourceFiles(List<Path> collection, String root) {
+	public static void getResourceFiles(Collection<Path> collection, String root) {
 		try {
 			URI uri = Objects.requireNonNull(ResourceUtil.class.getClassLoader().getResource(root)).toURI();
 
