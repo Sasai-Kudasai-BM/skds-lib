@@ -1,11 +1,22 @@
 package net.skds.lib2.mat.quat;
 
+import net.skds.lib2.io.json.JsonEntryType;
+import net.skds.lib2.io.json.JsonReader;
+import net.skds.lib2.io.json.JsonWriter;
+import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
+import net.skds.lib2.io.json.codec.AbstractJsonCodec;
+import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.json.exception.JsonReadException;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+
+@DefaultJsonCodec(Quat.JCodec.class)
 @SuppressWarnings("unused")
 public sealed interface Quat permits QuatD, QuatF {
 
@@ -589,5 +600,70 @@ public sealed interface Quat permits QuatD, QuatF {
 		qmy = (qa.yf() * ratioA + qb.yf() * ratioB);
 		qmz = (qa.zf() * ratioA + qb.zf() * ratioB);
 		return new QuatF(qmw, qmx, qmy, qmz);
+	}
+
+	final class JCodec extends AbstractJsonCodec<Quat> {
+		public JCodec(Type type, JsonCodecRegistry registry) {
+			super(type, registry);
+		}
+
+		@Override
+		public void write(Quat value, JsonWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginArray();
+			writer.writeFloat(value.x());
+			writer.writeFloat(value.y());
+			writer.writeFloat(value.z());
+			writer.writeFloat(value.w());
+			writer.endArray();
+		}
+
+		@Override
+		public Quat read(JsonReader reader) throws IOException {
+			Number x = 0;
+			Number y = 0;
+			Number z = 0;
+			Number w = 0;
+			switch (reader.nextEntryType()) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_ARRAY -> {
+					reader.beginArray();
+					x = reader.readNumber();
+					y = reader.readNumber();
+					z = reader.readNumber();
+					w = reader.readNumber();
+					reader.endArray();
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+						String s = reader.readName();
+						Number i = reader.readNumber();
+						switch (s.toLowerCase()) {
+							case "x" -> x = i;
+							case "y" -> y = i;
+							case "z" -> z = i;
+							case "w" -> w = i;
+						}
+					}
+					reader.endObject();
+				}
+				case NUMBER -> {
+					Number value = reader.readNumber();
+					x = value;
+					y = value;
+					z = value;
+				}
+				default ->
+						throw new JsonReadException("Unsupported token in quaternion \"" + reader.nextEntryType() + "\"");
+			}
+			return new QuatD(x.doubleValue(), y.doubleValue(), z.doubleValue(), w.doubleValue());
+		}
 	}
 }
