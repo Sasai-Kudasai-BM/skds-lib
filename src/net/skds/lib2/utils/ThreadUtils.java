@@ -136,9 +136,10 @@ public class ThreadUtils {
 		long endTime = t0 + (long) period * 1000_000L;
 		long waitTime = endTime - System.nanoTime();
 		LockSupport.parkNanos(waitTime);
-		while (endTime - System.nanoTime() > 5000L) {
-			Thread.yield();
-		}
+		//while (endTime - System.nanoTime() > 5000L) {
+		//	//LockSupport.parkNanos(5000L);
+		//	Thread.yield();
+		//}
 		return tick;
 	}
 
