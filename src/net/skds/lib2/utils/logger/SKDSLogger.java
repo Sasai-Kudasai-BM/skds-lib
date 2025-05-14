@@ -16,26 +16,66 @@ public abstract class SKDSLogger {
 	private static final int DEPTH = 3;
 	static final PrintStream[] printStreamArray = {};
 
-	protected abstract void log0(LoggerLevel level, int depth, boolean ln, Object msg);
+	protected abstract void log0(LoggerLevel level, int depth, boolean ln, boolean trace, Object msg);
 
 	public void debug(Object msg) {
-		log0(LoggerLevel.DEBUG, DEPTH, true, msg);
+		log0(LoggerLevel.DEBUG, DEPTH, true, true, msg);
 	}
 
 	public void info(Object msg) {
-		log0(LoggerLevel.INFO, DEPTH, true, msg);
+		log0(LoggerLevel.INFO, DEPTH, true, true, msg);
 	}
 
 	public void log(Object msg) {
-		log0(LoggerLevel.LOG, DEPTH, true, msg);
+		log0(LoggerLevel.LOG, DEPTH, true, true, msg);
 	}
 
 	public void warn(Object msg) {
-		log0(LoggerLevel.WARN, DEPTH, true, msg);
+		log0(LoggerLevel.WARN, DEPTH, true, true, msg);
 	}
 
 	public void error(Object msg) {
-		log0(LoggerLevel.ERROR, DEPTH, true, msg);
+		log0(LoggerLevel.ERROR, DEPTH, true, true, msg);
+	}
+
+	public void debugNoWrap(Object msg) {
+		log0(LoggerLevel.DEBUG, DEPTH, false, true, msg);
+	}
+
+	public void infoNoWrap(Object msg) {
+		log0(LoggerLevel.INFO, DEPTH, false, true, msg);
+	}
+
+	public void logNoWrap(Object msg) {
+		log0(LoggerLevel.LOG, DEPTH, false, true, msg);
+	}
+
+	public void warnNoWrap(Object msg) {
+		log0(LoggerLevel.WARN, DEPTH, false, true, msg);
+	}
+
+	public void errorNoWrap(Object msg) {
+		log0(LoggerLevel.ERROR, DEPTH, false, true, msg);
+	}
+
+	public void debugContinue(Object msg) {
+		log0(LoggerLevel.DEBUG, DEPTH, false, false, msg);
+	}
+
+	public void infoContinue(Object msg) {
+		log0(LoggerLevel.INFO, DEPTH, false, false, msg);
+	}
+
+	public void logContinue(Object msg) {
+		log0(LoggerLevel.LOG, DEPTH, false, false, msg);
+	}
+
+	public void warnContinue(Object msg) {
+		log0(LoggerLevel.WARN, DEPTH, false, false, msg);
+	}
+
+	public void errorContinue(Object msg) {
+		log0(LoggerLevel.ERROR, DEPTH, false, false, msg);
 	}
 
 	public static boolean attachPrintStream(PrintStream ps) {

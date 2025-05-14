@@ -11,37 +11,28 @@ final class SKDSLoggerImpl extends SKDSLogger {
 	}
 
 	@Override
-	protected void log0(LoggerLevel level, int depth, boolean ln, Object msg) {
+	protected void log0(LoggerLevel level, int depth, boolean ln, boolean trace, Object msg) {
 		if (!isLoggingLevel(level)) return;
 		String message = String.valueOf(msg);
 		long time = System.currentTimeMillis();
 		String thread = null;
 		StackTraceElement stackTop = null;
 		Class<?> loggingClass = null;
-		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
-		if (config.isLogThread()) {
-			thread = Thread.currentThread().getName();
-		}
-		if (config.isIncludeLoggerClass()) {
-			loggingClass = this.loggingClass;
-		}
-		if (config.isLogStackTop()) {
-			var trace = Thread.currentThread().getStackTrace();
-			stackTop = trace[depth];
+		if (trace) {
+			SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
+			if (config.isLogThread()) {
+				thread = Thread.currentThread().getName();
+			}
+			if (config.isIncludeLoggerClass()) {
+				loggingClass = this.loggingClass;
+			}
+			if (config.isLogStackTop()) {
+				stackTop = Thread.currentThread().getStackTrace()[depth];
+			}
 		}
 		LogWriteable e;
-		if (ln) {
-			e = new LogLnEntry(
-				time,
-				message,
-				level,
-				thread,
-				stackTop,
-				loggingClass,
-				attachedPrintStreams.toArray(printStreamArray),
-				useGlobalPrintStream,
-				useFileOut
-			);
+		if (trace) {
+			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut, ln);
 		} else {
 			e = new LogEntry(time, message, level, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut);
 		}

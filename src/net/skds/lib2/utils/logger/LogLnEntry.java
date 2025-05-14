@@ -7,10 +7,10 @@ import java.io.PrintStream;
 import java.util.Date;
 
 record LogLnEntry(long time, String message, LoggerLevel level, String thread, StackTraceElement trace,
-				Class<?> loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
-				boolean useFileOut) implements LogWriter.LogWriteable {
+				  Class<?> loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
+				  boolean useFileOut, boolean ln) implements LogWriter.LogWriteable {
 
-	private static final String TERMINATION = AnsiEscape.NORMAL.sequence;
+	private static final String TERMINATION = '\n' + AnsiEscape.NORMAL.sequence;
 	//public static final int TERMINATION_LENGTH = TERMINATION.length() - 1;
 
 	@Override
@@ -25,7 +25,6 @@ record LogLnEntry(long time, String message, LoggerLevel level, String thread, S
 		if (thread != null) {
 			logMsg.append('[').append(thread).append("] ");
 		}
-		StackTraceElement trace = trace();
 		if (trace != null && !trace.getClassName().equals("java.lang.Throwable$WrappedPrintStream")) {
 			logMsg.append('[')
 					.append(StringUtils.cutStringAfterFromEnd(trace.getClassName(), '.'))
@@ -36,10 +35,9 @@ record LogLnEntry(long time, String message, LoggerLevel level, String thread, S
 					.append("] ");
 		}
 		logMsg.append('[').append(level.msg).append("] ");
-		logMsg.append(message).append('\n');
-
+		logMsg.append(this.message);
 		String message = logMsg.toString();
-		String decoratedMsg = level.getColor() + message + TERMINATION;
+		String decoratedMsg = level.getColor() + message + (ln ? TERMINATION : "");
 		String fileOut = useFileOut ? message : null;
 
 		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, fileOut);

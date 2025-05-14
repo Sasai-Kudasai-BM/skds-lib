@@ -1,8 +1,8 @@
 package net.skds.lib2.utils.logger;
 
-import java.io.OutputStream;
-
 import net.skds.lib2.io.CustomAbstractPrintStream;
+
+import java.io.OutputStream;
 
 class CustomPrintStream extends CustomAbstractPrintStream {
 
@@ -14,7 +14,7 @@ class CustomPrintStream extends CustomAbstractPrintStream {
 		super(out);
 		this.type = t;
 	}
-	
+
 	public enum Type {
 		ERR, OUT;
 	}
@@ -22,8 +22,8 @@ class CustomPrintStream extends CustomAbstractPrintStream {
 	@Override
 	protected void logLine(String x, boolean ln) {
 		switch (this.type) {
-			case OUT -> log.log0(LoggerLevel.SYSTEM_OUT, 4, ln, x);
-			case ERR -> log.log0(LoggerLevel.SYSTEM_ERR, 4, ln, x);
+			case OUT -> log.log0(LoggerLevel.SYSTEM_OUT, 4, ln, true, x);
+			case ERR -> log.log0(LoggerLevel.SYSTEM_ERR, 4, ln, true, x);
 		}
 	}
 
