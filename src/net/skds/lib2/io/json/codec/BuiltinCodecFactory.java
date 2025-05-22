@@ -942,7 +942,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 					return null;
 				}
 				case STRING -> {
-					URI uri = URI.create(reader.readString());
+					URI uri = URI.create(reader.readString().replace(" ", "%20"));
 					if (uri.getScheme() == null) {
 						return new File(uri.getPath());
 					}
