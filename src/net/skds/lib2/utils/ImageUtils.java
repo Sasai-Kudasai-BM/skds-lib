@@ -56,6 +56,14 @@ public class ImageUtils {
 		}
 	}
 
+	public static BufferedImage readImageUnknown(final InputStream is) {
+		try {
+			return ImageIO.read(is);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static byte[] writeImageToArrayPng(final BufferedImage image) {
 		return writeImageToArray(image, "png");
 	}

@@ -7,7 +7,10 @@ import net.skds.lib2.io.exception.EndOfInputException;
 import net.skds.lib2.io.exception.EndOfOutputException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 @UtilityClass
@@ -88,6 +91,22 @@ public class StringUtils {
 			return "";
 		}
 		return str.substring(i + 1);
+	}
+
+	public static String formatNamed(String pattern, String startSequence, String endSequence, Function<String, Object> mappingFunction) {
+		return new PatternFormatter(pattern, startSequence, endSequence).assemble(mappingFunction);
+	}
+
+	public static String formatNamed(String pattern, Function<String, Object> mappingFunction) {
+		return new PatternFormatter(pattern, "${", "}").assemble(mappingFunction);
+	}
+
+	public static PatternFormatter createFormatter(String pattern) {
+		return new PatternFormatter(pattern, "${", "}");
+	}
+
+	public static PatternFormatter createFormatter(String pattern, String startSequence, String endSequence) {
+		return new PatternFormatter(pattern, startSequence, endSequence);
 	}
 
 	public static void writeQuoted(CharOutput output, String value, char quote) throws EndOfOutputException {
@@ -239,4 +258,40 @@ public class StringUtils {
 		}
 	}
 
+	public static class PatternFormatter {
+
+		private final List<String> parts = new ArrayList<>();
+		private final List<String> keys = new ArrayList<>();
+
+		private PatternFormatter(String pattern, String startSequence, String endSequence) {
+			int i = pattern.indexOf(startSequence);
+			final int ssl = startSequence.length();
+			final int esl = endSequence.length();
+			if (i == -1) {
+				this.parts.add(pattern);
+			} else {
+				int c = 0;
+				for (; i != -1; i = pattern.indexOf(startSequence, c + 1)) {
+					this.parts.add(pattern.substring(c, i));
+					c = pattern.indexOf(endSequence, i + ssl);
+					this.keys.add(pattern.substring(i + ssl, c));
+					c += esl;
+				}
+				this.parts.add(pattern.substring(c));
+			}
+		}
+
+		public String assemble(Function<String, Object> mappingFunction) {
+			if (parts.size() == 1) {
+				return parts.get(0);
+			}
+			StringBuilder sb = new StringBuilder(parts.get(0));
+			int i = 0;
+			while (i < keys.size()) {
+				Object value = mappingFunction.apply(keys.get(i));
+				sb.append(value).append(parts.get(++i));
+			}
+			return sb.toString();
+		}
+	}
 }
