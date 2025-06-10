@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 public class FileUtils {
 
@@ -60,5 +61,17 @@ public class FileUtils {
 	public static boolean createParentDirs(Path path) {
 		File file = getParentFile(path);
 		return file.mkdirs();
+	}
+
+	public static void deleteFilesFromDirectory(File folder) {
+		if (folder.isDirectory()) {
+			for (File file : Objects.requireNonNull(folder.listFiles())) {
+				if (file.isFile()) {
+					file.delete();
+				} else {
+					deleteFilesFromDirectory(file);
+				}
+			}
+		}
 	}
 }
