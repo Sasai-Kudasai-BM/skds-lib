@@ -55,7 +55,7 @@ public class VarInt extends Number implements Comparable<Integer> {
 		return value;
 	}
 
-	public static int read(ByteBuffer buf) {
+	public static int readFromBuffer(ByteBuffer buf) {
 		// https://github.com/jvm-profiling-tools/async-profiler/blob/a38a375dc62b31a8109f3af97366a307abb0fe6f/src/converter/one/jfr/JfrReader.java#L393
 		int result = 0;
 		for (int shift = 0; ; shift += 7) {
@@ -114,6 +114,14 @@ public class VarInt extends Number implements Comparable<Integer> {
 					| ((value >>> 14) & 0x7F | 0x80) << 8 | ((value >>> 21) & 0x7F | 0x80));
 			output.writeByte((byte) (value >>> 28));
 		}
+	}
+
+	public static int getSize(int input) {
+		return (input & 0xFFFFFF80) == 0
+				? 1 : (input & 0xFFFFC000) == 0
+				? 2 : (input & 0xFFE00000) == 0
+				? 3 : (input & 0xF0000000) == 0
+				? 4 : 5;
 	}
 
 }

@@ -2,7 +2,10 @@ package net.skds.lib2.storage.palette;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.skds.lib2.utils.SKDSByteBuf;
+import net.skds.lib2.io.ExtendedDataOutput;
+import net.skds.lib2.mat.VarInt;
+
+import java.io.IOException;
 
 public class PalettedStorage<T> implements Cloneable {
 
@@ -57,25 +60,25 @@ public class PalettedStorage<T> implements Cloneable {
 
 	public int getDataSize() {
 		if (isSingle()) {
-			return 1 + SKDSByteBuf.getVarIntSize(directSupplier.getIndex(defaultValue)) + 1;
+			return 1 + VarInt.getSize(directSupplier.getIndex(defaultValue)) + 1;
 		}
-		int size = SKDSByteBuf.getVarIntSize(bits);
-		size += SKDSByteBuf.getVarIntSize(data.words.length);
+		int size = VarInt.getSize(bits);
+		size += VarInt.getSize(data.words.length);
 		size += data.words.length * 8;
 		return size;
 	}
 
-	public void write(SKDSByteBuf buffer) {
+	public void write(ExtendedDataOutput output) throws IOException {
 		if (isSingle()) {
-			buffer.writeByte(0); // Bits Per Entry
-			buffer.writeVarInt(directSupplier.getIndex(defaultValue)); // Palette
-			buffer.writeVarInt(0); //Data Array Length
+			output.writeByte(0); // Bits Per Entry
+			output.writeVarInt(directSupplier.getIndex(defaultValue)); // Palette
+			output.writeVarInt(0); //Data Array Length
 			// empty //Data Array
 		} else {
-			buffer.writeByte(bits); // Bits Per Entry
-			buffer.writeVarInt(data.words.length); //Data Array Length
+			output.writeByte(bits); // Bits Per Entry
+			output.writeVarInt(data.words.length); //Data Array Length
 			for (int i = 0; i < data.words.length; i++) {
-				buffer.putLong(data.words[i]);
+				output.writeLong(data.words[i]);
 			}
 		}
 	}

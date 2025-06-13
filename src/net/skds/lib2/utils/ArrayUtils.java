@@ -18,6 +18,14 @@ public class ArrayUtils {
 	public static final double[] EMPTY_DOUBLE = {};
 	public static final Object[] EMPTY_OBJECT = {};
 
+	public static void movePart(Object array, int from, int to, int count) {
+		System.arraycopy(array, from, array, to, count);
+	}
+
+	public static void rewind(Object array, int from, int count) {
+		System.arraycopy(array, from, array, 0, count);
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> T[] toArray(Collection<T> collection, Class<T> type) {
 		return collection.toArray((T[]) Array.newInstance(type, collection.size()));

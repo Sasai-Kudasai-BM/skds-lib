@@ -2,8 +2,8 @@ package net.skds.lib2.utils;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 
 import javax.management.MBeanServer;
 import java.awt.*;
@@ -36,8 +36,6 @@ public class SKDSUtils {
 	private static final ThreadLocal<MessageDigest> tlSHA1 = ThreadLocal.withInitial(() -> getMDSafe("SHA1"));
 	private static final ThreadLocal<MessageDigest> tlSHA256 = ThreadLocal.withInitial(() -> getMDSafe("SHA256"));
 	private static final ThreadLocal<MessageDigest> tlMD5 = ThreadLocal.withInitial(() -> getMDSafe("MD5"));
-
-	private static final ThreadLocal<Zipper> zippers = ThreadLocal.withInitial(Zipper::new);
 
 	public static final Runnable EMPTY_RUNNABLE = () -> {
 	};
@@ -189,59 +187,10 @@ public class SKDSUtils {
 		}
 	}
 
-	public static Zipper getZipper(int bufferSize) {
-		Zipper zipper = zippers.get();
-		if (zipper.buffer == null || zipper.buffer.capacity() < bufferSize) {
-			zipper.buffer = ByteBuffer.allocate(bufferSize);
-		}
-		return zipper;
-	}
-
-	//public static UUID uuidFromName(String name) {
-	//	byte[] data = name.getBytes(StandardCharsets.UTF_8);
-	//	long msb = 0;
-	//	long lsb = 0;
-	//	assert data.length <= 16 : "name must be no longer 16 symbols";
-	//	int to = Math.min(8, data.length);
-	//	for (int i = 0; i < to; i++)
-	//		msb = (msb << 8) | (data[i] & 0xff);
-	//	if (data.length >= 8) {
-	//		to = Math.min(16, data.length);
-	//		for (int i = 8; i < to; i++)
-	//			lsb = (lsb << 8) | (data[i] & 0xff);
-	//	}
-	//	return new UUID(msb, lsb);
-	//}
-
 	public static UUID uuidFromName(String name) {
 		return UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public static class Zipper {
-		public final Inflater inflater = new Inflater();
-		public final Deflater deflater = new Deflater();
-		@Getter
-		private ByteBuffer buffer;
-
-		private Zipper() {
-		}
-
-		public void pack(ByteBuffer content, int contentStart, int length) {
-			buffer.clear().put(content.array(), contentStart, length).flip();
-			deflater.setInput(buffer);
-			deflater.finish();
-			deflater.deflate(content.position(contentStart));
-			deflater.reset();
-		}
-
-		public void unpack(byte[] srcArr, int srcPos, int srcLength) throws DataFormatException {
-			buffer.clear();
-			inflater.setInput(srcArr, srcPos, srcLength);
-			inflater.inflate(buffer);
-			inflater.reset();
-			buffer.flip();
-		}
-	}
 
 	@NoArgsConstructor
 	@AllArgsConstructor
@@ -418,6 +367,30 @@ public class SKDSUtils {
 		MessageDigest md = tlMD5.get();
 		md.reset();
 		return md;
+	}
+
+	public static ByteBuffer compress(byte[] data, int offset, int len) {
+		Deflater deflater = new Deflater();
+		deflater.setInput(data, offset, len);
+		deflater.finish();
+		byte[] outBuffer = new byte[(Math.min(len + 32, 1024 * 8))];
+		ByteArrayExtendedDataOutput bao = new ByteArrayExtendedDataOutput(len + 32);
+		do {
+			int i = deflater.deflate(outBuffer);
+			bao.write(outBuffer, 0, i);
+		} while (!deflater.finished());
+
+		deflater.end();
+		return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
+	}
+
+	public static ByteBuffer decompress(byte[] data, int offset, int len, int uncompressedSize) throws DataFormatException {
+		Inflater inflater = new Inflater();
+		inflater.setInput(data, offset, len);
+		ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
+		inflater.inflate(outBuffer);
+		inflater.end();
+		return outBuffer.flip();
 	}
 
 	private static String getOSAndArc() {
