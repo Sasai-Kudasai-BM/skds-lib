@@ -2,6 +2,9 @@ package net.skds.lib2.io;
 
 import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -110,6 +113,10 @@ public final class ByteArrayExtendedDataOutput implements ExtendedDataOutput {
 		return pos;
 	}
 
+	public boolean isEmpty() {
+		return pos == 0;
+	}
+
 	public void setPos(int newPos) {
 		this.pos = newPos;
 	}
@@ -120,6 +127,14 @@ public final class ByteArrayExtendedDataOutput implements ExtendedDataOutput {
 
 	public byte[] toByteArray() {
 		return Arrays.copyOf(buffer, pos);
+	}
+
+	public void writeToOutput(DataOutput output) throws IOException {
+		output.write(this.buffer, 0, pos);
+	}
+
+	public void writeToOutput(OutputStream output) throws IOException {
+		output.write(this.buffer, 0, pos);
 	}
 
 	@Override
