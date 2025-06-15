@@ -388,7 +388,9 @@ public class SKDSUtils {
 		Inflater inflater = new Inflater();
 		inflater.setInput(data, offset, len);
 		ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
-		inflater.inflate(outBuffer);
+		do {
+			inflater.inflate(outBuffer);
+		} while (!inflater.finished());
 		inflater.end();
 		return outBuffer.flip();
 	}
