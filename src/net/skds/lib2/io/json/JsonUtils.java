@@ -2,10 +2,7 @@ package net.skds.lib2.io.json;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.io.json.codec.JsonCodecFactory;
-import net.skds.lib2.io.json.codec.JsonCodecOptions;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonDeserializer;
+import net.skds.lib2.io.json.codec.*;
 import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
@@ -47,6 +44,10 @@ public class JsonUtils {
 		JsonCodecOptions op = options.clone();
 		compactRegistry = new JsonCodecRegistry(op.setDecorationType(JsonCodecOptions.DecorationType.FLAT), userCodecFactory);
 		fancyRegistry = new JsonCodecRegistry(op.setDecorationType(JsonCodecOptions.DecorationType.FANCY), userCodecFactory);
+	}
+
+	public static void addRedirectType(Type original, Type replaced) {
+		addFactory(original, (t, r) -> new ReplacedCodec(t, replaced, r));
 	}
 
 	public static void addFactory(Type type, JsonCodecFactory factory) {
