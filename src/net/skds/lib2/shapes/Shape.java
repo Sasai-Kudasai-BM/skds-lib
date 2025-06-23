@@ -51,7 +51,13 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Shape withAttachment(Object attachment);
 
-	static final class JCodec extends TypedEnumAdapter<Shape, ShapeType> {
+	default double raytraceExit(Vec3 from, Vec3 to, CollisionContext context) {
+		Collision c = raytrace(to, from, context);
+		if (c != null) return from.distanceTo(to) * (1 - c.distance());
+		return -1;
+	}
+
+	final class JCodec extends TypedEnumAdapter<Shape, ShapeType> {
 		public JCodec(Type type, JsonCodecRegistry registry) {
 			super(type, ShapeType.class, registry);
 		}

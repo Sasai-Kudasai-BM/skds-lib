@@ -31,7 +31,7 @@ final class SKDSLoggerImpl extends SKDSLogger {
 			}
 		}
 		LogWriteable e;
-		if (trace) {
+		if (ln) {
 			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut, ln);
 		} else {
 			e = new LogEntry(time, message, level, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut);

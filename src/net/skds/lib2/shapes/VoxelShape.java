@@ -1,8 +1,8 @@
 package net.skds.lib2.shapes;
 
 import net.skds.lib2.mat.matrix3.Matrix3;
-import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.quat.Quat;
+import net.skds.lib2.mat.vec3.Vec3;
 
 import java.util.Arrays;
 
@@ -126,6 +126,14 @@ public sealed class VoxelShape implements CompositeShape {
 			offBoxes[i] = boxes[i].move(delta);
 		}
 		return new VoxelShape(offBoxes, center.add(delta), attachment);
+	}
+
+	public VoxelShape move(int x, int y, int z) {
+		final AABB[] offBoxes = new AABB[boxes.length];
+		for (int i = 0; i < offBoxes.length; i++) {
+			offBoxes[i] = boxes[i].move(x, y, z);
+		}
+		return new VoxelShape(offBoxes, center.add(x, y, z), attachment);
 	}
 
 	@Override
