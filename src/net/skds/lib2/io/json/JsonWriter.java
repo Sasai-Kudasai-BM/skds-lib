@@ -69,7 +69,14 @@ public interface JsonWriter {
 
 	void writeFloat(double n) throws IOException;
 
+	void writeFloat(float n) throws IOException;
+
 	default void writeFloat(String name, double n) throws IOException {
+		writeName(name);
+		writeFloat(n);
+	}
+
+	default void writeFloat(String name, float n) throws IOException {
 		writeName(name);
 		writeFloat(n);
 	}

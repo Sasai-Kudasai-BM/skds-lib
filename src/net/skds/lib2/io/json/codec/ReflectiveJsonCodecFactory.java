@@ -576,6 +576,8 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	private static void collectFields(Class<?> c, JsonCodecRegistry registry, List<FieldCodec> list) {
 		if (c == Object.class) return;
 
+		List<FieldCodec> fields = new ArrayList<>();
+
 		JsonCodecOptions options = registry.options;
 		for (Field f : c.getDeclaredFields()) {
 			if ((f.getModifiers() & options.getExcludeFieldModifiers()) != 0) {
@@ -584,27 +586,29 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			Class<?> ct = f.getType();
 			if (ct.isPrimitive()) {
 				if (ct == int.class) {
-					list.add(new IntFieldCodec(f));
+					fields.add(new IntFieldCodec(f));
 				} else if (ct == float.class) {
-					list.add(new FloatFieldCodec(f));
+					fields.add(new FloatFieldCodec(f));
 				} else if (ct == double.class) {
-					list.add(new DoubleFieldCodec(f));
+					fields.add(new DoubleFieldCodec(f));
 				} else if (ct == boolean.class) {
-					list.add(new BooleanFieldCodec(f));
+					fields.add(new BooleanFieldCodec(f));
 				} else if (ct == long.class) {
-					list.add(new LongFieldCodec(f));
+					fields.add(new LongFieldCodec(f));
 				} else if (ct == byte.class) {
-					list.add(new ByteFieldCodec(f));
+					fields.add(new ByteFieldCodec(f));
 				} else if (ct == short.class) {
-					list.add(new ShortFieldCodec(f));
+					fields.add(new ShortFieldCodec(f));
 				} else if (ct == char.class) {
-					list.add(new CharFieldCodec(f, registry));
+					fields.add(new CharFieldCodec(f, registry));
 				}
 			} else {
 				ObjFieldCodec codec = new ObjFieldCodec(f, registry);
-				list.add(codec);
+				fields.add(codec);
 			}
 		}
+
+		list.addAll(0, fields);
 
 		Class<?> sup = c.getSuperclass();
 		if (sup != Object.class) {

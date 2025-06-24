@@ -115,6 +115,12 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
+	public void writeFloat(float n) throws IOException {
+		pushValue();
+		output.append(String.valueOf(n));
+	}
+
+	@Override
 	public void writeFloatExp(double n) throws IOException {
 		if (cpv == JsonCapabilityVersion.JSON5) {
 			pushValue();

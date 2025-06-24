@@ -104,6 +104,12 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
+	public void writeFloat(float n) throws IOException {
+		pushValue();
+		output.append(String.valueOf(n));
+	}
+
+	@Override
 	public void writeFloatExp(double n) throws IOException {
 		writeFloat(n);
 		//throw new UnsupportedOperationException("Exponents are not available in " + capabilityVersion());
