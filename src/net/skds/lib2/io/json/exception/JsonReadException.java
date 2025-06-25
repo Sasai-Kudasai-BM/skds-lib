@@ -11,4 +11,8 @@ public class JsonReadException extends IOException {
 	public JsonReadException(Throwable cause) {
 		super(cause);
 	}
+
+	public JsonReadException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

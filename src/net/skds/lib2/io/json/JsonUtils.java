@@ -8,6 +8,7 @@ import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.json.codec.typed.TypedMapAdapter;
 import net.skds.lib2.io.json.elements.JsonElement;
+import net.skds.lib2.io.json.exception.JsonReadException;
 import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
@@ -110,7 +111,7 @@ public class JsonUtils {
 			String text = Files.readString(file);
 			return parseJson(text, clazz);
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			new JsonReadException("Exception while reading " + file, e).printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -184,7 +185,6 @@ public class JsonUtils {
 		Class<Object> type = (Class<Object>) object.getClass();
 		return fancyRegistry.getSerializer(type).toJson(object);
 	}
-
 
 	public static boolean saveJson(String path, Object cfg) {
 		return saveJson(Path.of(path), cfg);
