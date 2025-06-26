@@ -388,9 +388,14 @@ public class SKDSUtils {
 		Inflater inflater = new Inflater();
 		inflater.setInput(data, offset, len);
 		ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
-		do {
+		while (true) {
 			inflater.inflate(outBuffer);
-		} while (!inflater.finished());
+			if (!inflater.finished()) {
+				if (!outBuffer.hasRemaining()) {
+					throw new RuntimeException("Decompressed data size is larger than specified " + uncompressedSize);
+				}
+			} else break;
+		}
 		inflater.end();
 		return outBuffer.flip();
 	}
