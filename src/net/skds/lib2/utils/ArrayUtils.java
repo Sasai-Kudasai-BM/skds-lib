@@ -106,18 +106,23 @@ public class ArrayUtils {
 	}
 
 	public static <T> T getRandom(List<T> list) {
+		if (list.isEmpty()) return null;
 		return list.get(FastMath.RANDOM.nextInt(list.size()));
 	}
 
 	public static <T> T getRandom(List<T> list, Random random) {
+
+		if (list.isEmpty()) return null;
 		return list.get(random.nextInt(list.size()));
 	}
 
 	public static <T> T getRandom(T[] array) {
+		if (array.length == 0) return null;
 		return array[FastMath.RANDOM.nextInt(array.length)];
 	}
 
 	public static <T> T getRandom(T[] array, Random random) {
+		if (array.length == 0) return null;
 		return array[random.nextInt(array.length)];
 	}
 
