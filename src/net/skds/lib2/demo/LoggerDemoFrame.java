@@ -21,13 +21,17 @@ public class LoggerDemoFrame extends JFrame {
 		});
 		add(btn);
 
-
 		btn = new JButton("log");
 		btn.addActionListener(e -> {
-			log.log("amogus");
+			log.log("log");
 		});
 		add(btn);
 
+		btn = new JButton("warn");
+		btn.addActionListener(e -> {
+			log.warn("warn");
+		});
+		add(btn);
 
 		btn = new JButton("sout");
 		btn.addActionListener(e -> {
@@ -35,17 +39,9 @@ public class LoggerDemoFrame extends JFrame {
 		});
 		add(btn);
 
-
 		btn = new JButton("serr");
 		btn.addActionListener(e -> {
 			System.err.println("serr");
-		});
-		add(btn);
-
-
-		btn = new JButton("warn");
-		btn.addActionListener(e -> {
-			log.warn("warn");
 		});
 		add(btn);
 
@@ -54,20 +50,27 @@ public class LoggerDemoFrame extends JFrame {
 			System.out.println();
 		});
 		add(btn);
+		
+		btn = new JButton("print");
+		btn.addActionListener(e -> {
+			System.out.println("string: ");
+			System.out.print("print");
+		});
+		add(btn);
+
 		btn = new JButton("testAll");
 		btn.addActionListener(e -> {
 			System.out.println("1");
 			System.err.println("2");
 			System.out.println();
 			System.err.println();
-			SKDSLoggerFactory.getLogger().info("info");
-			SKDSLoggerFactory.getLogger().debug("debug");
-			SKDSLoggerFactory.getLogger().warn("warn");
-			SKDSLoggerFactory.getLogger().error("error");
-			SKDSLoggerFactory.getLogger().log("log");
+			log.info("info");
+			log.debug("debug");
+			log.warn("warn");
+			log.error("error");
+			log.log("log");
 		});
 		add(btn);
-
 
 		setMinimumSize(new Dimension(300, 50));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);

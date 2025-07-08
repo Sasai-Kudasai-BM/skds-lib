@@ -454,9 +454,9 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 			this.constructor = tmpC;
 		}
 
-		private <E extends Enum<E>> Class<E> castEnum(Class<?> tClass) {
+		/*private <E extends Enum<E>> Class<E> castEnum(Class<?> tClass) {
 			return AutoCast.cast(tClass);
-		}
+		}*/
 
 		@Override
 		public void write(Collection<Object> value, JsonWriter writer) throws IOException {

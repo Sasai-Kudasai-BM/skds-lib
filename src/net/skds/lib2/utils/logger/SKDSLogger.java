@@ -106,5 +106,4 @@ public abstract class SKDSLogger {
 		LogPrintln e = new LogPrintln(time, level, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut);
 		LogWriter.INSTANCE.add(e);
 	}
-
 }
