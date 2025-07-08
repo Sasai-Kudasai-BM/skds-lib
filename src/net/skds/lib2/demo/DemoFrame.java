@@ -1,6 +1,7 @@
 package net.skds.lib2.demo;
 
 import net.skds.lib2.demo.classloader.DemoClassloaderFrame;
+import net.skds.lib2.demo.classloader.DemoClassloaderFrame2;
 import net.skds.lib2.demo.demo3d.Demo3dExample;
 import net.skds.lib2.demo.demo3d.Demo3dFrame;
 import net.skds.lib2.mat.FastMath;
@@ -39,6 +40,10 @@ public class DemoFrame extends JFrame {
 
 		button = new JButton("Classloader");
 		button.addActionListener(e -> new DemoClassloaderFrame(this).setLocationRelativeTo(this));
+		add(button);
+
+		button = new JButton("StringClassloader");
+		button.addActionListener(e -> new DemoClassloaderFrame2(this).setLocationRelativeTo(this));
 		add(button);
 
 		button = new JButton("WeightedPool");
@@ -88,7 +93,7 @@ public class DemoFrame extends JFrame {
 		//add(button);
 		button = new JButton("Demo3d");
 		button.addActionListener(e ->
-			Demo3dExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
+				Demo3dExample.init(new Demo3dFrame()).setLocationRelativeTo(this)
 		);
 		add(button);
 
