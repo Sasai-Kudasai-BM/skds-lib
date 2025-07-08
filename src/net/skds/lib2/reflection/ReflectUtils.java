@@ -4,6 +4,8 @@ import lombok.experimental.UtilityClass;
 import net.skds.lib2.utils.function.MultiSupplier;
 import sun.reflect.ReflectionFactory;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,7 +144,6 @@ public class ReflectUtils {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class<?>) {
 			// type is a normal class.
@@ -179,6 +180,27 @@ public class ReflectUtils {
 			throw new IllegalArgumentException("Expected a Class, ParameterizedType, or "
 					+ "GenericArrayType, but <" + type + "> is of type " + className);
 		}
+	}
+
+	public static final MethodHandles.Lookup METHOD_LOOKUP = MethodHandles.lookup();
+
+	public static MethodHandle getMethodHandle(Class<?> tClass, String methodName, Class<?>... args) {
+		try {
+			Method method = tClass.getDeclaredMethod(methodName, args);
+			return METHOD_LOOKUP.unreflect(method);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static MethodHandle getMethodHandle(Method method) {
+		try {
+			return METHOD_LOOKUP.unreflect(method);
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
