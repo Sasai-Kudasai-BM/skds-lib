@@ -121,6 +121,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				case NONE -> {
 					return new UnsupportedJsonCodec<>(tClass, registry);
 				}
+				case BOTH -> {}
 			}
 		}
 		return new CombinedJsonCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer(tClass, registry));
@@ -139,6 +140,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				case NONE -> {
 					return new UnsupportedJsonCodec<>(tClass, registry);
 				}
+				case BOTH -> {}
 			}
 		}
 		return new CombinedJsonCodec<>(new RecordSerializer(tClass, registry), new RecordDeserializer(tClass, registry));

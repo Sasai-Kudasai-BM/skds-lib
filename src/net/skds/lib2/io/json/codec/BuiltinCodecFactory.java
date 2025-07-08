@@ -115,7 +115,9 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				}
 			}
 			if (cl.isEnum()) {
-				return new EnumCodec<>(type, registry);
+				return new EnumCodec<>(cl, registry);
+			} else if (cl.getSuperclass() != null && cl.getSuperclass().isEnum()) {
+				return new EnumCodec<>(cl.getSuperclass(), registry);
 			} else if (cl.isArray()) {
 				Class<?> cle = cl.componentType();
 				if (cle.isPrimitive()) {
@@ -169,7 +171,7 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 
 	private static boolean isFinal(Type type) {
 		if (type instanceof Class<?> cl) {
-			return Modifier.isFinal(cl.getModifiers()) || cl.isRecord() || cl.isEnum();
+			return Modifier.isFinal(cl.getModifiers()) || cl.isRecord();
 		}
 		return false;
 	}
