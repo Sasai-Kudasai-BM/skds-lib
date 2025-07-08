@@ -16,7 +16,6 @@ import java.nio.file.Path;
 @SuppressWarnings("unused")
 public final class SafeLinker {
 
-
 	public static final boolean NATIVE_ORDER = ByteOrder.BIG_ENDIAN == ByteOrder.nativeOrder();
 	public static final Arena ARENA = Arena.global();
 	public static final Linker LINKER = Linker.nativeLinker();

@@ -42,7 +42,7 @@ public enum AnsiEscape {
 	BG_BRIGHT_MAGENTA(105),
 	BG_BRIGHT_CYAN(106),
 	BG_BRIGHT_WHITE(107),
-	
+
 	;
 
 	private static final String START_KEYCODE = "\u001b[";

@@ -35,7 +35,6 @@ public class BezierCurve {
 		;
 	}
 
-	
 	/**
 	 * (1-t)^2*P0 + 2t(1 - t)P1 + t^2*P2
 	 */

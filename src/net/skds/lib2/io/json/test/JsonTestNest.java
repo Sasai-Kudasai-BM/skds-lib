@@ -54,7 +54,7 @@ public class JsonTestNest {
 		public ConfigType<?> getConfigType() {
 			return childAdapter;
 		}
-		
+
 	}
 
 	@AllArgsConstructor

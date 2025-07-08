@@ -9,7 +9,7 @@ import net.skds.lib2.demo.demo3d.Demo3dShape.DemoShape3dHolder;
 import net.skds.lib2.shapes.Shape;
 
 public interface Demo3dShapeCollector {
-	
+
 	default void addShape(Supplier<Shape> shape) {
 		addShape(Demo3dShape.of(shape));
 	}
@@ -65,7 +65,7 @@ public interface Demo3dShapeCollector {
 
 			throw new IllegalStateException(shape.getClass().toGenericString());
 		}
-		
+
 		@Override
 		public final void clear() {
 			this.array.clear();

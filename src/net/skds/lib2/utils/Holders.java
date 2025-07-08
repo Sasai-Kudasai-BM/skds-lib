@@ -132,7 +132,7 @@ public final class Holders {
 		public int increment() {
 			return increment(1);
 		}
-		
+
 		public int increment(int inc) {
 			return value += inc;
 		}
@@ -162,7 +162,7 @@ public final class Holders {
 		public long increment() {
 			return increment(1);
 		}
-		
+
 		public long increment(long inc) {
 			return value += inc;
 		}
@@ -192,7 +192,7 @@ public final class Holders {
 		public float increment() {
 			return increment(1);
 		}
-		
+
 		public float increment(float inc) {
 			return value += inc;
 		}
@@ -222,7 +222,7 @@ public final class Holders {
 		public double increment() {
 			return increment(1);
 		}
-		
+
 		public double increment(float inc) {
 			return value += inc;
 		}
@@ -266,7 +266,7 @@ public final class Holders {
 		public byte increment() {
 			return increment((byte)1);
 		}
-		
+
 		public byte increment(byte inc) {
 			return value += inc;
 		}
@@ -296,7 +296,7 @@ public final class Holders {
 		public char increment() {
 			return increment(1);
 		}
-		
+
 		public char increment(int inc) {
 			return value += inc;
 		}
@@ -325,7 +325,7 @@ public final class Holders {
 		public short increment() {
 			return increment((short)1);
 		}
-		
+
 		public short increment(short inc) {
 			return value += inc;
 		}

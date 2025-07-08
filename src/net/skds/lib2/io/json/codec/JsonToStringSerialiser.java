@@ -10,7 +10,7 @@ public class JsonToStringSerialiser implements JsonSerializer<Object> {
 
 	@Getter(onMethod_ = @Override)
 	private JsonCodecRegistry registry;
-	
+
 	public JsonToStringSerialiser(Type type, JsonCodecRegistry registry) {
 		this.registry = registry;
 	}
@@ -23,5 +23,5 @@ public class JsonToStringSerialiser implements JsonSerializer<Object> {
 			writer.writeString(valueAsKeyString(value));
 		}
 	}
-	
+
 }

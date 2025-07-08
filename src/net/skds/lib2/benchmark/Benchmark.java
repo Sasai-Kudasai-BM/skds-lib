@@ -15,7 +15,6 @@ public abstract class Benchmark {
 		this.iterations = iterations;
 	}
 
-
 	public final void run() {
 		run(SKDSUtils.EMPTY_RUNNABLE);
 	}

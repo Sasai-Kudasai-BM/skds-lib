@@ -4,7 +4,9 @@ import net.skds.lib2.io.json.JsonUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 public interface AutoString {
 
@@ -37,6 +39,16 @@ public interface AutoString {
 		if (object == null) {
 			return "null";
 		}
+		if (object instanceof String instance) {
+			return instance;
+		}
+		if (object instanceof Collection || object instanceof Map) {
+			return object.toString();
+		}
+		if (object.getClass().isArray()) {
+			return Arrays.toString((Object[])object);
+		}
+
 		StringBuilder builder = new StringBuilder();
 		Iterator<Field> iterator = Arrays.asList(object.getClass().getFields()).iterator();
 		while (iterator.hasNext()) {

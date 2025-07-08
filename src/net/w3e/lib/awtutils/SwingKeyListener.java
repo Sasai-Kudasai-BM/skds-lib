@@ -38,7 +38,7 @@ public class SwingKeyListener {
 		this.component = (JComponent)jComponent;
 		this.listener = listener;
 	}
-	
+
 	public final SwingKeyListener install() {
 		this.component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(this.pressedKeyStroke, this.pressedKey);
 		this.component.getActionMap().put(this.pressedKey, new ActionListener(true));

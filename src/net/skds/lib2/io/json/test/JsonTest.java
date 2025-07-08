@@ -148,7 +148,6 @@ public class JsonTest {
 		/*Demo3dShapeHolder shaper = new Demo3dShapeHolder() {
 			@Override
 			public void addShape(Demo3dShape shape) {
-				
 			}
 		};
 		Demo3dFrameExample.initDefault(shaper);*/

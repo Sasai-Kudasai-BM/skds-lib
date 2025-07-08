@@ -24,7 +24,6 @@ public class TestClassloader extends ClassLoader {
 		}
 	}
 
-
 	@Override
 	protected URL findResource(String name) {
 		return super.findResource(name);

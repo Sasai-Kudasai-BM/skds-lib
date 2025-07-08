@@ -40,7 +40,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return null;
 		}
 	}
-	
+
 	public JsonObject getAsJsonObjectOrNew(String key) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -49,7 +49,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return new JsonObject();
 		}
 	}
-	
+
 	public JsonObject getAsJsonObjectOr(String key, JsonObject or) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -59,7 +59,6 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 	}
 
-
 	public JsonArray getAsJsonArrayOrNull(String key) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -68,7 +67,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return null;
 		}
 	}
-	
+
 	public JsonArray getAsJsonArrayOrNew(String key) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -77,7 +76,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return new JsonArray();
 		}
 	}
-	
+
 	public JsonArray getAsJsonArrayOr(String key, JsonArray or) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -96,7 +95,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return null;
 		}
 	}
-	
+
 	public String getAsJsonStringOrNew(String key) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -105,7 +104,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return "";
 		}
 	}
-	
+
 	public String getAsJsonStringOr(String key, String or) {
 		JsonElement element = this.get(key);
 		if (element != null) {

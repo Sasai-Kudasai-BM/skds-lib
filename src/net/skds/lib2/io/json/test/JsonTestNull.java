@@ -7,7 +7,7 @@ import net.skds.lib2.io.json.elements.JsonObject;
 import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 public class JsonTestNull {
-	
+
 	public static void test(JsonTestRegistry registry) {
 		String data = "{\"value\":null}";
 

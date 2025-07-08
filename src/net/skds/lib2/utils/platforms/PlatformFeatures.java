@@ -9,11 +9,10 @@ public abstract sealed class PlatformFeatures permits WindowsPlatform {
 
 	private static PlatformFeatures instance;
 
-
 	public abstract void addKeyListener(KeyListener listener);
 
 	public abstract void removeKeyListener(KeyListener listener);
-	
+
 	public abstract void addMouseListener(MouseListener listener);
 
 	public abstract void removeMouseListener(MouseListener listener);

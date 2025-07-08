@@ -7,7 +7,7 @@ import java.awt.PointerInfo;
 import java.awt.Robot;
 
 public class RobotUtils {
-	
+
 	public static final Robot ROBOT;
 
 	static {

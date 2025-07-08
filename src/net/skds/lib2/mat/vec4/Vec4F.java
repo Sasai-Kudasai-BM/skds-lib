@@ -1,7 +1,7 @@
 package net.skds.lib2.mat.vec4;
 
 public record Vec4F(float xf, float yf, float zf, float wf) implements Vec4 {
-	
+
 	@Override
 	public double x() {
 		return this.xf;

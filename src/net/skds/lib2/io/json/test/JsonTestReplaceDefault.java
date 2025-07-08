@@ -29,7 +29,7 @@ public class JsonTestReplaceDefault {
 	private class JTRD {}
 
 	private static class JTRD1 extends AbstractJsonCodec<JTRD> {
-	
+
 		protected JTRD1(Type type, JsonCodecRegistry registry) {
 			super(registry);
 		}
@@ -47,7 +47,7 @@ public class JsonTestReplaceDefault {
 	}
 
 	private static class JTRD2 extends AbstractJsonCodec<JTRD> {
-	
+
 		protected JTRD2(Type type, JsonCodecRegistry registry) {
 			super(registry);
 		}

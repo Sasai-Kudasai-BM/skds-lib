@@ -251,7 +251,7 @@ public class RenderDemo3dPanel extends JPanel {
 			Pair<Vec3, Vec3> line = lines[i];
 			Vec3 a = line.a();
 			Vec3 b = line.b();
-			
+
 			drawLine(g, stack, a, b);
 		}
 		g.setStroke(stroke);

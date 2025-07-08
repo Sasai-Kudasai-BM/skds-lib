@@ -2,7 +2,6 @@ package net.skds.lib2.demo;
 
 import lombok.CustomLog;
 import net.skds.lib2.utils.logger.SKDSLogger;
-import net.skds.lib2.utils.logger.SKDSLoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +49,7 @@ public class LoggerDemoFrame extends JFrame {
 			System.out.println();
 		});
 		add(btn);
-		
+
 		btn = new JButton("print");
 		btn.addActionListener(e -> {
 			System.out.println("string: ");

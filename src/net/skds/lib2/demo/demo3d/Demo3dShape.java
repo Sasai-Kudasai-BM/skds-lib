@@ -122,7 +122,7 @@ public abstract class Demo3dShape {
 
 	//@AllArgsConstructor
 	public abstract static class Demo3dShapeInterractable extends Demo3dShape {
-	
+
 		protected final Shape staticBox;
 
 		protected final DemoShape3dHolder[] shapes;
@@ -170,7 +170,7 @@ public abstract class Demo3dShape {
 		protected final void setHuman(Shape human) {
 			this.shapes[1].setShape(human);
 		}
-		
+
 		@Override
 		public final void mousePressedM1(MouseEvent event) {
 			this.move = 1;
@@ -180,7 +180,7 @@ public abstract class Demo3dShape {
 		public final void mouseReleasedM1(MouseEvent event) {
 			this.move = 0;
 		}
-		
+
 		@Override
 		public final void mousePressedM2(MouseEvent event) {
 			this.move = -1;

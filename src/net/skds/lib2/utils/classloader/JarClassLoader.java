@@ -17,7 +17,6 @@ public final class JarClassLoader extends ClassLoader {
 	private static final int DOT_CLASS_LENGTH = ".class".length();
 	private final String PROTOCOL = "jcl-" + getClass().getSimpleName() + hashCode();
 
-
 	private final Map<String, byte[]> resourceMap;
 	private final MemoryURLStreamHandler handler;
 

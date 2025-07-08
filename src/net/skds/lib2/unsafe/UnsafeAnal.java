@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
 public final class UnsafeAnal {
 
 	public static final Unsafe UNSAFE = getUnsafe();
-	
+
 	private static Unsafe getUnsafe() {
 		try {
 			Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
