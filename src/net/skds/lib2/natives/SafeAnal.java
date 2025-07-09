@@ -20,14 +20,14 @@ public class SafeAnal {
 	private static final VarHandle VH_FLOAT = ValueLayout.JAVA_FLOAT.varHandle();
 	private static final VarHandle VH_DOUBLE = ValueLayout.JAVA_DOUBLE.varHandle();
 
-	public static final MemoryLayout BOOLEAN = ValueLayout.JAVA_BOOLEAN;
-	public static final MemoryLayout BYTE = ValueLayout.JAVA_BYTE;
-	public static final MemoryLayout SHORT = ValueLayout.JAVA_SHORT;
-	public static final MemoryLayout INT = ValueLayout.JAVA_INT;
-	public static final MemoryLayout LONG = ValueLayout.JAVA_LONG;
-	public static final MemoryLayout PTR = ValueLayout.JAVA_LONG;
-	public static final MemoryLayout FLOAT = ValueLayout.JAVA_FLOAT;
-	public static final MemoryLayout DOUBLE = ValueLayout.JAVA_DOUBLE;
+	public static final ValueLayout BOOLEAN = ValueLayout.JAVA_BOOLEAN;
+	public static final ValueLayout BYTE = ValueLayout.JAVA_BYTE;
+	public static final ValueLayout SHORT = ValueLayout.JAVA_SHORT;
+	public static final ValueLayout INT = ValueLayout.JAVA_INT;
+	public static final ValueLayout LONG = ValueLayout.JAVA_LONG;
+	public static final ValueLayout PTR = ValueLayout.JAVA_LONG;
+	public static final ValueLayout FLOAT = ValueLayout.JAVA_FLOAT;
+	public static final ValueLayout DOUBLE = ValueLayout.JAVA_DOUBLE;
 
 	public static final MemorySegment ALL_MEMORY = MemorySegment.NULL.reinterpret((1L << 63) - 1);
 
@@ -42,6 +42,34 @@ public class SafeAnal {
 			alignment += calcPadding(alignment, (int) ml.byteAlignment()) + ml.byteSize();
 		}
 		return arena.allocate(alignment, 8);
+	}
+
+	public static long[] allocSlices(Arena arena, int... sizes) {
+		long totalSize = 0;
+		final long[] arr = new long[sizes.length];
+		for (int i = 0; i < sizes.length; i++) {
+			int s = sizes[i];
+			totalSize += calcPadding(totalSize, Math.min(s, 8));
+			arr[i] = totalSize;
+			totalSize += s;
+		}
+		MemorySegment segment = arena.allocate(totalSize);
+		long address = segment.address();
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] += address;
+		}
+		return arr;
+	}
+
+	public static long[] allocPointers(Arena arena, int count) {
+		long totalSize = count * 8L;
+		final long[] arr = new long[count];
+		MemorySegment segment = arena.allocate(totalSize);
+		long address = segment.address();
+		for (int i = 0; i < count; i++) {
+			arr[i] = address + i * 8L;
+		}
+		return arr;
 	}
 
 	public static long[] slices(MemorySegment segment, MemoryLayout... sizes) {

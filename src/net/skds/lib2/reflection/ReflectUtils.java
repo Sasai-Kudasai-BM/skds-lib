@@ -2,7 +2,6 @@ package net.skds.lib2.reflection;
 
 import lombok.experimental.UtilityClass;
 import net.skds.lib2.utils.function.MultiSupplier;
-import sun.reflect.ReflectionFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -25,19 +24,17 @@ public class ReflectUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> Supplier<T> getConstructor(Class<T> tClass) {
-		Constructor<?> c = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(tClass);
-		if (c == null) {
+		Constructor<?> c;
+		try {
+			c = tClass.getDeclaredConstructor();
 			try {
-				c = tClass.getDeclaredConstructor();
-				try {
-					c.setAccessible(true);
-				} catch (InaccessibleObjectException exception) {
-					exception.printStackTrace(System.err);
-					return null;
-				}
-			} catch (NoSuchMethodException e) {
+				c.setAccessible(true);
+			} catch (InaccessibleObjectException exception) {
+				exception.printStackTrace(System.err);
 				return null;
 			}
+		} catch (NoSuchMethodException e) {
+			return null;
 		}
 		Constructor<?> finalC = c;
 		return () -> {

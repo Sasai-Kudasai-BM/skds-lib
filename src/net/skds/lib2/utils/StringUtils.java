@@ -52,6 +52,26 @@ public class StringUtils {
 		return "0x%x".formatted(value);
 	}
 
+	public static String uppercaseFirstChar(String str) {
+		if (str.length() < 2) {
+			if (str.isEmpty()) {
+				return str;
+			}
+			return String.valueOf(Character.toUpperCase(str.charAt(0)));
+		}
+		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+	}
+
+	public static String lowercaseFirstChar(String str) {
+		if (str.length() < 2) {
+			if (str.isEmpty()) {
+				return str;
+			}
+			return String.valueOf(Character.toLowerCase(str.charAt(0)));
+		}
+		return Character.toLowerCase(str.charAt(0)) + str.substring(1);
+	}
+
 	public static String cutStringBefore(String str, char split) {
 		int i = str.indexOf(split);
 		if (i == -1) {

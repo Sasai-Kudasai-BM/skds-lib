@@ -12,20 +12,8 @@ public class User32 extends AbstractLinkedLibrary {
 
 	private static User32 instance;
 
-	public final UpcallLink<LowLevelKeyboardProc> lowLevelKeyboardProcUL = SafeLinker.createUpcallLink(
-			User32.LowLevelKeyboardProc.class,
-			SafeLinker.G_INT,
-			SafeLinker.G_INT,
-			SafeLinker.G_INT,
-			SafeLinker.G_LONG
-	);
-	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = SafeLinker.createUpcallLink(
-			User32.LowLevelMouseProc.class,
-			SafeLinker.G_INT,
-			SafeLinker.G_INT,
-			SafeLinker.G_INT,
-			SafeLinker.G_LONG
-	);
+	public final UpcallLink<LowLevelKeyboardProc> lowLevelKeyboardProcUL = SafeLinker.createUpcallLink(User32.LowLevelKeyboardProc.class);
+	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = SafeLinker.createUpcallLink(User32.LowLevelMouseProc.class);
 
 	private final MethodHandle peekMessage = createHandle(lib, "PeekMessageA", BOOLEAN, PTR, PTR, INT, INT, INT);
 	private final MethodHandle waitMessage = createHandle(lib, "WaitMessage", BOOLEAN);

@@ -5,6 +5,7 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
+@Deprecated
 @UtilityClass
 @SuppressWarnings("unused")
 public final class UnsafeAnal {

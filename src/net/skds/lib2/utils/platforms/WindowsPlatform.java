@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.lang.foreign.Arena;
 import java.lang.foreign.GroupLayout;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -276,6 +277,7 @@ final class WindowsPlatform extends PlatformFeatures {
 
 		@Override
 		public void run() {
+			Arena arena = Arena.ofAuto();
 			User32.LowLevelKeyboardProc kCaller = (n, w, l) -> {
 				if (n < 0) {
 					log.warn("User32.LowLevelKeyboardProc: n is negative " + n);
@@ -335,13 +337,13 @@ final class WindowsPlatform extends PlatformFeatures {
 			};
 
 			try {
-				MemorySegment segment = user32.lowLevelKeyboardProcUL.bind(kCaller);
+				MemorySegment segment = user32.lowLevelKeyboardProcUL.bind(kCaller, arena);
 				hookHandle = user32.setWindowsHookExA(WH_KEYBOARD_LL, segment.address(), moduleHandle, 0);
 				if (hookHandle == 0) {
 					int err = kernel32.getLastError();
 					throw new RuntimeException("Unable to create hook: err id " + err);
 				}
-				segment = user32.lowLevelMouseProc.bind(mCaller);
+				segment = user32.lowLevelMouseProc.bind(mCaller, arena);
 				hookHandle = user32.setWindowsHookExA(WH_MOUSE_LL, segment.address(), moduleHandle, 0);
 				if (hookHandle == 0) {
 					int err = kernel32.getLastError();
