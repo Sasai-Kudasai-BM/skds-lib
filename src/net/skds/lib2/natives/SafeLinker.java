@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Method;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -29,15 +30,24 @@ public final class SafeLinker {
 
 	private static final Map<Class<?>, ValueLayout> primitiveLayouts = new HashMap<>();
 
-	public static final ValueLayout BOOLEAN = ValueLayout.JAVA_BOOLEAN;
-	public static final ValueLayout BYTE = ValueLayout.JAVA_BYTE;
-	public static final ValueLayout SHORT = ValueLayout.JAVA_SHORT;
-	public static final ValueLayout INT = ValueLayout.JAVA_INT;
-	public static final ValueLayout LONG = ValueLayout.JAVA_LONG;
-	public static final ValueLayout PTR = ValueLayout.JAVA_LONG;
-	public static final ValueLayout FLOAT = ValueLayout.JAVA_FLOAT;
-	public static final ValueLayout DOUBLE = ValueLayout.JAVA_DOUBLE;
+	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
+	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
+	public static final ValueLayout.OfShort SHORT = ValueLayout.JAVA_SHORT;
+	public static final ValueLayout.OfInt INT = ValueLayout.JAVA_INT;
+	public static final ValueLayout.OfLong LONG = ValueLayout.JAVA_LONG;
+	public static final ValueLayout.OfLong PTR = ValueLayout.JAVA_LONG;
+	public static final ValueLayout.OfFloat FLOAT = ValueLayout.JAVA_FLOAT;
+	public static final ValueLayout.OfDouble DOUBLE = ValueLayout.JAVA_DOUBLE;
 	public static final ValueLayout VOID = null;
+
+	public static final VarHandle BOOLEAN_HANDLE = BOOLEAN.varHandle();
+	public static final VarHandle BYTE_HANDLE = BYTE.varHandle();
+	public static final VarHandle SHORT_HANDLE = SHORT.varHandle();
+	public static final VarHandle INT_HANDLE = INT.varHandle();
+	public static final VarHandle LONG_HANDLE = LONG.varHandle();
+	public static final VarHandle FLOAT_HANDLE = FLOAT.varHandle();
+	public static final VarHandle DOUBLE_HANDLE = DOUBLE.varHandle();
+
 
 	public static final TypeGlue G_BOOLEAN = new TypeGlue(ValueLayout.JAVA_BOOLEAN, boolean.class);
 	public static final TypeGlue G_BYTE = new TypeGlue(ValueLayout.JAVA_BYTE, byte.class);

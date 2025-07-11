@@ -23,10 +23,9 @@ public final class CBField extends CBElement {
 
 		if (initializer != null) {
 			sb.append(" = ");
-			initializer.write(sb);
+			TextClassBuilder.writeTabbed(initializer.write(), sb);
 		} else {
 			sb.append(";");
 		}
-		sb.append("\n\t");
 	}
 }

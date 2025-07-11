@@ -46,9 +46,9 @@ public final class CBMethod extends CBElement {
 		}
 
 		sb.append(") ");
-		if (!body.multiline()) sb.append("{\n\t\t");
-		body.write(sb);
-		if (!body.multiline()) sb.append("\n\t}\n\t");
+		sb.append("{\n\t\t");
+		TextClassBuilder.writeTabbed(body.write(), sb);
+		sb.append("}\n\t");
 		sb.append("\n\t");
 	}
 

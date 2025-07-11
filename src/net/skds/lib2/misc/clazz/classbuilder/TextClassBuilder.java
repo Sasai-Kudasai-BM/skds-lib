@@ -179,11 +179,13 @@ public class TextClassBuilder {
 
 	static void writeJavadoc(CBJavadoc javadoc, StringBuilder sb, int tabs) {
 		if (javadoc.lines().isEmpty()) return;
-		sb.append("/**\n").repeat("\t", tabs);
+		sb.append("/**\n").repeat("\t", tabs)
+				.append("*<pre>\n").repeat("\t", tabs);
 		for (int i = 0; i < javadoc.lines().size(); i++) {
 			sb.append("* ").append(javadoc.lines().get(i)).append("\n").repeat("\t", tabs);
 		}
-		sb.append("**/\n").repeat("\t", tabs);
+		sb.append("*</pre>").append("\n").repeat("\t", tabs)
+				.append("**/\n").repeat("\t", tabs);
 	}
 
 	static void appendModifiers(StringBuilder sb, int modifiers) {
@@ -265,13 +267,15 @@ public class TextClassBuilder {
 	}
 
 	public TextClassBuilder checkImport(CBType type) {
+		if (this.pack.equals(type.pack())) {
+			return this;
+		}
 		imports.add(type);
 		return this;
 	}
 
 	public TextClassBuilder checkImport(Class<?> type) {
-		imports.add(CBType.of(type));
-		return this;
+		return checkImport(CBType.of(type));
 	}
 
 	public TextClassBuilder importStatic(CBType clazz, String name) {
@@ -325,7 +329,7 @@ public class TextClassBuilder {
 		if (e instanceof CBElement element) {
 			element.imports(this);
 		} else if (e instanceof TextClassBuilder tcb) {
-			imports.addAll(tcb.imports);
+			for (CBType i : tcb.imports) checkImport(i);
 		}
 		elements.add(e);
 		return this;

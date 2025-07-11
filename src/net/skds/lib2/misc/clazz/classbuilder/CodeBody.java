@@ -1,11 +1,12 @@
 package net.skds.lib2.misc.clazz.classbuilder;
 
+import java.util.Arrays;
 import java.util.List;
 
 public record CodeBody(List<String> body, List<CBType> imports) {
 
 	public CodeBody(String body) {
-		this(List.of(body), null);
+		this(Arrays.asList(body.split("\n")), null);
 	}
 
 	public CodeBody(List<String> body) {
@@ -22,15 +23,18 @@ public record CodeBody(List<String> body, List<CBType> imports) {
 		return body.size() > 1;
 	}
 
-	public void write(StringBuilder sb) {
+	public String write() {
+		StringBuilder sb = new StringBuilder();
 		if (multiline()) {
-			sb.append("{\n\t");
-			for (String l : body) {
-				sb.append("\t").append(l).append("\n\t");
+			if (!body.isEmpty()) {
+				for (String l : body) {
+					sb.append(l).append("\n");
+				}
+				sb.setLength(sb.length() - 1);
 			}
-			sb.append("}\n\t");
 		} else if (!body.isEmpty()) {
 			sb.append(body.get(0));
 		}
+		return sb.toString();
 	}
 }

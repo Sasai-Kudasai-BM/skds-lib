@@ -11,8 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 //@SuppressWarnings("unused")
+@Getter
 public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput {
-	@Getter
 	private final ByteBuffer buffer;
 
 	public SKDSByteBuf(ByteBuffer buffer) {
