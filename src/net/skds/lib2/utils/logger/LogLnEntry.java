@@ -38,7 +38,7 @@ record LogLnEntry(long time, String message, LoggerLevel level, String thread, S
 		logMsg.append(this.message);
 		String message = logMsg.toString();
 		String decoratedMsg = level.getColor() + message + (ln ? TERMINATION : "");
-		String fileOut = useFileOut ? message : null;
+		String fileOut = useFileOut ? message + "\n" : null;
 
 		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, fileOut);
 	}
