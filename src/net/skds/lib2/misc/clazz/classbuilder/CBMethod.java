@@ -2,7 +2,7 @@ package net.skds.lib2.misc.clazz.classbuilder;
 
 import java.util.List;
 
-public final class CBMethod extends CBElement {
+public sealed class CBMethod extends CBElement permits CBConstructor {
 
 	public final List<Arg> arguments;
 	public final CodeBody body;
@@ -22,15 +22,12 @@ public final class CBMethod extends CBElement {
 			}
 			classBuilder.checkImport(arg.type());
 		}
-		body.imports(classBuilder);
+		if (body != null) body.imports(classBuilder);
 	}
 
-	@Override
-	public void write(StringBuilder sb) {
-		super.write(sb);
 
+	protected void writeMethod(StringBuilder sb) {
 		sb.append("(");
-
 		if (arguments != null && !arguments.isEmpty()) {
 			for (Arg arg : arguments) {
 				if (arg.comment != null && !arg.comment.isEmpty()) {
@@ -45,11 +42,21 @@ public final class CBMethod extends CBElement {
 			sb.setLength(sb.length() - 2);
 		}
 
-		sb.append(") ");
-		sb.append("{\n\t\t");
-		TextClassBuilder.writeTabbed(body.write(), sb);
-		sb.append("}\n\t");
+		sb.append(")");
+		if (body != null) {
+			sb.append(" {\n\t\t");
+			TextClassBuilder.writeTabbed(body.write(), sb);
+			sb.append("}\n\t");
+		} else {
+			sb.append(";");
+		}
 		sb.append("\n\t");
+	}
+
+	@Override
+	public void write(StringBuilder sb) {
+		super.write(sb);
+		writeMethod(sb);
 	}
 
 	public record Arg(CBType type, String name, List<CBAnnotation> annotations, String comment) {

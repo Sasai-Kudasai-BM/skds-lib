@@ -9,6 +9,10 @@ public record CodeBody(List<String> body, List<CBType> imports) {
 		this(Arrays.asList(body.split("\n")), null);
 	}
 
+	public CodeBody(String... body) {
+		this(Arrays.asList(body), null);
+	}
+
 	public CodeBody(List<String> body) {
 		this(body, null);
 	}

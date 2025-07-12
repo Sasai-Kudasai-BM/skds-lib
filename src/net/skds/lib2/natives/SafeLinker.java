@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -145,15 +146,17 @@ public final class SafeLinker {
 	public static <T> UpcallLink<T> createUpcallLink(Class<T> clazz) {
 		Method[] methods = clazz.getDeclaredMethods();
 		if (methods.length == 0) throw new IllegalArgumentException(clazz + " is not a functional interface");
-		if (methods.length > 1) log.warn(clazz + " is not a functional interface");
-		Method method = methods[0];
-		FunctionDescriptor fd = fd(method.getReturnType(), method.getParameterTypes());
-		try {
-			MethodHandle handle = METHOD_LOOKUP.unreflect(method);
-			return new UpcallLink<>(fd, handle);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+		for (Method method : methods) {
+			if (!Modifier.isAbstract(method.getModifiers())) continue;
+			FunctionDescriptor fd = fd(method.getReturnType(), method.getParameterTypes());
+			try {
+				MethodHandle handle = METHOD_LOOKUP.unreflect(method);
+				return new UpcallLink<>(fd, handle);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
 		}
+		throw new IllegalArgumentException(clazz + " is not a functional interface");
 	}
 
 	private static Class<?>[] jArray(TypeGlue[] gt) {
