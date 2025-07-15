@@ -42,6 +42,8 @@ public class SKDSUtils {
 
 	public static final Random R = new Random();
 
+	public static final UUID NULL_UUID = new UUID(0, 0);
+
 	public static <T> T caught(Throwable t) {
 		t.printStackTrace();
 		return null;
