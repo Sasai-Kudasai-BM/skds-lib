@@ -3,35 +3,40 @@ package net.skds.lib2.misc.clazz.classbuilder;
 import java.util.Arrays;
 import java.util.List;
 
-public record CBType(String name, String pack, int arrayDepth, List<String> genericPart) implements Comparable<CBType> {
+public record CBType(String name, String pack, List<String> genericPart) implements Comparable<CBType> {
+
+	public CBType(String name, String pack, int arrayDepth, List<String> genericPart) {
+		this(name + arrayAppending(arrayDepth), pack, genericPart);
+	}
+
+	public CBType(Class<?> c) {
+		this(c.getSimpleName(), c.getPackageName(), null);
+	}
+
+	public CBType(Class<?> c, String... genericPart) {
+		this(c.getSimpleName(), c.getPackageName(), Arrays.asList(genericPart));
+	}
+
 	public CBType(String name, String pack) {
-		this(name, pack, 0, null);
+		this(name, pack, null);
 	}
 
 	public static CBType of(Class<?> c) {
-		int depth = 0;
-		for (Class<?> c2 = c; c2.isArray(); c2 = c2.getComponentType()) {
-			depth++;
-		}
-		return new CBType(c.getSimpleName(), c.getPackageName(), depth, null);
+		return new CBType(c.getSimpleName(), c.getPackageName(), null);
 	}
 
 	public static CBType of(Class<?> c, String... genericPart) {
-		int depth = 0;
-		for (Class<?> c2 = c; c2.isArray(); c2 = c2.getComponentType()) {
-			depth++;
-		}
-		return new CBType(c.getSimpleName(), c.getPackageName(), depth, Arrays.asList(genericPart));
+		return new CBType(c.getSimpleName(), c.getPackageName(), Arrays.asList(genericPart));
 	}
 
 	public String canonicalName() {
 		return pack + "." + name;
 	}
 
-	public String arrayAppending() {
-		if (arrayDepth == 0) return "";
-		if (arrayDepth == 1) return "[]";
-		return "[]".repeat(arrayDepth);
+	private static String arrayAppending(int depth) {
+		if (depth == 0) return "";
+		if (depth == 1) return "[]";
+		return "[]".repeat(depth);
 	}
 
 	public boolean imports() {
@@ -51,7 +56,7 @@ public record CBType(String name, String pack, int arrayDepth, List<String> gene
 			}
 			generic = sb.append(">").toString();
 		}
-		return name + arrayAppending() + generic;
+		return name + generic;
 	}
 
 	@Override

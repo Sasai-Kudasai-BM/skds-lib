@@ -7,7 +7,11 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
+import java.util.List;
 
+/**
+ * AKA "Safe UnsafeAnal", "MemoryAccess"
+ */
 @UtilityClass
 @SuppressWarnings("unused")
 public class SafeAnal {
@@ -20,16 +24,73 @@ public class SafeAnal {
 	private static final VarHandle VH_FLOAT = ValueLayout.JAVA_FLOAT.varHandle();
 	private static final VarHandle VH_DOUBLE = ValueLayout.JAVA_DOUBLE.varHandle();
 
-	public static final ValueLayout BOOLEAN = ValueLayout.JAVA_BOOLEAN;
-	public static final ValueLayout BYTE = ValueLayout.JAVA_BYTE;
-	public static final ValueLayout SHORT = ValueLayout.JAVA_SHORT;
-	public static final ValueLayout INT = ValueLayout.JAVA_INT;
-	public static final ValueLayout LONG = ValueLayout.JAVA_LONG;
-	public static final ValueLayout PTR = ValueLayout.JAVA_LONG;
-	public static final ValueLayout FLOAT = ValueLayout.JAVA_FLOAT;
-	public static final ValueLayout DOUBLE = ValueLayout.JAVA_DOUBLE;
+	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
+	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
+	public static final ValueLayout.OfShort SHORT = ValueLayout.JAVA_SHORT;
+	public static final ValueLayout.OfInt INT = ValueLayout.JAVA_INT;
+	public static final ValueLayout.OfLong LONG = ValueLayout.JAVA_LONG;
+	public static final ValueLayout.OfLong PTR = ValueLayout.JAVA_LONG;
+	public static final ValueLayout.OfFloat FLOAT = ValueLayout.JAVA_FLOAT;
+	public static final ValueLayout.OfDouble DOUBLE = ValueLayout.JAVA_DOUBLE;
 
 	public static final MemorySegment ALL_MEMORY = MemorySegment.NULL.reinterpret((1L << 63) - 1);
+
+	public static long loadCString(Arena arena, String string) {
+		return arena.allocateFrom(string).address();
+	}
+
+	public static MemorySegment loadCString(String string) {
+		return Arena.ofAuto().allocateFrom(string);
+	}
+
+	public static long loadCStringArray(Arena arena, List<String> strings) {
+		int count = strings.size();
+		long[] pointers = new long[count];
+		for (int i = 0; i < count; i++) {
+			pointers[i] = arena.allocateFrom(strings.get(i)).address();
+		}
+		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers).address();
+	}
+
+	public static MemorySegment loadCStringArray(List<String> strings) {
+		Arena arena = Arena.ofAuto();
+		int count = strings.size();
+		long[] pointers = new long[count];
+		for (int i = 0; i < count; i++) {
+			pointers[i] = arena.allocateFrom(strings.get(i)).address();
+		}
+		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers);
+	}
+
+	public static long loadCStringArray(Arena arena, String... strings) {
+		int count = strings.length;
+		long[] pointers = new long[count];
+		for (int i = 0; i < count; i++) {
+			pointers[i] = arena.allocateFrom(strings[i]).address();
+		}
+		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers).address();
+	}
+
+	public static MemorySegment loadCStringArray(String... strings) {
+		Arena arena = Arena.ofAuto();
+		int count = strings.length;
+		long[] pointers = new long[count];
+		for (int i = 0; i < count; i++) {
+			pointers[i] = arena.allocateFrom(strings[i]).address();
+		}
+		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers);
+	}
+
+
+	public static String[] getCStringArray(MemorySegment segment, long offset, int count) {
+		long[] pointers = new long[count];
+		String[] strings = new String[count];
+		MemorySegment.copy(segment, LONG, offset, pointers, 0, count);
+		for (int i = 0; i < count; i++) {
+			strings[i] = segment.getString(pointers[i]);
+		}
+		return strings;
+	}
 
 	public static MemorySegment wrapSegment(long address, long size) {
 		return MemorySegment.ofAddress(address).reinterpret(size);
@@ -59,6 +120,18 @@ public class SafeAnal {
 			arr[i] += address;
 		}
 		return arr;
+	}
+
+	public static long alloc4(Arena arena, int count) {
+		return arena.allocate(count, 4).address();
+	}
+
+	public static long alloc2(Arena arena, int count) {
+		return arena.allocate(count, 2).address();
+	}
+
+	public static long alloc8(Arena arena, int count) {
+		return arena.allocate(count, 8).address();
 	}
 
 	public static long[] allocPointers(Arena arena, int count) {

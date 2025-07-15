@@ -47,7 +47,7 @@ public class ArrayUtils {
 
 	public static <T> int find(T o, T[] array) {
 		for (int i = 0; i < array.length; i++) {
-			if (o.equals(array[i])) {
+			if (Objects.equals(o, array[i])) {
 				return i;
 			}
 		}

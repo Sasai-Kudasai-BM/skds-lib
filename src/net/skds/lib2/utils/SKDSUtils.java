@@ -4,6 +4,7 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import net.skds.lib2.io.ByteArrayExtendedDataOutput;
+import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 
 import javax.management.MBeanServer;
 import java.awt.*;
@@ -147,6 +148,10 @@ public class SKDSUtils {
 		long l = (long) uuid[2] << 32;
 		l |= uuid[3];
 		return new UUID(m, l);
+	}
+
+	public static UUID uuid(byte[] uuid) {
+		return new UUID(ByteArrayPrimitiveOperations.getLong(uuid, 0), ByteArrayPrimitiveOperations.getLong(uuid, 8));
 	}
 
 	public static String memoryCompact(long bytes) {
