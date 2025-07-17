@@ -1,7 +1,25 @@
 version = "1.0"
 group = "net.skds"
 
-dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.32'
-    annotationProcessor 'org.projectlombok:lombok:1.18.32'
+
+/*
+sourceSets {
+    main {
+        java.srcDir 'src'
+        resources.srcDir 'resources'
+    }
+    test {
+        java.srcDir 'test_src'
+        resources.srcDir 'test_resources'
+    }
 }
+repositories {
+    mavenCentral()
+}
+dependencies {
+   compileOnly 'org.projectlombok:lombok:1.18.32'
+   annotationProcessor 'org.projectlombok:lombok:1.18.32'
+   testCompileOnly 'org.projectlombok:lombok:1.18.38'
+   testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+}
+ //*/

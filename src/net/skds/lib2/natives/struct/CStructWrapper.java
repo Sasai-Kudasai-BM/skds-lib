@@ -1,6 +1,6 @@
 package net.skds.lib2.natives.struct;
 
-import net.skds.lib2.natives.SafeAnal;
+import net.skds.lib2.natives.MemoryAccess;
 import net.skds.lib2.natives.struct.annotation.StructMember;
 import net.skds.lib2.reflection.ReflectUtils;
 
@@ -196,7 +196,7 @@ public class CStructWrapper<T extends WrappedCStruct> {
 		Class<?> fc = f.getType();
 		FieldLinker linker = null;
 		MemoryLayout layout = getMemberElementLayout(fc, sm);
-		int padding = SafeAnal.calcPadding(offset, layout.byteAlignment());
+		int padding = MemoryAccess.calcPadding(offset, layout.byteAlignment());
 		if (padding > 0) {
 			offset += padding;
 			layouts.add(MemoryLayout.paddingLayout(padding));
@@ -484,7 +484,7 @@ public class CStructWrapper<T extends WrappedCStruct> {
 			super(f, MemoryLayout.sequenceLayout(length, wrapper.layout), offset);
 			this.length = length;
 			this.wrapper = wrapper;
-			this.step = wrapper.layout.byteSize() + SafeAnal.calcPadding(wrapper.layout.byteSize(), wrapper.layout.byteAlignment());
+			this.step = wrapper.layout.byteSize() + MemoryAccess.calcPadding(wrapper.layout.byteSize(), wrapper.layout.byteAlignment());
 		}
 
 		@Override

@@ -1,6 +1,6 @@
 package net.skds.lib2.natives.struct;
 
-import net.skds.lib2.natives.SafeAnal;
+import net.skds.lib2.natives.MemoryAccess;
 
 import java.lang.foreign.MemorySegment;
 
@@ -23,7 +23,7 @@ public abstract class CStruct {
 	}
 
 	public CStruct(long address) {
-		this.segment = SafeAnal.ALL_MEMORY;
+		this.segment = MemoryAccess.ALL_MEMORY;
 		this.offset = address;
 	}
 

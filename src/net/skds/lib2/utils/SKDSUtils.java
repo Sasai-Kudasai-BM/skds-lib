@@ -319,43 +319,33 @@ public class SKDSUtils {
 	}
 
 	public static void collectFileTree(File root, Collection<File> collection) {
-		collectFileTree(root, f -> true, collection);
+		SKDSFiles.collectFileTree(root, f -> true, collection);
 	}
 
 	public static List<File> collectFileTree(File root) {
 		ArrayList<File> files = new ArrayList<>();
-		collectFileTree(root, f -> true, files);
+		SKDSFiles.collectFileTree(root, f -> true, files);
 		return files;
 	}
 
 	public static List<File> collectFileTree(File root, Predicate<File> filter) {
 		ArrayList<File> files = new ArrayList<>();
-		collectFileTree(root, filter, files);
+		SKDSFiles.collectFileTree(root, filter, files);
 		return files;
 	}
 
 	public static List<File> collectFileTree(File root, Predicate<File> filter, int depth) {
 		ArrayList<File> files = new ArrayList<>();
-		collectFileTree(root, filter, files, depth);
+		SKDSFiles.collectFileTree(root, filter, files, depth);
 		return files;
 	}
 
 	public static void collectFileTree(File root, Predicate<File> filter, Collection<File> collection) {
-		collectFileTree(root, filter, collection, Integer.MAX_VALUE);
+		SKDSFiles.collectFileTree(root, filter, collection, Integer.MAX_VALUE);
 	}
 
 	public static void collectFileTree(File root, Predicate<File> filter, Collection<File> collection, int depth) {
-		if (root.isDirectory()) {
-			if (depth <= 0) {
-				return;
-			}
-			File[] files = root.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				collectFileTree(files[i], filter, collection, depth - 1);
-			}
-		} else if (filter.test(root)) {
-			collection.add(root);
-		}
+		SKDSFiles.collectFileTree(root, filter, collection, depth);
 	}
 
 	public static MessageDigest getSHA1() {

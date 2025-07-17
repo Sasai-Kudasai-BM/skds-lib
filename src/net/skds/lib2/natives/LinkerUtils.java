@@ -21,7 +21,7 @@ import java.util.Optional;
 @CustomLog
 @UtilityClass
 @SuppressWarnings("unused")
-public final class SafeLinker {
+public final class LinkerUtils {
 
 	public static final boolean NATIVE_ORDER = ByteOrder.BIG_ENDIAN == ByteOrder.nativeOrder();
 	public static final Arena ARENA = Arena.global();

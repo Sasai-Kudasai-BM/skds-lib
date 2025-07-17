@@ -8,11 +8,11 @@ public abstract class AbstractLinkedLibrary {
 	protected final SymbolLookup lib;
 
 	public AbstractLinkedLibrary(String library) {
-		this.lib = SafeLinker.library(library);
+		this.lib = LinkerUtils.library(library);
 	}
 
 	public AbstractLinkedLibrary(Path library) {
-		this.lib = SafeLinker.library(library);
+		this.lib = LinkerUtils.library(library);
 	}
 
 }

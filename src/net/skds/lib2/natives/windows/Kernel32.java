@@ -4,7 +4,7 @@ import net.skds.lib2.natives.AbstractLinkedLibrary;
 
 import java.lang.invoke.MethodHandle;
 
-import static net.skds.lib2.natives.SafeLinker.*;
+import static net.skds.lib2.natives.LinkerUtils.*;
 
 public class Kernel32 extends AbstractLinkedLibrary {
 

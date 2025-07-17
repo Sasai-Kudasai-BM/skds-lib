@@ -1,6 +1,7 @@
 package net.skds.lib2.utils.platforms;
 
 import net.skds.lib2.utils.SKDSUtils;
+import net.skds.lib2.utils.exception.UnsupportedSystemException;
 
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
@@ -23,7 +24,7 @@ public abstract sealed class PlatformFeatures permits WindowsPlatform {
 			platform = switch (SKDSUtils.OS_TYPE) {
 				case WINDOWS -> new WindowsPlatform();
 				default ->
-						throw new UnsupportedOperationException(SKDSUtils.OS_TYPE + " platform-dependent features are not supported");
+						throw new UnsupportedSystemException(SKDSUtils.OS_TYPE + " platform-dependent features are not supported");
 			};
 			instance = platform;
 		}

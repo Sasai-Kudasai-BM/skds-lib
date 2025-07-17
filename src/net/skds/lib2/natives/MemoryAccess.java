@@ -10,11 +10,12 @@ import java.lang.invoke.VarHandle;
 import java.util.List;
 
 /**
- * AKA "Safe UnsafeAnal", "MemoryAccess"
+ * <p>AKA "Safe UnsafeAnal", "SafeAnal"</p>
+ * (I LOVE anal (both roles))
  */
 @UtilityClass
 @SuppressWarnings("unused")
-public class SafeAnal {
+public class MemoryAccess {
 
 	private static final VarHandle VH_BYTE = ValueLayout.JAVA_BYTE.varHandle();
 	private static final VarHandle VH_SHORT = ValueLayout.JAVA_SHORT.varHandle();
@@ -34,6 +35,30 @@ public class SafeAnal {
 	public static final ValueLayout.OfDouble DOUBLE = ValueLayout.JAVA_DOUBLE;
 
 	public static final MemorySegment ALL_MEMORY = MemorySegment.NULL.reinterpret((1L << 63) - 1);
+
+	public static long loadArray(Arena arena, byte... values) {
+		return arena.allocateFrom(BYTE, values).address();
+	}
+
+	public static long loadArray(Arena arena, short... values) {
+		return arena.allocateFrom(SHORT, values).address();
+	}
+
+	public static long loadArray(Arena arena, int... values) {
+		return arena.allocateFrom(INT, values).address();
+	}
+
+	public static long loadArray(Arena arena, float... values) {
+		return arena.allocateFrom(FLOAT, values).address();
+	}
+
+	public static long loadArray(Arena arena, long... values) {
+		return arena.allocateFrom(LONG, values).address();
+	}
+
+	public static long loadArray(Arena arena, double... values) {
+		return arena.allocateFrom(DOUBLE, values).address();
+	}
 
 	public static long loadCString(Arena arena, String string) {
 		return arena.allocateFrom(string).address();

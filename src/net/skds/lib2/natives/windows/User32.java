@@ -1,19 +1,19 @@
 package net.skds.lib2.natives.windows;
 
 import net.skds.lib2.natives.AbstractLinkedLibrary;
-import net.skds.lib2.natives.SafeLinker;
+import net.skds.lib2.natives.LinkerUtils;
 import net.skds.lib2.natives.UpcallLink;
 
 import java.lang.invoke.MethodHandle;
 
-import static net.skds.lib2.natives.SafeLinker.*;
+import static net.skds.lib2.natives.LinkerUtils.*;
 
 public class User32 extends AbstractLinkedLibrary {
 
 	private static User32 instance;
 
-	public final UpcallLink<LowLevelKeyboardProc> lowLevelKeyboardProcUL = SafeLinker.createUpcallLink(User32.LowLevelKeyboardProc.class);
-	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = SafeLinker.createUpcallLink(User32.LowLevelMouseProc.class);
+	public final UpcallLink<LowLevelKeyboardProc> lowLevelKeyboardProcUL = LinkerUtils.createUpcallLink(User32.LowLevelKeyboardProc.class);
+	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = LinkerUtils.createUpcallLink(User32.LowLevelMouseProc.class);
 
 	private final MethodHandle peekMessage = createHandle(lib, "PeekMessageA", BOOLEAN, PTR, PTR, INT, INT, INT);
 	private final MethodHandle waitMessage = createHandle(lib, "WaitMessage", BOOLEAN);

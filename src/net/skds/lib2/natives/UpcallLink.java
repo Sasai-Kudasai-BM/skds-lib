@@ -14,7 +14,7 @@ public class UpcallLink<T> {
 	private final MethodHandle virtualHandle;
 
 	public MemorySegment bind(T receiver) {
-		return SafeLinker.LINKER.upcallStub(
+		return LinkerUtils.LINKER.upcallStub(
 				virtualHandle.bindTo(receiver),
 				descriptor,
 				Arena.ofAuto()
@@ -22,10 +22,10 @@ public class UpcallLink<T> {
 	}
 	
 	public MemorySegment bind(T receiver, Arena arena) {
-		return SafeLinker.LINKER.upcallStub(
+		return LinkerUtils.LINKER.upcallStub(
 				virtualHandle.bindTo(receiver),
 				descriptor,
-				SafeLinker.ARENA
+				LinkerUtils.ARENA
 		);
 	}
 }
