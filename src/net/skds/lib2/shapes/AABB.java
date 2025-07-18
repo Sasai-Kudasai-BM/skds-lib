@@ -8,10 +8,10 @@ import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
 import net.skds.lib2.io.json.codec.typed.ConfigType;
 import net.skds.lib2.io.json.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
+import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
-import net.skds.lib2.mat.quat.Quat;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -508,6 +508,9 @@ public final class AABB implements ConvexShape, TypedConfig {
 	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
 
+		double pMin = 0;
+		double pMax = 1;
+
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Direction normal = null;
@@ -539,7 +542,13 @@ public final class AABB implements ConvexShape, TypedConfig {
 				tMax = max;
 			}
 
-			if (tMax < tMin) {
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
 				return null;
 			}
 

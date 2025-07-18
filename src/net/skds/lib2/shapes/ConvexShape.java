@@ -109,6 +109,9 @@ public non-sealed interface ConvexShape extends Shape {
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
 
+		double pMin = 0;
+		double pMax = 1;
+
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Vec3 normal = null;
@@ -140,11 +143,15 @@ public non-sealed interface ConvexShape extends Shape {
 			if (max < tMax) {
 				tMax = max;
 			}
-
-			if (tMax < tMin) {
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
 				return null;
 			}
-
 		}
 		if (inverse) {
 			normal = normal.inverse();
