@@ -30,7 +30,7 @@ public class OBB implements ConvexShape, TypedConfig {
 	public OBB(Vec3 center, Vec3 dimensions, Quat q) {
 		this.center = center;
 		this.dimensions = dimensions;
-		this.normals = Matrix3.fromQuatNS(q, dimensions.x(), dimensions.y(), dimensions.z());
+		this.normals = Matrix3.fromQuat(q);
 	}
 
 	public OBB(Vec3 center, Vec3 dimensions, Matrix3 normals) {
