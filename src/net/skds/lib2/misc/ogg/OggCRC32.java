@@ -23,9 +23,9 @@ public class OggCRC32 {
 		}
 	}
 
-	public int getCRC(byte[] arr) {
-		return getCRC(arr, 0);
-	}
+	//public int getCRC(byte[] arr) {
+	//	return getCRC(arr, 0);
+	//}
 
 	public int getCRC(byte[] arr, int previous) {
 		int crc = previous;
@@ -34,6 +34,20 @@ public class OggCRC32 {
 		for (int i = 0; i < arr.length; i++) {
 			a = crc << 8;
 			b = CRC_TABLE[(crc >>> 24) ^ (arr[i] & 0xff)];
+			crc = a ^ b;
+		}
+		return crc;
+	}
+
+	public int getMagicCRC(int magic) {
+		magic = Integer.reverseBytes(magic);
+		int crc = 0;
+		int a, b;
+
+		for (int i = 0; i < 4; i++) {
+			a = crc << 8;
+			b = CRC_TABLE[(crc >>> 24) ^ (magic & 0xff)];
+			magic >>>= 8;
 			crc = a ^ b;
 		}
 		return crc;

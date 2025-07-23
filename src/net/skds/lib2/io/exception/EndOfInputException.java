@@ -4,7 +4,18 @@ import java.io.IOException;
 
 public class EndOfInputException extends IOException {
 
+	public EndOfInputException() {
+	}
+
 	public EndOfInputException(String message) {
 		super(message);
+	}
+
+	public EndOfInputException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public EndOfInputException(Throwable cause) {
+		super(cause);
 	}
 }

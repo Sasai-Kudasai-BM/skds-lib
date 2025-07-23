@@ -28,6 +28,7 @@ public class MemoryAccess {
 	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
 	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
 	public static final ValueLayout.OfShort SHORT = ValueLayout.JAVA_SHORT;
+	public static final ValueLayout.OfChar CHAR = ValueLayout.JAVA_CHAR;
 	public static final ValueLayout.OfInt INT = ValueLayout.JAVA_INT;
 	public static final ValueLayout.OfLong LONG = ValueLayout.JAVA_LONG;
 	public static final ValueLayout.OfLong PTR = ValueLayout.JAVA_LONG;
@@ -35,6 +36,48 @@ public class MemoryAccess {
 	public static final ValueLayout.OfDouble DOUBLE = ValueLayout.JAVA_DOUBLE;
 
 	public static final MemorySegment ALL_MEMORY = MemorySegment.NULL.reinterpret((1L << 63) - 1);
+
+	public static byte[] getByteArray(MemorySegment segment, long offset, int length) {
+		byte[] array = new byte[length];
+		MemorySegment.copy(segment, BYTE, offset, array, 0, length);
+		return array;
+	}
+
+	public static short[] getShortArray(MemorySegment segment, long offset, int length) {
+		short[] array = new short[length];
+		MemorySegment.copy(segment, SHORT, offset, array, 0, length);
+		return array;
+	}
+
+	public static char[] getCharArray(MemorySegment segment, long offset, int length) {
+		char[] array = new char[length];
+		MemorySegment.copy(segment, CHAR, offset, array, 0, length);
+		return array;
+	}
+
+	public static int[] getIntArray(MemorySegment segment, long offset, int length) {
+		int[] array = new int[length];
+		MemorySegment.copy(segment, INT, offset, array, 0, length);
+		return array;
+	}
+
+	public static long[] getLongArray(MemorySegment segment, long offset, int length) {
+		long[] array = new long[length];
+		MemorySegment.copy(segment, LONG, offset, array, 0, length);
+		return array;
+	}
+
+	public static float[] getFloatArray(MemorySegment segment, long offset, int length) {
+		float[] array = new float[length];
+		MemorySegment.copy(segment, FLOAT, offset, array, 0, length);
+		return array;
+	}
+	
+	public static double[] getDoubleArray(MemorySegment segment, long offset, int length) {
+		double[] array = new double[length];
+		MemorySegment.copy(segment, DOUBLE, offset, array, 0, length);
+		return array;
+	}
 
 	public static long loadArray(Arena arena, byte... values) {
 		return arena.allocateFrom(BYTE, values).address();

@@ -59,7 +59,7 @@ public class SKDSUtils {
 	}
 
 	public static String hashFile(File f) {
-		try (InputStream is = new BufferedInputStream(new FileInputStream(f))) {
+		try (InputStream is = new FileInputStream(f)) {
 			byte[] buffer = new byte[1024];
 			MessageDigest md = getSHA1();
 			if (!f.exists()) {

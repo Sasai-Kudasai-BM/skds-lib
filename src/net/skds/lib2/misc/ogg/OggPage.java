@@ -1,22 +1,25 @@
 package net.skds.lib2.misc.ogg;
 
 import lombok.Getter;
-import net.skds.lib2.io.exception.WrongFormatException;
 import net.skds.lib2.io.json.JsonUtils;
+import net.skds.lib2.io.json.annotation.SkipSerialization;
 import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 import net.skds.lib2.utils.SKDSByteBuf;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 @Getter
 public class OggPage {
 
 	private static final int MAGIC = (('O' << 8 | 'g') << 8 | 'g') << 8 | 'S';
-	private static final int MINIMUM_PAGE_SIZE = 27;
+	private static final int MAGIC_CRC = OggCRC32.getMagicCRC(MAGIC);
+	private static final byte MAGIC_START = (byte) 'O';
+	public static final int MINIMUM_PAGE_SIZE = 27;
 
-	int magic;
 	int version;
 	int headerType;
 	long granulePosition;
@@ -27,47 +30,70 @@ public class OggPage {
 	int segmentTable;
 
 	byte[] data;
-	int crc32;
+	int crc32 = MAGIC_CRC;
 
-	public void read(InputStream in) throws IOException {
+	@Getter
+	OggPageReadState status = OggPageReadState.NONE;
 
-		SKDSByteBuf input = new SKDSByteBuf(in.readNBytes(MINIMUM_PAGE_SIZE));
+	@Getter
+	@SkipSerialization
+	OggMediaType mediaType;
 
-		this.magic = input.readInt();
-		if (this.magic != MAGIC) {
-			throw new WrongFormatException();
+	public OggPageReadState read(InputStream in) throws IOException {
+		if (this.status == OggPageReadState.NONE) {
+			if (!findMagic(in)) {
+				return OggPageReadState.NONE;
+			}
+			SKDSByteBuf input = new SKDSByteBuf(ByteBuffer.wrap(in.readNBytes(MINIMUM_PAGE_SIZE - 4)).order(ByteOrder.LITTLE_ENDIAN));
+
+			this.version = input.readUnsignedByte();
+			this.headerType = input.readUnsignedByte();
+			this.granulePosition = input.readLong();
+			this.bitstreamSerialNumber = input.readInt();
+			this.pageSequenceNumber = input.readInt();
+			this.crcChecksum = input.readInt();
+			this.pageSegments = input.readUnsignedByte();
+
+			input.getBuffer().putInt(18, 0);
+			crc32 = OggCRC32.getCRC(input.array(), crc32);
+			this.status = OggPageReadState.HEADER;
 		}
-		this.version = input.readUnsignedByte();
-		this.headerType = input.readUnsignedByte();
-		this.granulePosition = input.readLong();
-		this.bitstreamSerialNumber = input.readInt();
-		this.pageSequenceNumber = input.readInt();
-		this.crcChecksum = input.readInt();
-		int segments = this.pageSegments = input.readUnsignedByte();
+		if (this.status == OggPageReadState.HEADER) {
+			if (in.available() < pageSegments) return OggPageReadState.HEADER;
+			SKDSByteBuf input = new SKDSByteBuf(in.readNBytes(pageSegments));
+			crc32 = OggCRC32.getCRC(input.array(), crc32);
 
-		int tableSize = 0;
+			int tableSize = 0;
+			for (int i = 0; i < pageSegments; i++) {
+				tableSize += input.readUnsignedByte();
+			}
+			this.segmentTable = tableSize;
+			this.status = OggPageReadState.TABLE;
+		}
+		if (this.status == OggPageReadState.TABLE) {
+			if (in.available() < segmentTable) return OggPageReadState.TABLE;
+			byte[] d = in.readNBytes(segmentTable);
+			this.crc32 = OggCRC32.getCRC(d, crc32);
+			this.data = d;
+			if (isBOS()) {
+				this.mediaType = OggMediaType.readFromBody(d);
+			}
+			this.status = OggPageReadState.FULL;
+		}
+		return OggPageReadState.FULL;
+	}
 
-		input.getBuffer().putInt(22, 0);
-		int crc = OggCRC32.getCRC(input.array());
+	public boolean validate() {
+		return crcChecksum == crc32;
+	}
 
-		input = new SKDSByteBuf(in.readNBytes(segments));
-
-		crc = OggCRC32.getCRC(input.array(), crc);
-
-		for (int i = 0; i < segments; i++) {
-			tableSize += input.readUnsignedByte();
-			if (tableSize > 65307) {
-				throw new IOException("Page is too large");
+	private boolean findMagic(InputStream in) throws IOException {
+		while (in.available() > MINIMUM_PAGE_SIZE) {
+			if (in.read() == 'O' && in.read() == 'g' && in.read() == 'g' && in.read() == 'S') {
+				return true;
 			}
 		}
-		this.segmentTable = tableSize;
-		byte[] d = in.readNBytes(tableSize);
-		this.data = d;
-
-		//crc32 = OggCRC32.getCRC(getHeader());
-
-		this.crc32 = OggCRC32.getCRC(d, crc);
-
+		return false;
 	}
 
 	protected byte[] getHeader() {
@@ -90,15 +116,15 @@ public class OggPage {
 		return header;
 	}
 
-	public boolean isContinue() {
-		return (headerType & 0x1) != 0;
+	public boolean isFresh() {
+		return (headerType & 0x1) == 0;
 	}
 
-	public boolean isFirstPage() {
+	public boolean isBOS() {
 		return (headerType & 0x2) != 0;
 	}
 
-	public boolean isLastPage() {
+	public boolean isEOS() {
 		return (headerType & 0x4) != 0;
 	}
 
