@@ -158,6 +158,20 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		}
 	}
 
+	/**
+	 * @return weight of removed entry or -1 if no such entry presents
+	 */
+	public float remove(T object) {
+		for (int i = 0; i < entries.length; i++) {
+			Entry e = entries[i];
+			if (e.equals(object)) {
+				remove(i);
+				return e.weight;
+			}
+		}
+		return -1;
+	}
+
 	private void remove(int pos) {
 		var ers = entries;
 		if (ers.length == 0) return;
