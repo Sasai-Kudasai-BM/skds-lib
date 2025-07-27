@@ -95,9 +95,16 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					JsonArray ja = new JsonArray();
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						JsonElement e = elementCodec.read(reader);
+						JsonElement e;
+						try {
+							e = elementCodec.read(reader);
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
 						ja.add(e);
+						i++;
 					}
 					reader.endArray();
 					return ja;

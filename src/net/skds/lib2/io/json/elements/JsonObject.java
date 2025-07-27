@@ -191,7 +191,12 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 					JsonObject jo = new JsonObject();
 					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
 						String name = reader.readName();
-						JsonElement e = elementCodec.read(reader);
+						JsonElement e;
+						try {
+							e = elementCodec.read(reader);
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read " + name, ex);
+						}
 						jo.put(name, e);
 					}
 					reader.endObject();

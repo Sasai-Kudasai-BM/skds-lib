@@ -341,7 +341,6 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 		}
 	}
 
-
 	public static class MapCodec extends AbstractJsonCodec<Map<Object, Object>> {
 
 		//final Class<?> tClass;
@@ -417,7 +416,12 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 						String name = StringUtils.quote(reader.readName()); // TODO
 						JsonReader r2 = registry.createReader(new StringCharInput(name));
 						Object key = keyDeserializer.read(r2);
-						Object value = elementDeserializer.read(reader);
+						Object value;
+						try {
+							value = elementDeserializer.read(reader);
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read " + name, ex);
+						}
 						map.put(key, value);
 					}
 					reader.endObject();
@@ -488,9 +492,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					Collection<Object> list = constructor.get();
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						Object value = deserializer.read(reader);
-						list.add(value);
+						try {
+							list.add(deserializer.read(reader));
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return list;
@@ -558,8 +567,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayList<Object> list = new ArrayList<>();
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						list.add(deserializer.read(reader));
+						try {
+							list.add(deserializer.read(reader));
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return list.toArray(emptyArray);
@@ -600,8 +615,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.IntGrowingArray array = new ArrayUtils.IntGrowingArray(16);
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						array.add(reader.readInt());
+						try {
+							array.add(reader.readInt());
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
@@ -642,8 +663,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.ByteGrowingArray array = new ArrayUtils.ByteGrowingArray(16);
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						array.add((byte) reader.readInt());
+						try {
+							array.add((byte) reader.readInt());
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
@@ -726,8 +753,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.ShortGrowingArray array = new ArrayUtils.ShortGrowingArray(16);
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						array.add((short) reader.readInt());
+						try {
+							array.add((short) reader.readInt());
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
@@ -768,30 +801,36 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.CharGrowingArray array = new ArrayUtils.CharGrowingArray(16);
+					int i = 0;
 					l1:
 					while (true) {
-						switch (reader.nextEntryType()) {
-							case NULL -> {
-								reader.skipNull();
-								array.add((char) 0);
-							}
-							case NUMBER -> {
-								Number n = reader.readNumber();
-								array.add((char) n.intValue());
-							}
-							case STRING -> {
-								String cs = reader.readString();
-								if (cs.length() == 1) {
-									array.add(cs.charAt(0));
-								} else {
-									throw new JsonReadException("Unexpected char " + cs);
+						try {
+							switch (reader.nextEntryType()) {
+								case NULL -> {
+									reader.skipNull();
+									array.add((char) 0);
 								}
+								case NUMBER -> {
+									Number n = reader.readNumber();
+									array.add((char) n.intValue());
+								}
+								case STRING -> {
+									String cs = reader.readString();
+									if (cs.length() == 1) {
+										array.add(cs.charAt(0));
+									} else {
+										throw new JsonReadException("Unexpected char " + cs);
+									}
+								}
+								case END_ARRAY -> {
+									break l1;
+								}
+								default -> throw new JsonReadException("Unexpected token " + type);
 							}
-							case END_ARRAY -> {
-								break l1;
-							}
-							default -> throw new JsonReadException("Unexpected token " + type);
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
 						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
@@ -832,8 +871,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.LongGrowingArray array = new ArrayUtils.LongGrowingArray(16);
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						array.add(reader.readLong());
+						try {
+							array.add(reader.readLong());
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
@@ -875,8 +920,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.FloatGrowingArray array = new ArrayUtils.FloatGrowingArray(16);
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						array.add(reader.readFloat());
+						try {
+							array.add(reader.readFloat());
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
@@ -917,8 +968,14 @@ public class BuiltinCodecFactory implements JsonCodecFactory {
 				case BEGIN_ARRAY -> {
 					reader.beginArray();
 					ArrayUtils.DoubleGrowingArray array = new ArrayUtils.DoubleGrowingArray(16);
+					int i = 0;
 					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
-						array.add(reader.readDouble());
+						try {
+							array.add(reader.readDouble());
+						} catch (Exception ex) {
+							throw new JsonReadException("Exception while read [" + i + "]", ex);
+						}
+						i++;
 					}
 					reader.endArray();
 					return array.getArray();
