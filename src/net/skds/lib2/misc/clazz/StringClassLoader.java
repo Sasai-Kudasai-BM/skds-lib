@@ -10,6 +10,13 @@ import java.util.Collections;
 
 public class StringClassLoader {
 
+	/*private static final List<String> options = new ArrayList<String>();
+
+	static {
+		//options.add("-Xlint:-options");
+		//options.add("-deprecation");
+	}*/
+
 	private final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 	private final StandardJavaFileManager sfm = compiler.getStandardFileManager(null, null, null);
 
@@ -18,7 +25,7 @@ public class StringClassLoader {
 	public StringClassLoader() {
 	}
 
-	public Class<?> load(String className, String source) throws IOException {
+	public byte[] compile(String className, String source) throws IOException {
 		InnerFM fm = new InnerFM(sfm);
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 		JavaFileObject fileObject = new InnerJavaFileObject(className, source);
@@ -30,7 +37,14 @@ public class StringClassLoader {
 			}
 			throw new IOException("Class compilation error");
 		}
-		byte[] bytecode = fm.getBytecode();
+		return fm.getBytecode();
+	}
+
+	public Class<?> load(String className, String source) throws IOException {
+		return load(className, compile(className, source));
+	}
+
+	public Class<?> load(String className, byte[] bytecode) throws IOException {
 		return classLoader.compile(bytecode, className);
 	}
 
