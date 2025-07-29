@@ -179,7 +179,7 @@ public class ReflectUtils {
 		}
 	}
 
-	public static final MethodHandles.Lookup METHOD_LOOKUP = MethodHandles.lookup();
+	private static final MethodHandles.Lookup METHOD_LOOKUP = MethodHandles.lookup();
 
 	public static MethodHandle getMethodHandle(Class<?> tClass, String methodName, Class<?>... args) {
 		try {

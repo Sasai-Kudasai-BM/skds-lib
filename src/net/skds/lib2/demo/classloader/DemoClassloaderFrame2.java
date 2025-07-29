@@ -18,7 +18,7 @@ public class DemoClassloaderFrame2 extends JFrame {
 	private final String testClassName = "net.skds.lib2.demo.classloader.TestClass";
 	private final String testClassSource = """
 			package net.skds.lib2.demo.classloader;
-						
+
 			public class TestClass {
 				public void test() {
 			  		System.out.println("ok");
