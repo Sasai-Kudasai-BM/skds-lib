@@ -20,4 +20,8 @@ public class EventBus<T extends Event> {
 		});
 		return event != null && event.canceled;
 	}
+
+	public boolean isEmpty() {
+		return this.listeners.isEmpty();
+	}
 }

@@ -19,4 +19,8 @@ public class SimpleEventBus<T> {
 			l.onEvent(event);
 		}
 	}
+
+	public boolean isEmpty() {
+		return this.listeners.isEmpty();
+	}
 }
