@@ -146,6 +146,22 @@ public class StringUtils {
 		return new PatternFormatter(pattern, startSequence, endSequence);
 	}
 
+	public static String formatSequence(String pattern, String delimiter, Object... values) {
+		return new SequenceFormatter(pattern, delimiter).assemble(values);
+	}
+
+	public static String formatSequence(String pattern, Object... values) {
+		return new SequenceFormatter(pattern, "%s").assemble(values);
+	}
+
+	public static SequenceFormatter createSequenceFormatter(String pattern, String delimiter) {
+		return new SequenceFormatter(pattern, delimiter);
+	}
+
+	public static SequenceFormatter createSequenceFormatter(String pattern) {
+		return new SequenceFormatter(pattern, "%s");
+	}
+	
 	public static void writeQuoted(CharOutput output, String value, char quote) throws EndOfOutputException {
 		output.append(quote);
 		final int length = value.length();
@@ -327,6 +343,37 @@ public class StringUtils {
 			while (i < keys.size()) {
 				Object value = mappingFunction.apply(keys.get(i));
 				sb.append(value).append(parts.get(++i));
+			}
+			return sb.toString();
+		}
+	}
+
+	public static class SequenceFormatter {
+
+		private final List<String> parts = new ArrayList<>();
+
+		private SequenceFormatter(String pattern, String delimiter) {
+			int i = pattern.indexOf(delimiter);
+			if (i == -1) {
+				this.parts.add(pattern);
+			} else {
+				int delimiterLen = delimiter.length();
+				int c = 0;
+				for (; i != -1; i = pattern.indexOf(delimiter, c)) {
+					this.parts.add(pattern.substring(c, i));
+					c = i + delimiterLen;
+				}
+				this.parts.add(pattern.substring(c));
+			}
+		}
+
+		public String assemble(Object... values) {
+			if (parts.size() == 1) {
+				return parts.get(0);
+			}
+			StringBuilder sb = new StringBuilder(parts.get(0));
+			for (int i = 1; i < parts.size(); i++) {
+				sb.append(values[i - 1]).append(parts.get(i));
 			}
 			return sb.toString();
 		}
