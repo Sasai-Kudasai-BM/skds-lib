@@ -2,16 +2,14 @@ package net.skds.lib2.utils;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
 import lombok.AllArgsConstructor;
+import lombok.CustomLog;
 import lombok.NoArgsConstructor;
 import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 
 import javax.management.MBeanServer;
 import java.awt.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.math.BigInteger;
 import java.net.URI;
@@ -23,23 +21,27 @@ import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 @SuppressWarnings("unused")
+@CustomLog
 public class SKDSUtils {
 
 	public static final HexFormat HEX_FORMAT_LC = StringUtils.HEX_FORMAT_LC;
 	public static final OSType OS_TYPE = getOS();
 	public static final String OS_ARC = getOSAndArc();
 
-	private static final ThreadLocal<MessageDigest> tlSHA1 = ThreadLocal.withInitial(() -> getMDSafe("SHA1"));
-	private static final ThreadLocal<MessageDigest> tlSHA256 = ThreadLocal.withInitial(() -> getMDSafe("SHA256"));
-	private static final ThreadLocal<MessageDigest> tlMD5 = ThreadLocal.withInitial(() -> getMDSafe("MD5"));
+	private static Supplier<MessageDigest> SHA1 = getMDSafe("SHA1", md -> SHA1 = md);
+	private static Supplier<MessageDigest> SHA256 = getMDSafe("SHA256", md -> SHA256 = md);
+	private static Supplier<MessageDigest> SHA512 = getMDSafe("SHA512", md -> SHA512 = md);
+	private static Supplier<MessageDigest> MD5 = getMDSafe("MD5", md -> MD5 = md);
 
 	public static final Runnable EMPTY_RUNNABLE = () -> {
 	};
+	public static final Predicate<?> TRUE_PREDICATE = o -> true;
 
 	public static final Random R = new Random();
 
@@ -50,12 +52,36 @@ public class SKDSUtils {
 		return null;
 	}
 
-	private static MessageDigest getMDSafe(String algorithm) {
-		try {
-			return MessageDigest.getInstance(algorithm);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException(e);
-		}
+	private static Supplier<MessageDigest> getMDSafe(String algorithm, Consumer<Supplier<MessageDigest>> consumer) {
+		return () -> {
+			Supplier<MessageDigest> sup;
+			try {
+				MessageDigest md0 = MessageDigest.getInstance(algorithm);
+				try {
+					MessageDigest md = (MessageDigest) md0.clone();
+					sup = () -> {
+						try {
+							return (MessageDigest) md.clone();
+						} catch (CloneNotSupportedException e) {
+							throw new RuntimeException(e);
+						}
+					};
+				} catch (CloneNotSupportedException e) {
+					log.warn("MD algorithm \"" + algorithm + "\" is not Cloneable");
+					sup = () -> {
+						try {
+							return MessageDigest.getInstance(algorithm);
+						} catch (NoSuchAlgorithmException ex) {
+							throw new RuntimeException(ex);
+						}
+					};
+				}
+			} catch (NoSuchAlgorithmException e) {
+				throw new RuntimeException(e);
+			}
+			consumer.accept(sup);
+			return sup.get();
+		};
 	}
 
 	public static String hashFile(File f) {
@@ -122,16 +148,18 @@ public class SKDSUtils {
 
 	public static void openInBrowser(String link) {
 		try {
-			Desktop.getDesktop().browse(new URI(link));
-		} catch (Exception ex) {
+			Desktop.getDesktop().browse(URI.create(link));
+		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
+	@Deprecated(forRemoval = true)
 	public static int arrToInt(byte[] arr) {
 		return (((arr[0] & 255) << 8 | arr[1] & 255) << 8 | arr[2] & 255) << 8 | arr[3] & 255;
 	}
 
+	@Deprecated(forRemoval = true)
 	public static long arrToLong(byte[] arr) {
 		BigInteger bi = new BigInteger(arr);
 		return ((((((((long) (arr[0] & 255) << 8 | arr[1] & 255) << 8 | arr[2] & 255) << 8 | arr[3] & 255) << 8 | arr[4] & 255) << 8) | arr[5] & 255) << 8 | arr[6] & 255) << 8 | arr[7] & 255;
@@ -199,6 +227,7 @@ public class SKDSUtils {
 	}
 
 
+	@Deprecated(forRemoval = true)
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class PairIF {
@@ -211,6 +240,7 @@ public class SKDSUtils {
 		}
 	}
 
+	@Deprecated(forRemoval = true)
 	public static class Pair<A, B> {
 		public A a;
 		public B b;
@@ -229,6 +259,7 @@ public class SKDSUtils {
 		}
 	}
 
+	@Deprecated(forRemoval = true)
 	public static class Numered<T> {
 		public T value;
 		public int index;
@@ -244,6 +275,7 @@ public class SKDSUtils {
 		}
 	}
 
+	@Deprecated(forRemoval = true)
 	public static class NumeredConstant<T> {
 		public final T value;
 		public final int index;
@@ -259,16 +291,17 @@ public class SKDSUtils {
 		}
 	}
 
-	public static interface Indexed {
-		public int getIndex();
+	public interface Indexed {
+		int getIndex();
 	}
 
-	public static interface NamedWithId {
-		public String getName();
+	public interface NamedWithId {
+		String getName();
 
-		public String getId();
+		String getId();
 	}
 
+	@Deprecated
 	public static class R3ICorded<T> {
 		public T object;
 		public int x;
@@ -295,6 +328,8 @@ public class SKDSUtils {
 		}
 	}
 
+
+	@Deprecated(forRemoval = true)
 	public static class R3ICordedC<T> {
 		public final T object;
 		public final int x;
@@ -314,8 +349,9 @@ public class SKDSUtils {
 		}
 	}
 
-	public static boolean truePredicate(Object o) {
-		return true;
+	@SuppressWarnings("unchecked")
+	public static <T> Predicate<T> truePredicate() {
+		return (Predicate<T>) TRUE_PREDICATE;
 	}
 
 	public static void collectFileTree(File root, Collection<File> collection) {
@@ -349,25 +385,23 @@ public class SKDSUtils {
 	}
 
 	public static MessageDigest getSHA1() {
-		MessageDigest md = tlSHA1.get();
-		md.reset();
-		return md;
+		return SHA1.get();
 	}
 
 	public static MessageDigest getSHA256() {
-		MessageDigest md = tlSHA256.get();
-		md.reset();
-		return md;
+		return SHA256.get();
+	}
+
+	public static MessageDigest getSHA512() {
+		return SHA512.get();
 	}
 
 	public static MessageDigest getMD5() {
-		MessageDigest md = tlMD5.get();
-		md.reset();
-		return md;
+		return MD5.get();
 	}
 
-	public static ByteBuffer compress(byte[] data, int offset, int len) {
-		Deflater deflater = new Deflater();
+	public static ByteBuffer compress(byte[] data, int offset, int len, int compressionLevel) {
+		Deflater deflater = new Deflater(compressionLevel);
 		deflater.setInput(data, offset, len);
 		deflater.finish();
 		byte[] outBuffer = new byte[(Math.min(len + 32, 1024 * 8))];
@@ -379,6 +413,10 @@ public class SKDSUtils {
 
 		deflater.end();
 		return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
+	}
+
+	public static ByteBuffer compress(byte[] data, int offset, int len) {
+		return compress(data, offset, len, Deflater.DEFAULT_COMPRESSION);
 	}
 
 	public static ByteBuffer decompress(byte[] data, int offset, int len, int uncompressedSize) throws DataFormatException {
