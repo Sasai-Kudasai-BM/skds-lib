@@ -7,7 +7,7 @@ import java.io.PrintStream;
 import java.util.Date;
 
 record LogLnEntry(long time, String message, LoggerLevel level, String thread, StackTraceElement trace,
-				  Class<?> loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
+				  String loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
 				  boolean useFileOut, boolean ln) implements LogWriter.LogWriteable {
 
 	private static final String TERMINATION = '\n' + AnsiEscape.NORMAL.sequence;
@@ -20,7 +20,7 @@ record LogLnEntry(long time, String message, LoggerLevel level, String thread, S
 		StringBuilder logMsg = new StringBuilder();
 		logMsg.append(config.getTimeFormat().format(date)).append(' ');
 		if (loggingClass != null) {
-			logMsg.append('[').append(loggingClass.getSimpleName()).append("] ");
+			logMsg.append('[').append(loggingClass).append("] ");
 		}
 		if (thread != null) {
 			logMsg.append('[').append(thread).append("] ");

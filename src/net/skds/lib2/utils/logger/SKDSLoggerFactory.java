@@ -12,10 +12,10 @@ public final class SKDSLoggerFactory {
 			e.printStackTrace();
 			return null;
 		}
-		return new SKDSLoggerImpl(c);
+		return new SKDSLogger(c);
 	}
 
 	public static SKDSLogger getLogger(Class<?> c) {
-		return new SKDSLoggerImpl(c);
+		return new SKDSLogger(c);
 	}
 }

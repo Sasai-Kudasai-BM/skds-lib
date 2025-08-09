@@ -1,7 +1,7 @@
 package net.skds.lib2.utils.logger;
 
-import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import net.skds.lib2.io.json.JsonUtils;
 import net.skds.lib2.utils.AnsiEscape;
 
@@ -17,9 +17,11 @@ public final class SKDSLoggerConfig {
 
 	@Getter
 	private static SKDSLoggerConfig instance;
-	@Getter(AccessLevel.PACKAGE)
-	private static EnumSet<LoggerLevel> levels = EnumSet.allOf(LoggerLevel.class);
 
+	@Getter
+	private final long logFileSplitSize;
+	@Getter
+	private final EnumSet<LoggerLevel> levels;
 	@Getter()
 	private final SimpleDateFormat timeFormat;
 	@Getter()
@@ -27,51 +29,50 @@ public final class SKDSLoggerConfig {
 	@Getter()
 	private final boolean logThread;
 	@Getter()
+	private final boolean useFileOut;
+	@Getter()
 	private final boolean logStackTop;
 	@Getter()
 	private final boolean includeLoggerClass;
 	@Getter()
 	private final String logDir;
 
-	private SKDSLoggerConfig(Cfg cfg) {
+	public SKDSLoggerConfig(Cfg cfg) {
 		this.dateFormat = new SimpleDateFormat(cfg.dateFormat, Locale.ENGLISH);
 		this.timeFormat = new SimpleDateFormat(cfg.timeFormat, Locale.ENGLISH);
 		this.logThread = cfg.includeThread;
 		this.logStackTop = cfg.includeStackTop;
 		this.includeLoggerClass = cfg.includeLoggerClass;
 		this.logDir = cfg.logDir;
-		SKDSLogger.useFileOut = cfg.useFileOut;
+		this.useFileOut = cfg.useFileOut;
+		this.logFileSplitSize = cfg.logFileSplitSize;
+		this.levels = cfg.levels;
 		for (Entry<LoggerLevel, AnsiEscape> entry : cfg.ansiColors.entrySet()) {
 			entry.getKey().setColor(entry.getValue());
 		}
 	}
 
+	@Getter
+	@Setter
 	@SuppressWarnings("FieldMayBeFinal")
-	private static final class Cfg {
+	public static final class Cfg {
 		private String timeFormat = "HH:mm:ss.SSS";
 		private String dateFormat = "yyyy-MM/dd";
 		private String logDir = "logs";
+		private long logFileSplitSize = 64 * 1024 * 1024; // 64Mb
 		private boolean includeThread = true;
 		private boolean includeLoggerClass = false;
 		private boolean includeStackTop = true;
 		private boolean useFileOut = false;
 		private EnumMap<LoggerLevel, AnsiEscape> ansiColors = new EnumMap<>(LoggerLevel.class);
+		private EnumSet<LoggerLevel> levels = EnumSet.allOf(LoggerLevel.class);
 	}
 
-	public static void init() {}
-
-	public static void setLevels(LoggerLevel level, LoggerLevel... levels) {
-		SKDSLoggerConfig.levels = EnumSet.of(level, levels);
+	public static void set(Cfg cfg) {
+		instance = new SKDSLoggerConfig(cfg);
 	}
 
-	@SuppressWarnings("ManualArrayToCollectionCopy")
-	public static void setLevelsFromAbove(LoggerLevel level) {
-		EnumSet<LoggerLevel> newLevels = EnumSet.of(level);
-		LoggerLevel[] values = LoggerLevel.values();
-		for (int i = level.ordinal() + 1; i < values.length; i++) {
-			newLevels.add(values[i]);
-		}
-		levels = newLevels;
+	public static void init() {
 	}
 
 	static {
