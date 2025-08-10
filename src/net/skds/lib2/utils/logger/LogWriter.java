@@ -30,16 +30,15 @@ class LogWriter extends Thread {
 		this.fileWriter = new FileLogWriter();
 		setDaemon(true);
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			running = false;
 			long t0 = System.currentTimeMillis();
 			for (long t = 0; isBusy(); t = System.currentTimeMillis() - t0) {
-				if (t < SHUTDOWN_TIMEOUT) {
+				if (t > SHUTDOWN_TIMEOUT) {
 					SKDSLogger.ORIGINAL_ERR.println("SKDS-LogWriter-Finalizer error: log write timeout");
-					running = false;
 					return;
 				}
 				ThreadUtils.await(100);
 			}
-			running = false;
 		}, "LogWriter-Finalizer"));
 		start();
 		fileWriter.start();
