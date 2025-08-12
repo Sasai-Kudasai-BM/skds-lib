@@ -271,6 +271,25 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 		}
 
 		@Override
+		public int available() {
+			return buffer.remaining();
+		}
+
+		@Override
+		public byte[] readNBytes(int len) {
+			int c = Math.min(len, buffer.remaining());
+			byte[] arr = new byte[c];
+			buffer.get(arr, 0, c);
+			return arr;
+		}
+
+		@Override
+		public byte[] readAllBytes() {
+			byte[] arr = SKDSByteBuf.this.remainingAsArray();
+			return arr;
+		}
+
+		@Override
 		public int read(byte[] b) {
 			int count = Math.min(b.length, buffer.remaining());
 			buffer.get(b, 0, count);
@@ -283,6 +302,23 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 			count = Math.min(count, len);
 			buffer.get(b, off, count);
 			return count;
+		}
+
+		@Override
+		public long skip(long n) {
+			return SKDSByteBuf.this.skip((int) n);
+		}
+
+		@Override
+		public void skipNBytes(long n) {
+			SKDSByteBuf.this.skip((int) n);
+		}
+
+		@Override
+		public long transferTo(OutputStream out) throws IOException {
+			int c = buffer.remaining();
+			out.write(buffer.array(), buffer.position(), c);
+			return c;
 		}
 	}
 

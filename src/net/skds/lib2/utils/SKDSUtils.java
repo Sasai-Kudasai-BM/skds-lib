@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.zip.DataFormatException;
@@ -47,9 +48,20 @@ public class SKDSUtils {
 
 	public static final UUID NULL_UUID = new UUID(0, 0);
 
+	private static final Function<Throwable, Object> CATCHER = t -> {
+		t.printStackTrace();
+		return null;
+	};
+
+	@Deprecated
 	public static <T> T caught(Throwable t) {
 		t.printStackTrace();
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Function<Throwable, ? extends T> getCatcher() {
+		return (Function<Throwable, ? extends T>) CATCHER;
 	}
 
 	private static Supplier<MessageDigest> getMDSafe(String algorithm, Consumer<Supplier<MessageDigest>> consumer) {
