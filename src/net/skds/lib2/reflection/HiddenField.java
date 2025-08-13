@@ -1,17 +1,21 @@
 package net.skds.lib2.reflection;
 
-import lombok.AllArgsConstructor;
-
 import java.lang.reflect.Field;
 
-@AllArgsConstructor
-public class HiddenField<T> {
-	public final Field field;
+public record HiddenField<T>(Field field) {
+
+	public String getName() {
+		return this.field.getName();
+	}
+
+	public int getModifiers() {
+		return this.field.getModifiers();
+	}
 
 	@SuppressWarnings("unchecked")
 	public T get(Object o) {
 		try {
-			return (T) field.get(o);
+			return (T) this.field.get(o);
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -19,10 +23,11 @@ public class HiddenField<T> {
 
 	public void set(Object o, T value) {
 		try {
-			field.set(o, value);
+			this.field.set(o, value);
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
 }
 
