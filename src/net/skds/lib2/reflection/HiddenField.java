@@ -13,6 +13,11 @@ public record HiddenField<T>(Field field) {
 	}
 
 	@SuppressWarnings("unchecked")
+	public Class<T> getType() {
+		return (Class<T>) field.getType();
+	}
+
+	@SuppressWarnings("unchecked")
 	public T get(Object o) {
 		try {
 			return (T) this.field.get(o);

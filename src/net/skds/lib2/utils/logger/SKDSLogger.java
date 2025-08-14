@@ -17,7 +17,7 @@ public class SKDSLogger {
 	private final Supplier<SKDSLoggerConfig> configGetter;
 
 	protected LinkedList<PrintStream> attachedPrintStreams = new LinkedList<>();
-	protected PrintStream[] attachedPrintStreamsArray = PRINT_STREAM_ARRAY;
+	protected PrintStream[] attachedPrintStreamsArray = {};
 	protected boolean useGlobalPrintStream = true;
 	protected boolean useFileOut = true;
 
@@ -58,9 +58,9 @@ public class SKDSLogger {
 		}
 		LogWriter.LogWriteable e;
 		if (ln) {
-			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreams.toArray(PRINT_STREAM_ARRAY), useGlobalPrintStream, useFileOut, ln);
+			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut, ln);
 		} else {
-			e = new LogEntry(time, message, level, attachedPrintStreams.toArray(PRINT_STREAM_ARRAY), useGlobalPrintStream, useFileOut);
+			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut);
 		}
 		LogWriter.INSTANCE.add(e);
 	}
