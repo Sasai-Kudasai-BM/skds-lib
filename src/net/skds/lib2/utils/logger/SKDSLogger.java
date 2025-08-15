@@ -86,8 +86,16 @@ public abstract class SKDSLogger {
 		return attachedPrintStreams.remove(ps);
 	}
 
+	public static boolean isAttachToGlobal() {
+		return useGlobalPrintStream;
+	}
+
 	public static void setAttachToGlobal(boolean attached) {
 		useGlobalPrintStream = attached;
+	}
+
+	public static boolean isAttachToFile() {
+		return useFileOut;
 	}
 
 	public static void setAttachToFile(boolean attached) {

@@ -55,15 +55,15 @@ public class FunctionTester {
 		});
 		//tester.addFunction(new ITestFunction() {
 		//	@Override
-		//	public double calc(float input) {	
+		//	public double calc(float input) {
 		//		int val = (int) input + 1000;
-		//		val *= 2;	
+		//		val *= 2;
 		//		if (val < 0 || val >= dat.length - 1) {
 		//			return 0;
-		//		}	
+		//		}
 		//		double dd = dat[val] / 100;
 		//		return Math.abs(dd) > .1 ? dd : 0;
-		//	}	
+		//	}
 		//	@Override
 		//	public Color color() {
 		//		return Color.RED;

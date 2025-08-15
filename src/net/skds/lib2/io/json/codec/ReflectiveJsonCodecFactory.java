@@ -553,7 +553,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 						w.write(val, writer);
 						empty = false;
 					} catch (Exception e) {
-						throw new RuntimeException("Exception while write enum component \"" + tClass.getName() + ":" + names[i] + "\"", e);
+						throw new RuntimeException("Exception while write record component \"" + tClass.getName() + ":" + names[i] + "\"", e);
 					}
 				}
 				if (empty) {
