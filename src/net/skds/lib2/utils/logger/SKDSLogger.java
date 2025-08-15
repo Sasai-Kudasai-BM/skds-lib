@@ -1,7 +1,5 @@
 package net.skds.lib2.utils.logger;
 
-import lombok.Getter;
-
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.function.Supplier;
@@ -143,8 +141,16 @@ public class SKDSLogger {
 		useGlobalPrintStream = attached;
 	}
 
+	public boolean isAttachToGlobal() {
+		return this.useGlobalPrintStream;
+	}
+
 	public void setAttachToFile(boolean attached) {
 		useFileOut = attached;
+	}
+
+	public boolean isAttachToFile() {
+		return this.useFileOut;
 	}
 
 	public static void replaceOuts() {
