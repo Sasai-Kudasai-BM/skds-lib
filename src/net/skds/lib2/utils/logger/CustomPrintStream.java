@@ -30,8 +30,8 @@ class CustomPrintStream extends CustomAbstractPrintStream {
 	@Override
 	public void println() {
 		switch (this.type) {
-			case OUT -> SKDSLogger.printLn(LoggerLevel.SYSTEM_OUT);
-			case ERR -> SKDSLogger.printLn(LoggerLevel.SYSTEM_ERR);
+			case OUT -> log.printLn(LoggerLevel.SYSTEM_OUT);
+			case ERR -> log.printLn(LoggerLevel.SYSTEM_ERR);
 		}
 	}
 }

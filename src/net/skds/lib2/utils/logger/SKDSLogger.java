@@ -1,22 +1,71 @@
 package net.skds.lib2.utils.logger;
 
+import lombok.Getter;
+
 import java.io.PrintStream;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.LinkedList;
+import java.util.function.Supplier;
 
-public abstract class SKDSLogger {
-
-	static final ConcurrentLinkedQueue<PrintStream> attachedPrintStreams = new ConcurrentLinkedQueue<>();
-	protected static boolean useGlobalPrintStream = true;
-	protected static boolean useFileOut = true;
+public class SKDSLogger {
 
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
 	public static final PrintStream REPLACED_OUT = new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT);
 	public static final PrintStream REPLACED_ERR = new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR);
 	private static final int DEPTH = 3;
-	static final PrintStream[] printStreamArray = {};
+	static final PrintStream[] PRINT_STREAM_ARRAY = {};
 
-	protected abstract void log0(LoggerLevel level, int depth, boolean ln, boolean trace, Object msg);
+	private final String name;
+	private final Supplier<SKDSLoggerConfig> configGetter;
+
+	protected LinkedList<PrintStream> attachedPrintStreams = new LinkedList<>();
+	protected PrintStream[] attachedPrintStreamsArray = {};
+	protected boolean useGlobalPrintStream = true;
+	protected boolean useFileOut = true;
+
+	public SKDSLogger(Class<?> loggingClass) {
+		this.name = loggingClass.getSimpleName();
+		this.configGetter = SKDSLoggerConfig::getInstance;
+	}
+
+	public SKDSLogger(String name) {
+		this.name = name;
+		this.configGetter = SKDSLoggerConfig::getInstance;
+	}
+
+	public SKDSLogger(String name, SKDSLoggerConfig.Cfg config) {
+		this.name = name;
+		SKDSLoggerConfig config1 = new SKDSLoggerConfig(config);
+		this.configGetter = () -> config1;
+	}
+
+	protected void log0(LoggerLevel level, int depth, boolean ln, boolean trace, Object msg) {
+		final SKDSLoggerConfig config = configGetter.get();
+		if (!config.getLevels().contains(level)) return;
+		String message = String.valueOf(msg);
+		long time = System.currentTimeMillis();
+		String thread = null;
+		StackTraceElement stackTop = null;
+		String loggingClass = null;
+		if (trace) {
+			if (config.isLogThread()) {
+				thread = Thread.currentThread().getName();
+			}
+			if (config.isIncludeLoggerClass()) {
+				loggingClass = this.name;
+			}
+			if (config.isLogStackTop()) {
+				stackTop = Thread.currentThread().getStackTrace()[depth];
+			}
+		}
+		LogWriter.LogWriteable e;
+		if (ln) {
+			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut, ln);
+		} else {
+			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut);
+		}
+		LogWriter.INSTANCE.add(e);
+	}
 
 	public void debug(Object msg) {
 		log0(LoggerLevel.DEBUG, DEPTH, true, true, msg);
@@ -78,27 +127,23 @@ public abstract class SKDSLogger {
 		log0(LoggerLevel.ERROR, DEPTH, false, false, msg);
 	}
 
-	public static boolean attachPrintStream(PrintStream ps) {
-		return attachedPrintStreams.offer(ps);
+	public synchronized boolean attachPrintStream(PrintStream ps) {
+		attachedPrintStreams.add(ps);
+		this.attachedPrintStreamsArray = attachedPrintStreams.toArray(PRINT_STREAM_ARRAY);
+		return true;
 	}
 
-	public static boolean detachPrintStream(PrintStream ps) {
-		return attachedPrintStreams.remove(ps);
+	public synchronized boolean detachPrintStream(PrintStream ps) {
+		boolean b = attachedPrintStreams.remove(ps);
+		if (b) this.attachedPrintStreamsArray = attachedPrintStreams.toArray(PRINT_STREAM_ARRAY);
+		return b;
 	}
 
-	public static boolean isAttachToGlobal() {
-		return useGlobalPrintStream;
-	}
-
-	public static void setAttachToGlobal(boolean attached) {
+	public void setAttachToGlobal(boolean attached) {
 		useGlobalPrintStream = attached;
 	}
 
-	public static boolean isAttachToFile() {
-		return useFileOut;
-	}
-
-	public static void setAttachToFile(boolean attached) {
+	public void setAttachToFile(boolean attached) {
 		useFileOut = attached;
 	}
 
@@ -108,10 +153,10 @@ public abstract class SKDSLogger {
 		System.setErr(REPLACED_ERR);
 	}
 
-	static void printLn(LoggerLevel level) {
-		if (!SKDSLoggerConfig.getLevels().contains(level)) return;
+	void printLn(LoggerLevel level) {
+		if (!configGetter.get().getLevels().contains(level)) return;
 		long time = System.currentTimeMillis();
-		LogPrintln e = new LogPrintln(time, level, attachedPrintStreams.toArray(printStreamArray), useGlobalPrintStream, useFileOut);
+		LogPrintln e = new LogPrintln(time, level, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut);
 		LogWriter.INSTANCE.add(e);
 	}
 }

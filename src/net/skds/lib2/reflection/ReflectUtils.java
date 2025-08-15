@@ -107,14 +107,18 @@ public class ReflectUtils {
 			if (Modifier.isStatic(f.getModifiers())) {
 				continue;
 			}
-			function.accept(f, value -> {
-				f.setAccessible(true);
-				try {
-					f.set(instance, value);
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			});
+			try {
+				function.accept(f, value -> {
+					f.setAccessible(true);
+					try {
+						f.set(instance, value);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -128,10 +132,10 @@ public class ReflectUtils {
 
 	@FunctionalInterface
 	public interface FillingFunction {
-		void accept(Field field, Consumer<Object> consumer);
+		void accept(Field field, Consumer<Object> consumer) throws IllegalAccessException;
 	}
 
-	public static final Field accessField(Class<?> cl, String key) {
+	public static Field accessField(Class<?> cl, String key) {
 		try {
 			Field field = cl.getDeclaredField(key);
 			field.setAccessible(true);
