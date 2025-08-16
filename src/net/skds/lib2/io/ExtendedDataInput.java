@@ -41,6 +41,18 @@ public interface ExtendedDataInput extends DataInput {
 		buffer.position(buffer.limit());
 	}
 
+	default byte[] readBytes(int count) throws IOException {
+		byte[] array = new byte[count];
+		readFully(array, 0, count);
+		return array;
+	}
+
+	default String readStringBytes(int count) throws IOException {
+		byte[] array = new byte[count];
+		readFully(array, 0, count);
+		return new String(array, StandardCharsets.UTF_8);
+	}
+
 	default int readVarInt() throws IOException {
 		return VarInt.read(this);
 	}
@@ -363,4 +375,5 @@ public interface ExtendedDataInput extends DataInput {
 
 		};
 	}
+
 }

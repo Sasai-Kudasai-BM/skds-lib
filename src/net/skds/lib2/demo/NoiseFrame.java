@@ -18,30 +18,6 @@ public class NoiseFrame extends JFrame {
 			new ColorScheme() {
 				@Override
 				public int getColor(float value) {
-					int br = FastMath.clamp((int) (value * 255), 0, 255);
-					return ColorUtils.packARGB(br, br, br, 255);
-				}
-
-				@Override
-				public String toString() {
-					return "GRAY";
-				}
-			},
-			new ColorScheme() {
-				@Override
-				public int getColor(float value) {
-					int br = FastMath.clamp((int) ((1 - value) * 255), 0, 255);
-					return ColorUtils.packARGB(br, br, br, 255);
-				}
-
-				@Override
-				public String toString() {
-					return "GRAY INVERTED";
-				}
-			},
-			new ColorScheme() {
-				@Override
-				public int getColor(float value) {
 					int hue = ColorUtils.hueRGB(FastMath.clamp((1 - value) * 0.667f, 0, 0.667f));
 					return ColorUtils.packARGB(hue, 255);
 				}
@@ -62,6 +38,30 @@ public class NoiseFrame extends JFrame {
 				public String toString() {
 					return "HUE INVERTED";
 				}
+			},
+			new ColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int br = FastMath.clamp((int) (value * 255), 0, 255);
+					return ColorUtils.packARGB(br, br, br, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "GRAY";
+				}
+			},
+			new ColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int br = FastMath.clamp((int) ((1 - value) * 255), 0, 255);
+					return ColorUtils.packARGB(br, br, br, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "GRAY INVERTED";
+				}
 			}
 	};
 
@@ -72,10 +72,10 @@ public class NoiseFrame extends JFrame {
 	};
 
 	private static final AmplitudeFuncHolder[] amplitudeFunctions = {
+			new AmplitudeFuncHolder(Noise.AmplitudeFunction.FIBONACCI, "FIBONACCI"),
 			new AmplitudeFuncHolder(Noise.AmplitudeFunction.EXPONENT, "EXPONENT"),
 			new AmplitudeFuncHolder(Noise.AmplitudeFunction.SQUARE, "SQUARE"),
 			new AmplitudeFuncHolder(Noise.AmplitudeFunction.LINEAR, "LINEAR"),
-			new AmplitudeFuncHolder(Noise.AmplitudeFunction.FIBONACCI, "FIBONACCI"),
 	};
 
 	private record InterpolationHolder(FastMath.FloatInterpolation interpolation, String name) {
@@ -96,6 +96,7 @@ public class NoiseFrame extends JFrame {
 
 	private final NoisePanel noisePanel;
 
+	private boolean useFields = false;
 	private float scale = 1;
 	private float cx = 0;
 	private float cy = 0;
@@ -227,6 +228,13 @@ public class NoiseFrame extends JFrame {
 			});
 			add(amplitudeFuncSelector);
 
+			//JCheckBox fieldEnable = new JCheckBox("Use Fields");
+			//fieldEnable.addActionListener(e -> {
+			//	useFields = fieldEnable.isSelected();
+			//	updateNoise();
+			//});
+			//add(fieldEnable);
+
 			/*
 			JPanel ampPanel = new JPanel();
 			ampPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
@@ -335,12 +343,41 @@ public class NoiseFrame extends JFrame {
 			int w2 = w / 2;
 			int h2 = h / 2;
 
-			Image image = ImageUtils.drawPerPixel(w, h, (x, y) -> {
+			ImageUtils.PerPixelDraw draw = (x, y) -> {
 				float vx = (x - w2) / scale - cx;
 				float vy = (y - h2) / scale - cy;
-				float value = noise.getValueInPoint(vx, vy, depth);
+				//float value = noise.getValueInPoint(vx, vy, depth);
+				float value = noise.getValueInPoint(vx, vy);
 				return colorScheme.getColor((value + colorBias) * colorScale);
-			});
+			};
+
+			/*
+			if (useFields) {
+				Noise.Field field = noise.createFieldBuffer(w, h);
+				noise.fillFields(field, -cx / w, -cy / h);
+				FloatField2D nf = noise.getField(field);
+				draw = (x, y) -> {
+					int vx = (int) ((x) / scale);
+					int vy = (int) ((y) / scale);
+
+					vx = Math.clamp(vx, 0, w - 1);
+					vy = Math.clamp(vy, 0, h - 1);
+
+					float value = nf.getValue(vx, vy);
+					return colorScheme.getColor((value + colorBias) * colorScale);
+				};
+			} else {
+				draw = (x, y) -> {
+					float vx = (x - w2) / scale - cx;
+					float vy = (y - h2) / scale - cy;
+					//float value = noise.getValueInPoint(vx, vy, depth);
+					float value = noise.getValueInPoint(vx, vy);
+					return colorScheme.getColor((value + colorBias) * colorScale);
+				};
+			}
+
+			 //*/
+			Image image = ImageUtils.drawPerPixel(w, h, draw);
 
 			g2d.drawImage(image, 0, 0, w, h, null);
 		}

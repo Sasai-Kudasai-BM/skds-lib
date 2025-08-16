@@ -3,60 +3,56 @@ package net.skds.lib2.misc.noise;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.misc.random.StateFuncRandom;
 
+import java.util.Arrays;
+
 public class Noise {
 
 	private final float weightCorrection;
-	private final float exponent;
-	private final float phaseScale;
+	//private final float exponent;
+	//private final float phaseScale;
 	private final float[] amplitudes;
+	private final float[] scales;
 	private final StateFuncRandom[] layers;
-	private final int layerCount;
+	//private final int layerCount;
 	@SuppressWarnings({"unused", "FieldCanBeLocal"})
 	private final int actualLayerCount;
 	private final FastMath.FloatInterpolation interpolation;
 
 	public Noise(long seed, int layerCount, AmplitudeFunction amplitudeFunction, float exponent, FastMath.FloatInterpolation interpolation) {
-		this.exponent = exponent;
-		this.layerCount = layerCount;
-		float[] amplitudes = new float[layerCount];
-		for (int i = 0; i < layerCount; i++) {
-			amplitudes[i] = amplitudeFunction.amplitude(i, exponent);
-		}
-		this.amplitudes = amplitudes;
+		//this.exponent = exponent;
+		//this.layerCount = layerCount;
 		this.interpolation = interpolation;
-		this.layers = new StateFuncRandom[layerCount];
+		float[] amplitudes = new float[layerCount];
+		float[] pss = new float[layerCount];
+		int n = 0;
+		float ps = 1;
 
-		StateFuncRandom layer0 = new StateFuncRandom(seed);
-		layers[0] = layer0;
-		float ps = exponent;
-		float weight = amplitudes[0];
-		int lc = 1;
-		for (int i = 1; i < layerCount; i++) {
+		float weight = 0;
+		for (int i = 0; i < layerCount; i++) {
 			ps *= exponent;
-			float amp = amplitudes[i];
+			float amp = amplitudeFunction.amplitude(i, exponent);
 			if (amp == 0) continue;
-			lc++;
 			weight += amp;
+			pss[n] = ps;
+			amplitudes[n++] = amp;
+		}
+		this.actualLayerCount = n;
+		this.amplitudes = Arrays.copyOf(amplitudes, n);
+		this.layers = new StateFuncRandom[n];
+		for (int i = 0; i < n; i++) {
+			pss[i] /= ps;
 			layers[i] = new StateFuncRandom((seed ^ i) + 37);
 		}
+		this.scales = Arrays.copyOf(pss, n);
 		this.weightCorrection = 1 / weight;
-		this.phaseScale = 1 / ps;
-		this.actualLayerCount = lc;
+		//this.phaseScale = 1 / ps;
 	}
 
 	public float getValueInPoint(double x, double y, double z) {
-		x *= phaseScale;
-		y *= phaseScale;
-		z *= phaseScale;
 		float value = 0;
-		float ps = 1;
-		for (int i = 0; i < layerCount; i++) {
-			ps *= exponent;
+		for (int i = 0; i < actualLayerCount; i++) {
+			float ps = scales[i];
 			StateFuncRandom sfr = layers[i];
-			if (sfr == null) {
-				continue;
-			}
-			float amp = amplitudes[i];
 
 			double xi = x * ps;
 			double yi = y * ps;
@@ -89,25 +85,17 @@ public class Noise {
 			float s0 = interpolation.interpolate(ky, b00, b01);
 			float s1 = interpolation.interpolate(ky, b10, b11);
 
-			value += interpolation.interpolate(kx, s0, s1) * amp;
+			value += interpolation.interpolate(kx, s0, s1) * amplitudes[i];
 		}
 
 		return value * weightCorrection;
 	}
 
 	public float getValueInPoint(double x, double y) {
-		x *= phaseScale;
-		y *= phaseScale;
 		float value = 0;
-		float ps = 1;
-		for (int i = 0; i < layerCount; i++) {
-			ps *= exponent;
+		for (int i = 0; i < actualLayerCount; i++) {
+			float ps = scales[i];
 			StateFuncRandom sfr = layers[i];
-			if (sfr == null) {
-				continue;
-			}
-			float amp = amplitudes[i];
-
 			double xi = x * ps;
 			double yi = y * ps;
 
@@ -127,63 +115,90 @@ public class Noise {
 			float s0 = interpolation.interpolate(ky, v00, v01);
 			float s1 = interpolation.interpolate(ky, v10, v11);
 
-			value += interpolation.interpolate(kx, s0, s1) * amp;
+			value += interpolation.interpolate(kx, s0, s1) * amplitudes[i];
 		}
 
 		return value * weightCorrection;
 	}
 
 	/*
-	public FloatField2D[] createFieldBuffer(int width, int height) {
+	public Field createFieldBuffer(int width, int height) {
 		FloatField2D[] fields = new FloatField2D[actualLayerCount];
-		float ps = phaseScale;
-		int n = 0;
-		for (int i = 0; i < layerCount; i++) {
-			ps *= periodScale;
-			if (layers[i] == null) {
-				continue;
-			}
+		for (int i = 0; i < actualLayerCount; i++) {
+			float ps = scales[i];
 			float xi = width * ps;
 			float yi = height * ps;
 			int xs = FastMath.ceil(xi) + 1;
 			int ys = FastMath.ceil(yi) + 1;
-			fields[n++] = new FloatField2DImpl(xs, ys);
+			fields[i] = new FloatField2DImpl(xs, ys);
 		}
-		return fields;
+		return new Field(fields, scales, width, height);
 	}
 
-	public FloatField2D createFillField(FloatField2D[] fields, double xOffset, double yOffset) {
-		float ps = 1;
-		int n = 0;
-		for (int i = 0; i < layerCount; i++) {
-			ps *= periodScale;
+	public void fillFields(Field nf, double xOffset, double yOffset) {
+		if (nf.fields.length != this.actualLayerCount) throw new IllegalArgumentException("Incompatible field depth");
+		for (int i = 0; i < actualLayerCount; i++) {
+			float ps = scales[i];
+			FloatField2D field = nf.fields[i];
 			StateFuncRandom sfr = layers[i];
-			if (sfr == null) {
-				continue;
-			}
-			FloatField2D field = fields[n++];
 			int w = field.width();
 			int h = field.height();
 			for (int x = 0; x < w; x++) {
 				for (int y = 0; y < h; y++) {
-					float value = getLayerValueInPoint(i, x + xOffset, y + yOffset);
+
+					int xi = FastMath.floor(x + (xOffset) / ps);
+					int yi = FastMath.floor(y + (yOffset) / ps);
+
+					float value = sfr.randomize(xi, yi) * amplitudes[i];
 					field.setValue(value, x, y);
 				}
 			}
-
-			float xi = width * ps;
-			float yi = height * ps;
-			int xs = FastMath.ceil(xi) + 1;
-			int ys = FastMath.ceil(yi) + 1;
-			 =new FloatField2DImpl(xs, ys);
 		}
-		return fields;
 	}
 
 
-	//public float getLayerValueInPoint(int layer, double x, double y) {
-	//}
-	 */
+	public FloatField2D getField(Field nf) {
+		if (nf.fields.length != this.actualLayerCount) throw new IllegalArgumentException("Incompatible field depth");
+		FloatField2D out = new FloatField2DImpl(nf.targetWidth, nf.targetHeight);
+		for (int x = 0; x < nf.targetWidth; x++) {
+			for (int y = 0; y < nf.targetHeight; y++) {
+				float value = 0;
+				for (int i = 0; i < actualLayerCount; i++) {
+					float ps = scales[i];
+					FloatField2D field = nf.fields[i];
+
+					double xi = x * ps;
+					double yi = y * ps;
+
+					int x0 = FastMath.floor(xi);
+					int x1 = FastMath.ceil(xi);
+					float kx = (float) (xi - x0);
+					int y0 = FastMath.floor(yi);
+					int y1 = FastMath.ceil(yi);
+					float ky = (float) (yi - y0);
+
+					float v00 = field.getValue(x0, y0);
+					float v10 = field.getValue(x1, y0);
+					float v01 = field.getValue(x0, y1);
+					float v11 = field.getValue(x1, y1);
+
+					float s0 = interpolation.interpolate(ky, v00, v01);
+					float s1 = interpolation.interpolate(ky, v10, v11);
+
+					value += interpolation.interpolate(kx, s0, s1);
+				}
+
+				out.setValue(value, x, y);
+			}
+		}
+		return out;
+
+	}
+
+	public record Field(FloatField2D[] fields, float[] phaseScales, int targetWidth, int targetHeight) {
+	}
+
+	 //*/
 
 	public interface AmplitudeFunction {
 		float amplitude(int layer, float exponent);

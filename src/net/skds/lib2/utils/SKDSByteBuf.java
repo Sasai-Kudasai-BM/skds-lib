@@ -35,6 +35,14 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 		return new String(buffer.array(), buffer.position(), buffer.remaining(), StandardCharsets.UTF_8);
 	}
 
+	@Override
+	public String readStringBytes(int count) throws IOException {
+		if (buffer.isDirect() || buffer.isReadOnly()) return ExtendedDataInput.super.readStringBytes(count);
+		String s = new String(buffer.array(), buffer.position(), count, StandardCharsets.UTF_8);
+		skip(count);
+		return s;
+	}
+
 	public byte[] getBytes(int length) {
 		byte[] bytes = new byte[length];
 		buffer.get(bytes);

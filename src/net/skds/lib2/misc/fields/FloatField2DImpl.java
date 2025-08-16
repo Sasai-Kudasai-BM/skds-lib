@@ -31,4 +31,14 @@ public class FloatField2DImpl implements FloatField2D {
 	public void setValue(float value, int x, int y) {
 		array[Field2D.index(x, y, width)] = value;
 	}
+
+	@Override
+	public void increment(float value, int x, int y) {
+		array[Field2D.index(x, y, width)] += value;
+	}
+
+	@Override
+	public void multiply(float value, int x, int y) {
+		array[Field2D.index(x, y, width)] *= value;
+	}
 }
