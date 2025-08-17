@@ -1,18 +1,18 @@
 package net.skds.lib2.misc.fields;
 
-public class FloatField2DImpl implements FloatField2D {
+public class IntField2DImpl implements IntField2D {
 
 	private final int width;
 	private final int height;
-	private final float[] array;
+	private final int[] array;
 
-	public FloatField2DImpl(int width, int height) {
+	public IntField2DImpl(int width, int height) {
 		this.width = width;
 		this.height = height;
-		this.array = new float[width * height];
+		this.array = new int[width * height];
 	}
 
-	public FloatField2DImpl(int width, int height, float[] data) {
+	public IntField2DImpl(int width, int height, int[] data) {
 		if (width * height != data.length)
 			throw new IllegalArgumentException("Expected data length of %s but got %s".formatted(width * height, data.length));
 		this.width = width;
@@ -31,27 +31,27 @@ public class FloatField2DImpl implements FloatField2D {
 	}
 
 	@Override
-	public float[] toArray() {
+	public int[] toArray() {
 		return array;
 	}
 
 	@Override
-	public float getValue(int x, int y) {
+	public int getValue(int x, int y) {
 		return array[Field2D.index(x, y, width)];
 	}
 
 	@Override
-	public void setValue(float value, int x, int y) {
+	public void setValue(int value, int x, int y) {
 		array[Field2D.index(x, y, width)] = value;
 	}
 
 	@Override
-	public void increment(float value, int x, int y) {
+	public void increment(int value, int x, int y) {
 		array[Field2D.index(x, y, width)] += value;
 	}
 
 	@Override
-	public void multiply(float value, int x, int y) {
+	public void multiply(int value, int x, int y) {
 		array[Field2D.index(x, y, width)] *= value;
 	}
 }

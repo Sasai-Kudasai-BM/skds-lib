@@ -96,7 +96,7 @@ public class NoiseFrame extends JFrame {
 
 	private final NoisePanel noisePanel;
 
-	private boolean useFields = false;
+	//private boolean useFields = false;
 	private float scale = 1;
 	private float cx = 0;
 	private float cy = 0;

@@ -1,6 +1,8 @@
 package net.skds.lib2.utils;
 
 import lombok.experimental.UtilityClass;
+import net.skds.lib2.misc.fields.IntField2D;
+import net.skds.lib2.misc.fields.IntField2DImpl;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
@@ -8,12 +10,12 @@ import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageInputStreamSpi;
 import javax.imageio.spi.ImageReaderSpi;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
+import java.awt.image.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 @UtilityClass
@@ -25,6 +27,8 @@ public class ImageUtils {
 	private static final ImageReaderSpi GIF_READER;
 	private static final ImageReaderSpi TIFF_READER;
 	private static final ImageInputStreamSpi INPUT_STREAM_SPI;
+
+	private static final String DATA_BUFFER_INT_ERR = "Unable to get DataBufferInt from image";
 
 
 	public static BufferedImage readPNG(final InputStream is) {
@@ -82,20 +86,104 @@ public class ImageUtils {
 		}
 	}
 
+	private static final int[] ARGB_MASKS = {0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000};
+
+	public static BufferedImage fieldToImage(IntField2D field) {
+		int[] data = field.toArray();
+		DataBufferInt db = new DataBufferInt(data, data.length);
+		SinglePixelPackedSampleModel cm = new SinglePixelPackedSampleModel(db.getDataType(), field.width(), field.height(), ARGB_MASKS);
+		WritableRaster raster = WritableRaster.createWritableRaster(cm, db, null);
+		return new BufferedImage(ColorModel.getRGBdefault(), raster, false, null);
+	}
+
 	public static BufferedImage drawPerPixel(int w, int h, PerPixelDraw draw) {
 		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		WritableRaster raster = image.getRaster();
-		int[] buf = new int[1];
+		IntField2D raster = Objects.requireNonNull(getIntData(image), DATA_BUFFER_INT_ERR);
 		for (int x = 0; x < w; x++) {
 			for (int y = 0; y < h; y++) {
 				int c = draw.draw(x, y);
 				if (c != 0) {
-					buf[0] = c;
-					raster.setDataElements(x, y, buf);
+					raster.setValue(c, x, y);
 				}
 			}
 		}
 		return image;
+	}
+
+
+	public static BufferedImage drawPerPixelFill(int w, int h, PerPixelDraw draw) {
+		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		IntField2D raster = Objects.requireNonNull(getIntData(image), DATA_BUFFER_INT_ERR);
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				raster.setValue(draw.draw(x, y), x, y);
+			}
+		}
+		return image;
+	}
+
+	public static void drawPerPixel(BufferedImage image, PerPixelDraw draw) {
+		int w = image.getWidth();
+		int h = image.getHeight();
+		IntField2D raster = Objects.requireNonNull(getIntData(image), DATA_BUFFER_INT_ERR);
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				int c = draw.draw(x, y);
+				if (c != 0) {
+					raster.setValue(c, x, y);
+				}
+			}
+		}
+	}
+
+	public static void drawPerPixelFill(BufferedImage image, PerPixelDraw draw) {
+		int w = image.getWidth();
+		int h = image.getHeight();
+		IntField2D raster = Objects.requireNonNull(getIntData(image), DATA_BUFFER_INT_ERR);
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				raster.setValue(draw.draw(x, y), x, y);
+			}
+		}
+	}
+
+	public static void drawPerPixelFill(BufferedImage image, PerPixelDraw draw, int x0, int y0, int w, int h) {
+		int xe = Math.min(image.getWidth(), x0 + w);
+		int ye = Math.min(image.getHeight(), y0 + h);
+		IntField2D raster = Objects.requireNonNull(getIntData(image), DATA_BUFFER_INT_ERR);
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				raster.setValue(draw.draw(x, y), x, y);
+			}
+		}
+	}
+
+	public static void drawPerPixelFill(IntField2D image, PerPixelDraw draw) {
+		int w = image.width();
+		int h = image.height();
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
+				image.setValue(draw.draw(x, y), x, y);
+			}
+		}
+	}
+
+	public static void drawPerPixelFill(IntField2D image, PerPixelDraw draw, int x0, int y0, int w, int h) {
+		int xe = Math.min(image.width(), x0 + w);
+		int ye = Math.min(image.height(), y0 + h);
+		for (int x = x0; x < xe; x++) {
+			for (int y = y0; y < ye; y++) {
+				image.setValue(draw.draw(x, y), x, y);
+			}
+		}
+	}
+
+	public static IntField2D getIntData(BufferedImage image) {
+		if (image.getRaster().getDataBuffer() instanceof DataBufferInt dbi) {
+			return new IntField2DImpl(image.getWidth(), image.getHeight(), dbi.getData());
+		} else {
+			return null;
+		}
 	}
 
 	public interface PerPixelDraw {
