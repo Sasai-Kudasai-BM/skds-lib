@@ -58,6 +58,14 @@ class LogWriter extends Thread {
 				e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
 			}
 		}
+		LogWriteable le;
+		while ((le = entries.poll()) != null) {
+			try {
+				le.write();
+			} catch (Exception e) {
+				e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
+			}
+		}
 	}
 
 	static void write(Date date, String msg, LoggerLevel level, PrintStream[] attachedStreams, boolean useGlobalPrintStream, String fileOut) {
@@ -116,7 +124,7 @@ class LogWriter extends Thread {
 
 		@Override
 		public void run() {
-			while (running) {
+			while (running || !entries.isEmpty() || INSTANCE.getState() == State.RUNNABLE) {
 				try {
 					for (var itr = entries.entrySet().iterator(); itr.hasNext(); ) {
 						var e = itr.next();

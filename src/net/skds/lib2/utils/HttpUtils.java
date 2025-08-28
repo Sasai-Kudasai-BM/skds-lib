@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
@@ -58,6 +59,25 @@ public class HttpUtils { // TODO
 			int len = Integer.parseInt(cl.get(0));
 			return new DownloadProcess(response.statusCode(), len, response.body());
 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		throw new RuntimeException("Unable to download " + url);
+	}
+
+	public static String downloadString(String url) {
+		try {
+			byte[] data = URI.create(url).toURL().openConnection().getInputStream().readAllBytes();
+			return new String(data, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		throw new RuntimeException("Unable to download " + url);
+	}
+
+	public static byte[] downloadBytes(String url) {
+		try {
+			return URI.create(url).toURL().openConnection().getInputStream().readAllBytes();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
