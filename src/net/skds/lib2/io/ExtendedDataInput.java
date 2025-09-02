@@ -9,10 +9,7 @@ import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
 import net.skds.lib2.utils.ArrayUtils;
 
-import java.io.DataInput;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -88,7 +85,6 @@ public interface ExtendedDataInput extends DataInput {
 		return BitSet.valueOf(data);
 	}
 
-
 	default UUID readUUID() throws IOException {
 		return new UUID(readLong(), readLong());
 	}
@@ -101,6 +97,65 @@ public interface ExtendedDataInput extends DataInput {
 		return data;
 	}
 
+	default char[] readCharArray() throws IOException {
+		int l = readVarInt();
+		if (l == 0) return ArrayUtils.EMPTY_CHAR;
+		char[] data = new char[l];
+		for (int i = 0; i < l; i++) {
+			data[i] = readChar();
+		}
+		return data;
+	}
+
+	default short[] readShortArray() throws IOException {
+		int l = readVarInt();
+		if (l == 0) return ArrayUtils.EMPTY_SHORT;
+		short[] data = new short[l];
+		for (int i = 0; i < l; i++) {
+			data[i] = readShort();
+		}
+		return data;
+	}
+
+	default int[] readIntArray() throws IOException {
+		int l = readVarInt();
+		if (l == 0) return ArrayUtils.EMPTY_INT;
+		int[] data = new int[l];
+		for (int i = 0; i < l; i++) {
+			data[i] = readInt();
+		}
+		return data;
+	}
+
+	default long[] readLongArray() throws IOException {
+		int l = readVarInt();
+		if (l == 0) return ArrayUtils.EMPTY_LONG;
+		long[] data = new long[l];
+		for (int i = 0; i < l; i++) {
+			data[i] = readLong();
+		}
+		return data;
+	}
+
+	default float[] readFloatArray() throws IOException {
+		int l = readVarInt();
+		if (l == 0) return ArrayUtils.EMPTY_FLOAT;
+		float[] data = new float[l];
+		for (int i = 0; i < l; i++) {
+			data[i] = readFloat();
+		}
+		return data;
+	}
+
+	default double[] readDoubleArray() throws IOException {
+		int l = readVarInt();
+		if (l == 0) return ArrayUtils.EMPTY_DOUBLE;
+		double[] data = new double[l];
+		for (int i = 0; i < l; i++) {
+			data[i] = readDouble();
+		}
+		return data;
+	}
 
 	default <T> List<T> readCollection(DataReader<T> reader) throws IOException {
 		final int size = readVarInt();
@@ -373,6 +428,118 @@ public interface ExtendedDataInput extends DataInput {
 				return ByteArrayPrimitiveOperations.getDouble(readBuffer, 0);
 			}
 
+		};
+	}
+
+	static ExtendedDataInput wrap(byte[] in) {
+		return new ExtendedDataInput() {
+			int pos = 0;
+
+			@Override
+			public InputStream getAsInputStream() {
+				return new ByteArrayInputStream(in);
+			}
+
+			@Override
+			public void readToByteBuffer(ByteBuffer buffer, int offset, int length) {
+				length = Math.min(length, in.length - pos);
+				if (length < 1) return;
+				buffer.put(offset, in, pos, length);
+				pos += length;
+			}
+
+			@Override
+			public void readFully(byte[] b) {
+				int length = Math.min(b.length, in.length - pos);
+				if (length < 1) return;
+				System.arraycopy(in, pos, b, 0, length);
+				pos += length;
+			}
+
+			@Override
+			public void readFully(byte[] b, int off, int len) {
+				int length = Math.min(len, in.length - pos);
+				if (length < 1) return;
+				System.arraycopy(in, pos, b, off, length);
+				pos += length;
+			}
+
+			@Override
+			public int skipBytes(int n) {
+				return pos += n;
+			}
+
+			@Override
+			public boolean readBoolean() throws IOException {
+				return readUnsignedByte() != 0;
+			}
+
+			@Override
+			public byte readByte() throws IOException {
+				return (byte) readUnsignedByte();
+			}
+
+			@Override
+			public int readUnsignedByte() throws IOException {
+				if (pos >= in.length) throw new EOFException();
+				return in[pos++] & 0xff;
+			}
+
+			@Override
+			public short readShort() throws IOException {
+				if (in.length - pos < 2) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getShort(in, pos);
+				pos += 2;
+				return v;
+			}
+
+			@Override
+			public int readUnsignedShort() throws IOException {
+				if (in.length - pos < 2) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getUnsignedShort(in, pos);
+				pos += 2;
+				return v;
+			}
+
+			@Override
+			public char readChar() throws IOException {
+				if (in.length - pos < 2) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getChar(in, pos);
+				pos += 2;
+				return v;
+			}
+
+			@Override
+			public int readInt() throws IOException {
+				if (in.length - pos < 4) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getInt(in, pos);
+				pos += 4;
+				return v;
+			}
+
+			@Override
+			public long readLong() throws IOException {
+				if (in.length - pos < 8) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getLong(in, pos);
+				pos += 8;
+				return v;
+			}
+
+			@Override
+			public float readFloat() throws IOException {
+				if (in.length - pos < 4) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getFloat(in, pos);
+				pos += 4;
+				return v;
+			}
+
+			@Override
+			public double readDouble() throws IOException {
+				if (in.length - pos < 8) throw new EOFException();
+				var v = ByteArrayPrimitiveOperations.getDouble(in, pos);
+				pos += 8;
+				return v;
+			}
 		};
 	}
 

@@ -1,10 +1,10 @@
 package net.skds.lib2.io.json.elements;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -50,9 +50,9 @@ public record JsonNumber(Number value) implements JsonElement {
 		}
 
 		@Override
-		public JsonNumber read(JsonReader reader) throws IOException {
-			JsonEntryType type = reader.nextEntryType();
-			if (type == JsonEntryType.NULL) {
+		public JsonNumber read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
 				reader.skipNull();
 				return ZERO;
 			}

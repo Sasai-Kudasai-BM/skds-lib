@@ -95,9 +95,9 @@ public class DemoFrame extends JFrame {
 		//button.addActionListener(e -> new GraphicBuilder().setLocationRelativeTo(this));
 		//add(button);
 
-		button = new JButton("Json");
-		button.addActionListener(e -> new JsonDemoFrame().setLocationRelativeTo(this));
-		add(button);
+		//button = new JButton("Json");
+		//button.addActionListener(e -> new JsonDemoFrame().setLocationRelativeTo(this));
+		//add(button);
 
 
 		setMinimumSize(new Dimension(300, 50));

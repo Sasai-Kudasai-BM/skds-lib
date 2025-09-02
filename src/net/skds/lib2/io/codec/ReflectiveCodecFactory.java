@@ -1,8 +1,12 @@
-package net.skds.lib2.io.json.codec;
+package net.skds.lib2.io.codec;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.json.*;
-import net.skds.lib2.io.json.annotation.*;
+import net.skds.lib2.io.codec.annotation.CodecRoleConstrains;
+import net.skds.lib2.io.codec.annotation.SerializationAlias;
+import net.skds.lib2.io.codec.annotation.SkipSerialization;
+import net.skds.lib2.io.codec.annotation.TransientComponent;
+import net.skds.lib2.io.json.annotation.JsonComment;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.function.MultiSupplier;
@@ -15,14 +19,14 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @CustomLog
-public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
+public class ReflectiveCodecFactory implements UniversalCodecFactory {
 
 	private static final FieldCodec[] fieldCodecArray = {};
 
-	public static final ReflectiveJsonCodecFactory INSTANCE = new ReflectiveJsonCodecFactory();
+	public static final ReflectiveCodecFactory INSTANCE = new ReflectiveCodecFactory();
 
 	@Override
-	public JsonCodec<?> createCodec(Type type, JsonCodecRegistry registry) {
+	public UniversalCodec<?> createCodec(Type type, UniversalCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			if (c.isInterface()) {
 				return null;
@@ -42,7 +46,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	@Override
-	public JsonDeserializer<?> createDeserializer(Type type, JsonCodecRegistry registry) {
+	public UniversalDeserializer<?> createDeserializer(Type type, UniversalCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			if (c.isInterface()) {
 				return null;
@@ -62,7 +66,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	@Override
-	public JsonSerializer<?> createSerializer(Type type, JsonCodecRegistry registry) {
+	public UniversalSerializer<?> createSerializer(Type type, UniversalCodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			if (c.isInterface()) {
 				return null;
@@ -91,70 +95,72 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> JsonSerializer<T> getReflectiveSerializer(Class<T> tClass, JsonCodecRegistry registry) {
-		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+	private <T> UniversalSerializer<T> getReflectiveSerializer(Class<T> tClass, UniversalCodecRegistry registry) {
+		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null && !codecRole.value().isCanSerialize()) {
-			return new UnsupportedJsonCodec<>(tClass, registry);
+			return new UnsupportedCodec<>(tClass, registry);
 		}
-		return (JsonSerializer<T>) new ReflectiveSerializer(tClass, registry);
+		return (UniversalSerializer<T>) new ReflectiveSerializer(tClass, registry);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> JsonDeserializer<T> getReflectiveDeserializer(Class<T> tClass, JsonCodecRegistry registry) {
-		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+	private <T> UniversalDeserializer<T> getReflectiveDeserializer(Class<T> tClass, UniversalCodecRegistry registry) {
+		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null && !codecRole.value().isCanSerialize()) {
-			return new UnsupportedJsonCodec<>(tClass, registry);
+			return new UnsupportedCodec<>(tClass, registry);
 		}
-		return (JsonDeserializer<T>) new ReflectiveDeserializer(tClass, registry);
+		return (UniversalDeserializer<T>) new ReflectiveDeserializer(tClass, registry);
 	}
 
-	private JsonCodec<?> getReflectiveCodec(Class<?> tClass, JsonCodecRegistry registry) {
-		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+	private UniversalCodec<?> getReflectiveCodec(Class<?> tClass, UniversalCodecRegistry registry) {
+		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null) {
 			switch (codecRole.value()) {
 				case SERIALIZE -> {
-					return SerializeOnlyJsonCodec.ofSerializer(new ReflectiveSerializer(tClass, registry), tClass, registry);
+					return SerializeOnlyCodec.ofSerializer(new ReflectiveSerializer(tClass, registry), tClass, registry);
 				}
 				case DESERIALIZE -> {
-					return DeserializeOnlyJsonCodec.ofDeserializer(new ReflectiveDeserializer(tClass, registry), tClass, registry);
+					return DeserializeOnlyCodec.ofDeserializer(new ReflectiveDeserializer(tClass, registry), tClass, registry);
 				}
 				case NONE -> {
-					return new UnsupportedJsonCodec<>(tClass, registry);
+					return new UnsupportedCodec<>(tClass, registry);
 				}
-				case BOTH -> {}
+				case BOTH -> {
+				}
 			}
 		}
-		return new CombinedJsonCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer(tClass, registry));
+		return new CombinedCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer(tClass, registry));
 	}
 
-	private JsonCodec<?> getRecordCodec(Class<?> tClass, JsonCodecRegistry registry) {
-		JsonCodecRoleConstrains codecRole = tClass.getAnnotation(JsonCodecRoleConstrains.class);
+	private UniversalCodec<?> getRecordCodec(Class<?> tClass, UniversalCodecRegistry registry) {
+		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null) {
 			switch (codecRole.value()) {
 				case SERIALIZE -> {
-					return SerializeOnlyJsonCodec.ofSerializer(new RecordSerializer(tClass, registry), tClass, registry);
+					return SerializeOnlyCodec.ofSerializer(new RecordSerializer(tClass, registry), tClass, registry);
 				}
 				case DESERIALIZE -> {
-					return DeserializeOnlyJsonCodec.ofDeserializer(new RecordDeserializer(tClass, registry), tClass, registry);
+					return DeserializeOnlyCodec.ofDeserializer(new RecordDeserializer(tClass, registry), tClass, registry);
 				}
 				case NONE -> {
-					return new UnsupportedJsonCodec<>(tClass, registry);
+					return new UnsupportedCodec<>(tClass, registry);
 				}
-				case BOTH -> {}
+				case BOTH -> {
+				}
 			}
 		}
-		return new CombinedJsonCodec<>(new RecordSerializer(tClass, registry), new RecordDeserializer(tClass, registry));
+		return new CombinedCodec<>(new RecordSerializer(tClass, registry), new RecordDeserializer(tClass, registry));
 	}
 
-	public static class ReflectiveDeserializer implements JsonDeserializer<Object> {
+	public static class ReflectiveDeserializer implements UniversalDeserializer<Object> {
 
 		final Class<?> tClass;
 		final Supplier<Object> constructor;
 		final Map<String, FieldCodec> readers;
-		final JsonCodecRegistry registry;
+		final UniversalCodecRegistry registry;
 
 		@SuppressWarnings("unchecked")
-		public ReflectiveDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
+		public ReflectiveDeserializer(Class<?> tClass, UniversalCodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			Supplier<Object> tmpC;
@@ -179,14 +185,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		public Object read(JsonReader reader) throws IOException {
-			if (reader.nextEntryType() == JsonEntryType.NULL) {
+		public Object read(UniversalReader reader) throws IOException {
+			if (reader.nextEntryType() == SosisonEntryType.NULL) {
 				reader.skipNull();
 				return null;
 			}
 			Object o = constructor.get();
 			reader.beginObject();
-			while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+			while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 				String name = reader.readName();
 				FieldCodec fc = readers.get(name);
 				if (fc == null) {
@@ -200,38 +206,38 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 			}
 			reader.endObject();
-			if (o instanceof JsonPostDeserializeCall pdc) {
-				pdc.postDeserializedJson();
+			if (o instanceof PostDeserializeCall pdc) {
+				pdc.postDeserialized();
 			}
 			return o;
 		}
 
 		@Override
-		public JsonCodecRegistry getRegistry() {
+		public UniversalCodecRegistry getRegistry() {
 			return registry;
 		}
 	}
 
-	public static class ReflectiveSerializer implements JsonSerializer<Object> {
+	public static class ReflectiveSerializer implements UniversalSerializer<Object> {
 
 		final Class<?> tClass;
 		final FieldCodec[] writers;
-		final JsonCodecRegistry registry;
+		final UniversalCodecRegistry registry;
 
-		public ReflectiveSerializer(Class<?> tClass, JsonCodecRegistry registry) {
+		public ReflectiveSerializer(Class<?> tClass, UniversalCodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			this.writers = collectFields(tClass, registry);
 		}
 
 		@Override
-		public void write(Object value, JsonWriter writer) throws IOException {
+		public void write(Object value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
 			}
-			if (value instanceof JsonPreSerializeCall psc) {
-				psc.preSerializeJson();
+			if (value instanceof PreSerializeCall psc) {
+				psc.preSerialize();
 			}
 			writer.beginObject();
 			if (writers.length > 1) {
@@ -257,44 +263,44 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		public JsonCodecRegistry getRegistry() {
+		public UniversalCodecRegistry getRegistry() {
 			return registry;
 		}
 	}
 
-	public static class RecordDeserializer implements JsonDeserializer<Object> {
+	public static class RecordDeserializer implements UniversalDeserializer<Object> {
 
 		final Class<?> tClass;
-		final JsonCodecRegistry registry;
+		final UniversalCodecRegistry registry;
 		final MultiSupplier<Object> constructor;
-		final JsonDeserializer<Object>[] deserializers;
+		final UniversalDeserializer<Object>[] deserializers;
 		final String[] names;
 		final Map<String, Integer> readers;
 		final Class<?>[] components;
 
 		@SuppressWarnings("unchecked")
-		public RecordDeserializer(Class<?> tClass, JsonCodecRegistry registry) {
+		public RecordDeserializer(Class<?> tClass, UniversalCodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			MultiSupplier<Object> tmpC;
 			var rcs = tClass.getRecordComponents();
 			Class<?>[] args = new Class[rcs.length];
-			JsonDeserializer<Object>[] des = new JsonDeserializer[rcs.length];
+			UniversalDeserializer<Object>[] des = new UniversalDeserializer[rcs.length];
 			String[] names = new String[rcs.length];
 			Map<String, Integer> readers = new HashMap<>();
 			for (int i = 0; i < rcs.length; i++) {
 				RecordComponent rc = rcs[i];
 				args[i] = rc.getType();
 				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
-				JsonDeserializer<Object> deserializer;
-				if (codec instanceof JsonDeserializer<?> jd) {
-					deserializer = (JsonDeserializer<Object>) jd;
+				UniversalDeserializer<Object> deserializer;
+				if (codec instanceof UniversalDeserializer<?> jd) {
+					deserializer = (UniversalDeserializer<Object>) jd;
 				} else {
 					deserializer = registry.getDeserializerIndirect(rc.getGenericType());
 				}
 				des[i] = deserializer;
 				String name = rc.getName();
-				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
+				SerializationAlias alias = rc.getAnnotation(SerializationAlias.class);
 				if (alias != null) {
 					name = alias.value();
 				}
@@ -317,14 +323,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		public Object read(JsonReader reader) throws IOException {
-			if (reader.nextEntryType() == JsonEntryType.NULL) {
+		public Object read(UniversalReader reader) throws IOException {
+			if (reader.nextEntryType() == SosisonEntryType.NULL) {
 				reader.skipNull();
 				return null;
 			}
 			reader.beginObject();
 			Object[] args = new Object[names.length];
-			while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+			while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 				String name = reader.readName();
 				Integer index = readers.get(name);
 				if (index == null) {
@@ -342,14 +348,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 			wrapPrimitives(components, args);
 			Object o = constructor.get(args);
-			if (o instanceof JsonPostDeserializeCall pdc) {
-				pdc.postDeserializedJson();
+			if (o instanceof PostDeserializeCall pdc) {
+				pdc.postDeserialized();
 			}
 			return o;
 		}
 
 		@Override
-		public JsonCodecRegistry getRegistry() {
+		public UniversalCodecRegistry getRegistry() {
 			return registry;
 		}
 	}
@@ -454,11 +460,11 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		return predicate;
 	}
 
-	public static class RecordSerializer implements JsonSerializer<Object> {
+	public static class RecordSerializer implements UniversalSerializer<Object> {
 
 		final Class<?> tClass;
-		final JsonCodecRegistry registry;
-		final JsonSerializer<Object>[] serializers;
+		final UniversalCodecRegistry registry;
+		final UniversalSerializer<Object>[] serializers;
 		final int nonNullSerializers;
 		final String[] names;
 		final String[] comments;
@@ -466,12 +472,12 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		final Predicate<Object>[] skipPredicates;
 
 		@SuppressWarnings("unchecked")
-		public RecordSerializer(Class<?> tClass, JsonCodecRegistry registry) {
+		public RecordSerializer(Class<?> tClass, UniversalCodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			var rcs = tClass.getRecordComponents();
 			Predicate<Object>[] skips = new Predicate[rcs.length];
-			JsonSerializer<?>[] ser = new JsonSerializer[rcs.length];
+			UniversalSerializer<?>[] ser = new UniversalSerializer[rcs.length];
 			String[] comments = new String[rcs.length];
 			String[] names = new String[rcs.length];
 			Function<Object, Object>[] accessors = new Function[rcs.length];
@@ -483,7 +489,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 				c++;
 				Object codec = BuiltinCodecFactory.getDefaultCodec(rc, rc.getGenericType(), registry);
-				if (codec instanceof JsonSerializer<?> js) {
+				if (codec instanceof UniversalSerializer<?> js) {
 					ser[i] = js;
 				} else {
 					ser[i] = BuiltinCodecFactory.getUniversalSerializer(rc.getGenericType(), registry);
@@ -497,7 +503,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 					comments[i] = comment.value();
 				}
 				String name = rc.getName();
-				JsonAlias alias = rc.getAnnotation(JsonAlias.class);
+				SerializationAlias alias = rc.getAnnotation(SerializationAlias.class);
 				if (alias != null) {
 					name = alias.value();
 				}
@@ -515,20 +521,20 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 			this.skipPredicates = skips;
 			this.nonNullSerializers = c;
-			this.serializers = (JsonSerializer<Object>[]) ser;
+			this.serializers = (UniversalSerializer<Object>[]) ser;
 			this.names = names;
 			this.comments = comments;
 			this.accessors = accessors;
 		}
 
 		@Override
-		public void write(Object value, JsonWriter writer) throws IOException {
+		public void write(Object value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
 			}
-			if (value instanceof JsonPreSerializeCall psc) {
-				psc.preSerializeJson();
+			if (value instanceof PreSerializeCall psc) {
+				psc.preSerialize();
 			}
 			writer.beginObject();
 			if (nonNullSerializers > 0) {
@@ -537,7 +543,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 				}
 				boolean empty = true;
 				for (int i = 0; i < serializers.length; i++) {
-					JsonSerializer<Object> w = serializers[i];
+					UniversalSerializer<Object> w = serializers[i];
 					if (w == null) continue;
 					Predicate<Object> predicate = skipPredicates[i];
 					try {
@@ -564,23 +570,23 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		public JsonCodecRegistry getRegistry() {
+		public UniversalCodecRegistry getRegistry() {
 			return registry;
 		}
 	}
 
-	private static FieldCodec[] collectFields(Class<?> c, JsonCodecRegistry registry) {
+	private static FieldCodec[] collectFields(Class<?> c, UniversalCodecRegistry registry) {
 		ArrayList<FieldCodec> list = new ArrayList<>();
 		collectFields(c, registry, list);
 		return list.toArray(fieldCodecArray);
 	}
 
-	private static void collectFields(Class<?> c, JsonCodecRegistry registry, List<FieldCodec> list) {
+	private static void collectFields(Class<?> c, UniversalCodecRegistry registry, List<FieldCodec> list) {
 		if (c == Object.class) return;
 
 		List<FieldCodec> fields = new ArrayList<>();
 
-		JsonCodecOptions options = registry.options;
+		UniversalCodecOptions options = registry.options;
 		for (Field f : c.getDeclaredFields()) {
 			if ((f.getModifiers() & options.getExcludeFieldModifiers()) != 0) {
 				continue;
@@ -629,7 +635,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			field.setAccessible(true);
 			JsonComment com = field.getAnnotation(JsonComment.class);
 			comment = com != null ? com.value() : null;
-			JsonAlias alias = field.getAnnotation(JsonAlias.class);
+			SerializationAlias alias = field.getAnnotation(SerializationAlias.class);
 			String n;
 			if (alias != null) {
 				n = alias.value();
@@ -640,13 +646,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 			this.skipSerialization = field.getAnnotation(SkipSerialization.class);
 		}
 
-		abstract void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException;
+		abstract void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException;
 
-		abstract void read(JsonReader reader, Object o) throws IOException, IllegalAccessException;
+		abstract void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException;
 
 		abstract boolean checkSkip(Object o) throws IllegalAccessException;
 
-		void comment(JsonWriter writer) throws IOException {
+		void comment(UniversalWriter writer) throws IOException {
 			if (comment != null) {
 				writer.writeComment(comment);
 			}
@@ -660,13 +666,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeInt(field.getByte(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setByte(o, reader.readNumber().byteValue());
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+			field.setByte(o, (byte) reader.readInt());
 		}
 
 		@Override
@@ -684,13 +690,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeInt(field.getShort(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setShort(o, reader.readNumber().shortValue());
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+			field.setShort(o, (short) reader.readInt());
 		}
 
 		@Override
@@ -708,13 +714,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeInt(field.getInt(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setInt(o, reader.readNumber().intValue());
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+			field.setInt(o, reader.readInt());
 		}
 
 		@Override
@@ -732,13 +738,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
-			writer.writeInt(field.getLong(o));
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+			writer.writeLong(field.getLong(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setLong(o, reader.readNumber().longValue());
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+			field.setLong(o, reader.readLong());
 		}
 
 		@Override
@@ -756,13 +762,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeFloat(field.getFloat(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setFloat(o, reader.readNumber().floatValue());
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+			field.setFloat(o, reader.readFloat());
 		}
 
 		@Override
@@ -780,13 +786,13 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
-			writer.writeFloat(field.getDouble(o));
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+			writer.writeDouble(field.getDouble(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
-			field.setDouble(o, reader.readNumber().doubleValue());
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+			field.setDouble(o, reader.readDouble());
 		}
 
 		@Override
@@ -798,20 +804,20 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 	}
 
 	private static class CharFieldCodec extends FieldCodec {
-		final JsonDeserializer<Character> deserializer;
+		final UniversalDeserializer<Character> deserializer;
 
-		private CharFieldCodec(Field field, JsonCodecRegistry registry) {
+		private CharFieldCodec(Field field, UniversalCodecRegistry registry) {
 			super(field);
 			this.deserializer = registry.getDeserializerIndirect(char.class);
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
-			writer.writeInt(field.getChar(o));
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+			writer.writeLong(field.getChar(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setChar(o, deserializer.read(reader));
 		}
 
@@ -830,12 +836,12 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IOException, IllegalAccessException {
+		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeBoolean(field.getBoolean(o));
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) throws IOException, IllegalAccessException {
+		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setBoolean(o, reader.readBoolean());
 		}
 
@@ -849,14 +855,14 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 
 	private static class ObjFieldCodec extends FieldCodec {
 
-		final JsonSerializer<Object> serializer;
-		final JsonDeserializer<Object> deserializer;
+		final UniversalSerializer<Object> serializer;
+		final UniversalDeserializer<Object> deserializer;
 		final Predicate<Object> skipPredicate;
 
-		private ObjFieldCodec(Field field, JsonCodecRegistry registry) {
+		private ObjFieldCodec(Field field, UniversalCodecRegistry registry) {
 			super(field);
 			Type t = field.getGenericType();
-			JsonCodec<Object> c = BuiltinCodecFactory.getDefaultCodec(field, t, registry);
+			UniversalCodec<Object> c = BuiltinCodecFactory.getDefaultCodec(field, t, registry);
 			if (c != null) {
 				this.serializer = c;
 				this.deserializer = c;
@@ -868,7 +874,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void write(JsonWriter writer, Object o) throws IllegalAccessException {
+		void write(UniversalWriter writer, Object o) throws IllegalAccessException {
 			Object value = field.get(o);
 			try {
 				serializer.write(value, writer);
@@ -878,7 +884,7 @@ public class ReflectiveJsonCodecFactory implements JsonCodecFactory {
 		}
 
 		@Override
-		void read(JsonReader reader, Object o) {
+		void read(UniversalReader reader, Object o) {
 			try {
 				field.set(o, deserializer.read(reader));
 			} catch (Exception e) {

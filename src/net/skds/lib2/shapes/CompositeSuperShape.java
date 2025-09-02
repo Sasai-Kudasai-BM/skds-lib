@@ -18,6 +18,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @DefaultJsonCodec(CompositeSuperShape.JCodec.class)
 public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
@@ -33,6 +34,8 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 	private Object attachment;
 
 	CompositeSuperShape(Shape[] shapes, Vec3 center, Object attachment) {
+		Objects.requireNonNull(shapes);
+		Objects.requireNonNull(center);
 		this.shapes = shapes;
 		this.center = center;
 		this.attachment = attachment;

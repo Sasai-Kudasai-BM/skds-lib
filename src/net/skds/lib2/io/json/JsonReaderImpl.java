@@ -134,12 +134,8 @@ public final class JsonReaderImpl implements JsonReader {
 	@Override
 	public Number readNumber() throws IOException {
 		Number n;
-		switch (nextEntryType()) {
-			case NUMBER -> {
-				input.setPos(valueEnd);
-				n = (Number) cachedValue;
-				resetLastEntry();
-			}
+		SosisonEntryType et = this.nextEntryType();
+		switch (et) {
 			case NULL -> {
 				return Numbers.ZERO;
 			}

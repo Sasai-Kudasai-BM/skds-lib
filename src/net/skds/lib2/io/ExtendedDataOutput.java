@@ -114,6 +114,72 @@ public interface ExtendedDataOutput extends DataOutput {
 		write(array);
 	}
 
+	default void writeCharArray(char[] array) throws IOException {
+		if (array == null) {
+			writeVarInt(0);
+			return;
+		}
+		writeVarInt(array.length);
+		for (int i = 0; i < array.length; i++) {
+			writeChar(array[i]);
+		}
+	}
+
+	default void writeShortArray(short[] array) throws IOException {
+		if (array == null) {
+			writeVarInt(0);
+			return;
+		}
+		writeVarInt(array.length);
+		for (int i = 0; i < array.length; i++) {
+			writeShort(array[i]);
+		}
+	}
+
+	default void writeIntArray(int[] array) throws IOException {
+		if (array == null) {
+			writeVarInt(0);
+			return;
+		}
+		writeVarInt(array.length);
+		for (int i = 0; i < array.length; i++) {
+			writeInt(array[i]);
+		}
+	}
+
+	default void writeLongArray(long[] array) throws IOException {
+		if (array == null) {
+			writeVarInt(0);
+			return;
+		}
+		writeVarInt(array.length);
+		for (int i = 0; i < array.length; i++) {
+			writeLong(array[i]);
+		}
+	}
+
+	default void writeFloatArray(float[] array) throws IOException {
+		if (array == null) {
+			writeVarInt(0);
+			return;
+		}
+		writeVarInt(array.length);
+		for (int i = 0; i < array.length; i++) {
+			writeFloat(array[i]);
+		}
+	}
+
+	default void writeDoubleArray(double[] array) throws IOException {
+		if (array == null) {
+			writeVarInt(0);
+			return;
+		}
+		writeVarInt(array.length);
+		for (int i = 0; i < array.length; i++) {
+			writeDouble(array[i]);
+		}
+	}
+
 	default <T> void writeCollection(Collection<T> collection, DataWriter<T> consumer) throws IOException {
 		writeVarInt(collection.size());
 		for (T object : collection) {

@@ -3,14 +3,6 @@ package net.skds.lib2.mat.vec3;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
-
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec3D.JCodec.class)
 public record Vec3D(double x, double y, double z) implements Vec3 {
@@ -139,11 +131,11 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
-			writer.writeFloat(value.x());
-			writer.writeFloat(value.y());
-			writer.writeFloat(value.z());
-			writer.endArray();
+			writer.beginList();
+			writer.writeDouble(value.x());
+			writer.writeDouble(value.y());
+			writer.writeDouble(value.z());
+			writer.endList();
 		}
 
 		@Override
@@ -166,7 +158,7 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
 						double i = reader.readDouble();
 						switch (s.toLowerCase()) {

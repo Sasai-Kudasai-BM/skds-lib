@@ -106,10 +106,10 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
-			writer.writeInt(value.xi());
-			writer.writeInt(value.yi());
-			writer.endArray();
+			writer.beginList();
+			writer.writeLong(value.xi());
+			writer.writeLong(value.yi());
+			writer.endList();
 		}
 
 		@Override
@@ -130,7 +130,7 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
 						int i = reader.readInt();
 						switch (s.toLowerCase()) {

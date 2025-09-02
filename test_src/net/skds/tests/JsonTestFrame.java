@@ -1,16 +1,15 @@
-package net.skds.lib2.demo;
+package net.skds.tests;
+
+import net.skds.lib2.utils.logger.SKDSLogger;
+import net.skds.tests.json.JsonTest;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.skds.lib2.io.json.test.JsonTest;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRun;
-import net.skds.lib2.utils.logger.SKDSLogger;
-
-public class JsonDemoFrame extends JFrame {
-	JsonDemoFrame() {
+public class JsonTestFrame extends JFrame {
+	JsonTestFrame() {
 		super("SKDS Lib v2 demo");
 		SKDSLogger.replaceOuts();
 
@@ -18,10 +17,10 @@ public class JsonDemoFrame extends JFrame {
 
 		Map<String, JsonTest.JsonTestRun> runs = JsonTest.createRuns();
 
-		for (Entry<String, JsonTestRun> entry : runs.entrySet()) {
+		for (Entry<String, JsonTest.JsonTestRun> entry : runs.entrySet()) {
 			JsonTest.JsonTestRegistry registry = new JsonTest.JsonTestRegistry();
 			JButton button = new JButton(entry.getKey());
-			JsonTestRun value = entry.getValue();
+			JsonTest.JsonTestRun value = entry.getValue();
 			button.addActionListener(e -> value.run(registry));
 			add(button);
 		}

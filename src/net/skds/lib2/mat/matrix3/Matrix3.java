@@ -16,6 +16,8 @@ import net.skds.lib2.utils.linkiges.Obj2FloatPairRecord;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import static net.skds.lib2.io.sosison.SosisonEntryType.NULL;
+
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Matrix3.JCodec.class)
 public sealed interface Matrix3 permits Matrix3D, Matrix3F {
@@ -657,18 +659,18 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		}
 
 		@Override
-		public void write(Matrix3 value, JsonWriter writer) throws IOException {
-			writer.beginArray();
-			writer.writeFloat(value.m00());
-			writer.writeFloat(value.m01());
-			writer.writeFloat(value.m02());
-			writer.writeFloat(value.m10());
-			writer.writeFloat(value.m11());
-			writer.writeFloat(value.m12());
-			writer.writeFloat(value.m20());
-			writer.writeFloat(value.m21());
-			writer.writeFloat(value.m22());
-			writer.endArray();
+		public void write(Matrix3 value, UniversalWriter writer) throws IOException {
+			writer.beginList();
+			writer.writeDouble(value.m00());
+			writer.writeDouble(value.m01());
+			writer.writeDouble(value.m02());
+			writer.writeDouble(value.m10());
+			writer.writeDouble(value.m11());
+			writer.writeDouble(value.m12());
+			writer.writeDouble(value.m20());
+			writer.writeDouble(value.m21());
+			writer.writeDouble(value.m22());
+			writer.endList();
 		}
 
 		@Override

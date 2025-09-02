@@ -74,14 +74,14 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
+			writer.beginList();
 			if (value.size() > 1) {
 				writer.lineBreakEnable(true);
 			}
 			for (var e : value) {
 				elementCodec.write(e, writer);
 			}
-			writer.endArray();
+			writer.endList();
 		}
 
 		@Override
@@ -96,12 +96,12 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 					reader.beginArray();
 					JsonArray ja = new JsonArray();
 					int i = 0;
-					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
+					while (reader.nextEntryType() != SosisonEntryType.END_LIST) {
 						JsonElement e;
 						try {
 							e = elementCodec.read(reader);
 						} catch (Exception ex) {
-							throw new JsonReadException("Exception while read [" + i + "]", ex);
+							throw new ParseException("Exception while read [" + i + "]", ex);
 						}
 						ja.add(e);
 						i++;

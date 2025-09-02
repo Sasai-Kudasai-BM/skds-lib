@@ -1,33 +1,33 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import net.skds.lib2.io.codec.CodecUtils;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedConfig;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import net.skds.lib2.io.json.JsonUtils;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
-
 public class JsonTestNest {
 	private static final NestAdapter<?> parentAdapter = new NestAdapter<>("parent", JTNParent.class);
 	private static final NestAdapter<?> childAdapter = new NestAdapter<>("child", JTNChild.class);
 	private static final Map<String, NestAdapter<?>> ADAPTER_MAP = Map.of(
-		parentAdapter.keyName, parentAdapter,
-		childAdapter.keyName, childAdapter
+			parentAdapter.keyName, parentAdapter,
+			childAdapter.keyName, childAdapter
 	);
 
 	public static void test(JsonTestRegistry registry) {
-		JsonUtils.addTypedAdapter(JTN.class, ADAPTER_MAP);
+		CodecUtils.addTypedAdapter(JTN.class, ADAPTER_MAP);
 		ListHolder list = new ListHolder();
 		list.list = new ArrayList<>();
 		JTNParent parent = new JTNParent();
 		parent.child = new JTNParent();
 		list.list.add(parent);
-		System.out.println(JsonUtils.toJson(list));
+		System.out.println(CodecUtils.toJson(list));
 	}
 
 	private static class ListHolder {

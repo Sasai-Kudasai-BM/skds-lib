@@ -86,14 +86,23 @@ public class ImageUtils {
 		}
 	}
 
-	private static final int[] ARGB_MASKS = {0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000};
-
 	public static BufferedImage fieldToImage(IntField2D field) {
+		interface Masks {
+			int[] ARGB_MASKS = {0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000};
+		}
 		int[] data = field.toArray();
 		DataBufferInt db = new DataBufferInt(data, data.length);
-		SinglePixelPackedSampleModel cm = new SinglePixelPackedSampleModel(db.getDataType(), field.width(), field.height(), ARGB_MASKS);
-		WritableRaster raster = WritableRaster.createWritableRaster(cm, db, null);
+		SampleModel sm = new SinglePixelPackedSampleModel(db.getDataType(), field.width(), field.height(), Masks.ARGB_MASKS);
+		WritableRaster raster = WritableRaster.createWritableRaster(sm, db, null);
 		return new BufferedImage(ColorModel.getRGBdefault(), raster, false, null);
+	}
+
+	public static IntField2D getIntData(BufferedImage image) {
+		if (image.getRaster().getDataBuffer() instanceof DataBufferInt dbi) {
+			return new IntField2DImpl(image.getWidth(), image.getHeight(), dbi.getData());
+		} else {
+			return null;
+		}
 	}
 
 	public static BufferedImage drawPerPixel(int w, int h, PerPixelDraw draw) {
@@ -175,14 +184,6 @@ public class ImageUtils {
 			for (int y = y0; y < ye; y++) {
 				image.setValue(draw.draw(x, y), x, y);
 			}
-		}
-	}
-
-	public static IntField2D getIntData(BufferedImage image) {
-		if (image.getRaster().getDataBuffer() instanceof DataBufferInt dbi) {
-			return new IntField2DImpl(image.getWidth(), image.getHeight(), dbi.getData());
-		} else {
-			return null;
 		}
 	}
 

@@ -53,10 +53,8 @@ public class WrappedJsonReaderImpl implements JsonReader {
 	@Override
 	public Number readNumber() throws IOException {
 		Number n;
-		switch (nextEntryType()) {
-			case NUMBER -> {
-				n = nextElement().getAsNumber();
-			}
+		SosisonEntryType et = nextEntryType();
+		switch (et) {
 			case NULL -> {
 				return Numbers.ZERO;
 			}
@@ -131,7 +129,11 @@ public class WrappedJsonReaderImpl implements JsonReader {
 	public JsonEntryType nextEntryType() throws IOException {
 		StackEntry s = stack;
 		if (s == null) {
-			return input.type().getBeginEntryType();
+			JsonElementType jt = input.type();
+			if (jt == JsonElementType.NUMBER) {
+				return SosisonEntryType.number(input.getAsNumber());
+			}
+			return jt.getBeginEntryType();
 		}
 		return s.nextEntryType();
 	}
@@ -195,7 +197,13 @@ public class WrappedJsonReaderImpl implements JsonReader {
 						var e = mapIterator.next();
 						ne = e.getValue();
 						nextName = e.getKey();
-						nextElementType = ne.type().getBeginEntryType();
+
+						JsonElementType jt = ne.type();
+						if (jt == JsonElementType.NUMBER) {
+							nextElementType = SosisonEntryType.number(ne.getAsNumber());
+						} else {
+							nextElementType = jt.getBeginEntryType();
+						}
 					} else {
 						nextName = null;
 						ne = null;
@@ -206,7 +214,12 @@ public class WrappedJsonReaderImpl implements JsonReader {
 					nextName = null;
 					if (listIterator.hasNext()) {
 						ne = listIterator.next();
-						nextElementType = ne.type().getBeginEntryType();
+						JsonElementType jt = ne.type();
+						if (jt == JsonElementType.NUMBER) {
+							nextElementType = SosisonEntryType.number(ne.getAsNumber());
+						} else {
+							nextElementType = jt.getBeginEntryType();
+						}
 					} else {
 						ne = null;
 						nextElementType = JsonEntryType.END_ARRAY;
@@ -216,7 +229,12 @@ public class WrappedJsonReaderImpl implements JsonReader {
 					nextName = null;
 					if (first) {
 						ne = element;
-						nextElementType = element.type().getBeginEntryType();
+						JsonElementType jt = ne.type();
+						if (jt == JsonElementType.NUMBER) {
+							nextElementType = SosisonEntryType.number(ne.getAsNumber());
+						} else {
+							nextElementType = jt.getBeginEntryType();
+						}
 					} else {
 						nextElementType = null;
 						ne = null;

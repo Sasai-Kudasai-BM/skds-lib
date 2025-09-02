@@ -12,6 +12,8 @@ import net.skds.lib2.mat.FastMath;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
+
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec3I.JCodec.class)
 public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
@@ -228,11 +230,11 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
-			writer.writeInt(value.xi());
-			writer.writeInt(value.yi());
-			writer.writeInt(value.zi());
-			writer.endArray();
+			writer.beginList();
+			writer.writeLong(value.xi());
+			writer.writeLong(value.yi());
+			writer.writeLong(value.zi());
+			writer.endList();
 		}
 
 		@Override
@@ -255,7 +257,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
 						int i = reader.readInt();
 						switch (s.toLowerCase()) {

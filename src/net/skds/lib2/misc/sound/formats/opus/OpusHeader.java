@@ -1,7 +1,7 @@
 package net.skds.lib2.misc.sound.formats.opus;
 
 import lombok.NoArgsConstructor;
-import net.skds.lib2.io.json.JsonUtils;
+import net.skds.lib2.io.codec.CodecUtils;
 import net.skds.lib2.misc.ogg.OggPage;
 import net.skds.lib2.utils.SKDSByteBuf;
 
@@ -45,6 +45,6 @@ public class OpusHeader {
 
 	@Override
 	public String toString() {
-		return JsonUtils.toJson(this);
+		return CodecUtils.toJson(this);
 	}
 }

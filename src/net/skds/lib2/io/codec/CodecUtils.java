@@ -1,14 +1,13 @@
-package net.skds.lib2.io.json;
+package net.skds.lib2.io.codec;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.io.json.codec.*;
-import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
-import net.skds.lib2.io.json.codec.typed.TypedMapAdapter;
+import net.skds.lib2.io.codec.typed.ConfigEnumType;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
+import net.skds.lib2.io.codec.typed.TypedMapAdapter;
+import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.json.elements.JsonElement;
-import net.skds.lib2.io.json.exception.JsonReadException;
 import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
@@ -22,46 +21,46 @@ import java.util.Map;
 
 @UtilityClass
 @SuppressWarnings("unused")
-public class JsonUtils {
+public class CodecUtils {
 
 	@Getter
-	private static JsonCodecRegistry compactRegistry;
+	private static UniversalCodecRegistry compactRegistry;
 	@Getter
-	private static JsonCodecRegistry fancyRegistry;
-	private static JsonCodecOptions options;
-	private static final JsonCodecFactory.MapJsonFactory userMapCodecFactory = JsonCodecFactory.newMapFactory();
-	private static JsonCodecFactory userCodecFactory = userMapCodecFactory;
+	private static UniversalCodecRegistry fancyRegistry;
+	private static UniversalCodecOptions options;
+	private static final UniversalCodecFactory.MapJsonFactory userMapCodecFactory = UniversalCodecFactory.newMapFactory();
+	private static UniversalCodecFactory userCodecFactory = userMapCodecFactory;
 
-	public static JsonCodecOptions getOptions() {
+	public static UniversalCodecOptions getOptions() {
 		return options.clone();
 	}
 
-	public static void setOptions(JsonCodecOptions options) {
-		JsonUtils.options = options.clone();
+	public static void setOptions(UniversalCodecOptions options) {
+		CodecUtils.options = options.clone();
 		rebuild();
 	}
 
 	private static void rebuild() {
-		JsonCodecOptions op = options.clone();
-		compactRegistry = new JsonCodecRegistry(op.setDecorationType(JsonCodecOptions.DecorationType.FLAT), userCodecFactory);
-		fancyRegistry = new JsonCodecRegistry(op.setDecorationType(JsonCodecOptions.DecorationType.FANCY), userCodecFactory);
+		UniversalCodecOptions op = options.clone();
+		compactRegistry = new UniversalCodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FLAT), userCodecFactory);
+		fancyRegistry = new UniversalCodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FANCY), userCodecFactory);
 	}
 
 	public static void addRedirectType(Type original, Type replaced) {
 		addFactory(original, (t, r) -> new ReplacedCodec(t, replaced, r));
 	}
 
-	public static void addFactory(Type type, JsonCodecFactory factory) {
+	public static void addFactory(Type type, UniversalCodecFactory factory) {
 		userMapCodecFactory.addFactory(type, factory);
 		rebuild();
 	}
 
-	public static void addFactoryBefore(JsonCodecFactory factory) {
+	public static void addFactoryBefore(UniversalCodecFactory factory) {
 		userCodecFactory = factory.orElse(userCodecFactory);
 		rebuild();
 	}
 
-	public static void addFactoryAfter(JsonCodecFactory factory) {
+	public static void addFactoryAfter(UniversalCodecFactory factory) {
 		userCodecFactory = userCodecFactory.orElse(factory);
 		rebuild();
 	}
@@ -80,7 +79,7 @@ public class JsonUtils {
 
 	public static <T> T parseJson(String text, Class<T> type) {
 		try {
-			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
 			return deserializer.parse(text);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -90,7 +89,7 @@ public class JsonUtils {
 
 	public static <T> T parseJson(JsonElement json, Class<T> type) {
 		try {
-			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
 			return deserializer.parse(json);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -111,7 +110,7 @@ public class JsonUtils {
 			String text = Files.readString(file);
 			return parseJson(text, clazz);
 		} catch (Exception e) {
-			new JsonReadException("Exception while reading " + file, e).printStackTrace(System.err);
+			new ParseException("Exception while reading " + file, e).printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -157,7 +156,7 @@ public class JsonUtils {
 
 	public static <T> T parseJson(String text, Type type) {
 		try {
-			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
 			return deserializer.parse(text);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -168,7 +167,7 @@ public class JsonUtils {
 
 	public static <T> T parseJson(JsonElement json, Type type) {
 		try {
-			JsonDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
 			return deserializer.parse(json);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -238,6 +237,6 @@ public class JsonUtils {
 	}
 
 	static {
-		setOptions(new JsonCodecOptions());
+		setOptions(new UniversalCodecOptionsImpl());
 	}
 }

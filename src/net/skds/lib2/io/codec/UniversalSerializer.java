@@ -1,12 +1,11 @@
-package net.skds.lib2.io.json.codec;
+package net.skds.lib2.io.codec;
 
+import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 import net.skds.lib2.io.chars.StringCharOutput;
-import net.skds.lib2.io.codec.Serializer;
-import net.skds.lib2.io.json.JsonWriter;
 
 import java.io.IOException;
 
-public interface JsonSerializer<T> extends Serializer<T, JsonWriter>, JsonRegistryGetter {
+public interface UniversalSerializer<T> extends Serializer<T, UniversalWriter>, CodecRegistryGetter {
 
 	default String valueAsKeyString(T val) {
 		return String.valueOf(val);
@@ -15,7 +14,7 @@ public interface JsonSerializer<T> extends Serializer<T, JsonWriter>, JsonRegist
 	default String toJson(T value) {
 		try {
 			StringCharOutput co = new StringCharOutput();
-			JsonWriter writer = getRegistry().createWriter(co);
+			UniversalWriter writer = getRegistry().createJsonWriter(co);
 			write(value, writer);
 			return co.toString();
 		} catch (IOException e) {

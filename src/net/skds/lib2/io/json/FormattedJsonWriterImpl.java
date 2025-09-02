@@ -50,13 +50,13 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void beginArray() throws IOException {
+	public void beginList() throws IOException {
 		pushStack(true);
 		output.append('[');
 	}
 
 	@Override
-	public void endArray() throws IOException {
+	public void endList() throws IOException {
 		popStack();
 		output.append(']');
 	}
@@ -109,7 +109,17 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeFloat(double n) throws IOException {
+	public void writeHex(int n) throws IOException {
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.hexIntUC(n));
+		} else {
+			writeInt(n);
+		}
+	}
+
+	@Override
+	public void writeDouble(double n) throws IOException {
 		pushValue();
 		output.append(String.valueOf(n));
 	}
@@ -126,8 +136,88 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 			pushValue();
 			output.append(StringUtils.expFloatUC(n));
 		} else {
+			writeDouble(n);
+		}
+	}
+
+	@Override
+	public void writeFloatExp(float n) throws IOException {
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.expFloatUC(n));
+		} else {
 			writeFloat(n);
 		}
+	}
+
+
+	@Override
+	public void writeByteArray(byte[] b) throws IOException {
+		beginList();
+		for (int i = 0; i < b.length; i++) {
+			writeInt(b[i]);
+		}
+		endList();
+	}
+
+	@Override
+	public void writeCharArray(char[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeString(StringUtils.unicodeCharUC(arr[i]));
+		}
+		endList();
+	}
+
+	@Override
+	public void writeShortArray(short[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeInt(arr[i]);
+		}
+		endList();
+	}
+
+	@Override
+	public void writeIntArray(int[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeInt(arr[i]);
+		}
+		endList();
+	}
+
+	@Override
+	public void writeLongArray(long[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeLong(arr[i]);
+		}
+		endList();
+	}
+
+	@Override
+	public void writeFloatArray(float[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeFloat(arr[i]);
+		}
+		endList();
+	}
+
+	@Override
+	public void writeDoubleArray(double[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeDouble(arr[i]);
+		}
+		endList();
+	}
+
+
+	@Override
+	public void writeUUID(UUID uuid) throws IOException {
+		writeString(uuid.toString());
 	}
 
 	@Override

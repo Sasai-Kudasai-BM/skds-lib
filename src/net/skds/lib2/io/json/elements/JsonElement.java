@@ -1,12 +1,8 @@
 package net.skds.lib2.io.json.elements;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.*;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -110,8 +106,8 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		}
 
 		@Override
-		public JsonElement read(JsonReader reader) throws IOException {
-			JsonEntryType type = reader.nextEntryType();
+		public JsonElement read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
 					reader.skipNull();
@@ -120,7 +116,7 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 				case BEGIN_OBJECT -> {
 					return objectCodec.read(reader);
 				}
-				case BEGIN_ARRAY -> {
+				case BEGIN_LIST -> {
 					return arrayCodec.read(reader);
 				}
 				case STRING -> {
@@ -129,11 +125,12 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 				case BOOLEAN -> {
 					return booleanCodec.read(reader);
 				}
-				case NUMBER -> {
-					return numberCodec.read(reader);
+				default -> {
+					if (type.isNumber()) {
+						return numberCodec.read(reader);
+					}
+					throw new ParseException("Unexpected token " + type);
 				}
-
-				default -> throw new JsonReadException("Unexpected token " + type);
 			}
 		}
 	}

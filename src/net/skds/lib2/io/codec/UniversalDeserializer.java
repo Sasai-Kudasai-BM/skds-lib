@@ -1,14 +1,13 @@
-package net.skds.lib2.io.json.codec;
+package net.skds.lib2.io.codec;
 
+import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.chars.CharInput;
-import net.skds.lib2.io.codec.Deserializer;
 import net.skds.lib2.io.chars.StringCharInput;
-import net.skds.lib2.io.json.JsonReader;
 import net.skds.lib2.io.json.elements.JsonElement;
 
 import java.io.IOException;
 
-public interface JsonDeserializer<T> extends Deserializer<T, JsonReader>, JsonRegistryGetter {
+public interface UniversalDeserializer<T> extends Deserializer<T, UniversalReader>, CodecRegistryGetter {
 
 	default T parse(CharInput charInput) {
 		try {

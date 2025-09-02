@@ -1,6 +1,6 @@
 package net.skds.lib2.utils;
 
-import net.skds.lib2.io.json.JsonUtils;
+import net.skds.lib2.io.codec.CodecUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public interface AutoString {
 			return object.toString();
 		}
 		if (object.getClass().isArray()) {
-			return Arrays.toString((Object[])object);
+			return Arrays.toString((Object[]) object);
 		}
 
 		StringBuilder builder = new StringBuilder();
@@ -68,7 +68,7 @@ public interface AutoString {
 			} else if (value == null) {
 				builder.append("null");
 			} else {
-				builder.append(JsonUtils.toJsonCompact(value));
+				builder.append(CodecUtils.toJsonCompact(value));
 			}
 
 			if (iterator.hasNext()) {

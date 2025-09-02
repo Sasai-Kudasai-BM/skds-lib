@@ -1,21 +1,20 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import net.skds.lib2.io.codec.DeserializeBuilder;
+import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedConfig;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import net.skds.lib2.io.json.JsonUtils;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
-import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 @SuppressWarnings("unused")
 public abstract class JsonTestDg<T> implements TypedConfig {
@@ -100,7 +99,7 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 		}
 	}
 
-	@DefaultJsonCodec(Dg2.Dg2JsAdapter.class)
+	@DefaultCodec(Dg2.Dg2JsAdapter.class)
 	private static class Dg2 extends JsonTestDg<String> {
 		static final String TYPE = "dg2";
 		private int a1 = 5;
@@ -118,13 +117,13 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 			return TYPE;
 		}
 
-		private static class Dg2JsAdapter extends JsonReflectiveBuilderCodec<Dg2JsAdapter.Dg2JsData> {
+		private static class Dg2JsAdapter extends ReflectiveBuilderCodec<Dg2JsAdapter.Dg2JsData> {
 
-			public Dg2JsAdapter(Type type, JsonCodecRegistry registry) {
+			public Dg2JsAdapter(Type type, UniversalCodecRegistry registry) {
 				super(type, Dg2JsData.class, registry);
 			}
 
-			private static class Dg2JsData implements JsonDeserializeBuilder<Dg2> {
+			private static class Dg2JsData implements DeserializeBuilder<Dg2> {
 
 				@Override
 				public Dg2 build() {
@@ -160,7 +159,8 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 		private JsonTestDg field = new Dg1("inside");
 	}
 
-	private record Dg5(@SuppressWarnings("rawtypes") JsonTestDg dg) {}
+	private record Dg5(@SuppressWarnings("rawtypes") JsonTestDg dg) {
+	}
 
 	@AllArgsConstructor
 	public static class DgAdapter<CT> implements ConfigType<CT> {

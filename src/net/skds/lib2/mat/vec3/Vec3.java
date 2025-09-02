@@ -22,19 +22,21 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Random;
 
+import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
+
 // TODO проверить гетеры
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Vec3.JCodec.class)
 public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 
-	Vec3 XN = Vec3D.XN;
-	Vec3 XP = Vec3D.XP;
-	Vec3 YN = Vec3D.YN;
-	Vec3 YP = Vec3D.YP;
-	Vec3 ZN = Vec3D.ZN;
-	Vec3 ZP = Vec3D.ZP;
-	Vec3 SINGLE = Vec3D.SINGLE;
-	Vec3 ZERO = Vec3D.ZERO;
+	Vec3D XN = new Vec3D(-1.0D, 0.0D, 0.0D);
+	Vec3D XP = new Vec3D(1.0D, 0.0D, 0.0D);
+	Vec3D YN = new Vec3D(0.0D, -1.0D, 0.0D);
+	Vec3D YP = new Vec3D(0.0D, 1.0D, 0.0D);
+	Vec3D ZN = new Vec3D(0.0D, 0.0D, -1.0D);
+	Vec3D ZP = new Vec3D(0.0D, 0.0D, 1.0D);
+	Vec3D SINGLE = new Vec3D(1.0D, 1.0D, 1.0D);
+	Vec3D ZERO = new Vec3D(0.0D, 0.0D, 0.0D);
 
 	@Override
 	default int dimension() {
@@ -1678,27 +1680,28 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		}
 
 		@Override
-		public Vec3 read(JsonReader reader) throws IOException {
-			Number x = 0;
-			Number y = 0;
-			Number z = 0;
+		public Vec3 read(UniversalReader reader) throws IOException {
+			double x = 0;
+			double y = 0;
+			double z = 0;
+
 			switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
-					x = reader.readNumber();
-					y = reader.readNumber();
-					z = reader.readNumber();
-					reader.endArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
+					x = reader.readDouble();
+					y = reader.readDouble();
+					z = reader.readDouble();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
-						Number i = reader.readNumber();
+						double i = reader.readDouble();
 						switch (s.toLowerCase()) {
 							case "x" -> x = i;
 							case "y" -> y = i;
@@ -1707,20 +1710,14 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 					}
 					reader.endObject();
 				}
-				case NUMBER -> {
-					Number value = reader.readNumber();
-					x = value;
-					y = value;
-					z = value;
-				}
-				default ->
-						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+				case INT -> new Vec3D(reader.readInt());
+				case FLOAT -> new Vec3D(reader.readFloat());
+				case LONG -> new Vec3D(reader.readLong());
+				case DOUBLE -> new Vec3D(reader.readDouble());
+				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
-			if (x instanceof Double || y instanceof Double || z instanceof Double) {
-				return new Vec3D(x.doubleValue(), y.doubleValue(), z.doubleValue());
-			} else {
-				return new Vec3I(x.intValue(), y.intValue(), z.intValue());
-			}
+
+			return new Vec3D(x, y, z);
 		}
 	}
 

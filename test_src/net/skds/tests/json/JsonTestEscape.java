@@ -1,9 +1,9 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
 
 import net.skds.lib2.io.chars.StringCharOutput;
 import net.skds.lib2.io.exception.EndOfOutputException;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 import net.skds.lib2.utils.StringUtils;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 public class JsonTestEscape {
 

@@ -3,7 +3,7 @@ package net.skds.lib2.io.chars;
 import java.io.IOException;
 import java.io.InputStream;
 
-//TODO WIP
+//TODO WIP + RENAME
 public class InputStreamCharInput extends StringCharInput {
 
 	public InputStreamCharInput(InputStream stream) throws IOException {

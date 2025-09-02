@@ -16,6 +16,8 @@ import net.skds.lib2.mat.vec3.Vec3F;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
+
 @DefaultJsonCodec(Quat.JCodec.class)
 @SuppressWarnings("unused")
 public sealed interface Quat permits QuatD, QuatF {
@@ -613,38 +615,39 @@ public sealed interface Quat permits QuatD, QuatF {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
-			writer.writeFloat(value.x());
-			writer.writeFloat(value.y());
-			writer.writeFloat(value.z());
-			writer.writeFloat(value.w());
-			writer.endArray();
+			writer.beginList();
+			writer.writeDouble(value.x());
+			writer.writeDouble(value.y());
+			writer.writeDouble(value.z());
+			writer.writeDouble(value.w());
+			writer.endList();
 		}
 
 		@Override
-		public Quat read(JsonReader reader) throws IOException {
-			Number x = 0;
-			Number y = 0;
-			Number z = 0;
-			Number w = 0;
+		public Quat read(UniversalReader reader) throws IOException {
+			double x = 0;
+			double y = 0;
+			double z = 0;
+			double w = 0;
+
 			switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
-					x = reader.readNumber();
-					y = reader.readNumber();
-					z = reader.readNumber();
-					w = reader.readNumber();
-					reader.endArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
+					x = reader.readDouble();
+					y = reader.readDouble();
+					z = reader.readDouble();
+					w = reader.readDouble();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
-						Number i = reader.readNumber();
+						double i = reader.readDouble();
 						switch (s.toLowerCase()) {
 							case "x" -> x = i;
 							case "y" -> y = i;
@@ -654,16 +657,10 @@ public sealed interface Quat permits QuatD, QuatF {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> {
-					Number value = reader.readNumber();
-					x = value;
-					y = value;
-					z = value;
-				}
 				default ->
-						throw new JsonReadException("Unsupported token in quaternion \"" + reader.nextEntryType() + "\"");
+						throw new ParseException("Unsupported token in quaternion \"" + reader.nextEntryType() + "\"");
 			}
-			return new QuatD(x.doubleValue(), y.doubleValue(), z.doubleValue(), w.doubleValue());
+			return new QuatD(x, y, z, w);
 		}
 	}
 }

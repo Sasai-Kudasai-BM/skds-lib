@@ -1,17 +1,15 @@
-package net.skds.lib2.io.json.test;
-
-import java.util.LinkedList;
-import java.util.Map;
+package net.skds.tests.json;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.skds.lib2.io.json.JsonUtils;
-import net.skds.lib2.io.json.annotation.SkipSerialization;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
+import net.skds.lib2.io.codec.annotation.SkipSerialization;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedConfig;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
+
+import java.util.LinkedList;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public abstract class JsonTestYup implements TypedConfig {
@@ -72,7 +70,7 @@ public abstract class JsonTestYup implements TypedConfig {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Class<JsonTestYup> getTypeClass() {
-			return (Class<JsonTestYup>)tClass;
+			return (Class<JsonTestYup>) tClass;
 		}
 
 		@Override

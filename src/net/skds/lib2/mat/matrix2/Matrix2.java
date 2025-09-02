@@ -15,6 +15,8 @@ import net.skds.lib2.mat.vec3.Vec3;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import static net.skds.lib2.io.sosison.SosisonEntryType.NULL;
+
 @SuppressWarnings("unused")
 @DefaultJsonCodec(Matrix2.JCodec.class)
 public sealed interface Matrix2 permits Matrix2D, Matrix2F {
@@ -225,13 +227,13 @@ public sealed interface Matrix2 permits Matrix2D, Matrix2F {
 		}
 
 		@Override
-		public void write(Matrix2 value, JsonWriter writer) throws IOException {
-			writer.beginArray();
-			writer.writeFloat(value.m00());
-			writer.writeFloat(value.m01());
-			writer.writeFloat(value.m10());
-			writer.writeFloat(value.m11());
-			writer.endArray();
+		public void write(Matrix2 value, UniversalWriter writer) throws IOException {
+			writer.beginList();
+			writer.writeDouble(value.m00());
+			writer.writeDouble(value.m01());
+			writer.writeDouble(value.m10());
+			writer.writeDouble(value.m11());
+			writer.endList();
 		}
 
 		@Override

@@ -1,4 +1,12 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
+
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.sosison.SosisonEntryType;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -6,14 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 public class JsonTestCollections {
 	public static void test(JsonTestRegistry registry) {
@@ -57,34 +57,34 @@ public class JsonTestCollections {
 
 	}
 
-	@DefaultJsonCodec(DefaultCodecExtendsCollectionCodec.class)
+	@DefaultCodec(DefaultCodecExtendsCollectionCodec.class)
 	private static class DefaultCodecExtendsCollection extends ArrayList<String> {
 		private int version = 10;
 	}
 
-	private static final class DefaultCodecExtendsCollectionCodec extends AbstractJsonCodec<DefaultCodecExtendsCollection> {
+	private static final class DefaultCodecExtendsCollectionCodec extends AbstractCodec<DefaultCodecExtendsCollection> {
 
-		public DefaultCodecExtendsCollectionCodec(Type type, JsonCodecRegistry registry) {
+		public DefaultCodecExtendsCollectionCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 			System.out.println("create " + type);
 		}
 
 		@Override
-		public DefaultCodecExtendsCollection read(JsonReader reader) throws IOException {
+		public DefaultCodecExtendsCollection read(UniversalReader reader) throws IOException {
 			System.out.println("read");
 			DefaultCodecExtendsCollection value = new DefaultCodecExtendsCollection();
 			reader.beginObject();
-			while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+			while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 				String name = reader.readName();
 				if (name.equals("version")) {
 					value.version = reader.readInt();
 				}
 				if (name.equals("values")) {
-					reader.beginArray();
-					while (reader.nextEntryType() != JsonEntryType.END_ARRAY) {
+					reader.beginList();
+					while (reader.nextEntryType() != SosisonEntryType.END_LIST) {
 						value.add(reader.readString());
 					}
-					reader.endArray();
+					reader.endList();
 				}
 			}
 			reader.endObject();
@@ -92,17 +92,17 @@ public class JsonTestCollections {
 		}
 
 		@Override
-		public void write(DefaultCodecExtendsCollection value, JsonWriter writer) throws IOException {
+		public void write(DefaultCodecExtendsCollection value, UniversalWriter writer) throws IOException {
 			System.out.println("write");
 			writer.beginObject();
 
-			writer.writeInt("version", value.version);
+			writer.writeLong("version", value.version);
 
-			writer.beginArray("values");
+			writer.beginList("values");
 			for (String string : value) {
 				writer.writeString(string);
 			}
-			writer.endArray();
+			writer.endList();
 
 			writer.endObject();
 		}

@@ -1,0 +1,1552 @@
+package net.skds.lib2.io.codec;
+
+import lombok.CustomLog;
+import net.skds.lib2.io.chars.StringCharInput;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
+import net.skds.lib2.io.codec.nulls.NullCodec;
+import net.skds.lib2.io.codec.typed.ConfigEnumType;
+import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.json.elements.*;
+import net.skds.lib2.io.sosison.SosisonEntryType;
+import net.skds.lib2.reflection.ReflectUtils;
+import net.skds.lib2.utils.ArrayUtils;
+import net.skds.lib2.utils.AutoCast;
+import net.skds.lib2.utils.StringUtils;
+import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
+import net.skds.lib2.utils.function.MultiSupplier;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.*;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.Supplier;
+
+@CustomLog
+public class BuiltinCodecFactory implements UniversalCodecFactory {
+
+	public static final BuiltinCodecFactory INSTANCE = new BuiltinCodecFactory();
+
+	final Map<Type, UniversalCodecFactory> map = new ImmutableArrayHashMap<>(
+			JsonObject.class, (UniversalCodecFactory) JsonObject.Codec::new,
+			JsonElement.class, (UniversalCodecFactory) JsonElement.Codec::new,
+			JsonString.class, (UniversalCodecFactory) JsonString.Codec::new,
+			JsonNumber.class, (UniversalCodecFactory) JsonNumber.Codec::new,
+			JsonBoolean.class, (UniversalCodecFactory) JsonBoolean.Codec::new,
+			JsonArray.class, (UniversalCodecFactory) JsonArray.Codec::new,
+			JsonElement.JsonNull.class, (UniversalCodecFactory) NullCodec::new,
+
+			String.class, (UniversalCodecFactory) StringCodec::new,
+			Object.class, (UniversalCodecFactory) ObjectCodec::new,
+			File.class, (UniversalCodecFactory) FileCodec::new,
+			Path.class, (UniversalCodecFactory) PathCodec::new,
+			URI.class, (UniversalCodecFactory) URICodec::new,
+			URL.class, (UniversalCodecFactory) URLCodec::new,
+			UUID.class, (UniversalCodecFactory) UUIDCodec::new,
+
+			Number.class, (UniversalCodecFactory) NumberCodec::new,
+			Byte.class, (UniversalCodecFactory) WrappedByteCodec::new,
+			Boolean.class, (UniversalCodecFactory) WrappedBooleanCodec::new,
+			Short.class, (UniversalCodecFactory) WrappedShortCodec::new,
+			Character.class, (UniversalCodecFactory) WrappedCharCodec::new,
+			Integer.class, (UniversalCodecFactory) WrappedIntCodec::new,
+			Long.class, (UniversalCodecFactory) WrappedLongCodec::new,
+			Float.class, (UniversalCodecFactory) WrappedFloatCodec::new,
+			Double.class, (UniversalCodecFactory) WrappedDoubleCodec::new,
+
+			byte.class, (UniversalCodecFactory) ByteCodec::new,
+			boolean.class, (UniversalCodecFactory) BooleanCodec::new,
+			short.class, (UniversalCodecFactory) ShortCodec::new,
+			char.class, (UniversalCodecFactory) CharCodec::new,
+			int.class, (UniversalCodecFactory) IntCodec::new,
+			long.class, (UniversalCodecFactory) LongCodec::new,
+			float.class, (UniversalCodecFactory) FloatCodec::new,
+			double.class, (UniversalCodecFactory) DoubleCodec::new
+	);
+
+	@Override
+	public UniversalSerializer<?> createSerializer(Type type, UniversalCodecRegistry registry) {
+		UniversalCodecFactory fac = map.get(type);
+		if (fac != null) {
+			return fac.createSerializer(type, registry);
+		}
+		if (type instanceof Class<?> cl) {
+			UniversalCodec<?> codec = getDefaultCodec(cl, cl, registry);
+			if (codec != null) {
+				return codec;
+			}
+			if (Collection.class.isAssignableFrom(cl)) {
+				return new CollectionSerializer(registry);
+			}
+			if (Map.class.isAssignableFrom(cl)) {
+				return new MapSerializer(registry);
+			}
+		} else if (type instanceof ParameterizedType pt) {
+			if (pt.getRawType() instanceof Class<?> cl) {
+				// Non-canonical map
+				if (Map.class.isAssignableFrom(cl)) {
+					Type[] args = pt.getActualTypeArguments();
+					if (args.length != 2) {
+						return new MapSerializer(registry);
+					}
+				}
+			}
+		}
+		return createCodec(type, registry);
+	}
+
+	@Override
+	public UniversalCodec<?> createCodec(Type type, UniversalCodecRegistry registry) {
+		UniversalCodecFactory fac = map.get(type);
+		if (fac != null) {
+			return fac.createCodec(type, registry);
+		}
+		if (type instanceof Class<?> cl) {
+			{
+				UniversalCodec<?> codec = getDefaultCodec(cl, cl, registry);
+				if (codec != null) {
+					return codec;
+				}
+			}
+			if (cl.isEnum()) {
+				return new EnumCodec<>(cl, registry);
+			} else if (cl.getSuperclass() != null && cl.getSuperclass().isEnum()) {
+				return new EnumCodec<>(cl.getSuperclass(), registry);
+			} else if (cl.isArray()) {
+				Class<?> cle = cl.componentType();
+				if (cle.isPrimitive()) {
+					if (cle == int.class) {
+						return new IntArrayCodec(registry);
+					} else if (cle == float.class) {
+						return new FloatArrayCodec(registry);
+					} else if (cle == double.class) {
+						return new DoubleArrayCodec(registry);
+					} else if (cle == boolean.class) {
+						return new BooleanArrayCodec(registry);
+					} else if (cle == long.class) {
+						return new LongArrayCodec(registry);
+					} else if (cle == byte.class) {
+						return new ByteArrayCodec(registry);
+					} else if (cle == short.class) {
+						return new ShortArrayCodec(registry);
+					} else if (cle == char.class) {
+						return new CharArrayCodec(registry);
+					}
+					throw new RuntimeException("Unknown primitive " + cle);
+				} else {
+					UniversalDeserializer<Object> deserializer = registry.getDeserializerIndirect(cle);
+					UniversalSerializer<Object> serializer = getUniversalSerializer(cle, registry);
+					return new ArrayCodec(cle, deserializer, serializer, registry);
+				}
+			}
+		} else if (type instanceof ParameterizedType pt) {
+			if (!(pt.getRawType() instanceof Class<?> cl))
+				throw new UnsupportedOperationException("Unsupported or wildcard type \"" + pt + "\"");
+
+			if (Map.class.isAssignableFrom(cl)) {
+				return new MapCodec(cl, pt.getActualTypeArguments(), registry);
+			} else if (Collection.class.isAssignableFrom(cl)) {
+				if (Set.class.isAssignableFrom(cl)) {
+					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, HashSet::new);
+				} else {
+					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, ArrayList::new);
+				}
+			}
+		} else if (type instanceof GenericArrayType gat) {
+			Type cle = gat.getGenericComponentType();
+			Class<?> raw = ReflectUtils.getRawType(cle);
+			UniversalDeserializer<Object> deserializer = registry.getDeserializerIndirect(cle);
+			UniversalSerializer<Object> serializer = getUniversalSerializer(cle, registry);
+			return new ArrayCodec(raw, deserializer, serializer, registry);
+		}
+
+		return ReflectiveCodecFactory.INSTANCE.createCodec(type, registry);
+	}
+
+	private static boolean isFinal(Type type) {
+		if (type instanceof Class<?> cl) {
+			return Modifier.isFinal(cl.getModifiers()) || cl.isRecord();
+		}
+		return false;
+	}
+
+	public static UniversalSerializer<Object> getUniversalSerializer(Type type, UniversalCodecRegistry registry) {
+		if (isFinal(type) || type instanceof ParameterizedType) {
+			return registry.getSerializerIndirect(type);
+		}
+		return new AbstractUniversalSerializer<>(registry) {
+			UniversalSerializer<Object> serializer;
+
+			@Override
+			public void write(Object value, UniversalWriter writer) throws IOException {
+				if (value == null) {
+					writer.writeNull();
+					return;
+				}
+				UniversalSerializer<Object> s = serializer;
+				if (s == null) {
+					s = this.registry.getSerializerNullable(type);
+					this.serializer = Objects.requireNonNullElse(s, this);
+				}
+				if (this.serializer == this) {
+					this.registry.getSerializer((Type) value.getClass()).write(value, writer);
+				} else {
+					this.serializer.write(value, writer);
+				}
+			}
+		};
+	}
+
+	@SuppressWarnings("unchecked")
+	public static UniversalCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, UniversalCodecRegistry
+			registry) {
+		DefaultCodec defaultCodec = annotatedElement.getAnnotation(DefaultCodec.class);
+		if (defaultCodec == null) return getDefaultEnumTypedCodec(annotatedElement, type, registry);
+		Class<?> factoryClass = defaultCodec.value();
+		if (UniversalCodecFactory.class.isAssignableFrom(factoryClass)) {
+			Supplier<UniversalCodecFactory> constructor = (Supplier<UniversalCodecFactory>) ReflectUtils.getConstructor(factoryClass);
+			if (constructor != null) {
+				UniversalCodecFactory factory = constructor.get();
+				if (factory != null) {
+					UniversalCodec<?> codec = factory.createCodec(type, registry);
+					if (codec != null) return (UniversalCodec<Object>) codec;
+				}
+			}
+		} else l1:{
+			MultiSupplier<Object> constructor =
+					(MultiSupplier<Object>) ReflectUtils.getMultiConstructor(factoryClass, Type.class, UniversalCodecRegistry.class);
+			if (constructor != null) {
+				if (!UniversalCodec.class.isAssignableFrom(factoryClass)) {
+
+					if (!UniversalSerializer.class.isAssignableFrom(factoryClass) && !UniversalDeserializer.class.isAssignableFrom(factoryClass)) {
+						break l1;
+					}
+					UniversalDeserializer<?> deserializer;
+					UniversalSerializer<?> serializer;
+					if (!UniversalSerializer.class.isAssignableFrom(factoryClass)) {
+						serializer = ReflectiveCodecFactory.INSTANCE.createSerializer(type, registry);
+					} else {
+						serializer = (UniversalSerializer<?>) constructor.get(type, registry);
+					}
+					if (!UniversalDeserializer.class.isAssignableFrom(factoryClass)) {
+						deserializer = ReflectiveCodecFactory.INSTANCE.createDeserializer(type, registry);
+					} else {
+						deserializer = (UniversalDeserializer<?>) constructor.get(type, registry);
+					}
+					return new CombinedCodec<>(serializer, deserializer);
+				}
+				return (UniversalCodec<Object>) constructor.get(type, registry);
+			}
+		}
+		log.error("Invalid @DefaultJsonCodec on \"" + annotatedElement + "\"");
+		return null;
+	}
+
+	public static UniversalCodec<Object> getDefaultEnumTypedCodec(AnnotatedElement annotatedElement, Type type, UniversalCodecRegistry registry) {
+		DefaultEnumTypedCodec defaultCodec = annotatedElement.getAnnotation(DefaultEnumTypedCodec.class);
+		if (defaultCodec == null) return null;
+		Class<?> enumClass = defaultCodec.value();
+		if (!(Enum.class.isAssignableFrom(enumClass) && ConfigEnumType.class.isAssignableFrom(enumClass))) {
+			log.error("Invalid @DefaultJsonEnumTypedCodec on \"" + annotatedElement + "\"");
+			return null;
+		}
+		return new TypedEnumAdapter<>(ReflectUtils.getRawType(type), AutoCast.cast(enumClass), registry);
+	}
+
+
+	@SuppressWarnings("ClassCanBeRecord")
+	public static class CollectionSerializer implements UniversalSerializer<Collection<Object>> {
+
+		final UniversalCodecRegistry registry;
+
+		public CollectionSerializer(UniversalCodecRegistry registry) {
+			this.registry = registry;
+		}
+
+		@Override
+		public void write(Collection<Object> value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginList();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (Object v : value) {
+				if (v == null) {
+					writer.writeNull();
+					continue;
+				}
+				registry.getSerializer((Type) v.getClass()).write(v, writer);
+			}
+			writer.endList();
+		}
+
+		@Override
+		public UniversalCodecRegistry getRegistry() {
+			return registry;
+		}
+	}
+
+	@SuppressWarnings("ClassCanBeRecord")
+	public static class MapSerializer implements UniversalSerializer<Map<Object, Object>> {
+
+		final UniversalCodecRegistry registry;
+
+		public MapSerializer(UniversalCodecRegistry registry) {
+			this.registry = registry;
+		}
+
+		@Override
+		public void write(Map<Object, Object> value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginObject();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (var e : value.entrySet()) {
+				String ks;
+				Object k = e.getKey();
+				if (k == null) {
+					ks = "null";
+				} else {
+					ks = registry.getSerializer((Type) k.getClass()).valueAsKeyString(k);
+				}
+				writer.writeName(ks);
+				Object v = e.getValue();
+				if (v == null) {
+					writer.writeNull();
+					continue;
+				}
+				registry.getSerializer((Type) v.getClass()).write(v, writer);
+			}
+			writer.endObject();
+		}
+
+		@Override
+		public UniversalCodecRegistry getRegistry() {
+			return registry;
+		}
+	}
+
+	public static class MapCodec extends AbstractCodec<Map<Object, Object>> {
+
+		//final Class<?> tClass;
+		final Supplier<Map<Object, Object>> constructor;
+		final UniversalDeserializer<Object> keyDeserializer;
+		final UniversalDeserializer<Object> elementDeserializer;
+		final UniversalSerializer<Object> keySerializer;
+		final UniversalSerializer<Object> valueSerializer;
+
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public MapCodec(Class<?> tClass, Type[] parameters, UniversalCodecRegistry registry) {
+			super(tClass, registry);
+			//this.tClass = tClass;
+			if (parameters.length != 2) {
+				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass.getName()
+						+ " " + Arrays.toString(parameters) + "\"");
+			}
+			this.keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
+			this.elementDeserializer = registry.getDeserializerIndirect(parameters[1]);
+			this.keySerializer = getUniversalSerializer(parameters[0], registry);
+			this.valueSerializer = getUniversalSerializer(parameters[1], registry);
+			Supplier<Map<Object, Object>> tmpC;
+			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
+				tmpC = HashMap::new;
+			} else if (EnumMap.class.isAssignableFrom(tClass)) {
+				tmpC = () -> {
+					Map map = new EnumMap<>((Class) parameters[0]);
+					return (Map<Object, Object>) map;
+				};
+			} else {
+				tmpC = (Supplier<Map<Object, Object>>) ReflectUtils.getConstructor(tClass);
+				if (tmpC == null) {
+					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! HashMap will be used instead");
+					tmpC = HashMap::new;
+				}
+			}
+			this.constructor = tmpC;
+		}
+
+		@Override
+		public void write(Map<Object, Object> value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginObject();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+
+			for (Map.Entry<Object, Object> entry : value.entrySet()) {
+				Object k = entry.getKey();
+				Object v = entry.getValue();
+				writer.writeName(keySerializer.valueAsKeyString(k));
+				valueSerializer.write(v, writer);
+			}
+			writer.endObject();
+		}
+
+		@Override
+		public Map<Object, Object> read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					Map<Object, Object> map = constructor.get();
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
+						String name = StringUtils.quote(reader.readName()); // TODO
+						UniversalReader r2 = registry.createReader(new StringCharInput(name));
+						Object key = keyDeserializer.read(r2);
+						Object value;
+						try {
+							value = elementDeserializer.read(reader);
+						} catch (Exception ex) {
+							throw new ParseException("Exception while read " + name, ex);
+						}
+						map.put(key, value);
+					}
+					reader.endObject();
+					return map;
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+	}
+
+	public static class CollectionCodec extends AbstractCodec<Collection<Object>> {
+
+		final Supplier<Collection<Object>> constructor;
+		final UniversalDeserializer<Object> deserializer;
+		final UniversalSerializer<Object> serializer;
+
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public CollectionCodec(Class<?> tClass, Type[] parameters, UniversalCodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
+			super(tClass, registry);
+			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
+			this.serializer = getUniversalSerializer(parameters[0], registry);
+			Supplier<Collection<Object>> tmpC;
+			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
+				if (EnumSet.class.isAssignableFrom(tClass)) {
+					tmpC = () -> EnumSet.noneOf(((Class<? extends Enum>) parameters[0]));
+				} else {
+					tmpC = defaultSupplier;
+				}
+			} else {
+				tmpC = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
+				if (tmpC == null) {
+					log.warn("Class \"" + tClass.getName() + "\" have no empty constructor! Default supplier will be used instead");
+					tmpC = defaultSupplier;
+				}
+			}
+			this.constructor = tmpC;
+		}
+
+		/*private <E extends Enum<E>> Class<E> castEnum(Class<?> tClass) {
+			return AutoCast.cast(tClass);
+		}*/
+
+		@Override
+		public void write(Collection<Object> value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginList();
+			int size = value.size();
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (Object v : value) {
+				serializer.write(v, writer);
+			}
+			writer.endList();
+		}
+
+		@Override
+		public Collection<Object> read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_LIST -> {
+					reader.beginList();
+					Collection<Object> list = constructor.get();
+					int i = 0;
+					while (reader.nextEntryType() != SosisonEntryType.END_LIST) {
+						try {
+							list.add(deserializer.read(reader));
+						} catch (Exception ex) {
+							throw new ParseException("Exception while read [" + i + "]", ex);
+						}
+						i++;
+					}
+					reader.endList();
+					return list;
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+	}
+
+
+	public static class ArrayCodec extends AbstractCodec<Object> {
+
+		final Class<?> tClass;
+		final UniversalDeserializer<Object> deserializer;
+		final UniversalSerializer<Object> serializer;
+		final Object[] array;
+
+		public ArrayCodec(Class<?> type, UniversalCodecRegistry registry) {
+			this(type, registry.getDeserializerIndirect(type), registry.getSerializerIndirect(type), registry);
+		}
+
+		public ArrayCodec(Class<?> tClass, UniversalDeserializer<Object> deserializer, UniversalSerializer<Object> serializer, UniversalCodecRegistry registry) {
+			super(tClass, registry);
+			this.tClass = tClass;
+			this.deserializer = deserializer;
+			this.serializer = serializer;
+			this.array = (Object[]) Array.newInstance(tClass, 0);
+		}
+
+		@Override
+		public void write(Object value, UniversalWriter writer) throws IOException {
+			write(value, writer, this.serializer);
+		}
+
+		@SuppressWarnings("unchecked")
+		public static <T> void write(Object value, UniversalWriter writer, UniversalSerializer<T> serializer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginList();
+			int size = Array.getLength(value);
+			if (size > 1) {
+				writer.lineBreakEnable(true);
+			}
+			for (int i = 0; i < size; i++) {
+				T v = (T) Array.get(value, i);
+				serializer.write(v, writer);
+			}
+			writer.endList();
+		}
+
+		@Override
+		public Object read(UniversalReader reader) throws IOException {
+			return read(this.array, reader, this.deserializer);
+		}
+
+		public static <T> T[] read(T[] emptyArray, UniversalReader reader, UniversalDeserializer<T> deserializer) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_LIST -> {
+					reader.beginList();
+					ArrayList<Object> list = new ArrayList<>();
+					int i = 0;
+					while (reader.nextEntryType() != SosisonEntryType.END_LIST) {
+						try {
+							list.add(deserializer.read(reader));
+						} catch (Exception ex) {
+							throw new ParseException("Exception while read [" + i + "]", ex);
+						}
+						i++;
+					}
+					reader.endList();
+					return list.toArray(emptyArray);
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+	}
+
+	public static final class IntArrayCodec extends AbstractCodec<int[]> {
+
+		public IntArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(int[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeIntArray(value);
+		}
+
+		@Override
+		public int[] read(UniversalReader reader) throws IOException {
+			return reader.readIntArray();
+		}
+	}
+
+	public static final class ByteArrayCodec extends AbstractCodec<byte[]> {
+
+		public ByteArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(byte[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeByteArray(value);
+		}
+
+		@Override
+		public byte[] read(UniversalReader reader) throws IOException {
+			return reader.readByteArray();
+		}
+	}
+
+	public static final class BooleanArrayCodec extends AbstractCodec<boolean[]> {
+
+		public BooleanArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(boolean[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.beginList();
+			int size = value.length;
+			for (int i = 0; i < size; i++) {
+				writer.writeBoolean(value[i]);
+			}
+			writer.endList();
+		}
+
+		@Override
+		public boolean[] read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_LIST -> {
+					reader.beginList();
+					ArrayUtils.BooleanGrowingArray array = new ArrayUtils.BooleanGrowingArray(16);
+					while (reader.nextEntryType() != SosisonEntryType.END_LIST) {
+						array.add(reader.readBoolean());
+					}
+					reader.endList();
+					return array.getArray();
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+	}
+
+	public static final class ShortArrayCodec extends AbstractCodec<short[]> {
+
+		public ShortArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(short[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeShortArray(value);
+		}
+
+		@Override
+		public short[] read(UniversalReader reader) throws IOException {
+			return reader.readShortArray();
+		}
+	}
+
+	public static final class CharArrayCodec extends AbstractCodec<char[]> {
+
+		public CharArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(char[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeCharArray(value);
+		}
+
+		@Override
+		public char[] read(UniversalReader reader) throws IOException {
+			return reader.readCharArray();
+		}
+	}
+
+	public static final class LongArrayCodec extends AbstractCodec<long[]> {
+
+		public LongArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(long[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeLongArray(value);
+		}
+
+		@Override
+		public long[] read(UniversalReader reader) throws IOException {
+			return reader.readLongArray();
+		}
+	}
+
+
+	public static final class FloatArrayCodec extends AbstractCodec<float[]> {
+
+		public FloatArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(float[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeFloatArray(value);
+		}
+
+		@Override
+		public float[] read(UniversalReader reader) throws IOException {
+			return reader.readFloatArray();
+		}
+	}
+
+	public static final class DoubleArrayCodec extends AbstractCodec<double[]> {
+
+		public DoubleArrayCodec(UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(double[] value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeDoubleArray(value);
+		}
+
+		@Override
+		public double[] read(UniversalReader reader) throws IOException {
+			return reader.readDoubleArray();
+		}
+	}
+
+
+	public static final class FileCodec extends AbstractCodec<File> {
+
+		public FileCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public File read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					URI uri = URI.create(reader.readString().replace(" ", "%20"));
+					if (uri.getScheme() == null) {
+						return new File(uri.getPath());
+					}
+					return new File(uri);
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(File value, UniversalWriter writer) throws IOException {
+			URI uri = value.toURI();
+			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
+				writer.writeString(uri.toString().replace("\\", "/"));
+				return;
+			}
+			writer.writeString(uri.toString());
+		}
+	}
+
+
+	public static final class PathCodec extends AbstractCodec<Path> {
+
+		public PathCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public Path read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					URI uri = URI.create(reader.readString());
+					if (uri.getScheme() == null) {
+						return Path.of(uri.getPath());
+					}
+					return Path.of(uri);
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(Path value, UniversalWriter writer) throws IOException {
+			URI uri = value.toUri();
+			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
+				writer.writeString(value.toString());
+				return;
+			}
+			writer.writeString(value.toUri().toString());
+		}
+	}
+
+	public static final class URICodec extends AbstractCodec<URI> {
+
+		public URICodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public URI read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					return URI.create(reader.readString());
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(URI value, UniversalWriter writer) throws IOException {
+			writer.writeString(value.toString());
+		}
+	}
+
+	public static final class URLCodec extends AbstractCodec<URL> {
+
+		public URLCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public URL read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					return URI.create(reader.readString()).toURL();
+				}
+				default -> throw new ParseException("Unexpected token " + type);
+			}
+		}
+
+		@Override
+		public void write(URL value, UniversalWriter writer) throws IOException {
+			writer.writeString(value.toString());
+		}
+	}
+
+	public static final class UUIDCodec extends AbstractCodec<UUID> {
+
+		public UUIDCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public UUID read(UniversalReader reader) throws IOException {
+			return reader.readUUID();
+		}
+
+		@Override
+		public void write(UUID value, UniversalWriter writer) throws IOException {
+			writer.writeUUID(value);
+		}
+	}
+
+	public static final class ObjectCodec extends AbstractCodec<Object> {
+
+		final UniversalDeserializer<JsonObject> jod;
+		final UniversalDeserializer<JsonArray> jad;
+
+		public ObjectCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+			this.jod = registry.getDeserializerIndirect(JsonObject.class);
+			this.jad = registry.getDeserializerIndirect(JsonArray.class);
+		}
+
+		@Override
+		public Object read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case STRING -> {
+					return reader.readString();
+				}
+				case BOOLEAN -> {
+					return reader.readBoolean();
+				}
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case BEGIN_OBJECT -> {
+					return jod.read(reader);
+				}
+				case BEGIN_LIST -> {
+					return jad.read(reader);
+				}
+				default -> {
+					if (type.isNumber()) {
+						return reader.readNumber();
+					}
+					throw new ParseException("Unexpected token " + type);
+				}
+			}
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void write(Object value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			Class<Object> cl = (Class<Object>) value.getClass();
+			if (cl == Object.class) {
+				writer.beginObject();
+				writer.endObject();
+				return;
+			}
+			UniversalSerializer<Object> ser = registry.getSerializer(cl);
+			ser.write(value, writer);
+		}
+	}
+
+	public static final class StringCodec extends AbstractCodec<String> {
+
+		final UniversalDeserializer<JsonObject> jod;
+		final UniversalDeserializer<JsonArray> jad;
+
+		public StringCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+			this.jod = registry.getDeserializerIndirect(JsonObject.class);
+			this.jad = registry.getDeserializerIndirect(JsonArray.class);
+		}
+
+		@Override
+		public void write(String value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeString(value);
+		}
+
+		@Override
+		public String read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					return reader.readString();
+				}
+				case BOOLEAN -> {
+					return String.valueOf(reader.readBoolean());
+				}
+				case BEGIN_OBJECT -> {
+					return jod.read(reader).toString();    // TODO
+				}
+				case BEGIN_LIST -> {
+					return jad.read(reader).toString();    // TODO
+				}
+				default -> {
+					if (type.isNumber()) {
+						return String.valueOf(reader.readNumber());
+					}
+					throw new ParseException("Unexpected token " + type);
+				}
+			}
+		}
+	}
+
+	public static final class EnumCodec<E extends Enum<E>> extends AbstractCodec<E> {
+
+		private final Class<E> eClass;
+
+		@SuppressWarnings("unchecked")
+		public EnumCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+			eClass = (Class<E>) type;
+		}
+
+		@Override
+		public String valueAsKeyString(E val) {
+			return val.name();
+		}
+
+		@Override
+		public void write(E value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeString(value.name());
+		}
+
+		@Override
+		public E read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					String s = reader.readString();
+					try {
+						return Enum.valueOf(eClass, s);
+					} catch (IllegalArgumentException e) {
+						return null;
+					}
+				}
+				default -> {
+					if (type.isNumber()) {
+						int n = reader.readInt();
+						E[] values = eClass.getEnumConstants();
+						if (n < 0 || n >= values.length) return null;
+						return values[n];
+					} else
+						throw new ParseException("Unexpected token " + type);
+				}
+			}
+		}
+	}
+
+	public static final class IntCodec extends AbstractCodec<Integer> {
+
+		public IntCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Integer value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeRaw(value.toString());
+		}
+
+		@Override
+		public Integer read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
+			}
+			return reader.readInt();
+		}
+	}
+
+	public static final class WrappedIntCodec extends AbstractCodec<Integer> {
+
+		public WrappedIntCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Integer value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Integer read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return reader.readInt();
+		}
+	}
+
+	public static final class ByteCodec extends AbstractCodec<Byte> {
+
+		public ByteCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Byte value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Byte read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
+			}
+			return (byte) reader.readInt();
+		}
+	}
+
+	public static final class WrappedByteCodec extends AbstractCodec<Byte> {
+
+		public WrappedByteCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Byte value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Byte read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return (byte) reader.readInt();
+		}
+	}
+
+	public static final class NumberCodec extends AbstractCodec<Number> {
+
+		public NumberCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Number value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeRaw(value.toString());
+		}
+
+		@Override
+		public Number read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return reader.readNumber();
+		}
+	}
+
+	public static final class BooleanCodec extends AbstractCodec<Boolean> {
+
+		public BooleanCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Boolean value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeBoolean(false);
+				return;
+			}
+			writer.writeBoolean(value);
+		}
+
+		@Override
+		public Boolean read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return false;
+			}
+			return reader.readBoolean();
+		}
+	}
+
+	public static final class WrappedBooleanCodec extends AbstractCodec<Boolean> {
+
+		public WrappedBooleanCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Boolean value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeBoolean(value);
+		}
+
+		@Override
+		public Boolean read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return reader.readBoolean();
+		}
+	}
+
+	public static final class CharCodec extends AbstractCodec<Character> {
+
+		public CharCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Character value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeString(StringUtils.unicodeCharUC(value));
+		}
+
+		@Override
+		public Character read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return 0;
+				}
+				case STRING -> {
+					String cs = reader.readString();
+					if (cs.length() == 1) {
+						return cs.charAt(0);
+					} else {
+						throw new ParseException("Unexpected char " + cs);
+					}
+				}
+				default -> {
+					if (type.isNumber()) {
+						return (char) reader.readInt();
+					}
+					throw new ParseException("Unexpected token " + type);
+				}
+			}
+		}
+	}
+
+	public static final class WrappedCharCodec extends AbstractCodec<Character> {
+
+		public WrappedCharCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Character value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeString(StringUtils.unicodeCharUC(value));
+		}
+
+		@Override
+		public Character read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			switch (type) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case STRING -> {
+					String cs = reader.readString();
+					if (cs.length() == 1) {
+						return cs.charAt(0);
+					} else {
+						throw new ParseException("Unexpected char " + cs);
+					}
+				}
+				default -> {
+					if (type.isNumber()) {
+						return (char) reader.readInt();
+					}
+					throw new ParseException("Unexpected token " + type);
+				}
+			}
+		}
+	}
+
+	public static final class ShortCodec extends AbstractCodec<Short> {
+
+		public ShortCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Short value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Short read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
+			}
+			return (short) reader.readInt();
+		}
+	}
+
+	public static final class WrappedShortCodec extends AbstractCodec<Short> {
+
+		public WrappedShortCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Short value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeInt(value);
+		}
+
+		@Override
+		public Short read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0;
+			}
+			return (short) reader.readInt();
+		}
+	}
+
+	public static final class LongCodec extends AbstractCodec<Long> {
+
+		public LongCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Long value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeLong(value);
+		}
+
+		@Override
+		public Long read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0L;
+			}
+			return reader.readLong();
+		}
+	}
+
+	public static final class WrappedLongCodec extends AbstractCodec<Long> {
+
+		public WrappedLongCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Long value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeLong(value);
+		}
+
+		@Override
+		public Long read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return reader.readLong();
+		}
+	}
+
+	public static final class FloatCodec extends AbstractCodec<Float> {
+
+		public FloatCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Float value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeFloat(value);
+		}
+
+		@Override
+		public Float read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0f;
+			}
+			return reader.readFloat();
+		}
+	}
+
+	public static final class WrappedFloatCodec extends AbstractCodec<Float> {
+
+		public WrappedFloatCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Float value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeFloat(value);
+		}
+
+		@Override
+		public Float read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return reader.readFloat();
+		}
+	}
+
+	public static final class DoubleCodec extends AbstractCodec<Double> {
+
+		public DoubleCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Double value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeLong(0);
+				return;
+			}
+			writer.writeDouble(value);
+		}
+
+		@Override
+		public Double read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return 0d;
+			}
+			return reader.readDouble();
+		}
+	}
+
+	public static final class WrappedDoubleCodec extends AbstractCodec<Double> {
+
+		public WrappedDoubleCodec(Type type, UniversalCodecRegistry registry) {
+			super(registry);
+		}
+
+		@Override
+		public void write(Double value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+				return;
+			}
+			writer.writeDouble(value);
+		}
+
+		@Override
+		public Double read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
+			if (type == SosisonEntryType.NULL) {
+				reader.skipNull();
+				return null;
+			}
+			return reader.readDouble();
+		}
+	}
+}

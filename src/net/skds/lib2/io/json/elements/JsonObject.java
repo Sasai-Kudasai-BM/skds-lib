@@ -1,12 +1,8 @@
 package net.skds.lib2.io.json.elements;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.*;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
@@ -179,8 +175,8 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 
 		@Override
-		public JsonObject read(JsonReader reader) throws IOException {
-			JsonEntryType type = reader.nextEntryType();
+		public JsonObject read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
 					reader.skipNull();
@@ -189,13 +185,13 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					JsonObject jo = new JsonObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String name = reader.readName();
 						JsonElement e;
 						try {
 							e = elementCodec.read(reader);
 						} catch (Exception ex) {
-							throw new JsonReadException("Exception while read " + name, ex);
+							throw new ParseException("Exception while read " + name, ex);
 						}
 						jo.put(name, e);
 					}

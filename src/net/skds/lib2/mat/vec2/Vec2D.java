@@ -58,10 +58,10 @@ public record Vec2D(double x, double y) implements Vec2 {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
-			writer.writeFloat(value.x());
-			writer.writeFloat(value.y());
-			writer.endArray();
+			writer.beginList();
+			writer.writeDouble(value.x());
+			writer.writeDouble(value.y());
+			writer.endList();
 		}
 
 		@Override
@@ -82,7 +82,7 @@ public record Vec2D(double x, double y) implements Vec2 {
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
 						double i = reader.readDouble();
 						switch (s.toLowerCase()) {

@@ -2,13 +2,10 @@ package net.skds.lib2.demo.demo3d;
 
 import lombok.CustomLog;
 import net.skds.lib2.demo.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
-import net.skds.lib2.io.json.JsonUtils;
+import net.skds.lib2.io.codec.CodecUtils;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.shapes.AABB;
-import net.skds.lib2.shapes.AABBBuilder;
-import net.skds.lib2.shapes.Collision;
-import net.skds.lib2.shapes.CollisionContext;
 import net.skds.lib2.shapes.Shape;
+import net.skds.lib2.shapes.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -97,13 +94,13 @@ public class Demo3dToolPanel extends JPanel {
 			for (Demo3dShape shape : demo.shapes) {
 				collector.addShape(shape);
 			}
-			JsonUtils.saveJson("demo/shapes.json", collector);
+			CodecUtils.saveJson("demo/shapes.json", collector);
 		});
 		downPanel.add(saveButton);
 
 		JButton readButton = new JButton("read");
 		readButton.addActionListener(e -> {
-			Demo3dShapeCollectorImpl collector = JsonUtils.readJson("demo/shapes.json", Demo3dShapeCollectorImpl.class);
+			Demo3dShapeCollectorImpl collector = CodecUtils.readJson("demo/shapes.json", Demo3dShapeCollectorImpl.class);
 			demo.shapes.clear();
 			for (Shape shape : collector.array) {
 				demo.addShape(shape);
@@ -122,7 +119,7 @@ public class Demo3dToolPanel extends JPanel {
 	}
 
 	public static void read(Demo3dShapeCollector shapes) {
-		Demo3dShapeCollectorImpl collector = JsonUtils.readJson("demo/shapes.json", Demo3dShapeCollectorImpl.class);
+		Demo3dShapeCollectorImpl collector = CodecUtils.readJson("demo/shapes.json", Demo3dShapeCollectorImpl.class);
 		shapes.clear();
 		for (Shape shape : collector.array) {
 			shapes.addShape(shape);

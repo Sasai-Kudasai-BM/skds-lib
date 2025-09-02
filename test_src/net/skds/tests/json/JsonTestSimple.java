@@ -1,13 +1,13 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
+
+import net.skds.lib2.io.codec.PostDeserializeCall;
+import net.skds.lib2.io.codec.PreSerializeCall;
+import net.skds.lib2.io.json.elements.JsonElement;
+import net.skds.lib2.io.json.elements.JsonObject;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 import java.util.Arrays;
 import java.util.List;
-
-import net.skds.lib2.io.json.JsonPostDeserializeCall;
-import net.skds.lib2.io.json.JsonPreSerializeCall;
-import net.skds.lib2.io.json.elements.JsonElement;
-import net.skds.lib2.io.json.elements.JsonObject;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
 
 public class JsonTestSimple {
 	public static void test(JsonTestRegistry registry) {
@@ -19,24 +19,24 @@ public class JsonTestSimple {
 		System.out.println(long.class == Long.TYPE);
 
 		String test = """
-			{
-				"a": "ass",
-				"b": ["gf", 23, null, "ff"],
-				"c": null,
-				"d": 7,
-				"e": true,
-				"f": false,
-				// am gay
-				/* am gay2
-				lines sex */
-				"g": {
-					"ab\\"oba": 777.7,
-					"ses": 0x7,
-					"say": "gex",
-					"amogus": [1488, "aaa", -.3,],
+				{
+					"a": "ass",
+					"b": ["gf", 23, null, "ff"],
+					"c": null,
+					"d": 7,
+					"e": true,
+					"f": false,
+					// am gay
+					/* am gay2
+					lines sex */
+					"g": {
+						"ab\\"oba": 777.7,
+						"ses": 0x7,
+						"say": "gex",
+						"amogus": [1488, "aaa", -.3,],
+					}
 				}
-			}
-		  """;
+				 """;
 		System.out.println(registry.parseJson(test, JsonElement.class));
 
 		String prePostTest = registry.toJson(new PrePostList());
@@ -47,14 +47,14 @@ public class JsonTestSimple {
 		@SuppressWarnings("unused")
 		private List<PrePostListImpl> list = Arrays.asList(new PrePostListImpl());
 
-		private static class PrePostListImpl implements JsonPostDeserializeCall, JsonPreSerializeCall {
+		private static class PrePostListImpl implements PostDeserializeCall, PreSerializeCall {
 			@Override
-			public void preSerializeJson() {
+			public void preSerialize() {
 				System.out.println("pre");
 			}
 
 			@Override
-			public void postDeserializedJson() {
+			public void postDeserialized() {
 				System.out.println("post");
 			}
 		}

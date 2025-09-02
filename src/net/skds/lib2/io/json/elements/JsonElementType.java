@@ -34,6 +34,4 @@ public enum JsonElementType {
 	public boolean isJsonPrimitive() {
 		return true;
 	}
-
-
 }

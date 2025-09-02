@@ -1,11 +1,11 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
 
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.skds.lib2.io.json.JsonUtils;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
-import net.skds.lib2.io.json.test.JsonTest.JsonTestRegistry;
+import net.skds.lib2.io.codec.CodecUtils;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedConfig;
+import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 @ToString
 @NoArgsConstructor
@@ -14,9 +14,9 @@ public class JsonTestEmptyTyped implements TypedConfig {
 	public static void test(JsonTestRegistry registry) {
 		JsonTestEmptyTyped test = new JsonTestEmptyTyped();
 		test.a = 15;
-		String json = JsonUtils.toJsonCompact(test);
+		String json = CodecUtils.toJsonCompact(test);
 		System.out.println(json);
-		System.out.println(JsonUtils.parseJson(json, JsonTestEmptyTyped.class));
+		System.out.println(CodecUtils.parseJson(json, JsonTestEmptyTyped.class));
 	}
 
 	private int a = 10;

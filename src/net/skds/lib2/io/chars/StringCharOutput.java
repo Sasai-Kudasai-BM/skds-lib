@@ -10,16 +10,6 @@ public class StringCharOutput implements CharOutput {
 	}
 
 	@Override
-	public boolean isAvailable(int count) {
-		return true;
-	}
-
-	@Override
-	public void setCurrentChar(char c) {
-		builder.setCharAt(builder.length() - 1, c);
-	}
-
-	@Override
 	public void append(char c) {
 		builder.append(c);
 	}

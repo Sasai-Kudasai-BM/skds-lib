@@ -71,10 +71,10 @@ public record Vec2F(float xf, float yf) implements Vec2 {
 				writer.writeNull();
 				return;
 			}
-			writer.beginArray();
+			writer.beginList();
 			writer.writeFloat(value.xf());
 			writer.writeFloat(value.yf());
-			writer.endArray();
+			writer.endList();
 		}
 
 		@Override
@@ -95,7 +95,7 @@ public record Vec2F(float xf, float yf) implements Vec2 {
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
 						float i = reader.readFloat();
 						switch (s.toLowerCase()) {

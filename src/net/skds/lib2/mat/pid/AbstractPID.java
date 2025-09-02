@@ -15,6 +15,8 @@ import net.skds.lib2.mat.vec3.Vec3D;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -72,23 +74,23 @@ public abstract class AbstractPID {
 			}
 			if (value.min != DEFAULT_MIN || value.max != DEFAULT_MAX) {
 				writer.beginObject();
-				writer.writeFloat("p", value.p());
-				writer.writeFloat("i", value.i());
-				writer.writeFloat("d", value.d());
+				writer.writeDouble("p", value.p());
+				writer.writeDouble("i", value.i());
+				writer.writeDouble("d", value.d());
 				if (value.min != DEFAULT_MIN) {
-					writer.writeFloat("min", value.min());
+					writer.writeDouble("min", value.min());
 				}
 				if (value.max != DEFAULT_MAX) {
-					writer.writeFloat("max", value.max());
+					writer.writeDouble("max", value.max());
 				}
 				writer.endObject();
 				return;
 			}
-			writer.beginArray();
-			writer.writeFloat(value.p());
-			writer.writeFloat(value.i());
-			writer.writeFloat(value.d());
-			writer.endArray();
+			writer.beginList();
+			writer.writeDouble(value.p());
+			writer.writeDouble(value.i());
+			writer.writeDouble(value.d());
+			writer.endList();
 		}
 
 		@Override
@@ -114,7 +116,7 @@ public abstract class AbstractPID {
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
 						double v = reader.readDouble();
 						switch (s.toLowerCase()) {
@@ -127,7 +129,6 @@ public abstract class AbstractPID {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> new Vec3D(reader.readDouble());
 				default ->
 						throw new JsonReadException("Unsupported token in PIDConfig \"" + reader.nextEntryType() + "\"");
 			}

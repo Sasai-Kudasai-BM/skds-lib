@@ -1,12 +1,13 @@
-package net.skds.lib2.io.json.test;
+package net.skds.tests.json;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.json.codec.*;
-import net.skds.lib2.io.json.codec.JsonCodecFactory.MapJsonFactory;
-import net.skds.lib2.io.json.codec.typed.ConfigEnumType;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
-import net.skds.lib2.io.json.codec.typed.TypedMapAdapter;
+import net.skds.lib2.io.codec.*;
+import net.skds.lib2.io.codec.UniversalCodecFactory.MapJsonFactory;
+import net.skds.lib2.io.codec.typed.ConfigEnumType;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
+import net.skds.lib2.io.codec.typed.TypedMapAdapter;
+import net.skds.lib2.io.json.JsonCodecOptions;
 import net.skds.lib2.utils.AnsiEscape;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
@@ -64,14 +65,14 @@ public class JsonTest {
 		}
 	}
 
-	public static class JsonTestRegistry extends JsonCodecRegistry {
+	public static class JsonTestRegistry extends UniversalCodecRegistry {
 
-		private static final JsonCodecOptions OPTIONS;
+		private static final UniversalCodecOptions OPTIONS;
 
 		static {
-			JsonCodecOptions options = new JsonCodecOptions();
-			options.setCapabilityVersion(JsonCapabilityVersion.JSON_WITH_COMMENTS);
-			options.setDecorationType(JsonCodecOptions.DecorationType.FANCY);
+			UniversalCodecOptions options = new UniversalCodecOptionsImpl();
+			options.setCapabilityVersion(JsonCodecOptions.JsonCapabilityVersion.JSON_WITH_COMMENTS);
+			options.setDecorationType(UniversalCodecOptions.DecorationType.FANCY);
 			OPTIONS = options;
 		}
 
@@ -81,16 +82,16 @@ public class JsonTest {
 			this(OPTIONS);
 		}
 
-		public JsonTestRegistry(JsonCodecOptions options) {
-			this(options, JsonCodecFactory.newMapFactory());
+		public JsonTestRegistry(UniversalCodecOptions options) {
+			this(options, UniversalCodecFactory.newMapFactory());
 		}
 
-		public JsonTestRegistry(JsonCodecOptions options, MapJsonFactory map) {
+		public JsonTestRegistry(UniversalCodecOptions options, MapJsonFactory map) {
 			super(options, map);
 			this.map = map;
 		}
 
-		public final void addFactory(Type type, JsonCodecFactory factory) {
+		public final void addFactory(Type type, UniversalCodecFactory factory) {
 			this.map.addFactory(type, factory);
 		}
 
@@ -113,7 +114,7 @@ public class JsonTest {
 
 		public final <T> T parseJson(String json, Class<T> type) {
 			try {
-				JsonDeserializer<T> deserializer = this.getDeserializer(type);
+				UniversalDeserializer<T> deserializer = this.getDeserializer(type);
 				return deserializer.parse(json);
 			} catch (Exception e) {
 				e.printStackTrace(System.err);

@@ -16,7 +16,7 @@ public class Numbers {
 				return Long.parseLong(stringSubValue, 16);
 			}
 		}
-		if (stringValue.indexOf('.') != -1) {
+		if (stringValue.indexOf('.') != -1 || stringValue.indexOf('E') != -1 || stringValue.indexOf('e') != -1) {
 			return Double.parseDouble(stringValue);
 		}
 		return Long.parseLong(stringValue);

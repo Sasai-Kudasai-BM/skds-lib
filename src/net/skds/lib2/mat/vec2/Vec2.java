@@ -1,13 +1,9 @@
 package net.skds.lib2.mat.vec2;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonSerializer;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.*;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
 
@@ -1082,25 +1078,26 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		}
 
 		@Override
-		public Vec2 read(JsonReader reader) throws IOException {
-			Number x = 0;
-			Number y = 0;
+		public Vec2 read(UniversalReader reader) throws IOException {
+			double x = 0;
+			double y = 0;
+
 			switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
-					x = reader.readNumber();
-					y = reader.readNumber();
-					reader.endArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
+					x = reader.readDouble();
+					y = reader.readDouble();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
-					while (reader.nextEntryType() != JsonEntryType.END_OBJECT) {
+					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
-						Number i = reader.readNumber();
+						double i = reader.readDouble();
 						switch (s.toLowerCase()) {
 							case "x" -> x = i;
 							case "y" -> y = i;
@@ -1108,19 +1105,14 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 					}
 					reader.endObject();
 				}
-				case NUMBER -> {
-					Number value = reader.readNumber();
-					x = value;
-					y = value;
-				}
-				default ->
-						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+				case INT -> new Vec2D(reader.readInt());
+				case FLOAT -> new Vec2D(reader.readFloat());
+				case LONG -> new Vec2D(reader.readLong());
+				case DOUBLE -> new Vec2D(reader.readDouble());
+				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
-			if (x instanceof Double || y instanceof Double) {
-				return new Vec2D(x.doubleValue(), y.doubleValue());
-			} else {
-				return new Vec2I(x.intValue(), y.intValue());
-			}
+
+			return new Vec2D(x, y);
 		}
 	}
 }
