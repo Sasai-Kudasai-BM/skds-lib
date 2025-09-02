@@ -11,7 +11,7 @@ public class TypedEnumAdapter<CT, E extends Enum<E> & ConfigEnumType<CT>> extend
 	private final Class<E> typeClass;
 
 	@SuppressWarnings("unchecked")
-	public <VE extends Enum<VE> & ConfigEnumType<? extends CT>> TypedEnumAdapter(Type type, Class<VE> typeClass, UniversalCodecRegistry registry) {
+	public <VE extends Enum<VE> & ConfigEnumType<? extends CT>> TypedEnumAdapter(Type type, Class<VE> typeClass, CodecRegistry registry) {
 		super(type, registry);
 		this.typeClass = (Class<E>) typeClass;
 	}

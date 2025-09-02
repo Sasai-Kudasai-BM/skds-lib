@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 
 public final class UnsupportedCodec<T> extends AbstractCodec<T> {
 
-	public UnsupportedCodec(Type type, UniversalCodecRegistry registry) {
+	public UnsupportedCodec(Type type, CodecRegistry registry) {
 		super(type, registry);
 	}
 

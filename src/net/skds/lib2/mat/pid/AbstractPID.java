@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import net.skds.lib2.io.codec.AbstractCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
@@ -60,7 +60,7 @@ public abstract class AbstractPID {
 
 	final static class JCodec extends AbstractCodec<PIDConfig> {
 
-		public JCodec(Type type, UniversalCodecRegistry registry) {
+		public JCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 

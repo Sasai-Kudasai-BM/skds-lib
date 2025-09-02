@@ -10,7 +10,7 @@ public abstract class ReflectiveBuilderCodec<T> extends AbstractCodec<T> {
 	private final UniversalSerializer<T> serializer;
 
 	@SuppressWarnings("unchecked")
-	public ReflectiveBuilderCodec(Type type, Type builderType, UniversalCodecRegistry registry) {
+	public ReflectiveBuilderCodec(Type type, Type builderType, CodecRegistry registry) {
 		super(type, registry);
 		while (!(type instanceof Class<?> cl)) {
 			if (!(type instanceof ParameterizedType pt)) {

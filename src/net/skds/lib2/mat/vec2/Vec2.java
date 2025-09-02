@@ -1064,7 +1064,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		private final UniversalSerializer<Vec2I> veci = this.registry.getSerializerIndirect(Vec2I.class);
 		private final UniversalSerializer<Vec2> vecd = this.registry.getSerializerIndirect(Vec2D.class);
 
-		public JCodec(Type type, UniversalCodecRegistry registry) {
+		public JCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 

@@ -1,14 +1,14 @@
 package net.skds.lib2.io.codec;
 
 public abstract class AbstractUniversalSerializer<T> implements UniversalSerializer<T> {
-	final UniversalCodecRegistry registry;
+	final CodecRegistry registry;
 
-	protected AbstractUniversalSerializer(UniversalCodecRegistry registry) {
+	protected AbstractUniversalSerializer(CodecRegistry registry) {
 		this.registry = registry;
 	}
 
 	@Override
-	public UniversalCodecRegistry getRegistry() {
+	public CodecRegistry getRegistry() {
 		return registry;
 	}
 }

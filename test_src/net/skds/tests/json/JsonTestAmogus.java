@@ -83,7 +83,7 @@ public class JsonTestAmogus {
 
 	private static final class AnusCodec extends AbstractCodec<Anus> {
 
-		public AnusCodec(Type type, UniversalCodecRegistry registry) {
+		public AnusCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 			System.out.println("create");
 		}

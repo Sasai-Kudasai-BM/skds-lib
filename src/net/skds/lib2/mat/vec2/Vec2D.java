@@ -1,7 +1,7 @@
 package net.skds.lib2.mat.vec2;
 
 import net.skds.lib2.io.codec.AbstractCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
@@ -48,7 +48,7 @@ public record Vec2D(double x, double y) implements Vec2 {
 
 	static final class JCodec extends AbstractCodec<Vec2> {
 
-		public JCodec(Type type, UniversalCodecRegistry registry) {
+		public JCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 

@@ -153,7 +153,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 
 		private final UniversalCodec<JsonElement> elementCodec;
 
-		public Codec(Type type, UniversalCodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
 			this.elementCodec = registry.getCodecIndirect(JsonElement.class);
 		}

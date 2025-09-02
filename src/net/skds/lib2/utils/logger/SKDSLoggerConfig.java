@@ -2,7 +2,7 @@ package net.skds.lib2.utils.logger;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.skds.lib2.io.codec.CodecUtils;
+import net.skds.lib2.io.codec.SosisonUtils;
 import net.skds.lib2.utils.AnsiEscape;
 
 import java.io.IOException;
@@ -79,7 +79,7 @@ public final class SKDSLoggerConfig {
 		Cfg cfg = null;
 		try (InputStream is = SKDSLoggerConfig.class.getClassLoader().getResourceAsStream("SKDSLog.json")) {
 			if (is != null) {
-				cfg = CodecUtils.readJson(is, Cfg.class);
+				cfg = SosisonUtils.readJson(is, Cfg.class);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

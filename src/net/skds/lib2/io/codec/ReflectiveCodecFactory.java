@@ -19,14 +19,14 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @CustomLog
-public class ReflectiveCodecFactory implements UniversalCodecFactory {
+public class ReflectiveCodecFactory implements CodecFactory {
 
 	private static final FieldCodec[] fieldCodecArray = {};
 
 	public static final ReflectiveCodecFactory INSTANCE = new ReflectiveCodecFactory();
 
 	@Override
-	public UniversalCodec<?> createCodec(Type type, UniversalCodecRegistry registry) {
+	public UniversalCodec<?> createCodec(Type type, CodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			if (c.isInterface()) {
 				return null;
@@ -46,7 +46,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	}
 
 	@Override
-	public UniversalDeserializer<?> createDeserializer(Type type, UniversalCodecRegistry registry) {
+	public UniversalDeserializer<?> createDeserializer(Type type, CodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			if (c.isInterface()) {
 				return null;
@@ -66,7 +66,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	}
 
 	@Override
-	public UniversalSerializer<?> createSerializer(Type type, UniversalCodecRegistry registry) {
+	public UniversalSerializer<?> createSerializer(Type type, CodecRegistry registry) {
 		if (type instanceof Class<?> c) {
 			if (c.isInterface()) {
 				return null;
@@ -95,7 +95,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> UniversalSerializer<T> getReflectiveSerializer(Class<T> tClass, UniversalCodecRegistry registry) {
+	private <T> UniversalSerializer<T> getReflectiveSerializer(Class<T> tClass, CodecRegistry registry) {
 		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null && !codecRole.value().isCanSerialize()) {
 			return new UnsupportedCodec<>(tClass, registry);
@@ -104,7 +104,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> UniversalDeserializer<T> getReflectiveDeserializer(Class<T> tClass, UniversalCodecRegistry registry) {
+	private <T> UniversalDeserializer<T> getReflectiveDeserializer(Class<T> tClass, CodecRegistry registry) {
 		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null && !codecRole.value().isCanSerialize()) {
 			return new UnsupportedCodec<>(tClass, registry);
@@ -112,7 +112,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		return (UniversalDeserializer<T>) new ReflectiveDeserializer(tClass, registry);
 	}
 
-	private UniversalCodec<?> getReflectiveCodec(Class<?> tClass, UniversalCodecRegistry registry) {
+	private UniversalCodec<?> getReflectiveCodec(Class<?> tClass, CodecRegistry registry) {
 		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null) {
 			switch (codecRole.value()) {
@@ -132,7 +132,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		return new CombinedCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer(tClass, registry));
 	}
 
-	private UniversalCodec<?> getRecordCodec(Class<?> tClass, UniversalCodecRegistry registry) {
+	private UniversalCodec<?> getRecordCodec(Class<?> tClass, CodecRegistry registry) {
 		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null) {
 			switch (codecRole.value()) {
@@ -157,10 +157,10 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		final Class<?> tClass;
 		final Supplier<Object> constructor;
 		final Map<String, FieldCodec> readers;
-		final UniversalCodecRegistry registry;
+		final CodecRegistry registry;
 
 		@SuppressWarnings("unchecked")
-		public ReflectiveDeserializer(Class<?> tClass, UniversalCodecRegistry registry) {
+		public ReflectiveDeserializer(Class<?> tClass, CodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			Supplier<Object> tmpC;
@@ -213,7 +213,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		}
 
 		@Override
-		public UniversalCodecRegistry getRegistry() {
+		public CodecRegistry getRegistry() {
 			return registry;
 		}
 	}
@@ -222,9 +222,9 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 
 		final Class<?> tClass;
 		final FieldCodec[] writers;
-		final UniversalCodecRegistry registry;
+		final CodecRegistry registry;
 
-		public ReflectiveSerializer(Class<?> tClass, UniversalCodecRegistry registry) {
+		public ReflectiveSerializer(Class<?> tClass, CodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			this.writers = collectFields(tClass, registry);
@@ -263,7 +263,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		}
 
 		@Override
-		public UniversalCodecRegistry getRegistry() {
+		public CodecRegistry getRegistry() {
 			return registry;
 		}
 	}
@@ -271,7 +271,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	public static class RecordDeserializer implements UniversalDeserializer<Object> {
 
 		final Class<?> tClass;
-		final UniversalCodecRegistry registry;
+		final CodecRegistry registry;
 		final MultiSupplier<Object> constructor;
 		final UniversalDeserializer<Object>[] deserializers;
 		final String[] names;
@@ -279,7 +279,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		final Class<?>[] components;
 
 		@SuppressWarnings("unchecked")
-		public RecordDeserializer(Class<?> tClass, UniversalCodecRegistry registry) {
+		public RecordDeserializer(Class<?> tClass, CodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			MultiSupplier<Object> tmpC;
@@ -355,7 +355,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		}
 
 		@Override
-		public UniversalCodecRegistry getRegistry() {
+		public CodecRegistry getRegistry() {
 			return registry;
 		}
 	}
@@ -463,7 +463,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	public static class RecordSerializer implements UniversalSerializer<Object> {
 
 		final Class<?> tClass;
-		final UniversalCodecRegistry registry;
+		final CodecRegistry registry;
 		final UniversalSerializer<Object>[] serializers;
 		final int nonNullSerializers;
 		final String[] names;
@@ -472,7 +472,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		final Predicate<Object>[] skipPredicates;
 
 		@SuppressWarnings("unchecked")
-		public RecordSerializer(Class<?> tClass, UniversalCodecRegistry registry) {
+		public RecordSerializer(Class<?> tClass, CodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
 			var rcs = tClass.getRecordComponents();
@@ -570,18 +570,18 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		}
 
 		@Override
-		public UniversalCodecRegistry getRegistry() {
+		public CodecRegistry getRegistry() {
 			return registry;
 		}
 	}
 
-	private static FieldCodec[] collectFields(Class<?> c, UniversalCodecRegistry registry) {
+	private static FieldCodec[] collectFields(Class<?> c, CodecRegistry registry) {
 		ArrayList<FieldCodec> list = new ArrayList<>();
 		collectFields(c, registry, list);
 		return list.toArray(fieldCodecArray);
 	}
 
-	private static void collectFields(Class<?> c, UniversalCodecRegistry registry, List<FieldCodec> list) {
+	private static void collectFields(Class<?> c, CodecRegistry registry, List<FieldCodec> list) {
 		if (c == Object.class) return;
 
 		List<FieldCodec> fields = new ArrayList<>();
@@ -806,7 +806,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 	private static class CharFieldCodec extends FieldCodec {
 		final UniversalDeserializer<Character> deserializer;
 
-		private CharFieldCodec(Field field, UniversalCodecRegistry registry) {
+		private CharFieldCodec(Field field, CodecRegistry registry) {
 			super(field);
 			this.deserializer = registry.getDeserializerIndirect(char.class);
 		}
@@ -859,7 +859,7 @@ public class ReflectiveCodecFactory implements UniversalCodecFactory {
 		final UniversalDeserializer<Object> deserializer;
 		final Predicate<Object> skipPredicate;
 
-		private ObjFieldCodec(Field field, UniversalCodecRegistry registry) {
+		private ObjFieldCodec(Field field, CodecRegistry registry) {
 			super(field);
 			Type t = field.getGenericType();
 			UniversalCodec<Object> c = BuiltinCodecFactory.getDefaultCodec(field, t, registry);

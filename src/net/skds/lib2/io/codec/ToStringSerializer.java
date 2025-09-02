@@ -8,9 +8,9 @@ import java.lang.reflect.Type;
 public class ToStringSerializer implements UniversalSerializer<Object> {
 
 	@Getter(onMethod_ = @Override)
-	private UniversalCodecRegistry registry;
+	private CodecRegistry registry;
 
-	public ToStringSerializer(Type type, UniversalCodecRegistry registry) {
+	public ToStringSerializer(Type type, CodecRegistry registry) {
 		this.registry = registry;
 	}
 

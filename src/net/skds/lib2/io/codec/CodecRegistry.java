@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 import static net.skds.lib2.io.json.JsonCodecOptions.DecorationType.FANCY;
 
-public class UniversalCodecRegistry {
+public class CodecRegistry {
 
 	final UniversalCodecOptions options;
 	private final Map<Type, UniversalCodec<?>> codecMap = new ConcurrentHashMap<>();
@@ -30,11 +30,11 @@ public class UniversalCodecRegistry {
 	private final Function<? super Type, ? extends UniversalCodec<?>> codecMappingFunction;
 	private final Function<? super Type, ? extends UniversalSerializer<?>> serializerMappingFunction;
 	private final Function<? super Type, ? extends UniversalDeserializer<?>> deserializerMappingFunction;
-	private static final UniversalCodecFactory builtin = net.skds.lib2.io.codec.BuiltinCodecFactory.INSTANCE;
+	private static final CodecFactory builtin = BuiltinCodecFactory.INSTANCE;
 
-	public UniversalCodecRegistry(UniversalCodecOptions options, UniversalCodecFactory extraFactory) {
+	public CodecRegistry(UniversalCodecOptions options, CodecFactory extraFactory) {
 		this.options = options.clone();
-		UniversalCodecFactory combined;
+		CodecFactory combined;
 		if (extraFactory != null) {
 			combined = extraFactory.orElse(builtin);
 		} else {
@@ -159,8 +159,8 @@ public class UniversalCodecRegistry {
 			UniversalCodec<T> codec;
 
 			@Override
-			public UniversalCodecRegistry getRegistry() {
-				return UniversalCodecRegistry.this;
+			public CodecRegistry getRegistry() {
+				return CodecRegistry.this;
 			}
 
 			@Override
@@ -191,8 +191,8 @@ public class UniversalCodecRegistry {
 			UniversalDeserializer<T> deserializer;
 
 			@Override
-			public UniversalCodecRegistry getRegistry() {
-				return UniversalCodecRegistry.this;
+			public CodecRegistry getRegistry() {
+				return CodecRegistry.this;
 			}
 
 			@Override
@@ -213,8 +213,8 @@ public class UniversalCodecRegistry {
 			UniversalSerializer<T> serializer;
 
 			@Override
-			public UniversalCodecRegistry getRegistry() {
-				return UniversalCodecRegistry.this;
+			public CodecRegistry getRegistry() {
+				return CodecRegistry.this;
 			}
 
 			@Override

@@ -8,7 +8,7 @@ public abstract class AbstractReflectiveBuilderCodec<T> extends AbstractCodec<T>
 
 	private final UniversalDeserializer<DeserializeBuilder<T>> deserializer;
 
-	public AbstractReflectiveBuilderCodec(Type type, Type builderType, UniversalCodecRegistry registry) {
+	public AbstractReflectiveBuilderCodec(Type type, Type builderType, CodecRegistry registry) {
 		super(type, registry);
 		this.deserializer = registry.getDeserializerIndirect(builderType);
 	}

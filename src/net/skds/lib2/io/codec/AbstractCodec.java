@@ -4,21 +4,21 @@ import java.lang.reflect.Type;
 
 public abstract class AbstractCodec<T> implements UniversalCodec<T> {
 
-	protected final UniversalCodecRegistry registry;
+	protected final CodecRegistry registry;
 	protected final Type codecType;
 
-	public AbstractCodec(Type type, UniversalCodecRegistry registry) {
+	public AbstractCodec(Type type, CodecRegistry registry) {
 		this.codecType = type;
 		this.registry = registry;
 	}
 
-	public AbstractCodec(UniversalCodecRegistry registry) {
+	public AbstractCodec(CodecRegistry registry) {
 		this.codecType = null;
 		this.registry = registry;
 	}
 
 	@Override
-	public final UniversalCodecRegistry getRegistry() {
+	public final CodecRegistry getRegistry() {
 		return registry;
 	}
 }

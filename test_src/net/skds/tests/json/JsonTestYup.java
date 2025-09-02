@@ -52,7 +52,7 @@ public abstract class JsonTestYup implements TypedConfig {
 		System.out.println(yupJson);
 		System.out.println(registry.parseJson(yupJson, Pizdun.class));
 
-		//JsonUtils.saveJson(new File("yup.json"), p);
+		//SosisonUtils.saveJson(new File("yup.json"), p);
 	}
 
 	private static final YupCT y0 = new YupCT(JsonTestYup.Yup0.class, "e0");

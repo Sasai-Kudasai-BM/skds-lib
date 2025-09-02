@@ -1,14 +1,14 @@
 package net.skds.lib2.io.codec;
 
 public abstract class AbstractDeserializer<T> implements UniversalDeserializer<T> {
-	final UniversalCodecRegistry registry;
+	final CodecRegistry registry;
 
-	protected AbstractDeserializer(UniversalCodecRegistry registry) {
+	protected AbstractDeserializer(CodecRegistry registry) {
 		this.registry = registry;
 	}
 
 	@Override
-	public UniversalCodecRegistry getRegistry() {
+	public CodecRegistry getRegistry() {
 		return registry;
 	}
 }

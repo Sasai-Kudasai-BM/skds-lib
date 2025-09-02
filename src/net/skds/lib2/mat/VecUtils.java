@@ -33,20 +33,21 @@ public final class VecUtils {
 		return start.add(direction.normalizeScale(proj));
 	}
 
-	public static Vec3D sphereContactPointLimited(Vec3 start, Vec3 direction, Vec3 center, double radius) {
-		double proj = center.sub(start).projOn(direction);
-		if (proj > direction.length() + radius) {
-			return null;
-		}
-		Vec3D pp = start.add(direction.normalizeScale(proj));
+	public static Vec3 sphereContactPointLimited(Vec3 start, Vec3 direction, Vec3 center, double radius) {
+		
+		if (start.distanceTo(center) <= radius) return start;
+		double dirL = direction.length();
+		Vec3 dir = direction.scale(1 / dirL);
+
+		double proj = center.sub(start).dot(dir);
+		if (proj < 0 || proj > dirL + radius) return null;
+		Vec3 pp = start.addScale(dir, proj);
 		double r2 = radius * radius;
 		double k2 = pp.squareDistanceTo(center);
+		if (r2 < k2) return null;
 		double delta = Math.sqrt(r2 - k2);
-		if (proj > direction.length() + delta) {
-			return null;
-		}
-		return pp.sub(direction.normalizeScale(delta));
+		if (proj > dirL + delta) return null;
+		return start.addScale(dir, proj - delta);
 	}
-
 
 }

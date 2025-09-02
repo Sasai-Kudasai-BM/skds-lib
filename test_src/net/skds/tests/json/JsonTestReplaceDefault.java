@@ -1,7 +1,7 @@
 package net.skds.tests.json;
 
 import net.skds.lib2.io.codec.AbstractCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
@@ -30,7 +30,7 @@ public class JsonTestReplaceDefault {
 
 	private static class JTRD1 extends AbstractCodec<JTRD> {
 
-		protected JTRD1(Type type, UniversalCodecRegistry registry) {
+		protected JTRD1(Type type, CodecRegistry registry) {
 			super(registry);
 		}
 
@@ -48,7 +48,7 @@ public class JsonTestReplaceDefault {
 
 	private static class JTRD2 extends AbstractCodec<JTRD> {
 
-		protected JTRD2(Type type, UniversalCodecRegistry registry) {
+		protected JTRD2(Type type, CodecRegistry registry) {
 			super(registry);
 		}
 

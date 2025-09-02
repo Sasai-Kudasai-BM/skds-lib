@@ -1661,7 +1661,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		private final UniversalSerializer<Vec3I> veci = this.registry.getSerializerIndirect(Vec3I.class);
 		private final UniversalSerializer<Vec3> vecd = this.registry.getSerializerIndirect(Vec3D.class);
 
-		public JCodec(Type type, UniversalCodecRegistry registry) {
+		public JCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 

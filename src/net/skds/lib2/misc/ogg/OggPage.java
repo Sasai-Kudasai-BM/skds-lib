@@ -1,7 +1,7 @@
 package net.skds.lib2.misc.ogg;
 
 import lombok.Getter;
-import net.skds.lib2.io.codec.CodecUtils;
+import net.skds.lib2.io.codec.SosisonUtils;
 import net.skds.lib2.io.codec.annotation.SkipSerialization;
 import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 import net.skds.lib2.utils.SKDSByteBuf;
@@ -130,6 +130,6 @@ public class OggPage {
 
 	@Override
 	public String toString() {
-		return CodecUtils.toJson(this);
+		return SosisonUtils.toJson(this);
 	}
 }

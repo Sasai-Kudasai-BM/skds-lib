@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
@@ -43,7 +43,7 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 		//Type t = DgAdapter.class.getGenericInterfaces()[0];
 		//System.out.println(t);
 		//System.out.println(DgAdapter.class.getGenericSuperclass());
-		//JsonUtils.saveJson(new File("dg.json"), dgList);
+		//SosisonUtils.saveJson(new File("dg.json"), dgList);
 	}
 
 	@NoArgsConstructor
@@ -119,7 +119,7 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 
 		private static class Dg2JsAdapter extends ReflectiveBuilderCodec<Dg2JsAdapter.Dg2JsData> {
 
-			public Dg2JsAdapter(Type type, UniversalCodecRegistry registry) {
+			public Dg2JsAdapter(Type type, CodecRegistry registry) {
 				super(type, Dg2JsData.class, registry);
 			}
 

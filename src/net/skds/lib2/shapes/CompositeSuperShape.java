@@ -5,7 +5,7 @@ import lombok.Setter;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
@@ -300,7 +300,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 
 	static final class JCodec extends ReflectiveBuilderCodec<CompositeSuperShape> {
 
-		public JCodec(Type type, UniversalCodecRegistry registry) {
+		public JCodec(Type type, CodecRegistry registry) {
 			super(type, CompositeShapeTypeAdapter.class, registry);
 		}
 

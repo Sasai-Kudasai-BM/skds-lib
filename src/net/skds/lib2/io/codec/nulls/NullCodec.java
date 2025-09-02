@@ -1,7 +1,7 @@
 package net.skds.lib2.io.codec.nulls;
 
 import net.skds.lib2.io.codec.AbstractCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 
@@ -10,11 +10,11 @@ import java.lang.reflect.Type;
 
 public class NullCodec extends AbstractCodec<Object> {
 
-	public NullCodec(Type type, UniversalCodecRegistry registry) {
+	public NullCodec(Type type, CodecRegistry registry) {
 		super(type, registry);
 	}
 
-	public NullCodec(UniversalCodecRegistry registry) {
+	public NullCodec(CodecRegistry registry) {
 		super(registry);
 	}
 

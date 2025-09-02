@@ -2,7 +2,7 @@ package net.skds.lib2.io.json;
 
 import net.skds.lib2.io.chars.CharInput;
 import net.skds.lib2.io.codec.UniversalCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.exception.EndOfInputException;
 import net.skds.lib2.io.exception.ParseException;
@@ -26,7 +26,7 @@ public final class JsonReaderImpl implements UniversalReader {
 	private Object cachedValue;
 	private int valueEnd;
 
-	public JsonReaderImpl(CharInput input, UniversalCodecRegistry registry) {
+	public JsonReaderImpl(CharInput input, CodecRegistry registry) {
 		this.input = input;
 		this.skipCodec = registry.getCodec(JsonElement.class);
 	}

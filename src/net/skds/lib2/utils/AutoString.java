@@ -1,6 +1,6 @@
 package net.skds.lib2.utils;
 
-import net.skds.lib2.io.codec.CodecUtils;
+import net.skds.lib2.io.codec.SosisonUtils;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -68,7 +68,7 @@ public interface AutoString {
 			} else if (value == null) {
 				builder.append("null");
 			} else {
-				builder.append(CodecUtils.toJsonCompact(value));
+				builder.append(SosisonUtils.toJsonCompact(value));
 			}
 
 			if (iterator.hasNext()) {

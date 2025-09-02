@@ -7,7 +7,7 @@ public class ReplacedCodec extends AbstractCodec<Object> {
 
 	private final UniversalCodec<Object> codec;
 
-	public ReplacedCodec(Type originalType, Type newType, UniversalCodecRegistry registry) {
+	public ReplacedCodec(Type originalType, Type newType, CodecRegistry registry) {
 		super(originalType, registry);
 		this.codec = this.registry.getCodecIndirect(newType);
 	}

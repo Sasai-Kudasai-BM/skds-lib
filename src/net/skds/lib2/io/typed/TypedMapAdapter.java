@@ -11,7 +11,7 @@ public class TypedMapAdapter<CT> extends AbstractCodec<CT> {
 
 	private final Map<String, ? extends ConfigType<?>> typeMap;
 
-	public TypedMapAdapter(Type type, Map<String, ? extends ConfigType<?>> typeMap, UniversalCodecRegistry registry) {
+	public TypedMapAdapter(Type type, Map<String, ? extends ConfigType<?>> typeMap, CodecRegistry registry) {
 		super(type, registry);
 		this.typeMap = typeMap;
 	}

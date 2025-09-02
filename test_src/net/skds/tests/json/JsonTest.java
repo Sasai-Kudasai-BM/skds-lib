@@ -2,7 +2,7 @@ package net.skds.tests.json;
 
 import lombok.CustomLog;
 import net.skds.lib2.io.codec.*;
-import net.skds.lib2.io.codec.UniversalCodecFactory.MapJsonFactory;
+import net.skds.lib2.io.codec.CodecFactory.MapJsonFactory;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
@@ -65,7 +65,7 @@ public class JsonTest {
 		}
 	}
 
-	public static class JsonTestRegistry extends UniversalCodecRegistry {
+	public static class JsonTestRegistry extends CodecRegistry {
 
 		private static final UniversalCodecOptions OPTIONS;
 
@@ -83,7 +83,7 @@ public class JsonTest {
 		}
 
 		public JsonTestRegistry(UniversalCodecOptions options) {
-			this(options, UniversalCodecFactory.newMapFactory());
+			this(options, CodecFactory.newMapFactory());
 		}
 
 		public JsonTestRegistry(UniversalCodecOptions options, MapJsonFactory map) {
@@ -91,7 +91,7 @@ public class JsonTest {
 			this.map = map;
 		}
 
-		public final void addFactory(Type type, UniversalCodecFactory factory) {
+		public final void addFactory(Type type, CodecFactory factory) {
 			this.map.addFactory(type, factory);
 		}
 

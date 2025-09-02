@@ -4,13 +4,13 @@ import java.io.IOException;
 
 public final class CombinedCodec<T> implements UniversalCodec<T> {
 
-	private final UniversalCodecRegistry registry;
+	private final CodecRegistry registry;
 	private final UniversalSerializer<T> serializer;
 	private final UniversalDeserializer<T> deserializer;
 
 	@SuppressWarnings("unchecked")
 	public CombinedCodec(UniversalSerializer<?> serializer, UniversalDeserializer<?> deserializer) {
-		UniversalCodecRegistry registry = serializer.getRegistry();
+		CodecRegistry registry = serializer.getRegistry();
 		if (deserializer.getRegistry() != registry)
 			throw new IllegalArgumentException("serializer and deserializer registries are not the same");
 		this.registry = registry;
@@ -19,7 +19,7 @@ public final class CombinedCodec<T> implements UniversalCodec<T> {
 	}
 
 	@Override
-	public UniversalCodecRegistry getRegistry() {
+	public CodecRegistry getRegistry() {
 		return registry;
 	}
 

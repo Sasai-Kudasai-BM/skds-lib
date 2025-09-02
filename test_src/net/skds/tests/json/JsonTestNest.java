@@ -2,7 +2,7 @@ package net.skds.tests.json;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.skds.lib2.io.codec.CodecUtils;
+import net.skds.lib2.io.codec.SosisonUtils;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.tests.json.JsonTest.JsonTestRegistry;
@@ -21,13 +21,13 @@ public class JsonTestNest {
 	);
 
 	public static void test(JsonTestRegistry registry) {
-		CodecUtils.addTypedAdapter(JTN.class, ADAPTER_MAP);
+		SosisonUtils.addTypedAdapter(JTN.class, ADAPTER_MAP);
 		ListHolder list = new ListHolder();
 		list.list = new ArrayList<>();
 		JTNParent parent = new JTNParent();
 		parent.child = new JTNParent();
 		list.list.add(parent);
-		System.out.println(CodecUtils.toJson(list));
+		System.out.println(SosisonUtils.toJson(list));
 	}
 
 	private static class ListHolder {

@@ -83,7 +83,7 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		private final UniversalCodec<JsonBoolean> booleanCodec;
 		private final UniversalCodec<JsonNumber> numberCodec;
 
-		public Codec(Type type, UniversalCodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
 
 			this.objectCodec = registry.getCodecIndirect(JsonObject.class);

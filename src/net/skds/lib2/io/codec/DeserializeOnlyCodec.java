@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 
 public abstract class DeserializeOnlyCodec<T> extends AbstractCodec<T> {
 
-	public DeserializeOnlyCodec(Type type, UniversalCodecRegistry registry) {
+	public DeserializeOnlyCodec(Type type, CodecRegistry registry) {
 		super(type, registry);
 	}
 
@@ -16,7 +16,7 @@ public abstract class DeserializeOnlyCodec<T> extends AbstractCodec<T> {
 		throw new UnsupportedDeserializationException(codecType);
 	}
 
-	public static <T> UniversalCodec<T> ofDeserializer(UniversalDeserializer<T> deserializer, Type type, UniversalCodecRegistry registry) {
+	public static <T> UniversalCodec<T> ofDeserializer(UniversalDeserializer<T> deserializer, Type type, CodecRegistry registry) {
 		return new DeserializeOnlyCodec<>(type, registry) {
 
 			@Override

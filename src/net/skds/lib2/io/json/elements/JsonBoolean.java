@@ -1,7 +1,7 @@
 package net.skds.lib2.io.json.elements;
 
 import net.skds.lib2.io.codec.AbstractCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.sosison.SosisonEntryType;
@@ -40,7 +40,7 @@ public record JsonBoolean(boolean value) implements JsonElement {
 
 	public static final class Codec extends AbstractCodec<JsonBoolean> {
 
-		public Codec(Type type, UniversalCodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 

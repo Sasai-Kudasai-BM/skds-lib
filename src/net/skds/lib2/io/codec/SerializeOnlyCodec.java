@@ -7,7 +7,7 @@ import java.lang.reflect.Type;
 
 public abstract class SerializeOnlyCodec<T> extends AbstractCodec<T> {
 
-	public SerializeOnlyCodec(Type type, UniversalCodecRegistry registry) {
+	public SerializeOnlyCodec(Type type, CodecRegistry registry) {
 		super(type, registry);
 	}
 
@@ -16,7 +16,7 @@ public abstract class SerializeOnlyCodec<T> extends AbstractCodec<T> {
 		throw new UnsupportedJsonException(codecType);
 	}
 
-	public static <T> UniversalCodec<T> ofSerializer(UniversalSerializer<T> serializer, Type type, UniversalCodecRegistry registry) {
+	public static <T> UniversalCodec<T> ofSerializer(UniversalSerializer<T> serializer, Type type, CodecRegistry registry) {
 		return new SerializeOnlyCodec<>(type, registry) {
 
 			@Override

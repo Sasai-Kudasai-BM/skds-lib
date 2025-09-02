@@ -59,7 +59,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 
 		private final UniversalCodec<JsonElement> elementCodec;
 
-		public Codec(Type type, UniversalCodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
 			this.elementCodec = registry.getCodecIndirect(JsonElement.class);
 		}

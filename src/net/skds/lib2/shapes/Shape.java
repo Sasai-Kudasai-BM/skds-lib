@@ -1,6 +1,6 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.mat.matrix3.Matrix3;
@@ -58,7 +58,7 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 	}
 
 	final class JCodec extends TypedEnumAdapter<Shape, ShapeType> {
-		public JCodec(Type type, UniversalCodecRegistry registry) {
+		public JCodec(Type type, CodecRegistry registry) {
 			super(type, ShapeType.class, registry);
 		}
 	}

@@ -1,7 +1,7 @@
 package net.skds.tests.json;
 
 import net.skds.lib2.io.codec.AbstractCodec;
-import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
@@ -64,7 +64,7 @@ public class JsonTestCollections {
 
 	private static final class DefaultCodecExtendsCollectionCodec extends AbstractCodec<DefaultCodecExtendsCollection> {
 
-		public DefaultCodecExtendsCollectionCodec(Type type, UniversalCodecRegistry registry) {
+		public DefaultCodecExtendsCollectionCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 			System.out.println("create " + type);
 		}

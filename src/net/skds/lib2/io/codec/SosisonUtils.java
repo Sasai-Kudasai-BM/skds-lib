@@ -21,46 +21,46 @@ import java.util.Map;
 
 @UtilityClass
 @SuppressWarnings("unused")
-public class CodecUtils {
+public class SosisonUtils {
 
 	@Getter
-	private static UniversalCodecRegistry compactRegistry;
+	private static CodecRegistry compactRegistry;
 	@Getter
-	private static UniversalCodecRegistry fancyRegistry;
+	private static CodecRegistry fancyRegistry;
 	private static UniversalCodecOptions options;
-	private static final UniversalCodecFactory.MapJsonFactory userMapCodecFactory = UniversalCodecFactory.newMapFactory();
-	private static UniversalCodecFactory userCodecFactory = userMapCodecFactory;
+	private static final CodecFactory.MapJsonFactory userMapCodecFactory = CodecFactory.newMapFactory();
+	private static CodecFactory userCodecFactory = userMapCodecFactory;
 
 	public static UniversalCodecOptions getOptions() {
 		return options.clone();
 	}
 
 	public static void setOptions(UniversalCodecOptions options) {
-		CodecUtils.options = options.clone();
+		SosisonUtils.options = options.clone();
 		rebuild();
 	}
 
 	private static void rebuild() {
 		UniversalCodecOptions op = options.clone();
-		compactRegistry = new UniversalCodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FLAT), userCodecFactory);
-		fancyRegistry = new UniversalCodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FANCY), userCodecFactory);
+		compactRegistry = new CodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FLAT), userCodecFactory);
+		fancyRegistry = new CodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FANCY), userCodecFactory);
 	}
 
 	public static void addRedirectType(Type original, Type replaced) {
 		addFactory(original, (t, r) -> new ReplacedCodec(t, replaced, r));
 	}
 
-	public static void addFactory(Type type, UniversalCodecFactory factory) {
+	public static void addFactory(Type type, CodecFactory factory) {
 		userMapCodecFactory.addFactory(type, factory);
 		rebuild();
 	}
 
-	public static void addFactoryBefore(UniversalCodecFactory factory) {
+	public static void addFactoryBefore(CodecFactory factory) {
 		userCodecFactory = factory.orElse(userCodecFactory);
 		rebuild();
 	}
 
-	public static void addFactoryAfter(UniversalCodecFactory factory) {
+	public static void addFactoryAfter(CodecFactory factory) {
 		userCodecFactory = userCodecFactory.orElse(factory);
 		rebuild();
 	}

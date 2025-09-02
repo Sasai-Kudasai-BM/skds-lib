@@ -155,8 +155,8 @@ public final class Sphere implements ConvexShape {
 		if (proj > dirL + delta) {
 			return null;
 		}
-		Vec3 point = pp.sub(dir.scale(delta));
+		Vec3 point = pp.addScale(dir, -delta);
 
-		return new Collision(delta, 0, point.sub(center).normalizeScale(radius), point, null, this, null);
+		return new Collision(delta, 0, point.sub(center).normalize(), point, null, this, null);
 	}
 }
