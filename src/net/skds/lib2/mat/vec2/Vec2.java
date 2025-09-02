@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 import java.util.Random;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Vec2.JCodec.class)
+@DefaultCodec(Vec2.JCodec.class)
 public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, Vec2I {
 
 	Vec2 XP = Vec2D.XP;
@@ -1059,17 +1059,17 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		return new Vec2D(this.x(), this.y());
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec2> {
+	static final class JCodec extends AbstractCodec<Vec2> {
 
-		private final JsonSerializer<Vec2I> veci = this.registry.getSerializerIndirect(Vec2I.class);
-		private final JsonSerializer<Vec2> vecd = this.registry.getSerializerIndirect(Vec2D.class);
+		private final UniversalSerializer<Vec2I> veci = this.registry.getSerializerIndirect(Vec2I.class);
+		private final UniversalSerializer<Vec2> vecd = this.registry.getSerializerIndirect(Vec2D.class);
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec2 value, JsonWriter writer) throws IOException {
+		public void write(Vec2 value, UniversalWriter writer) throws IOException {
 			if (value instanceof Vec2I vec) {
 				this.veci.write(vec, writer);
 			} else {

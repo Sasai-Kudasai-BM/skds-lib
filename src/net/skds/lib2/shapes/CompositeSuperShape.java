@@ -2,13 +2,13 @@ package net.skds.lib2.shapes;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
-import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
-import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
+import net.skds.lib2.io.codec.DeserializeBuilder;
+import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
+import net.skds.lib2.io.codec.ToStringSerializer;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-@DefaultJsonCodec(CompositeSuperShape.JCodec.class)
+@DefaultCodec(CompositeSuperShape.JCodec.class)
 public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 
 	private static final ConvexShape[] empty = {};
@@ -30,7 +30,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 	private final Shape[] shapes;
 	private final transient AABB bounding;
 	private final Vec3 center;
-	@DefaultJsonCodec(JsonToStringSerialiser.class)
+	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 
 	CompositeSuperShape(Shape[] shapes, Vec3 center, Object attachment) {
@@ -298,13 +298,13 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 		return false;
 	}
 
-	static final class JCodec extends JsonReflectiveBuilderCodec<CompositeSuperShape> {
+	static final class JCodec extends ReflectiveBuilderCodec<CompositeSuperShape> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, CompositeShapeTypeAdapter.class, registry);
 		}
 
-		private static class CompositeShapeTypeAdapter implements JsonDeserializeBuilder<CompositeSuperShape> {
+		private static class CompositeShapeTypeAdapter implements DeserializeBuilder<CompositeSuperShape> {
 
 			private Shape[] shapes;
 			private Vec3 center = Vec3.ZERO;

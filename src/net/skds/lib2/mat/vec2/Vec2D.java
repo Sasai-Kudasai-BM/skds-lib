@@ -1,17 +1,17 @@
 package net.skds.lib2.mat.vec2;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-@DefaultJsonCodec(Vec2D.JCodec.class)
+@DefaultCodec(Vec2D.JCodec.class)
 public record Vec2D(double x, double y) implements Vec2 {
 
 	public static final Vec2D XP = new Vec2D(1, 0);
@@ -46,14 +46,14 @@ public record Vec2D(double x, double y) implements Vec2 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec2> {
+	static final class JCodec extends AbstractCodec<Vec2> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec2 value, JsonWriter writer) throws IOException {
+		public void write(Vec2 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -65,7 +65,7 @@ public record Vec2D(double x, double y) implements Vec2 {
 		}
 
 		@Override
-		public Vec2D read(JsonReader reader) throws IOException {
+		public Vec2D read(UniversalReader reader) throws IOException {
 			double x = 0;
 			double y = 0;
 
@@ -74,11 +74,11 @@ public record Vec2D(double x, double y) implements Vec2 {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
 					x = reader.readDouble();
 					y = reader.readDouble();
-					reader.endArray();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
@@ -92,9 +92,11 @@ public record Vec2D(double x, double y) implements Vec2 {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> new Vec2D(reader.readDouble());
-				default ->
-						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+				case INT -> new Vec2D(reader.readInt());
+				case FLOAT -> new Vec2D(reader.readFloat());
+				case LONG -> new Vec2D(reader.readLong());
+				case DOUBLE -> new Vec2D(reader.readDouble());
+				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
 
 			return new Vec2D(x, y);

@@ -75,15 +75,15 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		}
 	}
 
-	class Codec extends AbstractJsonCodec<JsonElement> {
+	class Codec extends AbstractCodec<JsonElement> {
 
-		private final JsonCodec<JsonObject> objectCodec;
-		private final JsonCodec<JsonArray> arrayCodec;
-		private final JsonCodec<JsonString> stringCodec;
-		private final JsonCodec<JsonBoolean> booleanCodec;
-		private final JsonCodec<JsonNumber> numberCodec;
+		private final UniversalCodec<JsonObject> objectCodec;
+		private final UniversalCodec<JsonArray> arrayCodec;
+		private final UniversalCodec<JsonString> stringCodec;
+		private final UniversalCodec<JsonBoolean> booleanCodec;
+		private final UniversalCodec<JsonNumber> numberCodec;
 
-		public Codec(Type type, JsonCodecRegistry registry) {
+		public Codec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 
 			this.objectCodec = registry.getCodecIndirect(JsonObject.class);
@@ -94,11 +94,11 @@ public sealed interface JsonElement permits JsonBoolean, JsonElement.JsonNull, J
 		}
 
 		@Override
-		public void write(JsonElement value, JsonWriter writer) throws IOException {
+		public void write(JsonElement value, UniversalWriter writer) throws IOException {
 			switch (value.type()) {
 				case BOOLEAN -> booleanCodec.write((JsonBoolean) value, writer);
 				case OBJECT -> objectCodec.write((JsonObject) value, writer);
-				case ARRAY -> arrayCodec.write((JsonArray) value, writer);
+				case LIST -> arrayCodec.write((JsonArray) value, writer);
 				case NUMBER -> numberCodec.write((JsonNumber) value, writer);
 				case STRING -> stringCodec.write((JsonString) value, writer);
 				case NULL -> writer.writeNull();

@@ -1,11 +1,10 @@
 package net.skds.lib2.mat.matrix2;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.vec2.Vec2;
 import net.skds.lib2.mat.vec2.Vec2D;
@@ -18,7 +17,7 @@ import java.lang.reflect.Type;
 import static net.skds.lib2.io.sosison.SosisonEntryType.NULL;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Matrix2.JCodec.class)
+@DefaultCodec(Matrix2.JCodec.class)
 public sealed interface Matrix2 permits Matrix2D, Matrix2F {
 
 	Matrix2 SINGLE = Matrix2F.SINGLE;
@@ -220,9 +219,9 @@ public sealed interface Matrix2 permits Matrix2D, Matrix2F {
 		return Vec2.normalizedF(m01f(), m11f());
 	}
 
-	final class JCodec extends AbstractJsonCodec<Matrix2> {
+	final class JCodec extends AbstractCodec<Matrix2> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
@@ -237,16 +236,16 @@ public sealed interface Matrix2 permits Matrix2D, Matrix2F {
 		}
 
 		@Override
-		public Matrix2 read(JsonReader reader) throws IOException {
-			if (reader.nextEntryType() == JsonEntryType.NULL) {
+		public Matrix2 read(UniversalReader reader) throws IOException {
+			if (reader.nextEntryType() == NULL) {
 				return Matrix2.SINGLE;
 			}
-			reader.beginArray();
+			reader.beginList();
 			Matrix2D m = new Matrix2D(
 					reader.readDouble(), reader.readDouble(),
 					reader.readDouble(), reader.readDouble()
 			);
-			reader.endArray();
+			reader.endList();
 			return m;
 		}
 	}

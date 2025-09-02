@@ -3,38 +3,29 @@ package net.skds.lib2.io.json;
 import lombok.CustomLog;
 import lombok.Getter;
 import net.skds.lib2.io.chars.CharOutput;
+import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.exception.EndOfOutputException;
-import net.skds.lib2.io.json.codec.JsonCapabilityVersion;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @CustomLog
-public final class FormattedJsonWriterImpl implements JsonWriter {
+public final class FormattedJsonWriterImpl implements UniversalWriter {
 
 	@Getter
 	private final CharOutput output;
 	private final String tab;
-	private final JsonCapabilityVersion cpv;
+	private final JsonCodecOptions.JsonCapabilityVersion cpv;
 
 	private StackEntry stack;
 	private String nextComment;
 
-	public FormattedJsonWriterImpl(CharOutput output, String tab, JsonCapabilityVersion cpv) {
+	public FormattedJsonWriterImpl(CharOutput output, String tab, JsonCodecOptions.JsonCapabilityVersion cpv) {
 		this.output = output;
 		this.tab = tab;
 		this.cpv = cpv;
-	}
-
-	@Override
-	public JsonCapabilityVersion capabilityVersion() {
-		return cpv;
-	}
-
-	@Override
-	public void print() {
-		log.debug(this.output);
 	}
 
 	@Override
@@ -93,18 +84,41 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeInt(long n) throws IOException {
+	public void writeLong(long n) throws IOException {
+		pushValue();
+		output.append(String.valueOf(n));
+	}
+
+	//@Override
+	//public void writeTime(long n) throws IOException {
+	//	writeLong(n);
+	//}
+
+	@Override
+	public void writeInt(int n) throws IOException {
+		pushValue();
+		output.append(String.valueOf(n));
+	}
+
+	@Override
+	public void writeShort(short n) throws IOException {
+		pushValue();
+		output.append(String.valueOf(n));
+	}
+
+	@Override
+	public void writeByte(byte n) throws IOException {
 		pushValue();
 		output.append(String.valueOf(n));
 	}
 
 	@Override
 	public void writeHex(long n) throws IOException {
-		if (cpv == JsonCapabilityVersion.JSON5) {
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
 			pushValue();
 			output.append(StringUtils.hexIntUC(n));
 		} else {
-			writeInt(n);
+			writeLong(n);
 		}
 	}
 
@@ -131,8 +145,8 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeFloatExp(double n) throws IOException {
-		if (cpv == JsonCapabilityVersion.JSON5) {
+	public void writeDoubleExp(double n) throws IOException {
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
 			pushValue();
 			output.append(StringUtils.expFloatUC(n));
 		} else {
@@ -222,7 +236,7 @@ public final class FormattedJsonWriterImpl implements JsonWriter {
 
 	@Override
 	public void writeComment(String comment) {
-		if (cpv != JsonCapabilityVersion.JSON) {
+		if (cpv != JsonCodecOptions.JsonCapabilityVersion.JSON) {
 			nextComment = comment;
 		}
 	}

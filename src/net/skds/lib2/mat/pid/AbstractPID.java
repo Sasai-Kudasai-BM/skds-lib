@@ -3,14 +3,12 @@ package net.skds.lib2.mat.pid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
-import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -44,7 +42,7 @@ public abstract class AbstractPID {
 
 	public abstract void reset();
 
-	@DefaultJsonCodec(JCodec.class)
+	@DefaultCodec(JCodec.class)
 	public record PIDConfig(double p, double i, double d, double min, double max) {
 
 		public PIDConfig(double p, double i, double d) {
@@ -60,14 +58,14 @@ public abstract class AbstractPID {
 		}
 	}
 
-	final static class JCodec extends AbstractJsonCodec<PIDConfig> {
+	final static class JCodec extends AbstractCodec<PIDConfig> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(PIDConfig value, JsonWriter writer) throws IOException {
+		public void write(PIDConfig value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -94,7 +92,7 @@ public abstract class AbstractPID {
 		}
 
 		@Override
-		public PIDConfig read(JsonReader reader) throws IOException {
+		public PIDConfig read(UniversalReader reader) throws IOException {
 			double p = 1;
 			double i = 0;
 			double d = 0;
@@ -107,12 +105,12 @@ public abstract class AbstractPID {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
 					p = reader.readDouble();
 					i = reader.readDouble();
 					d = reader.readDouble();
-					reader.endArray();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
@@ -130,7 +128,7 @@ public abstract class AbstractPID {
 					reader.endObject();
 				}
 				default ->
-						throw new JsonReadException("Unsupported token in PIDConfig \"" + reader.nextEntryType() + "\"");
+						throw new ParseException("Unsupported token in PIDConfig \"" + reader.nextEntryType() + "\"");
 			}
 
 			return new PIDConfig(p, i, d, min, max);

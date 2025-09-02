@@ -1,11 +1,10 @@
 package net.skds.lib2.mat.matrix3;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
@@ -19,7 +18,7 @@ import java.lang.reflect.Type;
 import static net.skds.lib2.io.sosison.SosisonEntryType.NULL;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Matrix3.JCodec.class)
+@DefaultCodec(Matrix3.JCodec.class)
 public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 
 	Matrix3 SINGLE = Matrix3D.SINGLE;
@@ -652,9 +651,9 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		);
 	}
 
-	final class JCodec extends AbstractJsonCodec<Matrix3> {
+	final class JCodec extends AbstractCodec<Matrix3> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
@@ -674,17 +673,17 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		}
 
 		@Override
-		public Matrix3 read(JsonReader reader) throws IOException {
-			if (reader.nextEntryType() == JsonEntryType.NULL) {
+		public Matrix3 read(UniversalReader reader) throws IOException {
+			if (reader.nextEntryType() == NULL) {
 				return Matrix3.SINGLE;
 			}
-			reader.beginArray();
+			reader.beginList();
 			Matrix3D m = new Matrix3D(
 					reader.readDouble(), reader.readDouble(), reader.readDouble(),
 					reader.readDouble(), reader.readDouble(), reader.readDouble(),
 					reader.readDouble(), reader.readDouble(), reader.readDouble()
 			);
-			reader.endArray();
+			reader.endList();
 			return m;
 		}
 	}

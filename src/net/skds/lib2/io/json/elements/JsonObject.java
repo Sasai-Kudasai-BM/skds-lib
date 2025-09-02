@@ -55,6 +55,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 	}
 
+
 	public JsonArray getAsJsonArrayOrNull(String key) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -148,17 +149,17 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return jsonObject;
 	}
 
-	public static class Codec extends AbstractJsonCodec<JsonObject> {
+	public static class Codec extends AbstractCodec<JsonObject> {
 
-		private final JsonCodec<JsonElement> elementCodec;
+		private final UniversalCodec<JsonElement> elementCodec;
 
-		public Codec(Type type, JsonCodecRegistry registry) {
+		public Codec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 			this.elementCodec = registry.getCodecIndirect(JsonElement.class);
 		}
 
 		@Override
-		public void write(JsonObject value, JsonWriter writer) throws IOException {
+		public void write(JsonObject value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -198,7 +199,7 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 					reader.endObject();
 					return jo;
 				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+				default -> throw new ParseException("Unexpected token " + type);
 			}
 		}
 	}

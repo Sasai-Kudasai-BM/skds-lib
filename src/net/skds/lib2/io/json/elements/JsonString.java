@@ -28,14 +28,14 @@ public record JsonString(String value) implements JsonElement {
 		return this;
 	}
 
-	public static final class Codec extends AbstractJsonCodec<JsonString> {
+	public static final class Codec extends AbstractCodec<JsonString> {
 
-		public Codec(Type type, JsonCodecRegistry registry) {
+		public Codec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(JsonString value, JsonWriter writer) throws IOException {
+		public void write(JsonString value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -55,7 +55,7 @@ public record JsonString(String value) implements JsonElement {
 					String s = reader.readString();
 					return new JsonString(s);
 				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+				default -> throw new ParseException("Unexpected token " + type);
 			}
 		}
 	}

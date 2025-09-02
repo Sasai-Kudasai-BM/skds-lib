@@ -79,6 +79,7 @@ public class TCPServer {
 					}
 				}
 			}, serverName + "-input");
+			log.info("TCP Server \"" + serverName + "\" started");
 		} catch (IOException e) {
 			running = false;
 			throw new RuntimeException(e);
@@ -106,11 +107,17 @@ public class TCPServer {
 				@SuppressWarnings("resource") final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
 				log.debug("[Monitor] accepting " + sc.getRemoteAddress());
 
+
 				final Socket socket = sc.socket();
 				sc.configureBlocking(false);
 				socket.setTcpNoDelay(true);
 				socket.setSoTimeout(5000);
-				sc.register(monitirSelector, SelectionKey.OP_READ, connectionFactory.apply(sc));
+				ChannelConnection connection = connectionFactory.apply(sc);
+				if (connection == null) {
+					disconnectKey(key);
+					return;
+				}
+				sc.register(monitirSelector, SelectionKey.OP_READ, connection);
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 				disconnectKey(key);
@@ -142,6 +149,7 @@ public class TCPServer {
 
 	public void disconnectKey(SelectionKey key) {
 		try {
+			log.debug("Disconnecting " + key);
 			key.cancel();
 			key.channel().close();
 		} catch (IOException ex) {

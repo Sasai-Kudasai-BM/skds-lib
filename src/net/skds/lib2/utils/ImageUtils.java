@@ -106,7 +106,11 @@ public class ImageUtils {
 	}
 
 	public static BufferedImage drawPerPixel(int w, int h, PerPixelDraw draw) {
-		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+		return drawPerPixel(w, h, draw, true);
+	}
+	
+	public static BufferedImage drawPerPixel(int w, int h, PerPixelDraw draw, boolean useAlpha) {
+		BufferedImage image = new BufferedImage(w, h, useAlpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
 		IntField2D raster = Objects.requireNonNull(getIntData(image), DATA_BUFFER_INT_ERR);
 		for (int x = 0; x < w; x++) {
 			for (int y = 0; y < h; y++) {

@@ -2,15 +2,16 @@ package net.skds.lib2.io.json;
 
 import lombok.CustomLog;
 import net.skds.lib2.io.chars.CharOutput;
+import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.exception.EndOfOutputException;
-import net.skds.lib2.io.json.codec.JsonCapabilityVersion;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.exception.StackUnderflowException;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @CustomLog
-public final class FlatJsonWriterImpl implements JsonWriter {
+public final class FlatJsonWriterImpl implements UniversalWriter {
 
 	private final CharOutput output;
 
@@ -18,16 +19,6 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 
 	public FlatJsonWriterImpl(CharOutput output) {
 		this.output = output;
-	}
-
-	@Override
-	public JsonCapabilityVersion capabilityVersion() {
-		return JsonCapabilityVersion.JSON;
-	}
-
-	@Override
-	public void print() {
-		log.debug(this.output);
 	}
 
 	@Override
@@ -86,7 +77,19 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 	}
 
 	@Override
-	public void writeInt(long n) throws IOException {
+	public void writeLong(long n) throws IOException {
+		pushValue();
+		output.append(String.valueOf(n));
+	}
+
+	//@Override
+	//public void writeTime(long n) throws IOException {
+	//	pushValue();
+	//	output.append(String.valueOf(n));
+	//}
+
+	@Override
+	public void writeInt(int n) throws IOException {
 		pushValue();
 		output.append(String.valueOf(n));
 	}
@@ -105,7 +108,7 @@ public final class FlatJsonWriterImpl implements JsonWriter {
 
 	@Override
 	public void writeHex(long n) throws IOException {
-		writeInt(n);
+		writeLong(n);
 		//throw new UnsupportedOperationException("Hex ints are not available in " + capabilityVersion());
 	}
 

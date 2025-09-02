@@ -1,44 +1,41 @@
 package net.skds.lib2.io.json;
 
 import net.skds.lib2.io.chars.CharInput;
+import net.skds.lib2.io.codec.UniversalCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.exception.EndOfInputException;
-import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
+import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.json.elements.JsonElement;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
+import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
+import java.util.Base64;
+import java.util.UUID;
 
-public final class JsonReaderImpl implements JsonReader {
+public final class JsonReaderImpl implements UniversalReader {
 
 	private final CharInput input;
-	private final JsonCodec<JsonElement> skipCodec;
+	private final UniversalCodec<JsonElement> skipCodec;
 
 	//private int pos;
-	private JsonEntryType lastReadEntryType;
+	private SosisonEntryType lastReadEntryType;
 	private Object cachedValue;
 	private int valueEnd;
 
-	public JsonReaderImpl(CharInput input, JsonCodecRegistry registry) {
+	public JsonReaderImpl(CharInput input, UniversalCodecRegistry registry) {
 		this.input = input;
 		this.skipCodec = registry.getCodec(JsonElement.class);
 	}
 
-	@Override
-	public void print() {
-		try {
-			System.out.println(input.subString(input.getPos(), input.getPos() + input.available()));
-		} catch (EndOfInputException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
-	private void validateEntryType(JsonEntryType expected) throws IOException {
-		JsonEntryType next = nextEntryType();
+	private void validateEntryType(SosisonEntryType expected) throws IOException {
+		SosisonEntryType next = this.nextEntryType();
 		if (next != expected) {
-			throw new JsonReadException("Expected " + expected + " but next entry is " + next);
+			throw new ParseException("Expected " + expected + " but next entry is " + next);
 		}
 	}
 
@@ -51,7 +48,7 @@ public final class JsonReaderImpl implements JsonReader {
 					switch (n2) {
 						case '/' -> skipSingleLineComment();
 						case '*' -> skipMultiLineComment();
-						default -> throw new JsonReadException("Unexpected slash");
+						default -> throw new ParseException("Unexpected slash");
 					}
 				}
 				case 0x0D, '\t', ' ', '\n' -> input.skip(1);
@@ -105,7 +102,7 @@ public final class JsonReaderImpl implements JsonReader {
 
 	@Override
 	public String readName() throws IOException {
-		validateEntryType(JsonEntryType.STRING);
+		validateEntryType(SosisonEntryType.STRING);
 		char next = input.getCurrentCharAntInc();
 		if (next != '"') {
 			throw unexpectedCharacter(next, input.getPos() - 1);
@@ -122,13 +119,222 @@ public final class JsonReaderImpl implements JsonReader {
 
 	@Override
 	public String readString() throws IOException {
-		validateEntryType(JsonEntryType.STRING);
+		validateEntryType(SosisonEntryType.STRING);
 		char next = input.getCurrentCharAntInc();
 		if (next != '"') {
 			throw unexpectedCharacter(next, input.getPos() - 1);
 		}
 		resetLastEntry();
 		return StringUtils.readQuoted(input, '"');
+	}
+
+	@Override
+	public byte[] readByteArray() throws IOException {
+		switch (nextEntryType()) {
+			case STRING -> {
+				return Base64.getDecoder().decode(readString());
+			}
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.ByteGrowingArray array = new ArrayUtils.ByteGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					if (!et.isNumber()) {
+						throw new ParseException("Non-number member in primitive array");
+					}
+					array.add(readNumber().byteValue());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public short[] readShortArray() throws IOException {
+		switch (nextEntryType()) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.ShortGrowingArray array = new ArrayUtils.ShortGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					if (!et.isNumber()) {
+						throw new ParseException("Non-number member in primitive array");
+					}
+					array.add(readNumber().shortValue());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public char[] readCharArray() throws IOException {
+		switch (nextEntryType()) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.CharGrowingArray array = new ArrayUtils.CharGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					switch (et) {
+						case NULL -> {
+							skipNull();
+							array.add((char) 0);
+						}
+						case STRING -> {
+							String cs = readString();
+							if (cs.length() == 1) {
+								array.add(cs.charAt(0));
+							} else {
+								throw new ParseException("Unexpected char " + cs);
+							}
+						}
+						default -> {
+							if (et.isNumber()) {
+								array.add((char) readInt());
+							} else throw new ParseException("Unexpected token " + et);
+						}
+					}
+					array.add((char) readInt());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public int[] readIntArray() throws IOException {
+		switch (nextEntryType()) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.IntGrowingArray array = new ArrayUtils.IntGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					if (!et.isNumber()) {
+						throw new ParseException("Non-number member in primitive array");
+					}
+					array.add(readInt());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public long[] readLongArray() throws IOException {
+		switch (nextEntryType()) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.LongGrowingArray array = new ArrayUtils.LongGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					if (!et.isNumber()) {
+						throw new ParseException("Non-number member in primitive array");
+					}
+					array.add(readLong());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public float[] readFloatArray() throws IOException {
+		switch (nextEntryType()) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.FloatGrowingArray array = new ArrayUtils.FloatGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					if (!et.isNumber()) {
+						throw new ParseException("Non-number member in primitive array");
+					}
+					array.add(readFloat());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public double[] readDoubleArray() throws IOException {
+		switch (nextEntryType()) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				ArrayUtils.DoubleGrowingArray array = new ArrayUtils.DoubleGrowingArray(16);
+				SosisonEntryType et;
+				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
+					if (!et.isNumber()) {
+						throw new ParseException("Non-number member in primitive array");
+					}
+					array.add(readDouble());
+				}
+				endList();
+				return array.getArray();
+			}
+			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
+		}
+	}
+
+	@Override
+	public UUID readUUID() throws IOException {
+		SosisonEntryType type = this.nextEntryType();
+		switch (type) {
+			case NULL -> {
+				skipNull();
+				return null;
+			}
+			case STRING -> {
+				return UUID.fromString(readString());
+			}
+			case BEGIN_LIST -> {
+				beginList();
+				long m = readLong();
+				long l = readLong();
+				endList();
+				return new UUID(m, l);
+			}
+			default -> throw new ParseException("Unexpected token " + type);
+		}
 	}
 
 	@Override
@@ -142,43 +348,49 @@ public final class JsonReaderImpl implements JsonReader {
 			case STRING -> {
 				return Numbers.parseNumber(readString());
 			}
-			default ->
-					throw new JsonReadException("Expected NUMBER, STRING or NULL but next entry is " + nextEntryType());
+			default -> {
+				if (et.isNumber()) {
+					input.setPos(valueEnd);
+					n = (Number) cachedValue;
+					resetLastEntry();
+				} else
+					throw new ParseException("Expected NUMBER, STRING or NULL but next entry is " + this.nextEntryType());
+			}
 		}
 		return n;
 	}
 
 	@Override
 	public void beginObject() throws IOException {
-		validateEntryType(JsonEntryType.BEGIN_OBJECT);
+		validateEntryType(SosisonEntryType.BEGIN_OBJECT);
 		input.skip(1);
 		resetLastEntry();
 	}
 
 	@Override
 	public void endObject() throws IOException {
-		validateEntryType(JsonEntryType.END_OBJECT);
+		validateEntryType(SosisonEntryType.END_OBJECT);
 		input.skip(1);
 		resetLastEntry();
 	}
 
 	@Override
-	public void beginArray() throws IOException {
-		validateEntryType(JsonEntryType.BEGIN_ARRAY);
+	public void beginList() throws IOException {
+		validateEntryType(SosisonEntryType.BEGIN_LIST);
 		input.skip(1);
 		resetLastEntry();
 	}
 
 	@Override
-	public void endArray() throws IOException {
-		validateEntryType(JsonEntryType.END_ARRAY);
+	public void endList() throws IOException {
+		validateEntryType(SosisonEntryType.END_LIST);
 		input.skip(1);
 		resetLastEntry();
 	}
 
 	@Override
 	public void skipNull() throws IOException {
-		switch (nextEntryType()) {
+		switch (this.nextEntryType()) {
 			case NULL -> {
 				input.setPos(valueEnd);
 				resetLastEntry();
@@ -186,10 +398,10 @@ public final class JsonReaderImpl implements JsonReader {
 			case STRING -> {
 				String s = readString();
 				if (!s.equalsIgnoreCase("null")) {
-					throw new JsonReadException("Expected \"null\" string but got \"" + s + "\"");
+					throw new ParseException("Expected \"null\" string but got \"" + s + "\"");
 				}
 			}
-			default -> throw new JsonReadException("Expected STRING or NULL but next entry is " + nextEntryType());
+			default -> throw new ParseException("Expected STRING or NULL but next entry is " + this.nextEntryType());
 		}
 	}
 
@@ -201,7 +413,7 @@ public final class JsonReaderImpl implements JsonReader {
 	@Override
 	public boolean readBoolean() throws IOException {
 		Boolean b;
-		switch (nextEntryType()) {
+		switch (this.nextEntryType()) {
 			case BOOLEAN -> {
 				input.setPos(valueEnd);
 				b = (Boolean) cachedValue;
@@ -210,20 +422,20 @@ public final class JsonReaderImpl implements JsonReader {
 			case STRING -> {
 				return Boolean.parseBoolean(readString());
 			}
-			default -> throw new JsonReadException("Expected STRING or BOOLEAN but next entry is " + nextEntryType());
+			default -> throw new ParseException("Expected STRING or BOOLEAN but next entry is " + this.nextEntryType());
 		}
 		return b;
 	}
 
 
-	private static JsonReadException unexpectedCharacter(char c, int pos) {
-		return new JsonReadException("Unexpected character \\u" + Integer.toHexString(c).toUpperCase() + " '" + c + "' at " + pos);
+	private static ParseException unexpectedCharacter(char c, int pos) {
+		return new ParseException("Unexpected character \\u" + Integer.toHexString(c).toUpperCase() + " '" + c + "' at " + pos);
 	}
 
 
 	@Override
-	public JsonEntryType nextEntryType() throws IOException {
-		JsonEntryType rt = lastReadEntryType;
+	public SosisonEntryType nextEntryType() throws IOException {
+		SosisonEntryType rt = lastReadEntryType;
 		if (rt != null) {
 			return rt;
 		}
@@ -233,11 +445,11 @@ public final class JsonReaderImpl implements JsonReader {
 			skipWhitespaces();
 			char next = input.getCurrentChar();
 			switch (next) {
-				case '{' -> rt = JsonEntryType.BEGIN_OBJECT;
-				case '}' -> rt = JsonEntryType.END_OBJECT;
-				case '[' -> rt = JsonEntryType.BEGIN_ARRAY;
-				case ']' -> rt = JsonEntryType.END_ARRAY;
-				case '"' -> rt = JsonEntryType.STRING;
+				case '{' -> rt = SosisonEntryType.BEGIN_OBJECT;
+				case '}' -> rt = SosisonEntryType.END_OBJECT;
+				case '[' -> rt = SosisonEntryType.BEGIN_LIST;
+				case ']' -> rt = SosisonEntryType.END_LIST;
+				case '"' -> rt = SosisonEntryType.STRING;
 
 				case ',' -> {
 					if (seenDivider) throw unexpectedCharacter(',', input.getPos());
@@ -249,21 +461,21 @@ public final class JsonReaderImpl implements JsonReader {
 					String value = input.subString(input.getPos(), end);
 
 					switch (value) {
-						case "null" -> rt = JsonEntryType.NULL;
+						case "null" -> rt = SosisonEntryType.NULL;
 						case "false" -> {
 							cachedValue = Boolean.FALSE;
-							rt = JsonEntryType.BOOLEAN;
+							rt = SosisonEntryType.BOOLEAN;
 						}
 						case "true" -> {
 							cachedValue = Boolean.TRUE;
-							rt = JsonEntryType.BOOLEAN;
+							rt = SosisonEntryType.BOOLEAN;
 						}
 						default -> {
 							try {
 								cachedValue = Numbers.parseNumber(value);
-								rt = JsonEntryType.NUMBER;
+								rt = SosisonEntryType.number((Number) cachedValue);
 							} catch (NumberFormatException e) {
-								throw new JsonReadException("Unable to parse number \"" + value + "\"");
+								throw new ParseException("Unable to parse number \"" + value + "\"");
 							}
 						}
 					}
@@ -274,4 +486,5 @@ public final class JsonReaderImpl implements JsonReader {
 		lastReadEntryType = rt;
 		return rt;
 	}
+
 }

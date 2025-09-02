@@ -2,26 +2,26 @@ package net.skds.lib2.io.json.elements;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.skds.lib2.io.json.JsonEntryType;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 
 @AllArgsConstructor
 public enum JsonElementType {
-	BOOLEAN(JsonEntryType.BOOLEAN),
-	OBJECT(JsonEntryType.BEGIN_OBJECT) {
+	BOOLEAN(SosisonEntryType.BOOLEAN),
+	OBJECT(SosisonEntryType.BEGIN_OBJECT) {
 		@Override
 		public boolean isJsonPrimitive() {
 			return false;
 		}
 	},
-	ARRAY(JsonEntryType.BEGIN_ARRAY) {
+	LIST(SosisonEntryType.BEGIN_LIST) {
 		@Override
 		public boolean isJsonPrimitive() {
 			return false;
 		}
 	},
-	NUMBER(JsonEntryType.NUMBER),
-	STRING(JsonEntryType.STRING),
-	NULL(JsonEntryType.NULL) {
+	NUMBER(null),
+	STRING(SosisonEntryType.STRING),
+	NULL(SosisonEntryType.NULL) {
 		@Override
 		public boolean isJsonPrimitive() {
 			return false;
@@ -29,7 +29,7 @@ public enum JsonElementType {
 	};
 
 	@Getter
-	private final JsonEntryType beginEntryType;
+	private final SosisonEntryType beginEntryType;
 
 	public boolean isJsonPrimitive() {
 		return true;

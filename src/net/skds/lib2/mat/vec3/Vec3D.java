@@ -1,10 +1,18 @@
 package net.skds.lib2.mat.vec3;
 
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Vec3D.JCodec.class)
+@DefaultCodec(Vec3D.JCodec.class)
 public record Vec3D(double x, double y, double z) implements Vec3 {
 
 	public static final Vec3D XN = new Vec3D(-1.0D, 0.0D, 0.0D);
@@ -28,22 +36,27 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	public Vec3D up() {
 		return add(0, 1, 0);
 	}
+
 	@Override
 	public Vec3D down() {
 		return add(0, -1, 0);
 	}
+
 	@Override
 	public Vec3D left() {
 		return add(1, 0, 0);
 	}
+
 	@Override
 	public Vec3D right() {
 		return add(-1, 0, 0);
 	}
+
 	@Override
 	public Vec3D forward() {
 		return add(0, 0, 1);
 	}
+
 	@Override
 	public Vec3D backward() {
 		return add(0, 0, -1);
@@ -53,22 +66,27 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	public Vec3D up(int i) {
 		return add(0, i, 0);
 	}
+
 	@Override
 	public Vec3D down(int i) {
 		return add(0, -i, 0);
 	}
+
 	@Override
 	public Vec3D left(int i) {
 		return add(i, 0, 0);
 	}
+
 	@Override
 	public Vec3D right(int i) {
 		return add(-i, 0, 0);
 	}
+
 	@Override
 	public Vec3D forward(int i) {
 		return add(0, 0, i);
 	}
+
 	@Override
 	public Vec3D backward(int i) {
 		return add(0, 0, -i);
@@ -78,22 +96,27 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	public Vec3D up(double i) {
 		return add(0, i, 0);
 	}
+
 	@Override
 	public Vec3D down(double i) {
 		return add(0, -i, 0);
 	}
+
 	@Override
 	public Vec3D left(double i) {
 		return add(i, 0, 0);
 	}
+
 	@Override
 	public Vec3D right(double i) {
 		return add(-i, 0, 0);
 	}
+
 	@Override
 	public Vec3D forward(double i) {
 		return add(0, 0, i);
 	}
+
 	@Override
 	public Vec3D backward(double i) {
 		return add(0, 0, -i);
@@ -119,14 +142,14 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec3> {
+	static final class JCodec extends AbstractCodec<Vec3> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec3 value, JsonWriter writer) throws IOException {
+		public void write(Vec3 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -139,7 +162,7 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 		}
 
 		@Override
-		public Vec3D read(JsonReader reader) throws IOException {
+		public Vec3D read(UniversalReader reader) throws IOException {
 			double x = 0;
 			double y = 0;
 			double z = 0;
@@ -149,12 +172,12 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
 					x = reader.readDouble();
 					y = reader.readDouble();
 					z = reader.readDouble();
-					reader.endArray();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
@@ -169,9 +192,11 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> new Vec3D(reader.readDouble());
-				default ->
-						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+				case INT -> new Vec3D(reader.readInt());
+				case FLOAT -> new Vec3D(reader.readFloat());
+				case LONG -> new Vec3D(reader.readLong());
+				case DOUBLE -> new Vec3D(reader.readDouble());
+				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
 
 			return new Vec3D(x, y, z);

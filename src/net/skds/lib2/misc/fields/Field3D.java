@@ -9,10 +9,7 @@ public interface Field3D {
 	int depth();
 
 	static int index(int x, int y, int z, int width, int height) {
-		return width * height * z + width * y + x;
-	}
-	
-	static int indexFast(int x, int y, int z, int w, int wh) {
-		return wh * z + w * y + x;
+		int wh = width * height;
+		return wh * z + width * y + x;
 	}
 }

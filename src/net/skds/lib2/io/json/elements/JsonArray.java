@@ -1,12 +1,8 @@
 package net.skds.lib2.io.json.elements;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.*;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -17,7 +13,7 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 
 	@Override
 	public JsonElementType type() {
-		return JsonElementType.ARRAY;
+		return JsonElementType.LIST;
 	}
 
 	@Override
@@ -59,17 +55,17 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		return array;
 	}
 
-	public static class Codec extends AbstractJsonCodec<JsonArray> {
+	public static class Codec extends AbstractCodec<JsonArray> {
 
-		private final JsonCodec<JsonElement> elementCodec;
+		private final UniversalCodec<JsonElement> elementCodec;
 
-		public Codec(Type type, JsonCodecRegistry registry) {
+		public Codec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 			this.elementCodec = registry.getCodecIndirect(JsonElement.class);
 		}
 
 		@Override
-		public void write(JsonArray value, JsonWriter writer) throws IOException {
+		public void write(JsonArray value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -85,15 +81,15 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		}
 
 		@Override
-		public JsonArray read(JsonReader reader) throws IOException {
-			JsonEntryType type = reader.nextEntryType();
+		public JsonArray read(UniversalReader reader) throws IOException {
+			SosisonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
 					JsonArray ja = new JsonArray();
 					int i = 0;
 					while (reader.nextEntryType() != SosisonEntryType.END_LIST) {
@@ -106,10 +102,10 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 						ja.add(e);
 						i++;
 					}
-					reader.endArray();
+					reader.endList();
 					return ja;
 				}
-				default -> throw new JsonReadException("Unexpected token " + type);
+				default -> throw new ParseException("Unexpected token " + type);
 			}
 		}
 	}

@@ -1,12 +1,11 @@
 package net.skds.lib2.mat.quat;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.vec3.Vec3;
@@ -18,7 +17,7 @@ import java.lang.reflect.Type;
 
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
-@DefaultJsonCodec(Quat.JCodec.class)
+@DefaultCodec(Quat.JCodec.class)
 @SuppressWarnings("unused")
 public sealed interface Quat permits QuatD, QuatF {
 
@@ -604,13 +603,13 @@ public sealed interface Quat permits QuatD, QuatF {
 		return new QuatF(qmw, qmx, qmy, qmz);
 	}
 
-	final class JCodec extends AbstractJsonCodec<Quat> {
-		public JCodec(Type type, JsonCodecRegistry registry) {
+	final class JCodec extends AbstractCodec<Quat> {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Quat value, JsonWriter writer) throws IOException {
+		public void write(Quat value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;

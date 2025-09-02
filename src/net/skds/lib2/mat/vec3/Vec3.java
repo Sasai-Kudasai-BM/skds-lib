@@ -1,13 +1,8 @@
 package net.skds.lib2.mat.vec3;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonSerializer;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.*;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
 import net.skds.lib2.mat.matrix3.Matrix3;
@@ -26,7 +21,7 @@ import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Vec3.JCodec.class)
+@DefaultCodec(Vec3.JCodec.class)
 public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 
 	Vec3D XN = new Vec3D(-1.0D, 0.0D, 0.0D);
@@ -1661,17 +1656,17 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return new Vec4D(this.x(), this.y(), this.z(), 1);
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec3> {
+	final class JCodec extends AbstractCodec<Vec3> {
 
-		private final JsonSerializer<Vec3I> veci = this.registry.getSerializerIndirect(Vec3I.class);
-		private final JsonSerializer<Vec3> vecd = this.registry.getSerializerIndirect(Vec3D.class);
+		private final UniversalSerializer<Vec3I> veci = this.registry.getSerializerIndirect(Vec3I.class);
+		private final UniversalSerializer<Vec3> vecd = this.registry.getSerializerIndirect(Vec3D.class);
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec3 value, JsonWriter writer) throws IOException {
+		public void write(Vec3 value, UniversalWriter writer) throws IOException {
 			if (value instanceof Vec3I vec) {
 				this.veci.write(vec, writer);
 			} else {

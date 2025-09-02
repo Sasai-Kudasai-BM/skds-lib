@@ -1,7 +1,7 @@
 package net.skds.lib2.shapes2d;
 
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
+import net.skds.lib2.io.codec.ToStringSerializer;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.mat.matrix2.Matrix2;
 import net.skds.lib2.mat.vec2.Vec2;
 import net.skds.lib2.utils.AutoString;
@@ -16,7 +16,7 @@ public class OBR implements ConvexShape2D {
 	private transient Vec2[] vertexCache;
 	private transient AABR boundingCache;
 
-	@DefaultJsonCodec(JsonToStringSerialiser.class)
+	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 
 

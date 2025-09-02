@@ -1,10 +1,10 @@
 package net.skds.lib2.mat.pid;
 
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.UnsupportedJsonCodec;
+import net.skds.lib2.io.codec.UnsupportedCodec;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.mat.vec3.Vec3;
 
-@DefaultJsonCodec(UnsupportedJsonCodec.class)
+@DefaultCodec(UnsupportedCodec.class)
 public final class Vec3PID extends AbstractPID {
 
 	private transient Vec3 lastD = Vec3.ZERO;

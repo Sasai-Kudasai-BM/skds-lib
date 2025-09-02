@@ -1,6 +1,6 @@
 package net.skds.lib2.mat.complex;
 
-public record ComplexFloatArray(float[] array) implements Cloneable {
+public record ComplexFloatArray(float[] array) implements Cloneable { // TODO implement FloatField2D
 
 	public ComplexFloatArray(int size) {
 		this(new float[size * 2]);

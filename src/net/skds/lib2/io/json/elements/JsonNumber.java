@@ -33,16 +33,16 @@ public record JsonNumber(Number value) implements JsonElement {
 		return this;
 	}
 
-	public static final class Codec extends AbstractJsonCodec<JsonNumber> {
+	public static final class Codec extends AbstractCodec<JsonNumber> {
 
-		public Codec(Type type, JsonCodecRegistry registry) {
+		public Codec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(JsonNumber value, JsonWriter writer) throws IOException {
+		public void write(JsonNumber value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeInt(0);
+				writer.writeLong(0);
 				return;
 			}
 			Number n = value.getAsNumber();

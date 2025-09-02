@@ -1,12 +1,12 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.JsonDeserializeBuilder;
-import net.skds.lib2.io.json.codec.JsonReflectiveBuilderCodec;
-import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
-import net.skds.lib2.io.json.codec.typed.ConfigType;
-import net.skds.lib2.io.json.codec.typed.TypedConfig;
+import net.skds.lib2.io.codec.DeserializeBuilder;
+import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
+import net.skds.lib2.io.codec.ToStringSerializer;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.typed.ConfigType;
+import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Direction;
@@ -17,7 +17,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(AABB.JCodec.class)
+@DefaultCodec(AABB.JCodec.class)
 public final class AABB implements ConvexShape, TypedConfig {
 
 	public static final AABB EMPTY = new AABB(0, 0, 0, 0, 0, 0);
@@ -27,7 +27,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 
 	public final double minX, minY, minZ, maxX, maxY, maxZ;
 
-	@DefaultJsonCodec(JsonToStringSerialiser.class)
+	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 
 	private transient Vec3[] pointsCache;
@@ -508,9 +508,6 @@ public final class AABB implements ConvexShape, TypedConfig {
 	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
 
-		double pMin = 0;
-		double pMax = 1;
-
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Direction normal = null;
@@ -542,13 +539,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 				tMax = max;
 			}
 
-			if (tMin > pMin) {
-				pMin = tMin;
-			}
-			if (tMax < pMax) {
-				pMax = tMax;
-			}
-			if (pMax < pMin) {
+			if (tMax < tMin) {
 				return null;
 			}
 
@@ -636,13 +627,13 @@ public final class AABB implements ConvexShape, TypedConfig {
 		return b;
 	}
 
-	static final class JCodec extends JsonReflectiveBuilderCodec<AABB> {
+	static final class JCodec extends ReflectiveBuilderCodec<AABB> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, AABBAdapter.class, registry);
 		}
 
-		private static class AABBAdapter extends AABBBuilder implements JsonDeserializeBuilder<AABB> {
+		private static class AABBAdapter extends AABBBuilder implements DeserializeBuilder<AABB> {
 
 			private String attachment;
 

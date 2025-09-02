@@ -1,7 +1,7 @@
 package net.skds.lib2.shapes2d;
 
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonToStringSerialiser;
+import net.skds.lib2.io.codec.ToStringSerializer;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.mat.matrix2.Matrix2;
 import net.skds.lib2.mat.vec2.Direction2D;
 import net.skds.lib2.mat.vec2.Vec2;
@@ -19,7 +19,7 @@ public final class AABR implements ConvexShape2D {
 
 	public final double minX, minY, maxX, maxY;
 
-	@DefaultJsonCodec(JsonToStringSerialiser.class)
+	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 
 	private transient Vec2[] pointsCache;

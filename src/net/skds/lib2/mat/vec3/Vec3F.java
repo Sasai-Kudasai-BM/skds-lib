@@ -1,10 +1,18 @@
 package net.skds.lib2.mat.vec3;
 
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.sosison.SosisonEntryType;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Vec3F.JCodec.class)
+@DefaultCodec(Vec3F.JCodec.class)
 public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 
 	public static final Vec3F XN = new Vec3F(-1.0F, 0.0F, 0.0F);
@@ -58,22 +66,27 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 	public Vec3F up() {
 		return addF(0, 1, 0);
 	}
+
 	@Override
 	public Vec3F down() {
 		return addF(0, -1, 0);
 	}
+
 	@Override
 	public Vec3F left() {
 		return addF(1, 0, 0);
 	}
+
 	@Override
 	public Vec3F right() {
 		return addF(-1, 0, 0);
 	}
+
 	@Override
 	public Vec3F forward() {
 		return addF(0, 0, 1);
 	}
+
 	@Override
 	public Vec3F backward() {
 		return addF(0, 0, -1);
@@ -83,22 +96,27 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 	public Vec3F up(int i) {
 		return addF(0, i, 0);
 	}
+
 	@Override
 	public Vec3F down(int i) {
 		return addF(0, -i, 0);
 	}
+
 	@Override
 	public Vec3F left(int i) {
 		return addF(i, 0, 0);
 	}
+
 	@Override
 	public Vec3F right(int i) {
 		return addF(-i, 0, 0);
 	}
+
 	@Override
 	public Vec3F forward(int i) {
 		return addF(0, 0, i);
 	}
+
 	@Override
 	public Vec3F backward(int i) {
 		return addF(0, 0, -i);
@@ -106,27 +124,32 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 
 	@Override
 	public Vec3F up(double i) {
-		return addF(0, (float)i, 0);
+		return addF(0, (float) i, 0);
 	}
+
 	@Override
 	public Vec3F down(double i) {
-		return addF(0, (float)-i, 0);
+		return addF(0, (float) -i, 0);
 	}
+
 	@Override
 	public Vec3F left(double i) {
-		return addF((float)i, 0, 0);
+		return addF((float) i, 0, 0);
 	}
+
 	@Override
 	public Vec3F right(double i) {
-		return addF((float)-i, 0, 0);
+		return addF((float) -i, 0, 0);
 	}
+
 	@Override
 	public Vec3F forward(double i) {
-		return addF(0, 0, (float)i);
+		return addF(0, 0, (float) i);
 	}
+
 	@Override
 	public Vec3F backward(double i) {
-		return addF(0, 0, (float)-i);
+		return addF(0, 0, (float) -i);
 	}
 
 	@Override
@@ -149,14 +172,14 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec3> {
+	static final class JCodec extends AbstractCodec<Vec3> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec3 value, JsonWriter writer) throws IOException {
+		public void write(Vec3 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -169,7 +192,7 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 		}
 
 		@Override
-		public Vec3F read(JsonReader reader) throws IOException {
+		public Vec3F read(UniversalReader reader) throws IOException {
 			float x = 0;
 			float y = 0;
 			float z = 0;
@@ -179,12 +202,12 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
 					x = reader.readFloat();
 					y = reader.readFloat();
 					z = reader.readFloat();
-					reader.endArray();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
@@ -199,9 +222,11 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> new Vec3F(reader.readFloat());
-				default ->
-						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+				case INT -> new Vec3F(reader.readInt());
+				case FLOAT -> new Vec3F(reader.readFloat());
+				case LONG -> new Vec3F(reader.readLong());
+				case DOUBLE -> new Vec3F((float) reader.readDouble());
+				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
 
 			return new Vec3F(x, y, z);

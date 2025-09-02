@@ -1,6 +1,6 @@
 package net.skds.lib2.misc.fields;
 
-public class FloatField2DImpl implements FloatField2D {
+final class FloatField2DImpl implements FloatField2D {
 
 	private final int width;
 	private final int height;

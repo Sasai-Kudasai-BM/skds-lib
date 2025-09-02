@@ -1,10 +1,10 @@
 package net.skds.lib2.mat.pid;
 
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.UnsupportedJsonCodec;
+import net.skds.lib2.io.codec.UnsupportedCodec;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.mat.FastMath;
 
-@DefaultJsonCodec(UnsupportedJsonCodec.class)
+@DefaultCodec(UnsupportedCodec.class)
 public final class PID extends AbstractPID {
 
 	private transient double lastD;

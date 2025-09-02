@@ -1,15 +1,15 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.codec.typed.TypedEnumAdapter;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 
 import java.lang.reflect.Type;
 
-@DefaultJsonCodec(Shape.JCodec.class)
+@DefaultCodec(Shape.JCodec.class)
 public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Shape move(Vec3 delta);
@@ -58,7 +58,7 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 	}
 
 	final class JCodec extends TypedEnumAdapter<Shape, ShapeType> {
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, ShapeType.class, registry);
 		}
 	}

@@ -38,14 +38,14 @@ public record JsonBoolean(boolean value) implements JsonElement {
 		return this;
 	}
 
-	public static final class Codec extends AbstractJsonCodec<JsonBoolean> {
+	public static final class Codec extends AbstractCodec<JsonBoolean> {
 
-		public Codec(Type type, JsonCodecRegistry registry) {
+		public Codec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(JsonBoolean value, JsonWriter writer) throws IOException {
+		public void write(JsonBoolean value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeBoolean(false);
 				return;

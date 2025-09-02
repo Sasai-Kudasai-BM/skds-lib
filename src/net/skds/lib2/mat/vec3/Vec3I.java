@@ -1,12 +1,11 @@
 package net.skds.lib2.mat.vec3;
 
-import net.skds.lib2.io.json.JsonEntryType;
-import net.skds.lib2.io.json.JsonReader;
-import net.skds.lib2.io.json.JsonWriter;
-import net.skds.lib2.io.json.annotation.DefaultJsonCodec;
-import net.skds.lib2.io.json.codec.AbstractJsonCodec;
-import net.skds.lib2.io.json.codec.JsonCodecRegistry;
-import net.skds.lib2.io.json.exception.JsonReadException;
+import net.skds.lib2.io.codec.AbstractCodec;
+import net.skds.lib2.io.codec.UniversalCodecRegistry;
+import net.skds.lib2.io.codec.UniversalReader;
+import net.skds.lib2.io.codec.UniversalWriter;
+import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.mat.FastMath;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.lang.reflect.Type;
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
 @SuppressWarnings("unused")
-@DefaultJsonCodec(Vec3I.JCodec.class)
+@DefaultCodec(Vec3I.JCodec.class)
 public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 
 	public static final Vec3I XN = new Vec3I(-1, 0, 0);
@@ -118,22 +117,27 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 	public Vec3I up() {
 		return addI(0, 1, 0);
 	}
+
 	@Override
 	public Vec3I down() {
 		return addI(0, -1, 0);
 	}
+
 	@Override
 	public Vec3I left() {
 		return addI(1, 0, 0);
 	}
+
 	@Override
 	public Vec3I right() {
 		return addI(-1, 0, 0);
 	}
+
 	@Override
 	public Vec3I forward() {
 		return addI(0, 0, 1);
 	}
+
 	@Override
 	public Vec3I backward() {
 		return addI(0, 0, -1);
@@ -143,22 +147,27 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 	public Vec3I up(int i) {
 		return addI(0, i, 0);
 	}
+
 	@Override
 	public Vec3I down(int i) {
 		return addI(0, -i, 0);
 	}
+
 	@Override
 	public Vec3I left(int i) {
 		return addI(i, 0, 0);
 	}
+
 	@Override
 	public Vec3I right(int i) {
 		return addI(-i, 0, 0);
 	}
+
 	@Override
 	public Vec3I forward(int i) {
 		return addI(0, 0, i);
 	}
+
 	@Override
 	public Vec3I backward(int i) {
 		return addI(0, 0, -i);
@@ -168,22 +177,27 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 	public Vec3I up(double i) {
 		return addI(0, FastMath.round(i), 0);
 	}
+
 	@Override
 	public Vec3I down(double i) {
 		return addI(0, FastMath.round(-i), 0);
 	}
+
 	@Override
 	public Vec3I left(double i) {
 		return addI(FastMath.round(i), 0, 0);
 	}
+
 	@Override
 	public Vec3I right(double i) {
 		return addI(FastMath.round(-i), 0, 0);
 	}
+
 	@Override
 	public Vec3I forward(double i) {
 		return addI(0, 0, FastMath.round(i));
 	}
+
 	@Override
 	public Vec3I backward(double i) {
 		return addI(0, 0, FastMath.round(-i));
@@ -218,14 +232,14 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 		return Vec3.compare(this, o);
 	}
 
-	static final class JCodec extends AbstractJsonCodec<Vec3> {
+	static final class JCodec extends AbstractCodec<Vec3> {
 
-		public JCodec(Type type, JsonCodecRegistry registry) {
+		public JCodec(Type type, UniversalCodecRegistry registry) {
 			super(type, registry);
 		}
 
 		@Override
-		public void write(Vec3 value, JsonWriter writer) throws IOException {
+		public void write(Vec3 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -238,7 +252,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 		}
 
 		@Override
-		public Vec3I read(JsonReader reader) throws IOException {
+		public Vec3I read(UniversalReader reader) throws IOException {
 			int x = 0;
 			int y = 0;
 			int z = 0;
@@ -248,12 +262,12 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 					reader.skipNull();
 					return null;
 				}
-				case BEGIN_ARRAY -> {
-					reader.beginArray();
+				case BEGIN_LIST -> {
+					reader.beginList();
 					x = reader.readInt();
 					y = reader.readInt();
 					z = reader.readInt();
-					reader.endArray();
+					reader.endList();
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
@@ -268,9 +282,11 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 					}
 					reader.endObject();
 				}
-				case NUMBER -> new Vec3I(reader.readInt());
-				default ->
-						throw new JsonReadException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
+				case INT -> new Vec3I(reader.readInt());
+				case FLOAT -> new Vec3I((int) reader.readFloat());
+				case LONG -> new Vec3I((int) reader.readLong());
+				case DOUBLE -> new Vec3I((int) reader.readDouble());
+				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
 			}
 
 			return new Vec3I(x, y, z);
