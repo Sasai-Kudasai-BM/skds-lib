@@ -42,10 +42,11 @@ public class SKDSLogger {
 		if (!config.getLevels().contains(level)) return;
 		String message = String.valueOf(msg);
 		long time = System.currentTimeMillis();
-		String thread = null;
-		StackTraceElement stackTop = null;
-		String loggingClass = null;
+		LogWriter.LogWriteable e;
 		if (trace) {
+			String thread = null;
+			StackTraceElement stackTop = null;
+			String loggingClass = null;
 			if (config.isLogThread()) {
 				thread = Thread.currentThread().getName();
 			}
@@ -55,9 +56,6 @@ public class SKDSLogger {
 			if (config.isLogStackTop()) {
 				stackTop = Thread.currentThread().getStackTrace()[depth];
 			}
-		}
-		LogWriter.LogWriteable e;
-		if (ln) {
 			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut, ln);
 		} else {
 			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut);
