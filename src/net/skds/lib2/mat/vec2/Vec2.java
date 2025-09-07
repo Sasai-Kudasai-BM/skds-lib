@@ -7,6 +7,8 @@ import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
 
+import java.awt.*;
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Random;
@@ -124,6 +126,23 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 			case 1 -> roundY();
 			default -> throw new ArrayIndexOutOfBoundsException(i);
 		};
+	}
+
+	static Vec2 of(Point2D p2d) {
+		switch (p2d) {
+			case Point2D.Float p -> {
+				return new Vec2F(p.x, p.y);
+			}
+			case Point p -> {
+				return new Vec2I(p.x, p.y);
+			}
+			case null -> {
+				return null;
+			}
+			default -> {
+				return new Vec2D(p2d.getX(), p2d.getY());
+			}
+		}
 	}
 
 	static Vec2 of(double x, double y) {

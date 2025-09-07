@@ -1,5 +1,7 @@
 package net.skds.lib2.shapes2d;
 
+import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.mat.vec2.Vec2;
 import net.skds.lib2.utils.ColorUtils;
 import net.skds.lib2.utils.Holders;
 
@@ -7,11 +9,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class Demo2D extends JFrame {
 
+	JCheckBox checkBox = new JCheckBox("raytrace");
+
+	Timer t;
+
 	public Demo2D() {
+		setLayout(new FlowLayout());
 		add(new Panel());
+		add(checkBox);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
@@ -19,7 +29,14 @@ public class Demo2D extends JFrame {
 		setLocationRelativeTo(null);
 		setResizable(false);
 		setVisible(true);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				t.stop();
+			}
+		});
 	}
+
 
 	private enum Mode {
 		ADD,
@@ -28,17 +45,30 @@ public class Demo2D extends JFrame {
 		;
 	}
 
-	private static class Panel extends JPanel {
+	private class Panel extends JPanel {
 
 		float lastColor = 0f;
 
 		AABRTree<Color> tree = new AABRTree<>();
 		Point point;
+		Point point2;
 		AABR draw;
 
 		Mode mode = Mode.ADD;
 
 		Panel() {
+			AABR rect = AABR.fromToNormalized(200, 300, 250, 400);
+			var n = tree.put(rect, Color.PINK);
+
+			t = new Timer(20, e -> {
+				float s = 200;
+				float time = (System.currentTimeMillis() % 180_000L) / 20f;
+				Vec2 off = Vec2.of(FastMath.cosDegr(time) * s, FastMath.sinDegr(time) * s);
+				n.move(rect.move(off));
+				repaint();
+			});
+			t.start();
+
 			setPreferredSize(new Dimension(1000, 600));
 			MouseAdapter ma = new MouseAdapter() {
 				@Override
@@ -57,6 +87,7 @@ public class Demo2D extends JFrame {
 				@Override
 				public void mouseDragged(MouseEvent e) {
 					draw = createBox(point, e.getPoint());
+					point2 = e.getPoint();
 					repaint();
 				}
 
@@ -67,7 +98,15 @@ public class Demo2D extends JFrame {
 					} else if (mode == Mode.REMOVE) {
 						AABR aabr = draw;
 						if (aabr != null) {
-							for (var r : tree.getCollisions(aabr)) {
+							if (checkBox.isSelected()) {
+								Vec2 start = Vec2.of(point);
+								Vec2 end = Vec2.of(point2);
+								if (start == null || end == null) return;
+								var cr = tree.rayTrace(start, end, CollisionContext2D.DEFAULT);
+								if (cr != null) {
+									cr.node().remove();
+								}
+							} else for (var r : tree.getCollisions(aabr)) {
 								r.remove();
 							}
 						}
@@ -78,6 +117,7 @@ public class Demo2D extends JFrame {
 			};
 			addMouseListener(ma);
 			addMouseMotionListener(ma);
+			setBackground(Color.LIGHT_GRAY);
 		}
 
 		private void addBox(Point p1, Point p2) {
@@ -117,6 +157,7 @@ public class Demo2D extends JFrame {
 			g2d.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 			tree.foreachNode(n -> {
+				if (n.isLeaf()) return;
 				Color c = n.getValue();
 				if (c == null) {
 					AABR r = n.getBounding();
@@ -138,13 +179,26 @@ public class Demo2D extends JFrame {
 					g2d.setColor(createColor());
 					g.drawRect((int) aabr.minX, (int) aabr.minY, (int) aabr.sizeX(), (int) aabr.sizeY());
 				} else {
-
-					g2d.setColor(Color.BLUE);
-					g.drawRect((int) aabr.minX, (int) aabr.minY, (int) aabr.sizeX(), (int) aabr.sizeY());
-					g2d.setColor(Color.LIGHT_GRAY);
-					for (var r : tree.getCollisions(aabr)) {
-						AABR rr = r.getBounding();
-						g.drawRect((int) rr.minX, (int) rr.minY, (int) rr.sizeX(), (int) rr.sizeY());
+					if (checkBox.isSelected()) {
+						Vec2 start = Vec2.of(point);
+						Vec2 end = Vec2.of(point2);
+						if (start == null || end == null) return;
+						var cr = tree.rayTrace(start, end, CollisionContext2D.DEFAULT);
+						if (cr != null) {
+							g2d.setColor(Color.MAGENTA.darker());
+							g2d.drawLine(start.xi(), start.yi(), cr.point().xi(), cr.point().yi());
+						} else {
+							g2d.setColor(Color.BLACK);
+							g2d.drawLine(start.xi(), start.yi(), end.xi(), end.yi());
+						}
+					} else {
+						g2d.setColor(Color.BLUE);
+						g.drawRect((int) aabr.minX, (int) aabr.minY, (int) aabr.sizeX(), (int) aabr.sizeY());
+						g2d.setColor(Color.LIGHT_GRAY);
+						for (var r : tree.getCollisions(aabr)) {
+							AABR rr = r.getBounding();
+							g.drawRect((int) rr.minX, (int) rr.minY, (int) rr.sizeX(), (int) rr.sizeY());
+						}
 					}
 				}
 			}

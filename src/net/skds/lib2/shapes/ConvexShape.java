@@ -108,21 +108,17 @@ public non-sealed interface ConvexShape extends Shape {
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
-
 		double pMin = 0;
 		double pMax = 1;
-
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Vec3 normal = null;
 		boolean inverse = false;
-
 		Vec3[] norms = getNormals();
 		for (int i = 0; i < norms.length; i++) {
 			Vec3 n = norms[i];
 			double nomLen = -n.dot(from);
 			double denomLen = n.dot(dir);
-
 			double a = (nomLen + getProjectionMax(n)) / denomLen;
 			double b = (nomLen + getProjectionMin(n)) / denomLen;
 			double min;
@@ -134,7 +130,6 @@ public non-sealed interface ConvexShape extends Shape {
 				min = b;
 				max = a;
 			}
-
 			if (min > tMin) {
 				tMin = min;
 				normal = n;
@@ -156,7 +151,52 @@ public non-sealed interface ConvexShape extends Shape {
 		if (inverse) {
 			normal = normal.inverse();
 		}
-		return new Collision(tMin, 0, normal, from.add(dir.normalizeScale(tMin)), null, this, null);
+		if (tMin < 0) {
+			return new Collision(0, -tMin, normal, from, null, this, null);
+		}
+		return new Collision(tMin, 0, normal, from.addScale(dir, tMin), null, this, null);
+	}
+
+	@Override
+	default boolean intersectsRay(Vec3 from, Vec3 to) {
+		Vec3 dir = to.sub(from);
+		double pMin = 0;
+		double pMax = 1;
+		double tMax = Double.POSITIVE_INFINITY;
+		double tMin = Double.NEGATIVE_INFINITY;
+		Vec3[] norms = getNormals();
+		for (int i = 0; i < norms.length; i++) {
+			Vec3 n = norms[i];
+			double nomLen = -n.dot(from);
+			double denomLen = n.dot(dir);
+			double a = (nomLen + getProjectionMax(n)) / denomLen;
+			double b = (nomLen + getProjectionMin(n)) / denomLen;
+			double min;
+			double max;
+			if (a < b) {
+				min = a;
+				max = b;
+			} else {
+				min = b;
+				max = a;
+			}
+			if (min > tMin) {
+				tMin = min;
+			}
+			if (max < tMax) {
+				tMax = max;
+			}
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	Vec3[] getNormals();

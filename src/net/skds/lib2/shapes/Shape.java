@@ -34,6 +34,8 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Collision raytrace(Vec3 from, Vec3 to, CollisionContext context);
 
+	boolean intersectsRay(Vec3 from, Vec3 to);
+
 	default boolean isConvex() {
 		return false;
 	}

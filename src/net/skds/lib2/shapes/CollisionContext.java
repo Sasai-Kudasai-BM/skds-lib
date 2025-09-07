@@ -2,9 +2,10 @@ package net.skds.lib2.shapes;
 
 import net.skds.lib2.mat.vec3.Vec3;
 
-public interface CollisionContext {
+public interface CollisionContext extends CollisionPredicate {
 	int compare(Collision a, Collision b, Vec3 velocity);
 
+	@Override
 	default boolean canCollide(Shape shape) {
 		return true;
 	}

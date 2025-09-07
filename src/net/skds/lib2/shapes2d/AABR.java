@@ -425,17 +425,16 @@ public final class AABR implements ConvexShape2D {
 	@Override
 	public Collision2D raytrace(Vec2 from, Vec2 to, CollisionContext2D context) {
 		Vec2 dir = to.sub(from);
-
+		double pMin = 0;
+		double pMax = 1;
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Direction2D normal = null;
 		boolean inverse = false;
-
 		for (int i = 0; i < Direction2D.Axis.VALUES.length; i++) {
 			Direction2D n = Direction2D.Axis.VALUES[i].getPositiveDirection();
 			double nomLen = -n.dot(from);
 			double denomLen = n.dot(dir);
-
 			double a = (nomLen + getProjectionMax(n)) / denomLen;
 			double b = (nomLen + getProjectionMin(n)) / denomLen;
 			double min;
@@ -447,7 +446,6 @@ public final class AABR implements ConvexShape2D {
 				min = b;
 				max = a;
 			}
-
 			if (min > tMin) {
 				tMin = min;
 				normal = n;
@@ -456,16 +454,64 @@ public final class AABR implements ConvexShape2D {
 			if (max < tMax) {
 				tMax = max;
 			}
-
-			if (tMax < tMin) {
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
 				return null;
 			}
-
 		}
 		if (inverse) {
 			normal = normal.getOpposite();
 		}
-		return new Collision2D(tMin, 0, normal, from.add(dir.normalizeScale(tMin)), normal, this, null);
+		if (tMin < 0) {
+			return new Collision2D(0, -tMin, normal, from, normal, this, null);
+		}
+		return new Collision2D(tMin, 0, normal, from.addScale(dir, tMin), normal, this, null);
+	}
+
+	@Override
+	public boolean intersectsRay(Vec2 from, Vec2 to) {
+		Vec2 dir = to.sub(from);
+		double pMin = 0;
+		double pMax = 1;
+		double tMax = Double.POSITIVE_INFINITY;
+		double tMin = Double.NEGATIVE_INFINITY;
+		for (int i = 0; i < Direction2D.Axis.VALUES.length; i++) {
+			Direction2D n = Direction2D.Axis.VALUES[i].getPositiveDirection();
+			double nomLen = -n.dot(from);
+			double denomLen = n.dot(dir);
+			double a = (nomLen + getProjectionMax(n)) / denomLen;
+			double b = (nomLen + getProjectionMin(n)) / denomLen;
+			double min;
+			double max;
+			if (a < b) {
+				min = a;
+				max = b;
+			} else {
+				min = b;
+				max = a;
+			}
+			if (min > tMin) {
+				tMin = min;
+			}
+			if (max < tMax) {
+				tMax = max;
+			}
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

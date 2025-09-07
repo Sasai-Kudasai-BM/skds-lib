@@ -1,9 +1,9 @@
 package net.skds.lib2.shapes;
 
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
-import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
@@ -507,12 +507,12 @@ public final class AABB implements ConvexShape, TypedConfig {
 	@Override
 	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
 		Vec3 dir = to.sub(from);
-
+		double pMin = 0;
+		double pMax = 1;
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Direction normal = null;
 		boolean inverse = false;
-
 		for (int i = 0; i < Direction.Axis.VALUES.length; i++) {
 			Direction n = Direction.Axis.VALUES[i].getPositiveDirection();
 			double nomLen = -n.dot(from);
@@ -529,7 +529,6 @@ public final class AABB implements ConvexShape, TypedConfig {
 				min = b;
 				max = a;
 			}
-
 			if (min > tMin) {
 				tMin = min;
 				normal = n;
@@ -538,16 +537,64 @@ public final class AABB implements ConvexShape, TypedConfig {
 			if (max < tMax) {
 				tMax = max;
 			}
-
-			if (tMax < tMin) {
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
 				return null;
 			}
-
 		}
 		if (inverse) {
 			normal = normal.getOpposite();
 		}
-		return new Collision(tMin, 0, normal, from.add(dir.normalizeScale(tMin)), normal, this, null);
+		if (tMin < 0) {
+			return new Collision(0, -tMin, normal, from, normal, this, null);
+		}
+		return new Collision(tMin, 0, normal, from.addScale(dir, tMin), normal, this, null);
+	}
+
+	@Override
+	public boolean intersectsRay(Vec3 from, Vec3 to) {
+		Vec3 dir = to.sub(from);
+		double pMin = 0;
+		double pMax = 1;
+		double tMax = Double.POSITIVE_INFINITY;
+		double tMin = Double.NEGATIVE_INFINITY;
+		for (int i = 0; i < Direction.Axis.VALUES.length; i++) {
+			Direction n = Direction.Axis.VALUES[i].getPositiveDirection();
+			double nomLen = -n.dot(from);
+			double denomLen = n.dot(dir);
+			double a = (nomLen + getProjectionMax(n)) / denomLen;
+			double b = (nomLen + getProjectionMin(n)) / denomLen;
+			double min;
+			double max;
+			if (a < b) {
+				min = a;
+				max = b;
+			} else {
+				min = b;
+				max = a;
+			}
+			if (min > tMin) {
+				tMin = min;
+			}
+			if (max < tMax) {
+				tMax = max;
+			}
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -590,8 +637,29 @@ public final class AABB implements ConvexShape, TypedConfig {
 	}
 
 	public boolean isValid() {
-		return Double.isNaN(this.minX) || Double.isNaN(this.minY) || Double.isNaN(this.minZ) || Double.isNaN(this.maxX)
-				|| Double.isNaN(this.maxY) || Double.isNaN(this.maxZ);
+		return !(Double.isNaN(this.minX)
+				|| Double.isNaN(this.minY)
+				|| Double.isNaN(this.minZ)
+				|| Double.isNaN(this.maxX)
+				|| Double.isNaN(this.maxY)
+				|| Double.isNaN(this.maxZ));
+	}
+
+	public boolean isNormal() {
+		return this.minX <= this.maxX && this.minY <= this.maxY && this.minZ <= this.maxZ;
+	}
+
+
+	public boolean fullyContains(AABB other) {
+		return other.minX >= this.minX && other.maxX < this.maxX
+				&& other.minY >= this.minY && other.maxY < this.maxY
+				&& other.minZ >= this.minZ && other.maxZ < this.maxZ;
+	}
+
+	public boolean fullyContains(double minX, double minY, double minZ, double maxX, double maxY, double maxZ) {
+		return minX >= this.minX && maxX < this.maxX
+				&& minY >= this.minY && maxY < this.maxY
+				&& minZ >= this.minZ && maxZ < this.maxZ;
 	}
 
 	@Override

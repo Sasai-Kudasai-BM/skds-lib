@@ -37,6 +37,7 @@ public non-sealed interface CompositeShape2D extends Shape2D {
 
 	@Override
 	default Collision2D raytrace(Vec2 from, Vec2 to, CollisionContext2D context) {
+		if (!getBoundingRect().intersectsRay(from, to)) return null;
 		ConvexShape2D[] shapes = simplify(AABR.fromToNormalized(from, to));
 		if (shapes.length == 0) return null;
 		Collision2D nearest = null;
@@ -49,6 +50,19 @@ public non-sealed interface CompositeShape2D extends Shape2D {
 			}
 		}
 		return nearest;
+	}
+
+	@Override
+	default boolean intersectsRay(Vec2 from, Vec2 to) {
+		if (!getBoundingRect().intersectsRay(from, to)) return false;
+		ConvexShape2D[] shapes = simplify(AABR.fromToNormalized(from, to));
+		if (shapes.length == 0) return false;
+		Vec2 velocity = to.sub(from);
+		for (int i = 0; i < shapes.length; i++) {
+			final ConvexShape2D subShape = shapes[i];
+			if (subShape.intersectsRay(from, to)) return true;
+		}
+		return false;
 	}
 
 	// TODO почему при вызове a и b меняются местами и velocity инверсируется

@@ -135,7 +135,6 @@ public final class Sphere implements ConvexShape {
 
 	@Override
 	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
-
 		double dist = from.distanceTo(center);
 		double dirL = from.distanceTo(to);
 		if (dist <= radius) {
@@ -143,20 +142,31 @@ public final class Sphere implements ConvexShape {
 			return new Collision(0, radius - dist, normal, from, null, this, null);
 		}
 		Vec3 dir = to.sub(from).scale(1 / dirL);
-
 		double proj = center.sub(from).dot(dir);
-		if (proj > dirL + radius) {
-			return null;
-		}
+		if (proj > dirL + radius) return null;
 		Vec3 pp = from.add(dir.scale(proj));
 		double r2 = radius * radius;
 		double k2 = pp.squareDistanceTo(center);
+		if (r2 < k2) return null;
 		double delta = Math.sqrt(r2 - k2);
-		if (proj > dirL + delta) {
-			return null;
-		}
+		if (proj > dirL + delta) return null;
 		Vec3 point = pp.addScale(dir, -delta);
-
 		return new Collision(delta, 0, point.sub(center).normalize(), point, null, this, null);
+	}
+
+	@Override
+	public boolean intersectsRay(Vec3 from, Vec3 to) {
+		double dist = from.distanceTo(center);
+		double dirL = from.distanceTo(to);
+		if (dist <= radius) return true;
+		Vec3 dir = to.sub(from).scale(1 / dirL);
+		double proj = center.sub(from).dot(dir);
+		if (proj > dirL + radius) return false;
+		Vec3 pp = from.add(dir.scale(proj));
+		double r2 = radius * radius;
+		double k2 = pp.squareDistanceTo(center);
+		if (r2 < k2) return false;
+		double delta = Math.sqrt(r2 - k2);
+		return !(proj > dirL + delta);
 	}
 }

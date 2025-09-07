@@ -1,27 +1,27 @@
-package net.skds.lib2.shapes2d;
+package net.skds.lib2.shapes;
 
-import net.skds.lib2.mat.vec2.Direction2D;
-import net.skds.lib2.mat.vec2.Vec2;
+import net.skds.lib2.mat.vec3.Direction;
+import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.utils.Removable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class AABRTree<T> {
+public class AABBTree<T> {
 
-	private static final float COST_RATIO = .5f;
+	private static final float COST_RATIO = .25f;
 
 	private Node root;
 
-	public TreeNode<T> put(AABR bounding, T value) {
+	public TreeNode<T> put(AABB bounding, T value) {
 		checkValid(bounding);
 		Node newNode = new Node(bounding, value);
 		put0(bounding, newNode);
 		return newNode;
 	}
 
-	private void put0(AABR bounding, Node newNode) {
+	private void put0(AABB bounding, Node newNode) {
 		Node root = this.root;
 		if (root == null) {
 			root = new Node(bounding, null);
@@ -38,119 +38,9 @@ public class AABRTree<T> {
 		normalize(newNode.parent);
 	}
 
-	public NodeRayCollision<T> rayTrace(Vec2 start, Vec2 end, CollisionContext2D context) {
+	public Iterable<TreeNode<T>> getCollisions(AABB box) {
 		Node root = this.root;
-		if (root == null || !root.bounding.intersectsRay(start, end)) {
-			return null;
-		}
-		TreeNode<T> nearestNode = null;
-		Collision2D nearest = null;
-		ArrayList<Node> stack = new ArrayList<>();
-		stack.add(root);
-		//int c = 0;
-		do {
-			//c++;
-			Node n = stack.removeLast();
-			Node l = n.left;
-			Node r = n.right;
-			if (l != null && l.bounding.intersectsRay(start, end)) {
-				if (l.isLeaf()) {
-					Node chosen = l;
-					if (context.canCollide(chosen.bounding)) {
-						Collision2D collision = chosen.bounding.raytrace(start, end, context);
-						if (collision != null) {
-							if (nearest == null || collision.compareTo(nearest) < 0) {
-								nearest = collision;
-								nearestNode = chosen;
-							}
-						}
-					}
-				} else {
-					stack.add(l);
-				}
-			}
-
-			if (r != null && r.bounding.intersectsRay(start, end)) {
-				if (r.isLeaf()) {
-					Node chosen = r;
-					if (context.canCollide(chosen.bounding)) {
-						Collision2D collision = chosen.bounding.raytrace(start, end, context);
-						if (collision != null) {
-							if (nearest == null || collision.compareTo(nearest) < 0) {
-								nearest = collision;
-								nearestNode = chosen;
-							}
-						}
-					}
-				} else {
-					stack.add(r);
-				}
-			}
-		} while (!stack.isEmpty());
-		//System.out.println("Iterations " + c);
-		if (nearestNode == null) return null;
-		return new NodeRayCollision<>(nearest.distance(), nearest.depth(), nearest.point(), nearest.normal(), nearest.direction(), nearestNode);
-	}
-
-	/*
-	public NodeCollision<T> collide(Shape2D shape, Vec2 vel, CollisionContext2D context) {
-		Node root = this.root;
-		if (root == null || !root.bounding.c) {
-			return null;
-		}
-		TreeNode<T> nearestNode = null;
-		Collision2D nearest = null;
-		ArrayList<Node> stack = new ArrayList<>();
-		stack.add(root);
-		//int c = 0;
-		do {
-			//c++;
-			Node n = stack.removeLast();
-			Node l = n.left;
-			Node r = n.right;
-			if (l != null && l.bounding.intersectsRay(start, end)) {
-				if (l.isLeaf()) {
-					Node chosen = l;
-					if (context.canCollide(chosen.bounding)) {
-						Collision2D collision = chosen.bounding.raytrace(start, end, context);
-						if (collision != null) {
-							if (nearest == null || collision.compareTo(nearest) < 0) {
-								nearest = collision;
-								nearestNode = chosen;
-							}
-						}
-					}
-				} else {
-					stack.add(l);
-				}
-			}
-
-			if (r != null && r.bounding.intersectsRay(start, end)) {
-				if (r.isLeaf()) {
-					Node chosen = r;
-					if (context.canCollide(chosen.bounding)) {
-						Collision2D collision = chosen.bounding.raytrace(start, end, context);
-						if (collision != null) {
-							if (nearest == null || collision.compareTo(nearest) < 0) {
-								nearest = collision;
-								nearestNode = chosen;
-							}
-						}
-					}
-				} else {
-					stack.add(r);
-				}
-			}
-		} while (!stack.isEmpty());
-		//System.out.println("Iterations " + c);
-		if (nearestNode == null) return null;
-		return new NodeRayCollision<>(nearest.distance(), nearest.depth(), nearest.point(), nearest.normal(), nearest.direction(), nearestNode);
-	}
-	 */
-
-	public Iterable<TreeNode<T>> getCollisions(AABR rect) {
-		Node root = this.root;
-		if (root == null || !root.bounding.intersects(rect)) {
+		if (root == null || !root.bounding.intersects(box)) {
 			return List.of();
 		}
 		ArrayList<TreeNode<T>> intersections = new ArrayList<>();
@@ -162,14 +52,14 @@ public class AABRTree<T> {
 			Node n = stack.removeLast();
 			Node l = n.left;
 			Node r = n.right;
-			if (l != null && l.bounding.intersects(rect)) {
+			if (l != null && l.bounding.intersects(box)) {
 				if (l.isLeaf()) {
 					intersections.add(l);
 				} else {
 					stack.add(l);
 				}
 			}
-			if (r != null && r.bounding.intersects(rect)) {
+			if (r != null && r.bounding.intersects(box)) {
 				if (r.isLeaf()) {
 					intersections.add(r);
 				} else {
@@ -179,6 +69,60 @@ public class AABRTree<T> {
 		} while (!stack.isEmpty());
 		//System.out.println("Iterations " + c);
 		return intersections;
+	}
+
+
+	public NodeRayCollision<T> rayTrace(Vec3 start, Vec3 end, CollisionContext context) {
+		Node root = this.root;
+		if (root == null || !root.bounding.intersectsRay(start, end)) {
+			return null;
+		}
+		TreeNode<T> nearestNode = null;
+		Collision nearest = null;
+		ArrayList<Node> stack = new ArrayList<>();
+		stack.add(root);
+		//int c = 0;
+		do {
+			//c++;
+			Node n = stack.removeLast();
+			Node l = n.left;
+			Node r = n.right;
+			if (l != null && l.bounding.intersectsRay(start, end)) {
+				if (l.isLeaf()) {
+					Node chosen = l;
+					if (context.canCollide(chosen.bounding)) {
+						Collision collision = chosen.bounding.raytrace(start, end, context);
+						if (collision != null) {
+							if (nearest == null || collision.compareTo(nearest) < 0) {
+								nearest = collision;
+								nearestNode = chosen;
+							}
+						}
+					}
+				} else {
+					stack.add(l);
+				}
+			}
+			if (r != null && r.bounding.intersectsRay(start, end)) {
+				if (r.isLeaf()) {
+					Node chosen = r;
+					if (context.canCollide(chosen.bounding)) {
+						Collision collision = chosen.bounding.raytrace(start, end, context);
+						if (collision != null) {
+							if (nearest == null || collision.compareTo(nearest) < 0) {
+								nearest = collision;
+								nearestNode = chosen;
+							}
+						}
+					}
+				} else {
+					stack.add(r);
+				}
+			}
+		} while (!stack.isEmpty());
+		//System.out.println("Iterations " + c);
+		if (nearestNode == null) return null;
+		return new NodeRayCollision<>(nearest.distance(), nearest.depth(), nearest.point(), nearest.normal(), nearest.direction(), nearestNode);
 	}
 
 	private void normalize(Node n) {
@@ -230,20 +174,22 @@ public class AABRTree<T> {
 		}
 	}
 
-	private float unionCost(AABR a, AABR b) {
+	private float unionCost(AABB a, AABB b) {
 		double minX = Math.min(a.minX, b.minX);
 		double minY = Math.min(a.minY, b.minY);
+		double minZ = Math.min(a.minZ, b.minZ);
 		double maxX = Math.max(a.maxX, b.maxX);
 		double maxY = Math.max(a.maxY, b.maxY);
+		double maxZ = Math.max(a.maxZ, b.maxZ);
 
-		return (float) ((maxX - minX) + (maxY - minY));
+		return (float) ((maxX - minX) + (maxY - minY) + (maxZ - minZ));
 	}
 
-	private float cost(AABR a) {
-		return (float) ((a.maxX - a.minX) + (a.maxY - a.minY)) * COST_RATIO;
+	private float cost(AABB a) {
+		return (float) ((a.maxX - a.minX) + (a.maxY - a.minY) + (a.maxZ - a.minZ)) * COST_RATIO;
 	}
 
-	private void checkValid(AABR a) {
+	private void checkValid(AABB a) {
 		if (!a.isValid() || !a.isNormal()) {
 			throw new IllegalArgumentException("Invalid " + a);
 		}
@@ -253,10 +199,10 @@ public class AABRTree<T> {
 		Node parent;
 		Node left;
 		Node right;
-		AABR bounding;
+		AABB bounding;
 		final T value;
 
-		Node(AABR bounding, T value) {
+		Node(AABB bounding, T value) {
 			this.bounding = bounding;
 			this.value = value;
 		}
@@ -266,7 +212,7 @@ public class AABRTree<T> {
 			return value != null;
 		}
 
-		private Node chooseNode(AABR newBounding, Node newNode) {
+		private Node chooseNode(AABB newBounding, Node newNode) {
 			float c0 = cost(this.bounding);
 			float c = unionCost(newBounding, this.bounding) - c0;
 			float cl;
@@ -326,8 +272,10 @@ public class AABRTree<T> {
 
 			double minX;
 			double minY;
+			double minZ;
 			double maxX;
 			double maxY;
+			double maxZ;
 
 			if (right == null) {
 				if (left == null) {
@@ -344,11 +292,13 @@ public class AABRTree<T> {
 						return p;
 					}
 				}
-				AABR rect = left.bounding;
+				AABB rect = left.bounding;
 				minX = rect.minX;
 				minY = rect.minY;
+				minZ = rect.minZ;
 				maxX = rect.maxX;
 				maxY = rect.maxY;
+				maxZ = rect.maxZ;
 			} else if (left == null) {
 				if (p != null) {
 					if (p.right == this) {
@@ -361,31 +311,35 @@ public class AABRTree<T> {
 						return p;
 					}
 				}
-				AABR rect = right.bounding;
+				AABB rect = right.bounding;
 				minX = rect.minX;
 				minY = rect.minY;
+				minZ = rect.minZ;
 				maxX = rect.maxX;
 				maxY = rect.maxY;
+				maxZ = rect.maxZ;
 			} else {
-				AABR a = left.bounding;
-				AABR b = right.bounding;
+				AABB a = left.bounding;
+				AABB b = right.bounding;
 				minX = Math.min(a.minX, b.minX);
 				minY = Math.min(a.minY, b.minY);
+				minZ = Math.min(a.minZ, b.minZ);
 				maxX = Math.max(a.maxX, b.maxX);
 				maxY = Math.max(a.maxY, b.maxY);
+				maxZ = Math.max(a.maxZ, b.maxZ);
 			}
 
-			AABR union = bounding;
+			AABB union = bounding;
 
-			if (!union.fullyContains(minX, minY, maxX, maxY)) {
-				this.bounding = new AABR(minX, minY, maxX, maxY);
+			if (!union.fullyContains(minX, minY, minZ, maxX, maxY, maxZ)) {
+				this.bounding = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 				return p;
 			}
 
 			float up = cost(union);
-			float np = (float) ((maxX - minX) + (maxY - minY));
+			float np = (float) ((maxX - minX) + (maxY - minY) + (maxZ - minZ));
 			if (up > np) {
-				this.bounding = new AABR(minX, minY, maxX, maxY);
+				this.bounding = new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 				return p;
 			}
 			return null;
@@ -405,7 +359,7 @@ public class AABRTree<T> {
 				if (parent.left == null && parent.right == null) {
 					n = parent;
 				} else {
-					AABRTree.this.normalize(parent);
+					AABBTree.this.normalize(parent);
 				}
 			} else {
 				n = this;
@@ -428,18 +382,18 @@ public class AABRTree<T> {
 			if (p.left == null && p.right == null) {
 				return p;
 			} else {
-				AABRTree.this.normalize(p);
+				AABBTree.this.normalize(p);
 				return null;
 			}
 		}
 
 		@Override
-		public AABR getBounding() {
+		public AABB getBounding() {
 			return bounding;
 		}
 
 		@Override
-		public void move(AABR newBounding) { // TODO
+		public void move(AABB newBounding) { // TODO
 			checkValid(newBounding);
 			remove();
 			this.bounding = newBounding;
@@ -458,23 +412,20 @@ public class AABRTree<T> {
 
 		T getValue();
 
-		AABR getBounding();
+		AABB getBounding();
 
-		void move(AABR newBounding);
+		void move(AABB newBounding);
 	}
 
 	public record NodeRayCollision<T>(double distance,
 									  double depth,
-									  Vec2 point,
-									  Vec2 normal,
-									  Direction2D direction,
-									  TreeNode<T> node
+									  Vec3 point,
+									  Vec3 normal,
+									  Direction direction,
+									  AABBTree.TreeNode<T> node
 	) {
-		public Collision2D asStandardCollision() {
-			return new Collision2D(distance, depth, normal, point, direction, node.getBounding(), null);
+		public Collision asStandardCollision() {
+			return new Collision(distance, depth, normal, point, direction, node.getBounding(), null);
 		}
 	}
-
-	//public record NodeCollision<T>(Collision2D collision, TreeNode<T> node) {
-	//}
 }

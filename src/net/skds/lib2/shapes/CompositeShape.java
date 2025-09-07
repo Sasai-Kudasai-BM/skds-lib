@@ -1,10 +1,10 @@
 package net.skds.lib2.shapes;
 
-import java.util.function.Consumer;
-
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
+
+import java.util.function.Consumer;
 
 public non-sealed interface CompositeShape extends Shape {
 
@@ -43,6 +43,7 @@ public non-sealed interface CompositeShape extends Shape {
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
+		if (!getBoundingBox().intersectsRay(from, to)) return null;
 		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
 		if (shapes.length == 0) return null;
 		Collision nearest = null;
@@ -55,6 +56,18 @@ public non-sealed interface CompositeShape extends Shape {
 			}
 		}
 		return nearest;
+	}
+
+	@Override
+	default boolean intersectsRay(Vec3 from, Vec3 to) {
+		if (!getBoundingBox().intersectsRay(from, to)) return false;
+		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
+		if (shapes.length == 0) return false;
+		Vec3 velocity = to.sub(from);
+		for (int i = 0; i < shapes.length; i++) {
+			if (shapes[i].intersectsRay(from, to)) return true;
+		}
+		return false;
 	}
 
 	// TODO почему при вызове a и b меняются местами и velocity инверсируется

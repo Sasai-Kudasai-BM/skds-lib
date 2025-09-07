@@ -3,6 +3,7 @@ package net.skds.lib2.demo;
 import net.skds.lib2.demo.demo3d.Demo3dExample;
 import net.skds.lib2.demo.demo3d.Demo3dFrame;
 import net.skds.lib2.misc.font.demo.FontDemoFrame;
+import net.skds.lib2.shapes2d.Demo2D;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.swing.*;
@@ -50,6 +51,10 @@ public class DemoFrame extends JFrame {
 
 		button = new JButton("Font");
 		button.addActionListener(e -> new FontDemoFrame().setLocationRelativeTo(this));
+		add(button);
+		
+		button = new JButton("2D");
+		button.addActionListener(e -> new Demo2D().setLocationRelativeTo(this));
 		add(button);
 
 		//button = new JButton("floor");

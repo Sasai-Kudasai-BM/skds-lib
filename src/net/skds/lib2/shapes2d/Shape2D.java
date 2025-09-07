@@ -20,6 +20,8 @@ public sealed interface Shape2D permits ConvexShape2D, CompositeShape2D {
 
 	Collision2D raytrace(Vec2 from, Vec2 to, CollisionContext2D context);
 
+	boolean intersectsRay(Vec2 from, Vec2 to);
+
 	default boolean isConvex() {
 		return false;
 	}

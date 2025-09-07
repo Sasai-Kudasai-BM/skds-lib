@@ -101,18 +101,17 @@ public non-sealed interface ConvexShape2D extends Shape2D {
 	@Override
 	default Collision2D raytrace(Vec2 from, Vec2 to, CollisionContext2D context) {
 		Vec2 dir = to.sub(from);
-
+		double pMin = 0;
+		double pMax = 1;
 		double tMax = Double.POSITIVE_INFINITY;
 		double tMin = Double.NEGATIVE_INFINITY;
 		Vec2 normal = null;
 		boolean inverse = false;
-
 		Vec2[] norms = getNormals();
 		for (int i = 0; i < norms.length; i++) {
 			Vec2 n = norms[i];
 			double nomLen = -n.dot(from);
 			double denomLen = n.dot(dir);
-
 			double a = (nomLen + getProjectionMax(n)) / denomLen;
 			double b = (nomLen + getProjectionMin(n)) / denomLen;
 			double min;
@@ -124,7 +123,6 @@ public non-sealed interface ConvexShape2D extends Shape2D {
 				min = b;
 				max = a;
 			}
-
 			if (min > tMin) {
 				tMin = min;
 				normal = n;
@@ -133,16 +131,65 @@ public non-sealed interface ConvexShape2D extends Shape2D {
 			if (max < tMax) {
 				tMax = max;
 			}
-
-			if (tMax < tMin) {
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
 				return null;
 			}
-
 		}
 		if (inverse) {
 			normal = normal.inverse();
 		}
-		return new Collision2D(tMin, 0, normal, from.add(dir.normalizeScale(tMin)), null, this, null);
+		if (tMin < 0) {
+			return new Collision2D(0, -tMin, normal, from, null, this, null);
+		}
+		return new Collision2D(tMin, 0, normal, from.addScale(dir, tMin), null, this, null);
+	}
+
+	@Override
+	default boolean intersectsRay(Vec2 from, Vec2 to) {
+		Vec2 dir = to.sub(from);
+		double pMin = 0;
+		double pMax = 1;
+		double tMax = Double.POSITIVE_INFINITY;
+		double tMin = Double.NEGATIVE_INFINITY;
+		Vec2[] norms = getNormals();
+		for (int i = 0; i < norms.length; i++) {
+			Vec2 n = norms[i];
+			double nomLen = -n.dot(from);
+			double denomLen = n.dot(dir);
+			double a = (nomLen + getProjectionMax(n)) / denomLen;
+			double b = (nomLen + getProjectionMin(n)) / denomLen;
+			double min;
+			double max;
+			if (a < b) {
+				min = a;
+				max = b;
+			} else {
+				min = b;
+				max = a;
+			}
+			if (min > tMin) {
+				tMin = min;
+			}
+			if (max < tMax) {
+				tMax = max;
+			}
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	Vec2[] getNormals();
