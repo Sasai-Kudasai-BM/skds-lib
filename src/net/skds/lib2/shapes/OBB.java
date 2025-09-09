@@ -1,9 +1,9 @@
 package net.skds.lib2.shapes;
 
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
-import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
@@ -159,12 +159,20 @@ public class OBB implements ConvexShape, TypedConfig {
 		if (obj == this) {
 			return true;
 		} else if (obj instanceof OBB obb) {
-			return ConvexShape.equals(this, obb);
+			return equals(obb);
 		} else if (obj instanceof ConvexShape convexShape) {
 			return ConvexShape.equals(this, convexShape);
 		} else {
 			return false;
 		}
+	}
+
+	boolean equals(OBB other) {
+		if (this == other) return true;
+		if (other == null) return false;
+		if (!this.getCenter().equals(other.getCenter())) return false;
+		if (!this.dimensions.equals(other.dimensions)) return false;
+		return Matrix3.equals(this.normals, other.normals);
 	}
 
 	@Override
@@ -204,4 +212,8 @@ public class OBB implements ConvexShape, TypedConfig {
 		return ShapeType.OBB;
 	}
 
+	@Override
+	public int hashCode() {
+		return getBoundingBox().hashCode();
+	}
 }

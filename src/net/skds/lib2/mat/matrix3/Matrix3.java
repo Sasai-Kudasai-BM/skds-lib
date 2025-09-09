@@ -83,11 +83,9 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		} else if ((m1 == null) != (m2 == null)) {
 			return false;
 		} else {
-			return Double.compare(m1.m00(), m2.m00()) == 0 && Double.compare(m1.m01(), m2.m01()) == 0
-					&& Double.compare(m1.m02(), m2.m02()) == 0 && Double.compare(m1.m10(), m2.m10()) == 0
-					&& Double.compare(m1.m11(), m2.m11()) == 0 && Double.compare(m1.m12(), m2.m12()) == 0
-					&& Double.compare(m1.m20(), m2.m20()) == 0 && Double.compare(m1.m21(), m2.m21()) == 0
-					&& Double.compare(m1.m22(), m2.m22()) == 0;
+			return m1.m00() == m2.m00() && m1.m01() == m2.m01() && m1.m02() == m2.m02()
+					&& m1.m10() == m2.m10() && m1.m11() == m2.m11() && m1.m12() == m2.m12()
+					&& m1.m20() == m2.m20() && m1.m21() == m2.m21() && m1.m22() == m2.m22();
 		}
 	}
 

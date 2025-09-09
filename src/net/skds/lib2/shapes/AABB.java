@@ -263,15 +263,19 @@ public final class AABB implements ConvexShape, TypedConfig {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == this) {
-			return true;
-		} else if (o instanceof AABB aabb) {
-			return ConvexShape.equals(this, aabb);
-		} else if (o instanceof ConvexShape convexShape) {
+		if (o == this) return true;
+		if (o instanceof AABB aabb) return equals(aabb);
+		if (o instanceof ConvexShape convexShape) {
 			return ConvexShape.equals(this, convexShape);
-		} else {
-			return false;
 		}
+		return false;
+	}
+
+	public boolean equals(AABB other) {
+		if (other == this) return true;
+		return other.minX == this.minX && other.maxX == this.maxX
+				&& other.minY == this.minY && other.maxY == this.maxY
+				&& other.minZ == this.minZ && other.maxZ == this.maxZ;
 	}
 
 	public int hashCode() {

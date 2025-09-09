@@ -395,6 +395,7 @@ public class AABBTree<T> {
 		@Override
 		public void move(AABB newBounding) { // TODO
 			checkValid(newBounding);
+			if (this.bounding.equals(newBounding)) return;
 			remove();
 			this.bounding = newBounding;
 			put0(newBounding, this);

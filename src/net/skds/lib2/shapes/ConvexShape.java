@@ -242,58 +242,19 @@ public non-sealed interface ConvexShape extends Shape {
 			return false;
 		}
 		if (shape1 instanceof AABB aabb1 && shape2 instanceof AABB aabb2) {
-			return equals(aabb1, aabb2);
+			return aabb1.equals(aabb2);
 		}
 		if (shape1 instanceof OBB obb1 && shape2 instanceof OBB obb2) {
-			return equals(obb1, obb2);
+			return obb1.equals(obb2);
 		}
 		if (shape1 instanceof AABB aabb && shape2 instanceof OBB obb && Matrix3.equals(obb.normals, Matrix3.SINGLE)) {
-			return equals(aabb, obb.getBoundingBox());
+			return aabb.equals(obb.getBoundingBox());
 		}
 		if (shape2 instanceof AABB aabb && shape1 instanceof OBB obb && Matrix3.equals(obb.normals, Matrix3.SINGLE)) {
-			return equals(aabb, obb.getBoundingBox());
+			return aabb.equals(obb.getBoundingBox());
 		}
 		return false;
 	}
 
-	static boolean equals(AABB shape1, AABB shape2) {
-		if (shape1 == shape2) {
-			return true;
-		}
-		if (shape1 == null || shape2 == null) {
-			return false;
-		}
-		if (shape1.minX != shape2.minX) {
-			return false;
-		}
-		if (shape1.minY != shape2.minY) {
-			return false;
-		}
-		if (shape1.minZ != shape2.minZ) {
-			return false;
-		}
-		if (shape1.maxX != shape2.maxX) {
-			return false;
-		}
-		if (shape1.maxY != shape2.maxY) {
-			return false;
-		}
-		return shape1.maxZ == shape2.maxZ;
-	}
 
-	static boolean equals(OBB shape1, OBB shape2) {
-		if (shape1 == shape2) {
-			return true;
-		}
-		if (shape1 == null || shape2 == null) {
-			return false;
-		}
-		if (!shape1.getCenter().equals(shape2.getCenter())) {
-			return false;
-		}
-		if (!shape1.dimensions.equals(shape2.dimensions)) {
-			return false;
-		}
-		return Matrix3.equals(shape1.normals, shape2.normals);
-	}
 }

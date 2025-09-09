@@ -169,4 +169,31 @@ public final class Sphere implements ConvexShape {
 		double delta = Math.sqrt(r2 - k2);
 		return !(proj > dirL + delta);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (obj instanceof Sphere s) {
+			return equals(s);
+		}
+		if (obj instanceof ConvexShape s) {
+			return ConvexShape.equals(this, s);
+		}
+		return false;
+	}
+
+	public boolean equals(Sphere other) {
+		if (this == other) return true;
+		if (other == null) return false;
+		return radius == other.radius && center.equals(other.center);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = center.hashCode();
+		long temp = Double.doubleToLongBits(radius);
+		result = 31 * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
 }
