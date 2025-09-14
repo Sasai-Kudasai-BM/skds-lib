@@ -5,6 +5,7 @@ import net.skds.lib2.mat.VarInt;
 import net.skds.lib2.mat.VarLong;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.utils.SKDSUtils;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -245,7 +246,7 @@ public interface ExtendedDataOutput extends DataOutput {
 					byte[] array = buffer.array();
 					out.write(array, offset, length);
 				} else {
-					final int bufferSize = Math.min(8196, length);
+					final int bufferSize = SKDSUtils.getDefaultBufferSize(length);
 					int rem = length;
 					byte[] array = new byte[bufferSize];
 					do {
@@ -324,7 +325,7 @@ public interface ExtendedDataOutput extends DataOutput {
 					byte[] array = buffer.array();
 					out.write(array, offset, length);
 				} else {
-					final int bufferSize = Math.min(8196, length);
+					final int bufferSize = SKDSUtils.getDefaultBufferSize(length);
 					int rem = length;
 					byte[] array = new byte[bufferSize];
 					do {

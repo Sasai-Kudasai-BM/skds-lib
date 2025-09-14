@@ -8,6 +8,7 @@ import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
 import net.skds.lib2.utils.ArrayUtils;
+import net.skds.lib2.utils.SKDSUtils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -232,7 +233,7 @@ public interface ExtendedDataInput extends DataInput {
 					buffer.get(array);
 					in.readFully(array);
 				} else {
-					final int bufferSize = Math.min(8196, length);
+					final int bufferSize = SKDSUtils.getDefaultBufferSize(length);
 					array = new byte[bufferSize];
 					int rem = length;
 					do {
@@ -333,7 +334,7 @@ public interface ExtendedDataInput extends DataInput {
 						rem -= in.read(array);
 					} while (rem > 0);
 				} else {
-					final int bufferSize = Math.min(8196, length);
+					final int bufferSize = SKDSUtils.getDefaultBufferSize(length);
 					array = new byte[bufferSize];
 					do {
 						buffer.get(array);

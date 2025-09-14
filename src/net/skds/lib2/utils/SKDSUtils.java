@@ -34,11 +34,7 @@ public class SKDSUtils {
 	public static final HexFormat HEX_FORMAT_LC = StringUtils.HEX_FORMAT_LC;
 	public static final OSType OS_TYPE = getOS();
 	public static final String OS_ARC = getOSAndArc();
-
-	private static Supplier<MessageDigest> SHA1 = getMDSafe("SHA1", md -> SHA1 = md);
-	private static Supplier<MessageDigest> SHA256 = getMDSafe("SHA256", md -> SHA256 = md);
-	private static Supplier<MessageDigest> SHA512 = getMDSafe("SHA512", md -> SHA512 = md);
-	private static Supplier<MessageDigest> MD5 = getMDSafe("MD5", md -> MD5 = md);
+	public static int DEFAULT_BUFFER_SIZE = Integer.getInteger("skds.default_buffer_size", 8192);
 
 	public static final Runnable EMPTY_RUNNABLE = () -> {
 	};
@@ -53,11 +49,10 @@ public class SKDSUtils {
 		return null;
 	};
 
-	@Deprecated
-	public static <T> T caught(Throwable t) {
-		t.printStackTrace();
-		return null;
-	}
+	private static Supplier<MessageDigest> SHA1 = getMDSafe("SHA1", md -> SHA1 = md);
+	private static Supplier<MessageDigest> SHA256 = getMDSafe("SHA256", md -> SHA256 = md);
+	private static Supplier<MessageDigest> SHA512 = getMDSafe("SHA512", md -> SHA512 = md);
+	private static Supplier<MessageDigest> MD5 = getMDSafe("MD5", md -> MD5 = md);
 
 	@SuppressWarnings("unchecked")
 	public static <T> Function<Throwable, ? extends T> getCatcher() {
@@ -96,9 +91,27 @@ public class SKDSUtils {
 		};
 	}
 
+	public static int getDefaultBufferSize(long dataLen) {
+		return dataLen < DEFAULT_BUFFER_SIZE ? (int) dataLen : DEFAULT_BUFFER_SIZE;
+	}
+
+	public static int getDefaultBufferSize(int dataLen) {
+		return dataLen < DEFAULT_BUFFER_SIZE ? dataLen : DEFAULT_BUFFER_SIZE;
+	}
+
+	public static byte[] createOptimalSizedBuffer(long dataLen) {
+		if (dataLen == 0) return ArrayUtils.EMPTY_BYTE;
+		return new byte[dataLen < DEFAULT_BUFFER_SIZE ? (int) dataLen : DEFAULT_BUFFER_SIZE];
+	}
+
+	public static byte[] createOptimalSizedBuffer(int dataLen) {
+		if (dataLen == 0) return ArrayUtils.EMPTY_BYTE;
+		return new byte[dataLen < DEFAULT_BUFFER_SIZE ? dataLen : DEFAULT_BUFFER_SIZE];
+	}
+
 	public static String hashFile(File f) {
 		try (InputStream is = new FileInputStream(f)) {
-			byte[] buffer = new byte[1024];
+			byte[] buffer = SKDSUtils.createOptimalSizedBuffer(f.length());
 			MessageDigest md = getSHA1();
 			if (!f.exists()) {
 				return HEX_FORMAT_LC.formatHex(md.digest());
@@ -115,7 +128,7 @@ public class SKDSUtils {
 
 	public static byte[] hashFileArray(File f) {
 		try (InputStream is = new BufferedInputStream(new FileInputStream(f))) {
-			byte[] buffer = new byte[1024];
+			byte[] buffer = SKDSUtils.createOptimalSizedBuffer(f.length());
 			MessageDigest md = getSHA1();
 			if (!f.exists()) {
 				return md.digest();

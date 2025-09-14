@@ -1,13 +1,17 @@
 package net.skds.lib2.io.codec;
 
+import lombok.CustomLog;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import net.skds.lib2.annotations.NotNull;
+import net.skds.lib2.io.codec.annotation.DefaultFile;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.codec.typed.TypedMapAdapter;
 import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.json.elements.JsonElement;
+import net.skds.lib2.reflection.ReflectUtils;
 import net.w3e.lib.utils.FileUtils;
 
 import java.io.File;
@@ -18,7 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Map;
+import java.util.function.Supplier;
 
+@CustomLog
 @UtilityClass
 @SuppressWarnings("unused")
 public class SosisonUtils {
@@ -142,6 +148,35 @@ public class SosisonUtils {
 			e.printStackTrace(System.err);
 		}
 		return null;
+	}
+
+	@NotNull
+	public static <T> T readOrCreateJson(@NotNull Class<T> tClass) {
+		DefaultFile df = tClass.getAnnotation(DefaultFile.class);
+		if (df == null) {
+			throw new IllegalArgumentException("Class \"" + tClass.getSimpleName() + "\" is not annotated with @DefaultFile");
+		}
+		return readOrCreateJson(Path.of(df.value()), tClass);
+	}
+
+	@NotNull
+	public static <T> T readOrCreateJson(@NotNull Path file, @NotNull Class<T> tClass) {
+		try {
+			if (Files.exists(file)) {
+				String text = Files.readString(file);
+				return parseJson(text, tClass);
+			}
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		Supplier<T> constructor = ReflectUtils.getConstructor(tClass);
+		if (constructor != null) {
+			T obj = constructor.get();
+			saveJson(file, obj);
+			return obj;
+		} else {
+			throw new RuntimeException("No constructor for class \"" + tClass.getSimpleName() + "\"");
+		}
 	}
 
 	public static <T> T readJson(InputStream is, Type type) {

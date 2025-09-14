@@ -129,7 +129,7 @@ public class SKDSFiles {
 		try (InputStream is = new FileInputStream(file)) {
 			long readSize = file.length();
 			MemorySegment segment = arena.allocate(readSize);
-			int bufSize = (int) Math.min(readSize, 8196);
+			int bufSize = SKDSUtils.getDefaultBufferSize(readSize);
 			byte[] buffer = new byte[bufSize];
 			for (int r = 0; r < readSize; ) {
 				int read = is.read(buffer);
@@ -149,7 +149,7 @@ public class SKDSFiles {
 		Files.createDirectories(path.getParent());
 		if (segment == null) segment = MemoryAccess.ALL_MEMORY;
 		try (OutputStream os = Files.newOutputStream(path, DEFAULT_OPTIONS)) {
-			int bufSize = (int) Math.min(bytes, 8196);
+			int bufSize = SKDSUtils.getDefaultBufferSize(bytes);
 			byte[] buffer = new byte[bufSize];
 			for (long remaning = bytes; remaning > 0; remaning -= bufSize) {
 				MemorySegment.copy(buffer, 0, segment, ValueLayout.JAVA_BYTE, segment.address() + offset + bytes - remaning, (int) Math.min(remaning, bufSize));
