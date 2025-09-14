@@ -21,6 +21,8 @@ public class SKDSFiles {
 
 	public static final OpenOption[] DEFAULT_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
 
+	public static final Path DESKTOP_PATH;
+
 	public static void collectFileTree(File root, Collection<File> collection) {
 		collectFileTree(root, f -> true, collection);
 	}
@@ -156,6 +158,16 @@ public class SKDSFiles {
 				os.write(buffer);
 			}
 		}
+	}
+
+	static {
+		Path desktopPath = null;
+		try {
+			desktopPath = Path.of(System.getProperty("user.home"), "Desktop");
+		} catch (Throwable t) {
+			t.printStackTrace(System.err);
+		}
+		DESKTOP_PATH = desktopPath;
 	}
 
 }
