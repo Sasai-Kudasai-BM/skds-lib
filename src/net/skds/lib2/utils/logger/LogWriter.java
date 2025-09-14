@@ -133,18 +133,21 @@ class LogWriter extends Thread {
 						StringBuffer sb = entry.buffer;
 						String num = entry.currentSplit == 0 ? "(0)" : "(" + entry.currentSplit + ")";
 						File f = new File(path + num + ".log");
+
+						// TODO check split lag
 						long ss = entry.splitSize;
 						while (f.length() > ss) {
 							f = new File(path + "(" + ++entry.currentSplit + ").log");
 						}
 
-						// TODO clear?
 						if (!sb.isEmpty()) {
 							writeFile(f, sb);
 							sb.setLength(0);
 							if (sb.capacity() > 1024 * 16) {
 								entry.buffer = new StringBuffer(64);
 							}
+						} else {
+							itr.remove();
 						}
 					}
 					if (entries.isEmpty()) synchronized (this) {
