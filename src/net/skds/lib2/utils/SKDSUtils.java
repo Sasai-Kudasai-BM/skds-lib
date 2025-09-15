@@ -34,7 +34,7 @@ public class SKDSUtils {
 	public static final HexFormat HEX_FORMAT_LC = StringUtils.HEX_FORMAT_LC;
 	public static final OSType OS_TYPE = getOS();
 	public static final String OS_ARC = getOSAndArc();
-	public static int DEFAULT_BUFFER_SIZE = Integer.getInteger("skds.default_buffer_size", 8192);
+	public static final int DEFAULT_BUFFER_SIZE = Integer.getInteger("skds.default_buffer_size", 8192);
 
 	public static final Runnable EMPTY_RUNNABLE = () -> {
 	};

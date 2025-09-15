@@ -48,4 +48,16 @@ public abstract class Benchmark {
 	protected abstract void prepare();
 
 	protected abstract void bench();
+
+	public static String runSimple(Runnable r) {
+
+		long t = System.nanoTime();
+		r.run();
+		double resultWarmup = (double) (System.nanoTime() - t) / 1000;
+		t = System.nanoTime();
+		r.run();
+		double resultBench = (double) (System.nanoTime() - t) / 1000;
+
+		return "Warmup: %.1f us\nBench: %.1f us".formatted(resultWarmup, resultBench);
+	}
 }

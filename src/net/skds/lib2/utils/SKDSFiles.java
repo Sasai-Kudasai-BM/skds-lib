@@ -14,6 +14,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 @UtilityClass
@@ -22,6 +23,26 @@ public class SKDSFiles {
 	public static final OpenOption[] DEFAULT_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
 
 	public static final Path DESKTOP_PATH;
+
+	public static void deleteDirectory(File dir) {
+		if (dir.isDirectory()) {
+			for (File file : Objects.requireNonNull(dir.listFiles())) {
+				if (file.isFile()) {
+					if (!file.delete()) {
+						throw new RuntimeException("Unable to file " + file.getAbsolutePath());
+					}
+				} else {
+					deleteDirectory(file);
+					if (!file.delete()) {
+						throw new RuntimeException("Unable to directory " + file.getAbsoluteFile());
+					}
+				}
+			}
+			if (!dir.delete()) {
+				throw new RuntimeException("Unable to directory " + dir.getAbsoluteFile());
+			}
+		}
+	}
 
 	public static void collectFileTree(File root, Collection<File> collection) {
 		collectFileTree(root, f -> true, collection);

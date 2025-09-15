@@ -79,11 +79,16 @@ public class User32 extends AbstractLinkedLibrary {
 	public static User32 getInstance() {
 		User32 inst = instance;
 		if (inst == null) {
-			try {
-				inst = new User32();
-				instance = inst;
-			} catch (Exception e) {
-				e.printStackTrace(System.err);
+			synchronized (User32.class) {
+				inst = instance;
+				if (inst == null) {
+					try {
+						inst = new User32();
+						instance = inst;
+					} catch (Exception e) {
+						e.printStackTrace(System.err);
+					}
+				}
 			}
 		}
 		return inst;

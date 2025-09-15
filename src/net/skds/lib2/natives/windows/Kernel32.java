@@ -36,11 +36,16 @@ public class Kernel32 extends AbstractLinkedLibrary {
 	public static Kernel32 getInstance() {
 		Kernel32 inst = instance;
 		if (inst == null) {
-			try {
-				inst = new Kernel32();
-				instance = inst;
-			} catch (Exception e) {
-				e.printStackTrace(System.err);
+			synchronized (Kernel32.class) {
+				inst = instance;
+				if (inst == null) {
+					try {
+						inst = new Kernel32();
+						instance = inst;
+					} catch (Exception e) {
+						e.printStackTrace(System.err);
+					}
+				}
 			}
 		}
 		return inst;
