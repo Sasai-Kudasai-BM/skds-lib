@@ -1,13 +1,13 @@
 package net.skds.lib2.io.codec;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
 import net.skds.lib2.io.codec.nulls.NullCodec;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.json.NameKeyReader;
 import net.skds.lib2.io.json.elements.*;
 import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.reflection.ReflectUtils;
@@ -202,10 +202,19 @@ public class BuiltinCodecFactory implements CodecFactory {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static UniversalCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement, Type type, CodecRegistry
-			registry) {
+	public static UniversalCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement,
+														 Type type,
+														 CodecRegistry registry
+	) {
 		DefaultCodec defaultCodec = annotatedElement.getAnnotation(DefaultCodec.class);
-		if (defaultCodec == null) return getDefaultEnumTypedCodec(annotatedElement, type, registry);
+		if (defaultCodec == null) {
+			if (!(type instanceof ParameterizedType pt
+					&& pt.getRawType() instanceof Class<?> rtc
+					&& (defaultCodec = rtc.getAnnotation(DefaultCodec.class)) != null
+			)) {
+				return getDefaultEnumTypedCodec(annotatedElement, type, registry);
+			}
+		}
 		Class<?> factoryClass = defaultCodec.value();
 		if (CodecFactory.class.isAssignableFrom(factoryClass)) {
 			Supplier<CodecFactory> constructor = (Supplier<CodecFactory>) ReflectUtils.getConstructor(factoryClass);
@@ -411,8 +420,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 					reader.beginObject();
 					Map<Object, Object> map = constructor.get();
 					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
-						String name = StringUtils.quote(reader.readName()); // TODO
-						UniversalReader r2 = registry.createReader(new StringCharInput(name));
+						String name = reader.readName(); // TODO check
+						UniversalReader r2 = new NameKeyReader(name);
 						Object key = keyDeserializer.read(r2);
 						Object value;
 						try {

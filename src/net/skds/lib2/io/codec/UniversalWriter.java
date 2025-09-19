@@ -1,5 +1,7 @@
 package net.skds.lib2.io.codec;
 
+import net.skds.lib2.utils.StringUtils;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -109,49 +111,97 @@ public interface UniversalWriter {
 
 	void writeFloatExp(float n) throws IOException;
 
-	void writeByteArray(byte[] b) throws IOException;
+	default void writeByteArray(byte[] b) throws IOException {
+		beginList();
+		for (int i = 0; i < b.length; i++) {
+			writeInt(b[i]);
+		}
+		endList();
+	}
+
+	default void writeCharArray(char[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeString(StringUtils.unicodeCharUC(arr[i]));
+		}
+		endList();
+	}
+
+	default void writeShortArray(short[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeInt(arr[i]);
+		}
+		endList();
+	}
+
+	default void writeIntArray(int[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeInt(arr[i]);
+		}
+		endList();
+	}
+
+	default void writeLongArray(long[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeLong(arr[i]);
+		}
+		endList();
+	}
+
+	default void writeFloatArray(float[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeFloat(arr[i]);
+		}
+		endList();
+	}
+
+	default void writeDoubleArray(double[] arr) throws IOException {
+		beginList();
+		for (int i = 0; i < arr.length; i++) {
+			writeDouble(arr[i]);
+		}
+		endList();
+	}
+
 
 	default void writeByteArray(String name, byte[] b) throws IOException {
 		writeName(name);
 		writeByteArray(b);
 	}
 
-	void writeCharArray(char[] arr) throws IOException;
 
 	default void writeCharArray(String name, char[] arr) throws IOException {
 		writeName(name);
 		writeCharArray(arr);
 	}
 
-	void writeShortArray(short[] arr) throws IOException;
 
 	default void writeShortArray(String name, short[] arr) throws IOException {
 		writeName(name);
 		writeShortArray(arr);
 	}
 
-	void writeIntArray(int[] arr) throws IOException;
 
 	default void writeIntArray(String name, int[] arr) throws IOException {
 		writeName(name);
 		writeIntArray(arr);
 	}
 
-	void writeLongArray(long[] arr) throws IOException;
-
 	default void writeLongArray(String name, long[] arr) throws IOException {
 		writeName(name);
 		writeLongArray(arr);
 	}
 
-	void writeFloatArray(float[] arr) throws IOException;
 
 	default void writeFloatArray(String name, float[] arr) throws IOException {
 		writeName(name);
 		writeFloatArray(arr);
 	}
 
-	void writeDoubleArray(double[] arr) throws IOException;
 
 	default void writeDoubleArray(String name, double[] arr) throws IOException {
 		writeName(name);

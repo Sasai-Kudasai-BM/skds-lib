@@ -1,19 +1,17 @@
 package net.skds.lib2.io.json;
 
 import net.skds.lib2.io.chars.CharInput;
-import net.skds.lib2.io.codec.UniversalCodec;
 import net.skds.lib2.io.codec.CodecRegistry;
+import net.skds.lib2.io.codec.UniversalCodec;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.exception.EndOfInputException;
 import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.io.sosison.SosisonEntryType;
-import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.StringUtils;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.UUID;
 
 public final class JsonReaderImpl implements UniversalReader {
@@ -128,192 +126,6 @@ public final class JsonReaderImpl implements UniversalReader {
 		return StringUtils.readQuoted(input, '"');
 	}
 
-	@Override
-	public byte[] readByteArray() throws IOException {
-		switch (nextEntryType()) {
-			case STRING -> {
-				return Base64.getDecoder().decode(readString());
-			}
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.ByteGrowingArray array = new ArrayUtils.ByteGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
-						throw new ParseException("Non-number member in primitive array");
-					}
-					array.add(readNumber().byteValue());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
-
-	@Override
-	public short[] readShortArray() throws IOException {
-		switch (nextEntryType()) {
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.ShortGrowingArray array = new ArrayUtils.ShortGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
-						throw new ParseException("Non-number member in primitive array");
-					}
-					array.add(readNumber().shortValue());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
-
-	@Override
-	public char[] readCharArray() throws IOException {
-		switch (nextEntryType()) {
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.CharGrowingArray array = new ArrayUtils.CharGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					switch (et) {
-						case NULL -> {
-							skipNull();
-							array.add((char) 0);
-						}
-						case STRING -> {
-							String cs = readString();
-							if (cs.length() == 1) {
-								array.add(cs.charAt(0));
-							} else {
-								throw new ParseException("Unexpected char " + cs);
-							}
-						}
-						default -> {
-							if (et.isNumber()) {
-								array.add((char) readInt());
-							} else throw new ParseException("Unexpected token " + et);
-						}
-					}
-					array.add((char) readInt());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
-
-	@Override
-	public int[] readIntArray() throws IOException {
-		switch (nextEntryType()) {
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.IntGrowingArray array = new ArrayUtils.IntGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
-						throw new ParseException("Non-number member in primitive array");
-					}
-					array.add(readInt());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
-
-	@Override
-	public long[] readLongArray() throws IOException {
-		switch (nextEntryType()) {
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.LongGrowingArray array = new ArrayUtils.LongGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
-						throw new ParseException("Non-number member in primitive array");
-					}
-					array.add(readLong());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
-
-	@Override
-	public float[] readFloatArray() throws IOException {
-		switch (nextEntryType()) {
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.FloatGrowingArray array = new ArrayUtils.FloatGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
-						throw new ParseException("Non-number member in primitive array");
-					}
-					array.add(readFloat());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
-
-	@Override
-	public double[] readDoubleArray() throws IOException {
-		switch (nextEntryType()) {
-			case NULL -> {
-				skipNull();
-				return null;
-			}
-			case BEGIN_LIST -> {
-				beginList();
-				ArrayUtils.DoubleGrowingArray array = new ArrayUtils.DoubleGrowingArray(16);
-				SosisonEntryType et;
-				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
-						throw new ParseException("Non-number member in primitive array");
-					}
-					array.add(readDouble());
-				}
-				endList();
-				return array.getArray();
-			}
-			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
-		}
-	}
 
 	@Override
 	public UUID readUUID() throws IOException {

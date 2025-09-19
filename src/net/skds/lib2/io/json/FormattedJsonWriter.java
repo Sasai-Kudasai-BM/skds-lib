@@ -1,6 +1,7 @@
 package net.skds.lib2.io.json;
 
 import lombok.CustomLog;
+import lombok.Getter;
 import net.skds.lib2.io.chars.CharOutput;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.exception.EndOfOutputException;
@@ -11,14 +12,20 @@ import java.io.IOException;
 import java.util.UUID;
 
 @CustomLog
-public final class FlatJsonWriterImpl implements UniversalWriter {
+public final class FormattedJsonWriter implements UniversalWriter {
 
+	@Getter
 	private final CharOutput output;
+	private final String tab;
+	private final JsonCodecOptions.JsonCapabilityVersion cpv;
 
 	private StackEntry stack;
+	private String nextComment;
 
-	public FlatJsonWriterImpl(CharOutput output) {
+	public FormattedJsonWriter(CharOutput output, String tab, JsonCodecOptions.JsonCapabilityVersion cpv) {
 		this.output = output;
+		this.tab = tab;
+		this.cpv = cpv;
 	}
 
 	@Override
@@ -49,7 +56,7 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 	public void writeName(String name) throws IOException {
 		pushName();
 		StringUtils.writeQuoted(output, name, '"');
-		output.append(':');
+		output.append(": ");
 	}
 
 	@Override
@@ -84,8 +91,7 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 
 	//@Override
 	//public void writeTime(long n) throws IOException {
-	//	pushValue();
-	//	output.append(String.valueOf(n));
+	//	writeLong(n);
 	//}
 
 	@Override
@@ -108,14 +114,22 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 
 	@Override
 	public void writeHex(long n) throws IOException {
-		writeLong(n);
-		//throw new UnsupportedOperationException("Hex ints are not available in " + capabilityVersion());
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.hexIntUC(n));
+		} else {
+			writeLong(n);
+		}
 	}
 
 	@Override
 	public void writeHex(int n) throws IOException {
-		writeInt(n);
-		//throw new UnsupportedOperationException("Hex ints are not available in " + capabilityVersion());
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.hexIntUC(n));
+		} else {
+			writeInt(n);
+		}
 	}
 
 	@Override
@@ -132,99 +146,80 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 
 	@Override
 	public void writeDoubleExp(double n) throws IOException {
-		writeDouble(n);
-		//throw new UnsupportedOperationException("Exponents are not available in " + capabilityVersion());
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.expFloatUC(n));
+		} else {
+			writeDouble(n);
+		}
 	}
 
 	@Override
 	public void writeFloatExp(float n) throws IOException {
-		writeFloat(n);
-		//throw new UnsupportedOperationException("Exponents are not available in " + capabilityVersion());
-	}
-
-	@Override
-	public void writeByteArray(byte[] b) throws IOException {
-		beginList();
-		for (int i = 0; i < b.length; i++) {
-			writeInt(b[i]);
+		if (cpv == JsonCodecOptions.JsonCapabilityVersion.JSON5) {
+			pushValue();
+			output.append(StringUtils.expFloatUC(n));
+		} else {
+			writeFloat(n);
 		}
-		endList();
-	}
-
-	@Override
-	public void writeCharArray(char[] arr) throws IOException {
-		beginList();
-		for (int i = 0; i < arr.length; i++) {
-			writeString(StringUtils.unicodeCharUC(arr[i]));
-		}
-		endList();
-	}
-
-	@Override
-	public void writeShortArray(short[] arr) throws IOException {
-		beginList();
-		for (int i = 0; i < arr.length; i++) {
-			writeInt(arr[i]);
-		}
-		endList();
-	}
-
-	@Override
-	public void writeIntArray(int[] arr) throws IOException {
-		beginList();
-		for (int i = 0; i < arr.length; i++) {
-			writeInt(arr[i]);
-		}
-		endList();
-	}
-
-	@Override
-	public void writeLongArray(long[] arr) throws IOException {
-		beginList();
-		for (int i = 0; i < arr.length; i++) {
-			writeLong(arr[i]);
-		}
-		endList();
-	}
-
-	@Override
-	public void writeFloatArray(float[] arr) throws IOException {
-		beginList();
-		for (int i = 0; i < arr.length; i++) {
-			writeFloat(arr[i]);
-		}
-		endList();
-	}
-
-	@Override
-	public void writeDoubleArray(double[] arr) throws IOException {
-		beginList();
-		for (int i = 0; i < arr.length; i++) {
-			writeDouble(arr[i]);
-		}
-		endList();
 	}
 
 	@Override
 	public void writeUUID(UUID uuid) throws IOException {
+		if (uuid == null) {
+			writeNull();
+			return;
+		}
 		writeString(uuid.toString());
 	}
 
 	@Override
 	public void writeComment(String comment) {
-		//throw new UnsupportedOperationException("Comments are not available in " + capabilityVersion());
+		if (cpv != JsonCodecOptions.JsonCapabilityVersion.JSON) {
+			nextComment = comment;
+		}
 	}
 
 	@Override
-	public void lineBreakEnable(boolean separate) throws EndOfOutputException {
+	public void lineBreakEnable(boolean lineBreak) {
+		StackEntry e = this.stack;
+		if (e == null) throw new StackUnderflowException();
+		e.lineBreak = lineBreak;
+	}
+
+	private void writeTabs(StackEntry e) throws EndOfOutputException {
+		if (tab != null && !tab.isEmpty()) {
+			while (e != null) {
+				if (e.lineBreak) {
+					output.append(tab);
+				}
+				e = e.parent;
+			}
+		}
 	}
 
 	private void pushName() throws IOException {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
 		if (!e.isList) {
+			String nc = nextComment;
+			if (nc != null) {
+				e.lineBreak = true;
+			}
+			boolean lb = e.lineBreak;
 			if (e.n++ > 0) {
-				output.append(',');
+				if (lb) {
+					output.append(',');
+				} else {
+					output.append(", ");
+				}
+			}
+			if (lb) {
+				output.append('\n');
+				writeTabs(e);
+			}
+			if (nc != null) {
+				writeComment0(nc);
 			}
 		}
 	}
@@ -237,10 +232,49 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 		}
 		if (e == null) throw new StackUnderflowException();
 		if (e.isList) {
+			String nc = nextComment;
+			if (nc != null) {
+				e.lineBreak = true;
+			}
+			boolean lb = e.lineBreak;
 			if (e.n++ > 0) {
-				output.append(',');
+				if (lb) {
+					output.append(',');
+				} else {
+					output.append(", ");
+				}
+			}
+			if (lb) {
+				output.append('\n');
+				writeTabs(e);
+			}
+			if (nc != null) {
+				writeComment0(nc);
 			}
 		}
+	}
+
+	private void writeComment0(String nc) throws IOException {
+		//output.append('\n');
+		if (nc.indexOf('\n') == -1) {
+			output.append("// ");
+			output.append(nc);
+			output.append('\n');
+		} else {
+			String[] com = nc.split("\n");
+			if (com.length > 0) {
+				output.append("/* ");
+				output.append(com[0]);
+				for (int i = 1; i < com.length; i++) {
+					output.append('\n');
+					writeTabs(stack);
+					output.append(com[i]);
+				}
+				output.append(" */\n");
+			}
+		}
+		writeTabs(stack);
+		nextComment = null;
 	}
 
 	private void pushStack(boolean isList) throws IOException {
@@ -248,9 +282,13 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 		this.stack = new StackEntry(this.stack, isList);
 	}
 
-	private void popStack() {
+	private void popStack() throws EndOfOutputException {
 		StackEntry e = this.stack;
 		if (e == null) throw new StackUnderflowException();
+		if (e.lineBreak) {
+			output.append('\n');
+			writeTabs(e.parent);
+		}
 		this.stack = e.parent;
 	}
 
@@ -258,6 +296,7 @@ public final class FlatJsonWriterImpl implements UniversalWriter {
 		int n;
 		final StackEntry parent;
 		final boolean isList;
+		boolean lineBreak;
 
 		private StackEntry(StackEntry parent, boolean isList) {
 			this.parent = parent;

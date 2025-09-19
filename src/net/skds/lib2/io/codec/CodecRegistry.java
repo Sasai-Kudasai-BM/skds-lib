@@ -4,8 +4,8 @@ import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.io.chars.CharInput;
 import net.skds.lib2.io.chars.CharOutput;
-import net.skds.lib2.io.json.FlatJsonWriterImpl;
-import net.skds.lib2.io.json.FormattedJsonWriterImpl;
+import net.skds.lib2.io.json.FlatJsonWriter;
+import net.skds.lib2.io.json.FormattedJsonWriter;
 import net.skds.lib2.io.json.JsonReaderImpl;
 import net.skds.lib2.io.json.WrappedJsonReaderImpl;
 import net.skds.lib2.io.json.elements.JsonElement;
@@ -72,10 +72,10 @@ public class CodecRegistry {
 
 	public UniversalWriter createJsonWriter(CharOutput output) {
 		if (options.getDecorationType() == FANCY) {
-			return new FormattedJsonWriterImpl(output, options.getTabulation(), options.getCapabilityVersion());
+			return new FormattedJsonWriter(output, options.getTabulation(), options.getCapabilityVersion());
 
 		}
-		return new FlatJsonWriterImpl(output);
+		return new FlatJsonWriter(output);
 	}
 
 	public UniversalWriter createSosisonWriter(ExtendedDataOutput output) {
