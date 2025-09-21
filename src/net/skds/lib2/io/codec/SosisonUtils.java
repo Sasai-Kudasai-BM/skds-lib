@@ -150,6 +150,14 @@ public class SosisonUtils {
 		return null;
 	}
 
+	public static <T> T readJson(@NotNull Class<T> tClass) {
+		DefaultFile df = tClass.getAnnotation(DefaultFile.class);
+		if (df == null) {
+			throw new IllegalArgumentException("Class \"" + tClass.getSimpleName() + "\" is not annotated with @DefaultFile");
+		}
+		return readJson(Path.of(df.value()), tClass);
+	}
+
 	@NotNull
 	public static <T> T readOrCreateJson(@NotNull Class<T> tClass) {
 		DefaultFile df = tClass.getAnnotation(DefaultFile.class);
