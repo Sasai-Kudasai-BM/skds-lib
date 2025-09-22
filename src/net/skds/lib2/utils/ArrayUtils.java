@@ -18,6 +18,11 @@ public class ArrayUtils {
 	public static final double[] EMPTY_DOUBLE = {};
 	public static final Object[] EMPTY_OBJECT = {};
 
+	@SuppressWarnings("unchecked")
+	public static <T> T[] emptyArray() {
+		return (T[]) EMPTY_OBJECT;
+	}
+
 	public static void movePart(Object array, int from, int to, int count) {
 		System.arraycopy(array, from, array, to, count);
 	}
