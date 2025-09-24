@@ -13,8 +13,8 @@ class AbstractEnumMap<E extends Enum<E>> {
 		this.keyUniverse = enumType.getEnumConstants();
 	}
 
-	public int universeSize() {
-		return keyUniverse.length;
+	public final int universeSize() {
+		return this.keyUniverse.length;
 	}
 
 }
