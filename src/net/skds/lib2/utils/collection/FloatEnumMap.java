@@ -1,19 +1,19 @@
 package net.skds.lib2.utils.collection;
 
-import net.skds.lib2.utils.function.LongBiConsumer;
+import net.skds.lib2.utils.function.FloatBiConsumer;
 
 import java.util.Arrays;
 
-public class LongEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implements Cloneable {
+public class FloatEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implements Cloneable {
 
-	private final long[] values;
+	private final float[] values;
 
-	public LongEnumMap(Class<E> clazz) {
+	public FloatEnumMap(Class<E> clazz) {
 		super(clazz);
-		this.values = new long[universeSize()];
+		this.values = new float[universeSize()];
 	}
 
-	public LongEnumMap(Class<E> clazz, long[] values) {
+	public FloatEnumMap(Class<E> clazz, float[] values) {
 		super(clazz);
 		if (universeSize() != values.length) throw new IllegalArgumentException(
 				"Length of values must be equal to universe size (%s) but it is %s"
@@ -22,24 +22,24 @@ public class LongEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implement
 		this.values = values;
 	}
 
-	public long get(E key) {
+	public float get(E key) {
 		return values[key.ordinal()];
 	}
 
-	public long put(E key, long value) {
+	public float put(E key, float value) {
 		int i = key.ordinal();
-		long old = values[i];
+		float old = values[i];
 		values[i] = value;
 		return old;
 	}
 
-	public void foreach(LongBiConsumer<E> action) {
+	public void foreach(FloatBiConsumer<E> action) {
 		for (int i = 0; i < values.length; i++) {
 			action.accept(keyUniverse[i], values[i]);
 		}
 	}
 
-	public long[] values() {
+	public float[] values() {
 		return this.values;
 	}
 
@@ -50,12 +50,12 @@ public class LongEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implement
 	}
 
 	@Override
-	public LongEnumMap<E> clone() {
-		return new LongEnumMap<>(enumType, values.clone());
+	public FloatEnumMap<E> clone() {
+		return new FloatEnumMap<>(enumType, values.clone());
 	}
 
 	@Override
 	public String toString() {
-		return "LongEnumMap" + Arrays.toString(values);
+		return "FloatEnumMap" + Arrays.toString(values);
 	}
 }
