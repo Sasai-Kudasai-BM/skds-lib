@@ -13,10 +13,7 @@ import net.skds.lib2.utils.SKDSUtils;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public interface ExtendedDataInput extends DataInput {
 
@@ -33,6 +30,13 @@ public interface ExtendedDataInput extends DataInput {
 	}
 
 	void readToByteBuffer(ByteBuffer buffer, int offset, int length) throws IOException;
+
+	/**
+	 * @return the number of ready to read bytes, or -1 if unknown
+	 */
+	default int available() {
+		return -1;
+	}
 
 	default void readToByteBuffer(ByteBuffer buffer) throws IOException {
 		readToByteBuffer(buffer, buffer.position(), buffer.remaining());
@@ -230,17 +234,15 @@ public interface ExtendedDataInput extends DataInput {
 				byte[] array;
 				if (!buffer.isDirect() && !buffer.isReadOnly()) {
 					array = buffer.array();
-					buffer.get(array);
 					in.readFully(array);
 				} else {
 					final int bufferSize = SKDSUtils.getDefaultBufferSize(length);
 					array = new byte[bufferSize];
 					int rem = length;
 					do {
-						buffer.get(array);
 						in.readFully(array);
 						rem -= bufferSize;
-						buffer.put(array, offset + length - rem, bufferSize);
+						buffer.put(offset + length - rem, array, 0, bufferSize);
 					} while (rem > 0);
 				}
 			}
@@ -330,18 +332,25 @@ public interface ExtendedDataInput extends DataInput {
 				if (!buffer.isDirect() && !buffer.isReadOnly()) {
 					array = buffer.array();
 					do {
-						buffer.get(array);
 						rem -= in.read(array);
 					} while (rem > 0);
 				} else {
 					final int bufferSize = SKDSUtils.getDefaultBufferSize(length);
 					array = new byte[bufferSize];
 					do {
-						buffer.get(array);
 						int r = in.read(array);
 						rem -= r;
-						buffer.put(array, offset + length - rem, r);
+						buffer.put(offset + length - rem, array, 0, r);
 					} while (rem > 0);
+				}
+			}
+
+			@Override
+			public int available() {
+				try {
+					return in.available();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			}
 
@@ -357,6 +366,7 @@ public interface ExtendedDataInput extends DataInput {
 
 			@Override
 			public void readFully(byte[] b, int off, int len) throws IOException {
+				Objects.checkFromIndexSize(off, len, b.length);
 				int rem = len;
 				do {
 					int r = in.read(b, len - rem, rem);
@@ -442,6 +452,11 @@ public interface ExtendedDataInput extends DataInput {
 			}
 
 			@Override
+			public int available() {
+				return in.length - pos;
+			}
+
+			@Override
 			public void readToByteBuffer(ByteBuffer buffer, int offset, int length) {
 				length = Math.min(length, in.length - pos);
 				if (length < 1) return;
@@ -459,6 +474,7 @@ public interface ExtendedDataInput extends DataInput {
 
 			@Override
 			public void readFully(byte[] b, int off, int len) {
+				Objects.checkFromIndexSize(off, len, b.length);
 				int length = Math.min(len, in.length - pos);
 				if (length < 1) return;
 				System.arraycopy(in, pos, b, off, length);

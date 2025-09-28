@@ -250,7 +250,7 @@ public interface ExtendedDataOutput extends DataOutput {
 					int rem = length;
 					byte[] array = new byte[bufferSize];
 					do {
-						buffer.get(array);
+						buffer.get(offset + length - rem, array, 0, bufferSize);
 						out.write(array);
 						rem -= bufferSize;
 					} while (rem > 0);
@@ -329,7 +329,7 @@ public interface ExtendedDataOutput extends DataOutput {
 					int rem = length;
 					byte[] array = new byte[bufferSize];
 					do {
-						buffer.get(array);
+						buffer.get(offset + length - rem, array, 0, bufferSize);
 						out.write(array);
 						rem -= bufferSize;
 					} while (rem > 0);

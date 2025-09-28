@@ -1,51 +1,58 @@
-package net.skds.lib2.network;
+package net.skds.lib2.network.tcp;
 
 import lombok.CustomLog;
+import net.skds.lib2.misc.timer.SimpleTimer;
+import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.ThreadUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.*;
-import java.util.function.Function;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 
 
 @CustomLog
 public class TCPServer {
 
 	protected boolean running = false;
-	public final Selector selector;
+	//public final Selector selector;
 	public final Selector monitirSelector;
 	public final ServerSocketChannel server;
 	protected final Object acceptAttachment = new Object();
+	public final ServersideTCPConnectionOptions options;
 
 	protected final String serverName;
-	protected final Function<SocketChannel, ChannelConnection> connectionFactory;
+	protected final BiFunction<SocketChannel, TCPServer, CompletableFuture<ServersideTCPConnection>> connectionFactory;
 
-	public TCPServer(String serverName, Function<SocketChannel, ChannelConnection> connectionFactory) {
+	public TCPServer(ServersideTCPConnectionOptions options,
+					 String serverName,
+					 BiFunction<SocketChannel, TCPServer, CompletableFuture<ServersideTCPConnection>> connectionFactory
+	) {
+		this.options = options;
 		this.serverName = serverName;
 		this.connectionFactory = connectionFactory;
 		try {
 			this.monitirSelector = Selector.open();
-			this.selector = Selector.open();
+			//this.selector = Selector.open();
 			this.server = ServerSocketChannel.open();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
+
 	public void stop() {
 		running = false;
-		for (var k : selector.keys()) {
-			try {
-				k.channel().close();
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-			}
-		}
 		try {
-			selector.close();
+			server.close();
+			//selector.close();
+			monitirSelector.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -60,7 +67,7 @@ public class TCPServer {
 			//server.register(selector, SelectionKey.OP_READ);
 
 			final ServerSocket socket = server.socket();
-			socket.setSoTimeout(5000);
+			socket.setSoTimeout(options.getAcceptTimeout());
 			ThreadUtils.runNewThreadMainGroup(() -> {
 				while (running) {
 					try {
@@ -70,29 +77,10 @@ public class TCPServer {
 					}
 				}
 			}, serverName + "-monitor");
-			ThreadUtils.runNewThreadMainGroup(() -> {
-				while (running) {
-					try {
-						selector.select(this::onSelect);
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
-				}
-			}, serverName + "-input");
 			log.info("TCP Server \"" + serverName + "\" started");
 		} catch (IOException e) {
 			running = false;
 			throw new RuntimeException(e);
-		}
-	}
-
-	public void registerMain(ChannelConnection cs) {
-		SocketChannel sc = cs.getChannel();
-		try {
-			sc.register(selector, SelectionKey.OP_READ, sc);
-		} catch (ClosedChannelException e) {
-			e.printStackTrace(System.err);
-			disconnectSC(sc);
 		}
 	}
 
@@ -103,41 +91,26 @@ public class TCPServer {
 				return;
 			}
 			try {
-
 				@SuppressWarnings("resource") final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
+				//key.cancel();
 				log.debug("[Monitor] accepting " + sc.getRemoteAddress());
-
-
-				final Socket socket = sc.socket();
-				sc.configureBlocking(false);
-				socket.setTcpNoDelay(true);
-				socket.setSoTimeout(5000);
-				ChannelConnection connection = connectionFactory.apply(sc);
-				if (connection == null) {
-					disconnectKey(key);
-					return;
-				}
-				sc.register(monitirSelector, SelectionKey.OP_READ, connection);
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-				disconnectKey(key);
-			}
-		} else if (key.isReadable() && (key.attachment() instanceof ChannelConnection cr)) {
-			try {
-				cr.read((SocketChannel) key.channel());
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-				disconnectKey(key);
-			}
-		} else {
-			disconnectKey(key);
-		}
-	}
-
-	protected void onSelect(SelectionKey key) {
-		if (key.isReadable() && (key.attachment() instanceof ChannelConnection cr)) {
-			try {
-				cr.read((SocketChannel) key.channel());
+				connectionFactory.apply(sc, this).thenAccept(cc -> {
+					try {
+						if (cc == null) {
+							disconnectKey(key);
+							return;
+						}
+						final Socket socket = sc.socket();
+						socket.setTcpNoDelay(true);
+						socket.setSoTimeout(5000);
+						//sc.configureBlocking(false);
+						//sc.register(monitirSelector, SelectionKey.OP_READ, cc);
+						SimpleTimer.INSTANCE.scheduleRelative(cc::checkTimeout, options.getSilenceTimeout());
+						cc.startThreads();
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}).exceptionally(SKDSUtils.getCatcher());
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
 				disconnectKey(key);

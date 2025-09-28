@@ -36,6 +36,11 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 	}
 
 	@Override
+	public int available() {
+		return remaining();
+	}
+
+	@Override
 	public String readStringBytes(int count) throws IOException {
 		if (buffer.isDirect() || buffer.isReadOnly()) return ExtendedDataInput.super.readStringBytes(count);
 		String s = new String(buffer.array(), buffer.position(), count, StandardCharsets.UTF_8);
@@ -250,6 +255,7 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 	@Override
 	public void writeFromByteBuffer(ByteBuffer buffer, int offset, int length) {
 		this.buffer.put(this.buffer.position(), buffer, offset, length);
+		this.buffer.position(this.buffer.position() + length);
 	}
 
 	private class BufferOutputStream extends OutputStream {

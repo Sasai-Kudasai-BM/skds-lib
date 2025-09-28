@@ -48,6 +48,8 @@ public class SKDSUtils {
 		t.printStackTrace();
 		return null;
 	};
+	private static final Consumer<?> EMPTY_CONSUMER = o -> {
+	};
 
 	private static Supplier<MessageDigest> SHA1 = getMDSafe("SHA1", md -> SHA1 = md);
 	private static Supplier<MessageDigest> SHA256 = getMDSafe("SHA256", md -> SHA256 = md);
@@ -57,6 +59,11 @@ public class SKDSUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> Function<Throwable, ? extends T> getCatcher() {
 		return (Function<Throwable, ? extends T>) CATCHER;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Consumer<T> emptyConsumer() {
+		return (Consumer<T>) EMPTY_CONSUMER;
 	}
 
 	private static Supplier<MessageDigest> getMDSafe(String algorithm, Consumer<Supplier<MessageDigest>> consumer) {
