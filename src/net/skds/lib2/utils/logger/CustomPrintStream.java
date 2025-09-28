@@ -22,8 +22,8 @@ class CustomPrintStream extends CustomAbstractPrintStream {
 	@Override
 	protected void logLine(String x, boolean ln) {
 		switch (this.type) {
-			case OUT -> log.log0(LoggerLevel.SYSTEM_OUT, 4, ln, true, x);
-			case ERR -> log.log0(LoggerLevel.SYSTEM_ERR, 4, ln, true, x);
+			case OUT -> log.log0(LoggerLevel.SYSTEM_OUT, 4, ln, ln, x);
+			case ERR -> log.log0(LoggerLevel.SYSTEM_ERR, 4, ln, ln, x);
 		}
 	}
 
