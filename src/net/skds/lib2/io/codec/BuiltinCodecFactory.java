@@ -1,6 +1,7 @@
 package net.skds.lib2.io.codec;
 
 import lombok.CustomLog;
+import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
 import net.skds.lib2.io.codec.nulls.NullCodec;
@@ -353,9 +354,19 @@ public class BuiltinCodecFactory implements CodecFactory {
 		//final Class<?> tClass;
 		final Supplier<Map<Object, Object>> constructor;
 		final UniversalDeserializer<Object> keyDeserializer;
-		final UniversalDeserializer<Object> elementDeserializer;
+		final UniversalDeserializer<Object> valueDeserializer;
 		final UniversalSerializer<Object> keySerializer;
 		final UniversalSerializer<Object> valueSerializer;
+
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public MapCodec(Class<?> tClass, UniversalCodec[] codec, Supplier<Map<Object, Object>> consturctor, CodecRegistry registry) {
+			super(tClass, registry);
+			this.keyDeserializer = codec[0];
+			this.valueDeserializer = codec[1];
+			this.keySerializer = codec[0];
+			this.valueSerializer = codec[1];
+			this.constructor = consturctor;
+		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public MapCodec(Class<?> tClass, Type[] parameters, CodecRegistry registry) {
@@ -366,7 +377,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 						+ " " + Arrays.toString(parameters) + "\"");
 			}
 			this.keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
-			this.elementDeserializer = registry.getDeserializerIndirect(parameters[1]);
+			this.valueDeserializer = registry.getDeserializerIndirect(parameters[1]);
 			this.keySerializer = getUniversalSerializer(parameters[0], registry);
 			this.valueSerializer = getUniversalSerializer(parameters[1], registry);
 			Supplier<Map<Object, Object>> tmpC;
@@ -425,7 +436,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 						Object key = keyDeserializer.read(r2);
 						Object value;
 						try {
-							value = elementDeserializer.read(reader);
+							value = valueDeserializer.read(reader);
 						} catch (Exception ex) {
 							throw new ParseException("Exception while read " + name, ex);
 						}
@@ -444,6 +455,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final Supplier<Collection<Object>> constructor;
 		final UniversalDeserializer<Object> deserializer;
 		final UniversalSerializer<Object> serializer;
+
+		@SuppressWarnings("unchecked")
+		public CollectionCodec(Class<?> tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
+			super(tClass, registry);
+			this.deserializer = (UniversalDeserializer<Object>) codec;
+			this.serializer = (UniversalSerializer<Object>) codec;
+			this.constructor = defaultSupplier;
+		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public CollectionCodec(Class<?> tClass, Type[] parameters, CodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
@@ -515,7 +534,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 			}
 		}
 	}
-
 
 	public static class ArrayCodec extends AbstractCodec<Object> {
 

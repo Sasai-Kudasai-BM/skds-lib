@@ -21,6 +21,17 @@ public class SKDSLogger {
 	protected boolean useGlobalPrintStream = true;
 	protected boolean useFileOut = true;
 
+	public SKDSLogger() {
+		Class<?> c;
+		try {
+			c = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		this.name = c.getSimpleName();
+		this.configGetter = SKDSLoggerConfig::getInstance;
+	}
+
 	public SKDSLogger(Class<?> loggingClass) {
 		this.name = loggingClass.getSimpleName();
 		this.configGetter = SKDSLoggerConfig::getInstance;
