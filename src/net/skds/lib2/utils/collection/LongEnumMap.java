@@ -33,6 +33,21 @@ public class LongEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implement
 		return old;
 	}
 
+	public long increment(E key, long value) {
+		return values[key.ordinal()] += value;
+	}
+
+	public void increment(LongEnumMap<E> map) {
+		long[] array = map.values();
+		for (int i = 0, len = array.length; i < len; i++) {
+			this.values[i] += array[i];
+		}
+	}
+
+	public long mul(E key, long value) {
+		return values[key.ordinal()] *= value;
+	}
+
 	public void foreach(LongBiConsumer<E> action) {
 		for (int i = 0; i < values.length; i++) {
 			action.accept(keyUniverse[i], values[i]);

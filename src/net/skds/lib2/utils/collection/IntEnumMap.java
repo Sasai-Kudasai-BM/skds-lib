@@ -1,19 +1,19 @@
 package net.skds.lib2.utils.collection;
 
-import net.skds.lib2.utils.function.FloatBiConsumer;
+import net.skds.lib2.utils.function.IntBiConsumer;
 
 import java.util.Arrays;
 
-public class FloatEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implements Cloneable {
+public class IntEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implements Cloneable {
 
-	private final float[] values;
+	private final int[] values;
 
-	public FloatEnumMap(Class<E> clazz) {
+	public IntEnumMap(Class<E> clazz) {
 		super(clazz);
-		this.values = new float[universeSize()];
+		this.values = new int[universeSize()];
 	}
 
-	public FloatEnumMap(Class<E> clazz, float[] values) {
+	public IntEnumMap(Class<E> clazz, int[] values) {
 		super(clazz);
 		if (universeSize() != values.length) throw new IllegalArgumentException(
 				"Length of values must be equal to universe size (%s) but it is %s"
@@ -22,39 +22,39 @@ public class FloatEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implemen
 		this.values = values;
 	}
 
-	public float get(E key) {
+	public int get(E key) {
 		return values[key.ordinal()];
 	}
 
-	public float put(E key, float value) {
+	public int put(E key, int value) {
 		int i = key.ordinal();
-		float old = values[i];
+		int old = values[i];
 		values[i] = value;
 		return old;
 	}
 
-	public float increment(E key, float value) {
+	public int increment(E key, int value) {
 		return values[key.ordinal()] += value;
 	}
 
-	public void increment(FloatEnumMap<E> map) {
-		float[] array = map.values();
+	public void increment(IntEnumMap<E> map) {
+		int[] array = map.values();
 		for (int i = 0, len = array.length; i < len; i++) {
 			this.values[i] += array[i];
 		}
 	}
 
-	public float mul(E key, float value) {
+	public float mul(E key, int value) {
 		return values[key.ordinal()] *= value;
 	}
 
-	public void foreach(FloatBiConsumer<E> action) {
+	public void foreach(IntBiConsumer<E> action) {
 		for (int i = 0; i < values.length; i++) {
 			action.accept(keyUniverse[i], values[i]);
 		}
 	}
 
-	public float[] values() {
+	public int[] values() {
 		return this.values;
 	}
 
@@ -65,12 +65,12 @@ public class FloatEnumMap<E extends Enum<E>> extends AbstractEnumMap<E> implemen
 	}
 
 	@Override
-	public FloatEnumMap<E> clone() {
-		return new FloatEnumMap<>(enumType, values.clone());
+	public IntEnumMap<E> clone() {
+		return new IntEnumMap<>(enumType, values.clone());
 	}
 
 	@Override
 	public String toString() {
-		return "FloatEnumMap" + Arrays.toString(values);
+		return "IntEnumMap" + Arrays.toString(values);
 	}
 }
