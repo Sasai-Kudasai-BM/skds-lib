@@ -74,6 +74,14 @@ public class SKDSLogger {
 		LogWriter.INSTANCE.add(e);
 	}
 
+	public void sout(Object msg) {
+		log0(LoggerLevel.SYSTEM_OUT, DEPTH, true, true, msg);
+	}
+
+	public void serr(Object msg) {
+		log0(LoggerLevel.SYSTEM_ERR, DEPTH, true, true, msg);
+	}
+
 	public void debug(Object msg) {
 		log0(LoggerLevel.DEBUG, DEPTH, true, true, msg);
 	}
@@ -94,6 +102,14 @@ public class SKDSLogger {
 		log0(LoggerLevel.ERROR, DEPTH, true, true, msg);
 	}
 
+	public void soutNoWrap(Object msg) {
+		log0(LoggerLevel.SYSTEM_OUT, DEPTH, false, true, msg);
+	}
+
+	public void serrNoWrap(Object msg) {
+		log0(LoggerLevel.SYSTEM_ERR, DEPTH, false, true, msg);
+	}
+
 	public void debugNoWrap(Object msg) {
 		log0(LoggerLevel.DEBUG, DEPTH, false, true, msg);
 	}
@@ -112,6 +128,14 @@ public class SKDSLogger {
 
 	public void errorNoWrap(Object msg) {
 		log0(LoggerLevel.ERROR, DEPTH, false, true, msg);
+	}
+
+	public void soutContinue(Object msg) {
+		log0(LoggerLevel.SYSTEM_OUT, DEPTH, false, false, msg);
+	}
+
+	public void serrContinue(Object msg) {
+		log0(LoggerLevel.SYSTEM_ERR, DEPTH, false, false, msg);
 	}
 
 	public void debugContinue(Object msg) {
