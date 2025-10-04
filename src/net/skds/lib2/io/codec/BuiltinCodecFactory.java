@@ -1,7 +1,6 @@
 package net.skds.lib2.io.codec;
 
 import lombok.CustomLog;
-import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
 import net.skds.lib2.io.codec.nulls.NullCodec;

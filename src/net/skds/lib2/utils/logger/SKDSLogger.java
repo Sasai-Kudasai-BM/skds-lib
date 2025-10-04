@@ -6,6 +6,8 @@ import java.util.function.Supplier;
 
 public class SKDSLogger {
 
+	static final SKDSLogger GLOBAL_LOGGER = new SKDSLogger(SKDSLogger.class);
+
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
 	public static final PrintStream REPLACED_OUT = new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT);
