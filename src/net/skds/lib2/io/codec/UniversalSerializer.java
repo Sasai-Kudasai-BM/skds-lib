@@ -1,6 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 import net.skds.lib2.io.chars.StringCharOutput;
 
 import java.io.IOException;

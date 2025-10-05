@@ -455,12 +455,12 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalDeserializer<Object> deserializer;
 		final UniversalSerializer<Object> serializer;
 
-		@SuppressWarnings("unchecked")
-		public CollectionCodec(Class<?> tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public CollectionCodec(Class<?> tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<?>> defaultSupplier) {
 			super(tClass, registry);
 			this.deserializer = (UniversalDeserializer<Object>) codec;
 			this.serializer = (UniversalSerializer<Object>) codec;
-			this.constructor = defaultSupplier;
+			this.constructor = (Supplier<Collection<Object>>)(Supplier)defaultSupplier;
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
