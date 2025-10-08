@@ -38,6 +38,7 @@ public class JsonTest {
 		runs.add(new JsonTestRun("escape", JsonTestEscape::test));
 		runs.add(new JsonTestRun("emptyTyped", JsonTestEmptyTyped::test));
 		runs.add(new JsonTestRun("null", JsonTestNull::test));
+		runs.add(new JsonTestRun("mapKeyValue", JsonTestMap::test));
 
 		Map<String, JsonTestRun> map = new LinkedHashMap<>();
 

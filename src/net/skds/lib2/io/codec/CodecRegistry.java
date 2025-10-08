@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import lombok.RequiredArgsConstructor;
+
 import static net.skds.lib2.io.json.JsonCodecOptions.DecorationType.FANCY;
 
 public class CodecRegistry {
@@ -154,78 +156,124 @@ public class CodecRegistry {
 	}
 
 	public <T> UniversalCodec<T> getCodecIndirect(Type type) {
-		return new UniversalCodec<>() {
-
-			UniversalCodec<T> codec;
-
-			@Override
-			public CodecRegistry getRegistry() {
-				return CodecRegistry.this;
-			}
-
-			@Override
-			public T read(UniversalReader reader) throws IOException {
-				UniversalCodec<T> c = codec;
-				if (c == null) {
-					c = getCodec(type);
-					codec = c;
-				}
-				return c.read(reader);
-			}
-
-			@Override
-			public void write(T value, UniversalWriter writer) throws IOException {
-				UniversalCodec<T> c = codec;
-				if (c == null) {
-					c = getCodec(type);
-					codec = c;
-				}
-				c.write(value, writer);
-			}
-		};
+		return new CodecIndirect<>(type);
 	}
 
 	public <T> UniversalDeserializer<T> getDeserializerIndirect(Type type) {
-		return new UniversalDeserializer<>() {
-
-			UniversalDeserializer<T> deserializer;
-
-			@Override
-			public CodecRegistry getRegistry() {
-				return CodecRegistry.this;
-			}
-
-			@Override
-			public T read(UniversalReader reader) throws IOException {
-				UniversalDeserializer<T> c = deserializer;
-				if (c == null) {
-					c = getDeserializer(type);
-					deserializer = c;
-				}
-				return c.read(reader);
-			}
-		};
+		return new DeserializerIndirect<>(type);
 	}
 
 	public <T> UniversalSerializer<T> getSerializerIndirect(Type type) {
-		return new UniversalSerializer<>() {
-
-			UniversalSerializer<T> serializer;
-
-			@Override
-			public CodecRegistry getRegistry() {
-				return CodecRegistry.this;
-			}
-
-			@Override
-			public void write(T value, UniversalWriter writer) throws IOException {
-				UniversalSerializer<T> c = serializer;
-				if (c == null) {
-					c = getSerializer(type);
-					serializer = c;
-				}
-				c.write(value, writer);
-			}
-		};
+		return new SerializerIndirect<>(type);
 	}
+
+	@RequiredArgsConstructor
+	private class CodecIndirect<T> implements UniversalCodec<T> {
+
+		private final Type type;
+	
+		private UniversalCodec<T> codec;
+
+		private UniversalCodec<T> getOrCreateCodec() {
+			UniversalCodec<T> c = codec;
+			if (c == null) {
+				c = getCodec(type);
+				codec = c;
+			}
+			return c;
+		}
+
+		@Override
+		public String valueAsKeyString(T val) {
+			return getOrCreateCodec().valueAsKeyString(val);
+		}
+
+		@Override
+		public T keyStringAsValue(String key) throws IOException {
+			return getOrCreateCodec().keyStringAsValue(key);
+		}
+
+		@Override
+		public CodecRegistry getRegistry() {
+			return CodecRegistry.this;
+		}
+
+		@Override
+		public T read(UniversalReader reader) throws IOException {
+			return getOrCreateCodec().read(reader);
+		}
+
+		@Override
+		public void write(T value, UniversalWriter writer) throws IOException {
+			getOrCreateCodec().write(value, writer);
+		}
+
+	}
+
+	@RequiredArgsConstructor
+	private class DeserializerIndirect<T> implements UniversalDeserializer<T> {
+
+		private final Type type;
+	
+		private UniversalDeserializer<T> deserializer;
+
+		private UniversalDeserializer<T> getOrCreateCodec() {
+			UniversalDeserializer<T> c = deserializer;
+			if (c == null) {
+				c = getDeserializer(type);
+				deserializer = c;
+			}
+			return c;
+		}
+
+		@Override
+		public T keyStringAsValue(String key) throws IOException {
+			return getOrCreateCodec().keyStringAsValue(key);
+		}
+
+		@Override
+		public CodecRegistry getRegistry() {
+			return CodecRegistry.this;
+		}
+
+		@Override
+		public T read(UniversalReader reader) throws IOException {
+			return getOrCreateCodec().read(reader);
+		}
+
+	}
+
+	@RequiredArgsConstructor
+	private class SerializerIndirect<T> implements UniversalSerializer<T> {
+
+		private final Type type;
+
+		private UniversalSerializer<T> serializer;
+
+		private UniversalSerializer<T> getOrCreateCodec() {
+			UniversalSerializer<T> c = serializer;
+			if (c == null) {
+				c = getSerializer(type);
+				serializer = c;
+			}
+			return c;
+		}
+
+		@Override
+		public String valueAsKeyString(T val) {
+			return getOrCreateCodec().valueAsKeyString(val);
+		}
+
+		@Override
+		public CodecRegistry getRegistry() {
+			return CodecRegistry.this;
+		}
+
+		@Override
+		public void write(T value, UniversalWriter writer) throws IOException {
+			getOrCreateCodec().write(value, writer);
+		}
+
+	}
+
 }

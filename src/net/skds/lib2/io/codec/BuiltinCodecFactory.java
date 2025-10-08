@@ -350,8 +350,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 	public static class MapCodec extends AbstractCodec<Map<Object, Object>> {
 
-		//final Class<?> tClass;
 		final Supplier<Map<Object, Object>> constructor;
+		final UniversalDeserializer<String> stringKeyDeserializer;
 		final UniversalDeserializer<Object> keyDeserializer;
 		final UniversalDeserializer<Object> valueDeserializer;
 		final UniversalSerializer<Object> keySerializer;
@@ -360,6 +360,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public MapCodec(Class<?> tClass, UniversalCodec[] codec, Supplier<Map<Object, Object>> consturctor, CodecRegistry registry) {
 			super(tClass, registry);
+			this.stringKeyDeserializer = registry.getDeserializerIndirect(String.class);
 			this.keyDeserializer = codec[0];
 			this.valueDeserializer = codec[1];
 			this.keySerializer = codec[0];
@@ -370,6 +371,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public MapCodec(Class<?> tClass, Type[] parameters, CodecRegistry registry) {
 			super(tClass, registry);
+			this.stringKeyDeserializer = registry.getDeserializerIndirect(String.class);
 			//this.tClass = tClass;
 			if (parameters.length != 2) {
 				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass.getName()
@@ -432,7 +434,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String name = reader.readName(); // TODO check
 						UniversalReader r2 = new NameKeyReader(name);
-						Object key = keyDeserializer.read(r2);
+						Object key = keyDeserializer.keyStringAsValue(this.stringKeyDeserializer.read(r2));
 						Object value;
 						try {
 							value = valueDeserializer.read(reader);
@@ -1010,6 +1012,16 @@ public class BuiltinCodecFactory implements CodecFactory {
 			super(registry);
 			this.jod = registry.getDeserializerIndirect(JsonObject.class);
 			this.jad = registry.getDeserializerIndirect(JsonArray.class);
+		}
+
+		@Override
+		public String keyStringAsValue(String key) throws IOException {
+			return key;
+		}
+
+		@Override
+		public String valueAsKeyString(String val) {
+			return val;
 		}
 
 		@Override

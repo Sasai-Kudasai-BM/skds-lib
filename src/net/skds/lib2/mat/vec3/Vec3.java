@@ -1747,4 +1747,5 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 			return Double.compare(a.z(), b.z());
 		}
 	}
+
 }

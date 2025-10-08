@@ -1,11 +1,13 @@
 package net.skds.lib2.mat.vec3;
 
+import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.codec.AbstractCodec;
 import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.json.JsonReaderImpl;
 import net.skds.lib2.mat.FastMath;
 
 import java.io.IOException;
@@ -236,6 +238,19 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 
 		public JCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
+		}
+
+		@Override
+		public String valueAsKeyString(Vec3 val) {
+			if (val == null) {
+				return null;
+			}
+			return "[" + val.xi() + "," + val.yi() + "," + val.zi() + "]";
+		}
+
+		@Override
+		public Vec3 keyStringAsValue(String key) throws IOException {
+			return read(new JsonReaderImpl(new StringCharInput(key), this.registry));
 		}
 
 		@Override

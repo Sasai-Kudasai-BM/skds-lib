@@ -1,13 +1,17 @@
 package net.skds.lib2.io.codec;
 
-import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.chars.CharInput;
 import net.skds.lib2.io.chars.StringCharInput;
+import net.skds.lib2.io.json.JsonReaderImpl;
 import net.skds.lib2.io.json.elements.JsonElement;
 
 import java.io.IOException;
 
 public interface UniversalDeserializer<T> extends Deserializer<T, UniversalReader>, CodecRegistryGetter {
+
+	default T keyStringAsValue(String key) throws IOException {
+		return read(new JsonReaderImpl(new StringCharInput(key), this.getRegistry()));
+	}
 
 	default T parse(CharInput charInput) {
 		try {

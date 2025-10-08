@@ -116,7 +116,6 @@ public class ArrayUtils {
 	}
 
 	public static <T> T getRandom(List<T> list, Random random) {
-
 		if (list.isEmpty()) return null;
 		return list.get(random.nextInt(list.size()));
 	}
