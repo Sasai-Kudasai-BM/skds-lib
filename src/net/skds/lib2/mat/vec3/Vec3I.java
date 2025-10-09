@@ -249,7 +249,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 		}
 
 		@Override
-		public Vec3 keyStringAsValue(String key) throws IOException {
+		public Vec3 stringKeyToValue(String key) throws IOException {
 			return read(new JsonReaderImpl(new StringCharInput(key), this.registry));
 		}
 

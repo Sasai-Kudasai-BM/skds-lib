@@ -7,7 +7,6 @@ import net.skds.lib2.io.codec.nulls.NullCodec;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.exception.ParseException;
-import net.skds.lib2.io.json.NameKeyReader;
 import net.skds.lib2.io.json.elements.*;
 import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.reflection.ReflectUtils;
@@ -351,7 +350,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 	public static class MapCodec extends AbstractCodec<Map<Object, Object>> {
 
 		final Supplier<Map<Object, Object>> constructor;
-		final UniversalDeserializer<String> stringKeyDeserializer;
 		final UniversalDeserializer<Object> keyDeserializer;
 		final UniversalDeserializer<Object> valueDeserializer;
 		final UniversalSerializer<Object> keySerializer;
@@ -360,7 +358,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public MapCodec(Class<?> tClass, UniversalCodec[] codec, Supplier<Map<Object, Object>> consturctor, CodecRegistry registry) {
 			super(tClass, registry);
-			this.stringKeyDeserializer = registry.getDeserializerIndirect(String.class);
 			this.keyDeserializer = codec[0];
 			this.valueDeserializer = codec[1];
 			this.keySerializer = codec[0];
@@ -371,7 +368,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public MapCodec(Class<?> tClass, Type[] parameters, CodecRegistry registry) {
 			super(tClass, registry);
-			this.stringKeyDeserializer = registry.getDeserializerIndirect(String.class);
 			//this.tClass = tClass;
 			if (parameters.length != 2) {
 				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass.getName()
@@ -433,8 +429,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 					Map<Object, Object> map = constructor.get();
 					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String name = reader.readName(); // TODO check
-						UniversalReader r2 = new NameKeyReader(name);
-						Object key = keyDeserializer.keyStringAsValue(this.stringKeyDeserializer.read(r2));
+						Object key = keyDeserializer.stringKeyToValue(name);
 						Object value;
 						try {
 							value = valueDeserializer.read(reader);
@@ -462,7 +457,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 			super(tClass, registry);
 			this.deserializer = (UniversalDeserializer<Object>) codec;
 			this.serializer = (UniversalSerializer<Object>) codec;
-			this.constructor = (Supplier<Collection<Object>>)(Supplier)defaultSupplier;
+			this.constructor = (Supplier<Collection<Object>>) (Supplier) defaultSupplier;
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
@@ -1015,7 +1010,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
-		public String keyStringAsValue(String key) throws IOException {
+		public String stringKeyToValue(String key) throws IOException {
 			return key;
 		}
 

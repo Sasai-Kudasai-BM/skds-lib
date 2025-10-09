@@ -1,5 +1,6 @@
 package net.skds.lib2.io.codec;
 
+import lombok.RequiredArgsConstructor;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.io.chars.CharInput;
@@ -18,8 +19,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
-import lombok.RequiredArgsConstructor;
 
 import static net.skds.lib2.io.json.JsonCodecOptions.DecorationType.FANCY;
 
@@ -171,7 +170,7 @@ public class CodecRegistry {
 	private class CodecIndirect<T> implements UniversalCodec<T> {
 
 		private final Type type;
-	
+
 		private UniversalCodec<T> codec;
 
 		private UniversalCodec<T> getOrCreateCodec() {
@@ -189,8 +188,8 @@ public class CodecRegistry {
 		}
 
 		@Override
-		public T keyStringAsValue(String key) throws IOException {
-			return getOrCreateCodec().keyStringAsValue(key);
+		public T stringKeyToValue(String key) throws IOException {
+			return getOrCreateCodec().stringKeyToValue(key);
 		}
 
 		@Override
@@ -214,7 +213,7 @@ public class CodecRegistry {
 	private class DeserializerIndirect<T> implements UniversalDeserializer<T> {
 
 		private final Type type;
-	
+
 		private UniversalDeserializer<T> deserializer;
 
 		private UniversalDeserializer<T> getOrCreateCodec() {
@@ -227,8 +226,8 @@ public class CodecRegistry {
 		}
 
 		@Override
-		public T keyStringAsValue(String key) throws IOException {
-			return getOrCreateCodec().keyStringAsValue(key);
+		public T stringKeyToValue(String key) throws IOException {
+			return getOrCreateCodec().stringKeyToValue(key);
 		}
 
 		@Override
