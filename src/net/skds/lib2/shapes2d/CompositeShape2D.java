@@ -57,7 +57,7 @@ public non-sealed interface CompositeShape2D extends Shape2D {
 		if (!getBoundingRect().intersectsRay(from, to)) return false;
 		ConvexShape2D[] shapes = simplify(AABR.fromToNormalized(from, to));
 		if (shapes.length == 0) return false;
-		Vec2 velocity = to.sub(from);
+		//Vec2 velocity = to.sub(from);
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape2D subShape = shapes[i];
 			if (subShape.intersectsRay(from, to)) return true;

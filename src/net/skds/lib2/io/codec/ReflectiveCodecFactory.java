@@ -385,7 +385,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			}
 			return (Predicate<Object>) constructor.get();
 		}
-		Predicate<Object> predicate = o -> false;
+		Predicate<Object> predicate = _ -> false;
 		if (type.isPrimitive()) {
 			if (type == byte.class) {
 				byte value = ss.defaultByte();
@@ -870,7 +870,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				this.serializer = BuiltinCodecFactory.getUniversalSerializer(t, registry);
 				this.deserializer = registry.getDeserializerIndirect(t);
 			}
-			this.skipPredicate = this.skipSerialization == null ? o -> false : getSkipPredicate(this.skipSerialization, field.getType());
+			this.skipPredicate = this.skipSerialization == null ? _ -> false : getSkipPredicate(this.skipSerialization, field.getType());
 		}
 
 		@Override

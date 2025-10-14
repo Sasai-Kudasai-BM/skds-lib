@@ -427,7 +427,7 @@ public class CStructWrapper<T extends WrappedCStruct> {
 	private static class PrimitiveArrayFieldLinker extends FieldLinker {
 
 		final ValueLayout valueLayout;
-		final VarHandle handle;
+		//final VarHandle handle;
 		final int length;
 		final Class<?> aClass;
 
@@ -436,7 +436,7 @@ public class CStructWrapper<T extends WrappedCStruct> {
 			this.length = length;
 			this.aClass = aClass;
 			this.valueLayout = valueLayout;
-			this.handle = valueLayout.varHandle();
+			//this.handle = valueLayout.varHandle();
 		}
 
 		@Override

@@ -18,8 +18,8 @@ public class WeightedPoolDemoFrame extends JFrame {
 		setLayout(new FlowLayout());
 
 		JButton btn = new JButton("size 0");
-		btn.addActionListener(e -> {
-			WeightedPool<String> wp = new WeightedPool<>(List.of(), s -> 1);
+		btn.addActionListener(_ -> {
+			WeightedPool<String> wp = new WeightedPool<>(List.of(), _ -> 1);
 
 			log.debug("========= size 0 ==========");
 			for (int i = 0; i < 12; i++) {
@@ -29,8 +29,8 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 1");
-		btn.addActionListener(e -> {
-			WeightedPool<String> wp = new WeightedPool<>(List.of("ass"), s -> 1);
+		btn.addActionListener(_ -> {
+			WeightedPool<String> wp = new WeightedPool<>(List.of("ass"), _ -> 1);
 
 			log.debug("========= size 1 ==========");
 			for (int i = 0; i < 12; i++) {
@@ -40,12 +40,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 5");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 5; i++) {
 				list.add(String.valueOf(i));
 			}
-			WeightedPool<String> wp = new WeightedPool<>(list, s -> 1);
+			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
 
 			log.debug("========= size 5 ==========");
 			for (int i = 0; i < 12; i++) {
@@ -55,12 +55,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 10");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 10; i++) {
 				list.add(String.valueOf(i));
 			}
-			WeightedPool<String> wp = new WeightedPool<>(list, s -> 1);
+			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
 
 			log.debug("========= size 10 ==========");
 			for (int i = 0; i < 12; i++) {
@@ -70,12 +70,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 15");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 15; i++) {
 				list.add(String.valueOf(i));
 			}
-			WeightedPool<String> wp = new WeightedPool<>(list, s -> 1);
+			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
 
 			log.debug("========= size 15 ==========");
 			for (int i = 0; i < 12; i++) {
@@ -85,7 +85,7 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 100 R");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 100; i++) {
 				list.add(String.valueOf(i));
@@ -100,7 +100,7 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 1000 R");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 1000; i++) {
 				list.add(String.valueOf(i));
@@ -115,12 +115,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 10 Fail");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 10; i++) {
 				list.add(String.valueOf(i));
 			}
-			WeightedPool<String> wp = new WeightedPool<>(list, s -> FastMath.RANDOM.nextFloat());
+			WeightedPool<String> wp = new WeightedPool<>(list, _ -> FastMath.RANDOM.nextFloat());
 
 			log.debug("========= size 10 Fail ==========");
 			for (int i = 0; i < 11; i++) {
@@ -130,12 +130,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 		add(btn);
 
 		btn = new JButton("size 10 remove");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
 			for (int i = 0; i < 10; i++) {
 				list.add(String.valueOf(i));
 			}
-			WeightedPool<String> wp = new WeightedPool<>(list, s -> 1);
+			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
 
 			log.debug("========= size 10 remove ==========");
 			for (int i = 0; i < 11; i++) {

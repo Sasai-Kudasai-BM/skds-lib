@@ -63,11 +63,11 @@ public class NativesDemo extends JFrame {
 
 		setLayout(new GridBagLayout());
 		JButton button = new JButton("KL Add");
-		button.addActionListener(e -> testKLAdd());
+		button.addActionListener(_ -> testKLAdd());
 		add(button);
 		button.addKeyListener(kl2);
 		button = new JButton("KL Remove");
-		button.addActionListener(e -> testKLRemove());
+		button.addActionListener(_ -> testKLRemove());
 		add(button);
 
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);

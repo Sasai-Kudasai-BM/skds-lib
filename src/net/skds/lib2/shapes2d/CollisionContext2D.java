@@ -11,5 +11,5 @@ public interface CollisionContext2D extends CollisionPredicate2D {
 		return true;
 	}
 
-	CollisionContext2D DEFAULT = (a, b, v) -> a.compareTo(b);
+	CollisionContext2D DEFAULT = (a, b, _) -> a.compareTo(b);
 }

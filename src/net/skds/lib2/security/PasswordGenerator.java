@@ -18,7 +18,7 @@ public class PasswordGenerator extends JFrame {
 		add(new JLabel("length"));
 		add(length);
 		JButton gen = new JButton("generate");
-		gen.addActionListener(e -> out.setText(generate()));
+		gen.addActionListener(_ -> out.setText(generate()));
 		add(gen);
 		add(new JLabel("Output"));
 		add(out);

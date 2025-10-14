@@ -72,12 +72,12 @@ public enum SosisonEntryType {
 
 	public static SosisonEntryType number(Number n) {
 		return switch (n) {
-			case Integer ignored -> INT;
-			case Float ignored -> FLOAT;
-			case Long ignored -> LONG;
-			case Double ignored -> DOUBLE;
-			case Short ignored -> SHORT;
-			case Byte ignored -> BYTE;
+			case Integer _ -> INT;
+			case Float _ -> FLOAT;
+			case Long _ -> LONG;
+			case Double _ -> DOUBLE;
+			case Short _ -> SHORT;
+			case Byte _ -> BYTE;
 			default -> throw new IllegalArgumentException("Unsupported number type " + n.getClass().getSimpleName());
 		};
 	}

@@ -25,19 +25,19 @@ public class Demo3dToolPanel extends JPanel {
 		JPanel downPanel = new JPanel(layout);
 
 		JCheckBox fillCheckBox = new JCheckBox("fill");
-		fillCheckBox.addItemListener(e -> {
+		fillCheckBox.addItemListener(_ -> {
 			this.demo.setFill(fillCheckBox.isSelected());
 		});
 		downPanel.add(fillCheckBox);
 
 		JCheckBox sortCheckBox = new JCheckBox("sort");
-		sortCheckBox.addItemListener(e -> {
+		sortCheckBox.addItemListener(_ -> {
 			this.demo.setSort(sortCheckBox.isSelected());
 		});
 		downPanel.add(sortCheckBox);
 
 		JButton collideButton = new JButton("collide");
-		collideButton.addActionListener(e -> {
+		collideButton.addActionListener(_ -> {
 			Demo3dShapeCollectorImpl collector = new Demo3dShapeCollectorImpl();
 			Demo3dShape hovered = demo.getHovered();
 			if (hovered == null) {
@@ -64,7 +64,7 @@ public class Demo3dToolPanel extends JPanel {
 		downPanel.add(collideButton);
 
 		JButton resetButton = new JButton("reset");
-		resetButton.addActionListener(e -> {
+		resetButton.addActionListener(_ -> {
 			Demo3dShapeCollectorImpl collector = new Demo3dShapeCollectorImpl();
 			for (Demo3dShape shape : demo.shapes) {
 				collector.addShape(shape);
@@ -89,7 +89,7 @@ public class Demo3dToolPanel extends JPanel {
 		downPanel.add(resetButton);
 
 		JButton saveButton = new JButton("save");
-		saveButton.addActionListener(e -> {
+		saveButton.addActionListener(_ -> {
 			Demo3dShapeCollectorImpl collector = new Demo3dShapeCollectorImpl();
 			for (Demo3dShape shape : demo.shapes) {
 				collector.addShape(shape);
@@ -99,7 +99,7 @@ public class Demo3dToolPanel extends JPanel {
 		downPanel.add(saveButton);
 
 		JButton readButton = new JButton("read");
-		readButton.addActionListener(e -> {
+		readButton.addActionListener(_ -> {
 			Demo3dShapeCollectorImpl collector = SosisonUtils.readJson("demo/shapes.json", Demo3dShapeCollectorImpl.class);
 			demo.shapes.clear();
 			for (Shape shape : collector.array) {

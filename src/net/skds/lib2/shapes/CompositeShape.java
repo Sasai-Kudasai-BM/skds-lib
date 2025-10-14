@@ -63,7 +63,7 @@ public non-sealed interface CompositeShape extends Shape {
 		if (!getBoundingBox().intersectsRay(from, to)) return false;
 		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
 		if (shapes.length == 0) return false;
-		Vec3 velocity = to.sub(from);
+		//Vec3 velocity = to.sub(from);
 		for (int i = 0; i < shapes.length; i++) {
 			if (shapes[i].intersectsRay(from, to)) return true;
 		}

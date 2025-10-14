@@ -147,7 +147,7 @@ public class NoiseFrame extends JFrame {
 			JLabel zAx = new JLabel("Z-Axis: %.2f".formatted(depth));
 			add(zAx);
 			JSlider slider = new JSlider(0, 200, 0);
-			slider.addChangeListener(e -> {
+			slider.addChangeListener(_ -> {
 				depth = slider.getValue();
 				zAx.setText("Z-Axis: %.2f".formatted(depth));
 				noisePanel.repaint();
@@ -157,7 +157,7 @@ public class NoiseFrame extends JFrame {
 			JLabel exp = new JLabel("Exponent: %.2f".formatted(exponent));
 			add(exp);
 			JSlider psSlider = new JSlider(1100, 3000, 2000);
-			psSlider.addChangeListener(e -> {
+			psSlider.addChangeListener(_ -> {
 				exponent = psSlider.getValue() * 1e-3f;
 				exp.setText("Exponent: %.2f".formatted(exponent));
 				updateNoise();
@@ -167,7 +167,7 @@ public class NoiseFrame extends JFrame {
 			JLabel seedL = new JLabel("Seed: " + seed);
 			add(seedL);
 			JSlider sliderSeed = new JSlider(0, 50, 0);
-			sliderSeed.addChangeListener(e -> {
+			sliderSeed.addChangeListener(_ -> {
 				seed = sliderSeed.getValue();
 				seedL.setText("Seed: " + seed);
 				updateNoise();
@@ -177,7 +177,7 @@ public class NoiseFrame extends JFrame {
 			var cb = new JLabel("Color bias: %.2f".formatted(colorBias));
 			add(cb);
 			JSlider slider2 = new JSlider(-1000, 1000, (int) (colorBias * 1000));
-			slider2.addChangeListener(e -> {
+			slider2.addChangeListener(_ -> {
 				colorBias = slider2.getValue() * 1E-3f;
 				cb.setText("Color bias: %.2f".formatted(colorBias));
 				noisePanel.repaint();
@@ -187,7 +187,7 @@ public class NoiseFrame extends JFrame {
 			var cs = new JLabel("Color scale: %.2f".formatted(colorScale));
 			add(cs);
 			JSlider slider3 = new JSlider(100, 3000, (int) (colorScale * 1000));
-			slider3.addChangeListener(e -> {
+			slider3.addChangeListener(_ -> {
 				colorScale = slider3.getValue() * 1E-3f;
 				cs.setText("Color scale: %.2f".formatted(colorScale));
 				noisePanel.repaint();
@@ -197,7 +197,7 @@ public class NoiseFrame extends JFrame {
 			var harms = new JLabel("Harmonics: " + harmonics);
 			add(harms);
 			JSlider slider5 = new JSlider(1, 15, harmonics);
-			slider5.addChangeListener(e -> {
+			slider5.addChangeListener(_ -> {
 				harmonics = slider5.getValue();
 				harms.setText("Harmonics: " + harmonics);
 				updateNoise();
@@ -206,7 +206,7 @@ public class NoiseFrame extends JFrame {
 
 			add(new JLabel("Color scheme"));
 			JComboBox<ColorScheme> schemeSelector = new JComboBox<>(schemes);
-			schemeSelector.addActionListener(e -> {
+			schemeSelector.addActionListener(_ -> {
 				colorScheme = (ColorScheme) schemeSelector.getSelectedItem();
 				noisePanel.repaint();
 			});
@@ -214,7 +214,7 @@ public class NoiseFrame extends JFrame {
 
 			add(new JLabel("Interpolation"));
 			JComboBox<InterpolationHolder> interpolationSelector = new JComboBox<>(interpolations);
-			interpolationSelector.addActionListener(e -> {
+			interpolationSelector.addActionListener(_ -> {
 				interpolation = ((InterpolationHolder) Objects.requireNonNull(interpolationSelector.getSelectedItem())).interpolation;
 				updateNoise();
 			});
@@ -222,14 +222,14 @@ public class NoiseFrame extends JFrame {
 
 			add(new JLabel("AmplitudeFunction"));
 			JComboBox<AmplitudeFuncHolder> amplitudeFuncSelector = new JComboBox<>(amplitudeFunctions);
-			amplitudeFuncSelector.addActionListener(e -> {
+			amplitudeFuncSelector.addActionListener(_ -> {
 				amplitudeFunction = ((AmplitudeFuncHolder) Objects.requireNonNull(amplitudeFuncSelector.getSelectedItem())).af;
 				updateNoise();
 			});
 			add(amplitudeFuncSelector);
 
 			//JCheckBox fieldEnable = new JCheckBox("Use Fields");
-			//fieldEnable.addActionListener(e -> {
+			//fieldEnable.addActionListener(_ -> {
 			//	useFields = fieldEnable.isSelected();
 			//	updateNoise();
 			//});
@@ -239,7 +239,7 @@ public class NoiseFrame extends JFrame {
 			JPanel ampPanel = new JPanel();
 			ampPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
 			JSlider ampCount = new JSlider(1, 15, 5);
-			ampCount.addChangeListener(e -> {
+			ampCount.addChangeListener(_ -> {
 				setAmpSliders(ampSliders, ampPanel, ampCount.getValue());
 				noisePanel.repaint();
 			});
@@ -250,7 +250,7 @@ public class NoiseFrame extends JFrame {
 				amp.setPreferredSize(new Dimension(22, 120));
 				ampPanel.add(amp);
 				ampSliders.add(amp);
-				amp.addChangeListener(e -> updateNoise());
+				amp.addChangeListener(_ -> updateNoise());
 			}
 			add(ampPanel);
 			add(ampCount);
@@ -268,7 +268,7 @@ public class NoiseFrame extends JFrame {
 					amp.setPreferredSize(new Dimension(20, 120));
 					ampPanel.add(amp);
 					ampSliders.add(amp);
-					amp.addChangeListener(e -> updateNoise());
+					amp.addChangeListener(_ -> updateNoise());
 				}
 				ampPanel.revalidate();
 				updateNoise();

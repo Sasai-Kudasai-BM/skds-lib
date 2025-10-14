@@ -45,12 +45,12 @@ public class SKDSFiles {
 	}
 
 	public static void collectFileTree(File root, Collection<File> collection) {
-		collectFileTree(root, f -> true, collection);
+		collectFileTree(root, _ -> true, collection);
 	}
 
 	public static List<File> collectFileTree(File root) {
 		ArrayList<File> files = new ArrayList<>();
-		collectFileTree(root, f -> true, files);
+		collectFileTree(root, _ -> true, files);
 		return files;
 	}
 
@@ -85,7 +85,7 @@ public class SKDSFiles {
 	}
 
 	public static void collectFilesAndDirs(File root, Collection<File> collection) {
-		collectFilesAndDirs(root, f -> true, collection);
+		collectFilesAndDirs(root, _ -> true, collection);
 	}
 
 	public static List<File> collectFiles(File root) {

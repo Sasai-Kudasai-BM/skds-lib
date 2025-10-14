@@ -1,6 +1,5 @@
 package net.skds.lib2.utils.logger;
 
-import lombok.RequiredArgsConstructor;
 import net.skds.lib2.utils.ThreadUtils;
 import net.w3e.lib.utils.FileUtils;
 
@@ -167,12 +166,12 @@ class LogWriter extends Thread {
 		}
 	}
 
-	@RequiredArgsConstructor
 	private static class FileEntry {
-		final String name;
 		int currentSplit = 0;
 		long splitSize;
 		StringBuffer buffer = new StringBuffer(64);
+
+		public FileEntry(String name) {}
 	}
 
 	//private record FileKey(String name, SKDSLoggerConfig config) {

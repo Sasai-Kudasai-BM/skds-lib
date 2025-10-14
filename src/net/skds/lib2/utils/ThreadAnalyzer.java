@@ -54,7 +54,7 @@ public final class ThreadAnalyzer {
 
 		ThreadInfo[] threads = threadMXBean.dumpAllThreads(false, false);
 
-		lastThreadInfo.forEach((id, e) -> e.listed = false);
+		lastThreadInfo.forEach((_, e) -> e.listed = false);
 
 		for (int i = 0; i < threads.length; i++) {
 			ThreadInfo thread = threads[i];

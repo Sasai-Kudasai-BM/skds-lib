@@ -1,6 +1,12 @@
 version = "1.0"
 group = "net.skds"
 
+sourceSets {
+    main {
+        java.srcDir 'src'
+        resources.srcDir 'resources'
+    }
+}
 
 /*
 sourceSets {

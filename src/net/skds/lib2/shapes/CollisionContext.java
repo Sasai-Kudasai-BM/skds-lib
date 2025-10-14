@@ -11,5 +11,5 @@ public interface CollisionContext extends CollisionPredicate {
 		return true;
 	}
 
-	CollisionContext DEFAULT = (a, b, v) -> a.compareTo(b);
+	CollisionContext DEFAULT = (a, b, _) -> a.compareTo(b);
 }

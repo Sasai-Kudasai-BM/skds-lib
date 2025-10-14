@@ -26,7 +26,7 @@ public class DemoClassloaderFrame extends JFrame {
 		setPreferredSize(new Dimension(300, 200));
 
 		JButton button = new JButton("create new");
-		button.addActionListener(e -> {
+		button.addActionListener(_ -> {
 			classloader = new TestClassloader();
 			System.gc();
 			System.out.println("old is " + ref.get());
@@ -35,7 +35,7 @@ public class DemoClassloaderFrame extends JFrame {
 		add(button);
 
 		button = new JButton("load class");
-		button.addActionListener(e -> {
+		button.addActionListener(_ -> {
 			try {
 				cl = classloader.findClass(testClass);
 				System.out.println(cl + "#" + cl.hashCode());
@@ -48,7 +48,7 @@ public class DemoClassloaderFrame extends JFrame {
 		add(button);
 
 		button = new JButton("jar");
-		button.addActionListener(e -> {
+		button.addActionListener(_ -> {
 
 			JarClassLoader jcl = new JarClassLoader(Path.of("kek.jar"));
 

@@ -214,8 +214,8 @@ public class Noise {
 			float a = (l + 1) * e;
 			return 1f / (a * a);
 		};
-		AmplitudeFunction LINEAR = (l, e) -> 1f / (l + 1);
-		AmplitudeFunction FIBONACCI = (l, e) -> {
+		AmplitudeFunction LINEAR = (l, _) -> 1f / (l + 1);
+		AmplitudeFunction FIBONACCI = (l, _) -> {
 			float a = 1;
 			float a0 = 1;
 			for (int i = 1; i < l; i++) {

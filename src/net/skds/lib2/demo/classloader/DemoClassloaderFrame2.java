@@ -32,7 +32,7 @@ public class DemoClassloaderFrame2 extends JFrame {
 		setPreferredSize(new Dimension(300, 200));
 
 		JButton button = new JButton("create new");
-		button.addActionListener(e -> {
+		button.addActionListener(_ -> {
 			classloader = new StringClassLoader();
 			System.out.println("before gc old is " + ref.get());
 			System.gc();
@@ -42,7 +42,7 @@ public class DemoClassloaderFrame2 extends JFrame {
 		add(button);
 
 		button = new JButton("load class");
-		button.addActionListener(e -> {
+		button.addActionListener(_ -> {
 			try {
 				Class<?> cl = classloader.load(testClassSource, testClassName);
 				System.out.println(cl + "#" + cl.hashCode());

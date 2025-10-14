@@ -68,7 +68,7 @@ public class ContinuousBuffer {
 			int space = nodeSize - wp;
 			int toPut = Math.min(space, count - putCount);
 			if (toPut == 0) break; // limit
-			System.arraycopy(b, offset + putCount, n.bufferArray, wp, toPut);
+			System.arraycopy(b, offset + putCount, n.buffer, wp, toPut);
 			n.writePosition = wp += toPut;
 			putCount += toPut;
 			if (wp == nodeSize) {
@@ -102,7 +102,7 @@ public class ContinuousBuffer {
 			int toPut = Math.min(space, count - putCount);
 			if (toPut == 0)
 				break; // limit
-			buffer.get(offset + putCount, n.bufferArray, wp, toPut);
+			buffer.get(offset + putCount, n.buffer, wp, toPut);
 			n.writePosition = wp += toPut;
 			putCount += toPut;
 			if (wp == nodeSize) {
@@ -154,7 +154,7 @@ public class ContinuousBuffer {
 			if (available == 0) {
 				break; // no more space in buffer
 			}
-			System.arraycopy(n.bufferArray, rp, b, offset + readCount, available);
+			System.arraycopy(n.buffer, rp, b, offset + readCount, available);
 			n.readPosition = rp + available;
 			readCount += available;
 		}
@@ -183,7 +183,7 @@ public class ContinuousBuffer {
 			if (available == 0) {
 				break; // no more space in buffer
 			}
-			b.put(offset + readCount, n.bufferArray, rp, available);
+			b.put(offset + readCount, n.buffer, rp, available);
 			n.readPosition = rp + available;
 			readCount += available;
 		}
@@ -219,16 +219,14 @@ public class ContinuousBuffer {
 
 
 	private class Node {
-		final ByteBuffer buffer;
-		final byte[] bufferArray;
+		final byte[] buffer;
 		private int readPosition;
 		private int writePosition;
 		long index;
 		Node next;
 
 		private Node() {
-			this.bufferArray = new byte[nodeSize];
-			this.buffer = ByteBuffer.wrap(bufferArray);
+			this.buffer = new byte[nodeSize];
 		}
 	}
 }

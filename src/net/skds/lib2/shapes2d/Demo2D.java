@@ -60,7 +60,7 @@ public class Demo2D extends JFrame {
 			AABR rect = AABR.fromToNormalized(200, 300, 250, 400);
 			var n = tree.put(rect, Color.PINK);
 
-			t = new Timer(20, e -> {
+			t = new Timer(20, _ -> {
 				float s = 200;
 				float time = (System.currentTimeMillis() % 180_000L) / 20f;
 				Vec2 off = Vec2.of(FastMath.cosDegr(time) * s, FastMath.sinDegr(time) * s);
@@ -134,7 +134,7 @@ public class Demo2D extends JFrame {
 				}
 			});
 
-			tree.foreach(n -> c2.increment());
+			tree.foreach(_ -> c2.increment());
 
 			System.out.println(c1.getValue() + "/" + c2.getValue());
 		}

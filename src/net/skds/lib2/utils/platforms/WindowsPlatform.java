@@ -13,8 +13,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.lang.foreign.Arena;
-import java.lang.foreign.GroupLayout;
-import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.util.LinkedList;
 
@@ -23,8 +21,6 @@ import static java.awt.event.KeyEvent.CTRL_DOWN_MASK;
 import static java.awt.event.KeyEvent.SHIFT_DOWN_MASK;
 import static java.awt.event.KeyEvent.*;
 import static java.awt.event.MouseEvent.*;
-import static net.skds.lib2.natives.LinkerUtils.INT;
-import static net.skds.lib2.natives.LinkerUtils.LONG;
 
 @CustomLog
 final class WindowsPlatform extends PlatformFeatures {
@@ -39,7 +35,7 @@ final class WindowsPlatform extends PlatformFeatures {
 	private static final int WIN_L_MENU = 0xA4;
 	private static final int WIN_R_MENU = 0xA5;
 
-	private static final GroupLayout KBDLLHOOK_STRUCT = MemoryLayout.structLayout(
+	/*private static final GroupLayout KBDLLHOOK_STRUCT = MemoryLayout.structLayout(
 			INT.withName("vkCode"),
 			INT.withName("scanCode"),
 			INT.withName("flags"),
@@ -57,8 +53,7 @@ final class WindowsPlatform extends PlatformFeatures {
 			INT.withName("time"),
 			MemoryLayout.paddingLayout(4),
 			LONG.withName("dwExtraInfo")
-	);
-
+	);*/
 
 	private final Component blankComponent = Box.createGlue();
 
@@ -278,7 +273,7 @@ final class WindowsPlatform extends PlatformFeatures {
 		@Override
 		public void run() {
 			Arena arena = Arena.ofAuto();
-			User32.LowLevelKeyboardProc kCaller = (n, w, l) -> {
+			User32.LowLevelKeyboardProc kCaller = (n, _, l) -> {
 				if (n < 0) {
 					log.warn("User32.LowLevelKeyboardProc: n is negative " + n);
 					return 0;

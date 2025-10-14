@@ -15,50 +15,50 @@ public class LoggerDemoFrame extends JFrame {
 		setLayout(new FlowLayout());
 
 		JButton btn = new JButton("replaceOuts");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			SKDSLogger.replaceOuts();
 		});
 		add(btn);
 
 		btn = new JButton("log");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			log.log("log");
 		});
 		add(btn);
 
 		btn = new JButton("warn");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			log.warn("warn");
 		});
 		add(btn);
 
 		btn = new JButton("sout");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			System.out.println("sout");
 		});
 		add(btn);
 
 		btn = new JButton("serr");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			System.err.println("serr");
 		});
 		add(btn);
 
 		btn = new JButton("println");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			System.out.println();
 		});
 		add(btn);
 
 		btn = new JButton("print");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			System.out.println("string: ");
 			System.out.print("print");
 		});
 		add(btn);
 
 		btn = new JButton("testAll");
-		btn.addActionListener(e -> {
+		btn.addActionListener(_ -> {
 			System.out.println("1");
 			System.err.println("2");
 			System.out.println();

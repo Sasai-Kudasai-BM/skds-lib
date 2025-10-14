@@ -17,7 +17,7 @@ public class OggPage {
 
 	private static final int MAGIC = (('O' << 8 | 'g') << 8 | 'g') << 8 | 'S';
 	private static final int MAGIC_CRC = OggCRC32.getMagicCRC(MAGIC);
-	private static final byte MAGIC_START = (byte) 'O';
+	//private static final byte MAGIC_START = (byte) 'O';
 	public static final int MINIMUM_PAGE_SIZE = 27;
 
 	int version;
