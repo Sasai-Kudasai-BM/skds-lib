@@ -436,7 +436,7 @@ public class SKDSUtils {
 		Deflater deflater = new Deflater(compressionLevel);
 		deflater.setInput(data, offset, len);
 		deflater.finish();
-		byte[] outBuffer = new byte[(Math.min(len + 32, 1024 * 8))];
+		byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
 		ByteArrayExtendedDataOutput bao = new ByteArrayExtendedDataOutput(len + 32);
 		do {
 			int i = deflater.deflate(outBuffer);
@@ -447,8 +447,32 @@ public class SKDSUtils {
 		return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
 	}
 
+	public static void compress(byte[] data, int offset, int len, int compressionLevel, DataOutput output) {
+		Deflater deflater = new Deflater(compressionLevel);
+		deflater.setInput(data, offset, len);
+		deflater.finish();
+		byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
+		try {
+			do {
+				int i = deflater.deflate(outBuffer);
+				output.write(outBuffer, 0, i);
+			} while (!deflater.finished());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		deflater.end();
+	}
+
 	public static ByteBuffer compress(byte[] data, int offset, int len) {
 		return compress(data, offset, len, Deflater.DEFAULT_COMPRESSION);
+	}
+
+	public static void compress(byte[] data, int offset, int len, DataOutput output) {
+		compress(data, offset, len, Deflater.DEFAULT_COMPRESSION, output);
+	}
+
+	public static ByteBuffer decompress(byte[] data, int uncompressedSize) throws DataFormatException {
+		return decompress(data, 0, data.length, uncompressedSize);
 	}
 
 	public static ByteBuffer decompress(byte[] data, int offset, int len, int uncompressedSize) throws DataFormatException {

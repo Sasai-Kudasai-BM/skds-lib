@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ClientTCPConnectionOptions extends TCPConnectionOptions {
+public class ClientsideTCPConnectionOptions extends TCPConnectionOptions {
 
 
 }

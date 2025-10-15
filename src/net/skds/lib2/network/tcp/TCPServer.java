@@ -1,42 +1,38 @@
 package net.skds.lib2.network.tcp;
 
 import lombok.CustomLog;
-import net.skds.lib2.misc.timer.SimpleTimer;
 import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.ThreadUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
-
 
 @CustomLog
-public class TCPServer {
+public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C, ServersideTCPConnectionOptions> {
 
 	protected boolean running = false;
 	//public final Selector selector;
 	public final Selector monitirSelector;
 	public final ServerSocketChannel server;
 	protected final Object acceptAttachment = new Object();
-	public final ServersideTCPConnectionOptions options;
+	private final ServersideTCPConnectionOptions options;
 
 	protected final String serverName;
-	protected final BiFunction<SocketChannel, TCPServer, CompletableFuture<ServersideTCPConnection>> connectionFactory;
+	protected final TCPConnectionFactory<?, TCPServer<C>> connectionFactory;
 
+	@SuppressWarnings("unchecked")
 	public TCPServer(ServersideTCPConnectionOptions options,
 					 String serverName,
-					 BiFunction<SocketChannel, TCPServer, CompletableFuture<ServersideTCPConnection>> connectionFactory
+					 TCPConnectionFactory<C, ? extends TCPServer<C>> connectionFactory
 	) {
 		this.options = options;
 		this.serverName = serverName;
-		this.connectionFactory = connectionFactory;
+		this.connectionFactory = (TCPConnectionFactory<?, TCPServer<C>>) connectionFactory;
 		try {
 			this.monitirSelector = Selector.open();
 			//this.selector = Selector.open();
@@ -84,6 +80,7 @@ public class TCPServer {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void onSelectMonitor(SelectionKey key) {
 		if (key.isAcceptable()) {
 			if (key.attachment() != acceptAttachment) {
@@ -94,22 +91,14 @@ public class TCPServer {
 				@SuppressWarnings("resource") final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
 				//key.cancel();
 				log.debug("[Monitor] accepting " + sc.getRemoteAddress());
-				connectionFactory.apply(sc, this).thenAccept(cc -> {
-					try {
-						if (cc == null) {
-							disconnectKey(key);
-							return;
-						}
-						final Socket socket = sc.socket();
-						socket.setTcpNoDelay(true);
-						socket.setSoTimeout(5000);
-						//sc.configureBlocking(false);
-						//sc.register(monitirSelector, SelectionKey.OP_READ, cc);
-						SimpleTimer.INSTANCE.scheduleRelative(cc::checkTimeout, options.getSilenceTimeout());
-						cc.startThreads();
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+				connectionFactory.createConnection(sc, this).thenAccept(cc -> {
+					if (cc == null) {
+						disconnectKey(key);
+						return;
 					}
+					cc.validateServerside();
+					onConnect((C) cc);
+					cc.startThreads();
 				}).exceptionally(SKDSUtils.getCatcher());
 			} catch (IOException e) {
 				e.printStackTrace(System.err);
@@ -136,6 +125,21 @@ public class TCPServer {
 		} catch (IOException ex) {
 			ex.printStackTrace(System.err);
 		}
+	}
+
+	@Override
+	public void onConnect(C connection) {
+
+	}
+
+	@Override
+	public void onDisconnect(C connection) {
+
+	}
+
+	@Override
+	public ServersideTCPConnectionOptions getOptions() {
+		return options;
 	}
 
 	//protected void outputLoop(AbstractClientConnection<?> connection) {

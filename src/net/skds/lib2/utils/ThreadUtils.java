@@ -12,6 +12,7 @@ public class ThreadUtils {
 
 	public static final ThreadGroup MAIN_GROUP = new ThreadGroup("Main");
 	public static final ThreadGroup UTIL_GROUP = new ThreadGroup("Util");
+	public static final ThreadGroup IO_GROUP = new ThreadGroup("IO");
 
 	private static final int threads = Math.max(4, Runtime.getRuntime().availableProcessors());
 

@@ -3,26 +3,32 @@ package net.skds.lib2.network.tcp;
 import lombok.CustomLog;
 import lombok.Getter;
 import net.skds.lib2.io.ContinuousBuffer;
+import net.skds.lib2.misc.timer.SimpleTimer;
+import net.skds.lib2.network.exception.WrongSideException;
 import net.skds.lib2.utils.ArrayUtils;
+import net.skds.lib2.utils.ThreadUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
 @CustomLog
-public abstract class TCPConnection<T extends TCPConnectionOptions> implements Closeable {
+public abstract class TCPConnection<O extends TCPConnectionOptions> implements Closeable {
 
 	@Getter
 	private final SocketChannel channel;
 	@Getter
-	private final SocketAddress address;
+	private final InetSocketAddress address;
 	@Getter
-	protected final T options;
+	protected final O options;
 	private final ByteBuffer directInputBuffer;
 	private final ByteBuffer directOutputBuffer;
 	private final ContinuousBuffer inputData;
@@ -37,12 +43,20 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 	private Thread outputThread;
 	private long lastTalk = 0;
 
+	@Getter
+	private final boolean serverside;
 
-	public TCPConnection(SocketChannel channel, T options) {
+	@Getter
+	private boolean packetTerminated = false;
+
+	private boolean threadsStarted = false;
+
+	public TCPConnection(SocketChannel channel, boolean isServerside, O options) {
+		this.serverside = isServerside;
 		this.channel = channel;
 		this.options = options;
 		try {
-			this.address = channel.getRemoteAddress();
+			this.address = (InetSocketAddress) channel.getRemoteAddress();
 			int inputSize = options.getInputBufferSize();
 			channel.socket().setReceiveBufferSize(inputSize);
 			this.directInputBuffer = ByteBuffer.allocateDirect(inputSize).flip();
@@ -51,6 +65,11 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 			channel.socket().setSendBufferSize(outputSize);
 			this.directOutputBuffer = ByteBuffer.allocateDirect(outputSize).flip();
 			this.outputData = new ContinuousBuffer(outputSize, -1);
+
+			final Socket socket = channel.socket();
+			socket.setTcpNoDelay(true);
+			socket.setSoTimeout(5000);
+			SimpleTimer.INSTANCE.scheduleRelative(this::checkTimeout, options.getSilenceTimeout());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -59,16 +78,33 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 	}
 
 	public final void startThreads() {
+		if (threadsStarted) throw new IllegalStateException("Threads has been already started");
+		threadsStarted = true;
 		this.inputThread = startInputThread();
 		this.outputThread = startOutputThread();
 	}
 
 	protected Thread startInputThread() {
-		return Thread.ofPlatform().name(getClass().getSimpleName() + "-" + address + "-in-", 0).start(this::readLoop);
+		return Thread.ofPlatform().group(ThreadUtils.IO_GROUP).name(getClass().getSimpleName() + "-" + address + "-in-", 0).start(this::readLoop);
 	}
 
 	protected Thread startOutputThread() {
-		return Thread.ofPlatform().name(getClass().getSimpleName() + "-" + address + "-out-", 0).start(this::writeLoop);
+		return Thread.ofPlatform().group(ThreadUtils.IO_GROUP).name(getClass().getSimpleName() + "-" + address + "-out-", 0).start(this::writeLoop);
+	}
+
+	public void validateServerside() {
+		if (!serverside)
+			throw new WrongSideException("Connection [%s] expected to be serverside but it is clientside".formatted(this));
+	}
+
+	public void validateClientside() {
+		if (serverside)
+			throw new WrongSideException("Connection [%s] expected to be clientside but it is serverside".formatted(this));
+	}
+
+
+	protected void setPacketTerminated() {
+		this.packetTerminated = true;
 	}
 
 	protected long checkTimeout() {
@@ -90,7 +126,7 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 
 	protected void timeoutDisconnect() throws IOException {
 		log.warn("Timeout disconnect " + this);
-		channel.close();
+		safeClose();
 	}
 
 	protected void resetTimeout() {
@@ -111,16 +147,21 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 	public void readLoop() {
 		try {
 			while (isAlive()) {
-				readInput(inputStream);
+				readInput();
 			}
-		} catch (IOException e) {
+		} catch (ClosedChannelException | SocketException closed) {
+			safeClose();
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 			safeClose();
 		}
 	}
 
 	protected void safeClose() {
 		try {
-			if (isAlive()) close();
+			if (isAlive()) {
+				close();
+			}
 		} catch (IOException ignored) {
 		}
 	}
@@ -134,20 +175,27 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 					channel.write(directOutputBuffer);
 					break;
 				}
+				if (packetTerminated) {
+					safeClose();
+					return;
+				}
 				if (outputData.available() < directOutputBuffer.capacity()) {
-					doDataWrite(outputStream);
+					doDataWrite(outputData.isEmpty() && !directOutputBuffer.hasRemaining());
 				}
 				outputData.takeData(directOutputBuffer.clear());
 				channel.write(directOutputBuffer.flip());
 			}
-		} catch (IOException e) {
+		} catch (ClosedChannelException | SocketException closed) {
+			safeClose();
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
 			safeClose();
 		}
 	}
 
-	public abstract void readInput(InputStream input) throws IOException;
+	public abstract void readInput() throws IOException;
 
-	public abstract void doDataWrite(OutputStream output) throws IOException;
+	public abstract void doDataWrite(boolean isQueueEmpty) throws IOException;
 
 	protected int doRead(byte[] b, int off, int len) throws IOException {
 		int read = 0;
@@ -162,8 +210,8 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 				}
 				directInputBuffer.clear();
 				int i = channel.read(directInputBuffer);
+				directInputBuffer.flip();
 				if (i > 0) {
-					directInputBuffer.flip();
 					inputData.putData(directInputBuffer);
 				} else if (i < 0) {
 					safeClose();
@@ -195,6 +243,10 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 
 		@Override
 		public int read(byte[] b, int off, int len) throws IOException {
+			if (Thread.currentThread() != inputThread) throw new WrongThreadException(
+					"Read operation must only be called from " + inputThread
+							+ " but was called from " + Thread.currentThread()
+			);
 			return doRead(b, off, len);
 		}
 
@@ -226,6 +278,10 @@ public abstract class TCPConnection<T extends TCPConnectionOptions> implements C
 
 		@Override
 		public void write(byte[] b, int off, int len) {
+			if (Thread.currentThread() != outputThread) throw new WrongThreadException(
+					"Write operation must only be called from " + outputThread
+							+ " but was called from " + Thread.currentThread()
+			);
 			int put = outputData.putData(b, off, len);
 			if (put < len) {
 				throw new IllegalStateException();

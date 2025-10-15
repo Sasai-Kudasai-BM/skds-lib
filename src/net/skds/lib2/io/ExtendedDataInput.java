@@ -71,6 +71,13 @@ public interface ExtendedDataInput extends DataInput {
 		return new String(data, StandardCharsets.UTF_8);
 	}
 
+
+	default <T> T readOptional(DataReader<T> reader) throws IOException {
+		if (readBoolean()) {
+			return reader.read(this);
+		} else return null;
+	}
+
 	default String readSizedString(int maxLength) throws IOException {
 		int l = readVarInt();
 		if (l == 0) return "";

@@ -3,15 +3,16 @@ package net.skds.tests.tcp;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.misc.timer.SimpleTimer;
-import net.skds.lib2.network.tcp.*;
+import net.skds.lib2.network.tcp.ClientsideTCPConnectionOptions;
+import net.skds.lib2.network.tcp.ServersideTCPConnectionOptions;
+import net.skds.lib2.network.tcp.TCPConnection;
+import net.skds.lib2.network.tcp.TCPServer;
 import net.skds.lib2.utils.Holders;
 import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.ThreadUtils;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletableFuture;
@@ -21,20 +22,30 @@ public class TCPServerTest {
 		SKDSLogger.replaceOuts();
 
 		Holders.IntHolder counter = new Holders.IntHolder();
-		Holders.ObjectHolder<ClientsideTCPConnection> connection = new Holders.ObjectHolder<>();
+		Holders.ObjectHolder<TCPConnection<?>> connection = new Holders.ObjectHolder<>();
 
-		TCPServer server = new TCPServer(
-				new ServersideTCPConnectionOptions(),
+		byte[] dataIn = new byte[1024 * 64];
+
+		ServersideTCPConnectionOptions serversideOptions = new ServersideTCPConnectionOptions();
+		ClientsideTCPConnectionOptions clientsideOptions = new ClientsideTCPConnectionOptions();
+
+		serversideOptions.setInputBufferSize(2 << 16);
+		clientsideOptions.setOutputBufferSize(2 << 16);
+
+		TCPServer<TCPConnection<ServersideTCPConnectionOptions>> server = new TCPServer<>(
+				serversideOptions,
 				"TestServer",
-				(sc, s) -> CompletableFuture.completedFuture(new ServersideTCPConnection(sc, s) {
+				(sc, s) -> CompletableFuture.supplyAsync(() -> new TCPConnection<>(sc, true, s.getOptions()) {
 
-					final ExtendedDataInput input = ExtendedDataInput.wrap(getInputStream());
+					//final ExtendedDataInput input = ExtendedDataInput.wrap(getInputStream());
 					final ExtendedDataOutput output = ExtendedDataOutput.wrap(getOutputStream());
 
 					long read = 0;
 					long readLast = 0;
 
 					{
+						ThreadUtils.await(1000); // think about
+
 						SimpleTimer.INSTANCE.scheduleRelative(() -> {
 							long r = read;
 							System.out.println(SKDSUtils.memoryCompact(r - readLast));
@@ -45,38 +56,40 @@ public class TCPServerTest {
 					}
 
 					@Override
-					public void readInput(InputStream inputStream) throws IOException {
-						read += input.readByteArray().length;
+					public void readInput() throws IOException {
+						//read += input.readByteArray().length;
+						read += getInputStream().read(dataIn);
 						resetTimeout();
 					}
 
 					@Override
-					public void doDataWrite(OutputStream outputStream) throws IOException {
+					public void doDataWrite(boolean isQueueEmpty) throws IOException {
 						ThreadUtils.await(1000);
 						output.writeSizedString("AMOGUS");
 					}
-				})
+				}, ThreadUtils.EXECUTOR)
 		);
 
 
 		server.start(new InetSocketAddress(8080));
 
-		byte[] data = new byte[1024 * 32 + 3463];
+		byte[] data = new byte[1024 * 64];
 
 		SocketChannel channel = SocketChannel.open(new InetSocketAddress(8080));
-		var cn = new ClientsideTCPConnection(channel, new ClientTCPConnectionOptions()) {
+		var cn = new TCPConnection<>(channel, false, clientsideOptions) {
 			final ExtendedDataInput input = ExtendedDataInput.wrap(getInputStream());
-			final ExtendedDataOutput output = ExtendedDataOutput.wrap(getOutputStream());
+			//final ExtendedDataOutput output = ExtendedDataOutput.wrap(getOutputStream());
 
 			@Override
-			public void readInput(InputStream inputStream) throws IOException {
+			public void readInput() throws IOException {
 				System.out.println(input.readSizedString());
 				resetTimeout();
 			}
 
 			@Override
-			public void doDataWrite(OutputStream outputStream) throws IOException {
-				output.writeByteArray(data);
+			public void doDataWrite(boolean isQueueEmpty) throws IOException {
+				//output.writeByteArray(data);
+				getOutputStream().write(data);
 				counter.increment();
 			}
 		};

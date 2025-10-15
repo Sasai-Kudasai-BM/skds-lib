@@ -191,32 +191,35 @@ public class ContinuousBuffer {
 		return readCount;
 	}
 
-	public long skipData(long count) {
-		Node n = this.readNode;
-		if (n == null) return 0;
-		int readCount = 0;
-		while (readCount < count) {
-			int rp = n.readPosition;
-			if (rp == nodeSize) {
-				// end of node
-				n = retireNode(n);
-				continue;
-			}
-			int available = n.writePosition - rp;
-			if (available == 0) {
-				break;
-			}
-			n.readPosition = rp + available;
-			readCount += available;
-		}
-		this.available -= readCount;
-		return readCount;
-	}
+	//public long skipData(long count) {
+	//	Node n = this.readNode;
+	//	if (n == null) return 0;
+	//	int readCount = 0;
+	//	while (readCount < count) {
+	//		int rp = n.readPosition;
+	//		if (rp == nodeSize) {
+	//			// end of node
+	//			n = retireNode(n);
+	//			continue;
+	//		}
+	//		int available = n.writePosition - rp;
+	//		if (available == 0) {
+	//			break;
+	//		}
+	//		n.readPosition = rp + available;
+	//		readCount += available;
+	//	}
+	//	this.available -= readCount;
+	//	return readCount;
+	//}
 
 	public long available() {
 		return available;
 	}
 
+	public boolean isEmpty() {
+		return available == 0;
+	}
 
 	private class Node {
 		final byte[] buffer;
