@@ -1,5 +1,6 @@
 package net.skds.lib2.io.json.elements;
 
+import lombok.NoArgsConstructor;
 import net.skds.lib2.io.codec.*;
 import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.sosison.SosisonEntryType;
@@ -9,6 +10,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
+@NoArgsConstructor
 public final class JsonArray extends ArrayList<JsonElement> implements JsonElement {
 
 	@Override
@@ -28,6 +30,10 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 			sj.add(String.valueOf(e));
 		}
 		return sj.toString();
+	}
+
+	public JsonArray(int initialCapacity) {
+		super(initialCapacity);
 	}
 
 	public boolean add(Number value) {
