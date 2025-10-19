@@ -194,6 +194,13 @@ public class ArrayUtils {
 		return array[random.nextInt(array.length)];
 	}
 
+	public static <T> boolean contains(T[] array, T value) {
+		for (int i = 0; i < array.length; i++) {
+			if (Objects.equals(array[i], value)) return true;
+		}
+		return false;
+	}
+
 	public static <T> boolean containsAll(Collection<T> collection, T[] array) {
 		for (int i = 0; i < array.length; i++) {
 			if (!collection.contains(array[i])) return false;

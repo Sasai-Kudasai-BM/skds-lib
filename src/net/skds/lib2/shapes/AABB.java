@@ -213,6 +213,14 @@ public final class AABB implements ConvexShape, TypedConfig {
 		return 2 * (x * y + x * z + y * z);
 	}
 
+	public double volume() {
+		double x = maxX - minX;
+		double y = maxY - minY;
+		double z = maxZ - minZ;
+
+		return x * y * z;
+	}
+
 	public double sizeX() {
 		return maxX - minX;
 	}
@@ -360,6 +368,16 @@ public final class AABB implements ConvexShape, TypedConfig {
 
 	public AABB expand(double value) {
 		return this.expand(value, value, value);
+	}
+
+	public double intersectionVolume(AABB box) {
+		double minX = Math.max(this.minX, box.minX);
+		double minY = Math.max(this.minY, box.minY);
+		double minZ = Math.max(this.minZ, box.minZ);
+		double maxX = Math.min(this.maxX, box.maxX);
+		double maxY = Math.min(this.maxY, box.maxY);
+		double maxZ = Math.min(this.maxZ, box.maxZ);
+		return (maxX - minX) * (maxY - minY) * (maxZ - minZ);
 	}
 
 	public AABB intersection(AABB box) {

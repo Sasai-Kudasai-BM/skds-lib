@@ -4,6 +4,8 @@ import net.skds.lib2.utils.SKDSUtils;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
@@ -55,6 +57,8 @@ public class CachedFileCollection {
 	}
 
 	private FileChunk loadChunk(FileChunkKey key) {
+		Path path = Path.of(key.path());
+		if (!Files.exists(path)) return null;
 		try (RandomAccessFile raf = new RandomAccessFile(key.path(), "r")) {
 			long offset = key.chunkIndex() * chunkSize;
 			long len = raf.length();

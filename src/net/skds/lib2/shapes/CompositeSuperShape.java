@@ -2,10 +2,10 @@ package net.skds.lib2.shapes;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
-import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
@@ -33,7 +33,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 
-	CompositeSuperShape(Shape[] shapes, Vec3 center, Object attachment) {
+	public CompositeSuperShape(Shape[] shapes, Vec3 center, Object attachment) {
 		Objects.requireNonNull(shapes);
 		Objects.requireNonNull(center);
 		this.shapes = shapes;
