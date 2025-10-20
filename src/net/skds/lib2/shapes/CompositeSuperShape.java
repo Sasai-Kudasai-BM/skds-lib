@@ -50,6 +50,13 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 		}
 	}
 
+	public static CompositeSuperShape of(Shape[] shapes) {
+		if (shapes == null || shapes.length == 0) {
+			return EMPTY;
+		}
+		return new CompositeSuperShape(shapes, Vec3.ZERO, null);
+	}
+
 	public static CompositeSuperShape of(Shape[] shapes, Vec3 center) {
 		if (shapes == null || shapes.length == 0) {
 			return EMPTY;

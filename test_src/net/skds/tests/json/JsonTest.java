@@ -25,6 +25,8 @@ public class JsonTest {
 
 	public static Map<String, JsonTestRun> createRuns() {
 		List<JsonTestRun> runs = new ArrayList<>();
+		//runs.add(new JsonTestRun("classHack", JsonTestClassHack::test));
+
 		runs.add(new JsonTestRun("amogus", JsonTestAmogus::test));
 		runs.add(new JsonTestRun("record", JsonTestRecord::test));
 		runs.add(new JsonTestRun("yup", JsonTestYup::test));
@@ -49,7 +51,7 @@ public class JsonTest {
 		return map;
 	}
 
-	public static record JsonTestRun(String key, Consumer<JsonTestRegistry> function) {
+	public record JsonTestRun(String key, Consumer<JsonTestRegistry> function) {
 
 		private static final String SPLIT;
 

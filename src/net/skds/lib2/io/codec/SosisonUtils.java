@@ -150,12 +150,27 @@ public class SosisonUtils {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T> T readJson(T... type) {
+		if (type.length != 0) throw new IllegalStateException("Are you Dolbaeb?!");
+		Class<T> tClass = (Class<T>) type.getClass().getComponentType();
+		return readJson(tClass);
+	}
+
 	public static <T> T readJson(@NotNull Class<T> tClass) {
 		DefaultFile df = tClass.getAnnotation(DefaultFile.class);
 		if (df == null) {
 			throw new IllegalArgumentException("Class \"" + tClass.getSimpleName() + "\" is not annotated with @DefaultFile");
 		}
 		return readJson(Path.of(df.value()), tClass);
+	}
+
+	@NotNull
+	@SuppressWarnings("unchecked")
+	public static <T> T readOrCreateJson(T... type) {
+		if (type.length != 0) throw new IllegalStateException("Are you Dolbaeb?!");
+		Class<T> tClass = (Class<T>) type.getClass().getComponentType();
+		return readOrCreateJson(tClass);
 	}
 
 	@NotNull
