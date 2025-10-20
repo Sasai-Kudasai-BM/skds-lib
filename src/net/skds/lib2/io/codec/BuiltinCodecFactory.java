@@ -356,7 +356,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> valueSerializer;
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		public MapCodec(Class<?> tClass, UniversalCodec[] codec, Supplier<Map<Object, Object>> consturctor, CodecRegistry registry) {
+		public MapCodec(Type tClass, UniversalCodec[] codec, Supplier<Map<Object, Object>> consturctor, CodecRegistry registry) {
 			super(tClass, registry);
 			this.keyDeserializer = codec[0];
 			this.valueDeserializer = codec[1];
@@ -453,7 +453,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> serializer;
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		public CollectionCodec(Class<?> tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<?>> defaultSupplier) {
+		public CollectionCodec(Type tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<?>> defaultSupplier) {
 			super(tClass, registry);
 			this.deserializer = (UniversalDeserializer<Object>) codec;
 			this.serializer = (UniversalSerializer<Object>) codec;
