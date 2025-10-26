@@ -52,6 +52,18 @@ public class StringUtils {
 		return "0x%x".formatted(value);
 	}
 
+	public static List<String> split(String value, char delimiter) {
+		List<String> list = new ArrayList<>();
+		int prev = 0;
+		int next;
+		while ((next = value.indexOf(delimiter, prev)) != -1) {
+			list.add(value.substring(prev, next));
+			prev = next + 1;
+		}
+		list.add(value.substring(prev));
+		return list;
+	}
+
 	public static String uppercaseUnderlined(String str) {
 		int l = str.length();
 		if (l <= 1) return str.toUpperCase();
@@ -161,7 +173,7 @@ public class StringUtils {
 	public static SequenceFormatter createSequenceFormatter(String pattern) {
 		return new SequenceFormatter(pattern, "%s");
 	}
-	
+
 	public static void writeQuoted(CharOutput output, String value, char quote) throws EndOfOutputException {
 		output.append(quote);
 		final int length = value.length();

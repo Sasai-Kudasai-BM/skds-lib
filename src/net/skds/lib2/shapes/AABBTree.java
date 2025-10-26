@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 public class AABBTree<T> {
 
+	private static final boolean DEBUG = Boolean.getBoolean("skds.bounding_tree.debug");
 	private static final float COST_RATIO = .25f;
 
 	private Node root;
@@ -213,8 +214,7 @@ public class AABBTree<T> {
 		}
 
 		private Node chooseNode(AABB newBounding, Node newNode) {
-			float c0 = cost(this.bounding);
-			float c = unionCost(newBounding, this.bounding) - c0;
+			float c = unionCost(newBounding, this.bounding) - cost(this.bounding);
 			float cl;
 			float cr;
 			Node left = this.left;
