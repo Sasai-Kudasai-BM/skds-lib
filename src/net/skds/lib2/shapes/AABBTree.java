@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 public class AABBTree<T> {
 
 	private static final boolean DEBUG = Boolean.getBoolean("skds.bounding_tree.debug");
-	private static final float COST_RATIO = .25f;
+	private static final float COST_RATIO = 0.25f;
 
 	private Node root;
 
