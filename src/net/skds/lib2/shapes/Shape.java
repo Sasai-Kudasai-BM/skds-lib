@@ -42,6 +42,8 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context);
 
+	boolean intersects(Shape shapeB);
+
 	Object getAttachment();
 
 	/**

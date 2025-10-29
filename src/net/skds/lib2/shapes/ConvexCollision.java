@@ -18,7 +18,7 @@ public class ConvexCollision {
 
 		List<Vec3> terminators = new ArrayList<>();
 		if (s1Norm.length * s2Norm.length == 0) {
-			terminators.add(velocity21.normalize());
+			terminators.add(s1.getCenter().sub(s2.getCenter()).normalize());
 		} else {
 			Collections.addAll(terminators, s1Norm);
 			Collections.addAll(terminators, s2Norm);
@@ -35,6 +35,92 @@ public class ConvexCollision {
 		}
 
 		return intersectionMoving(s1, s2, terminators, velocity21);
+	}
+
+	public static boolean intersects(ConvexShape s1, ConvexShape s2) {
+
+		Vec3[] s1Norm = s1.getNormals();
+		Vec3[] s2Norm = s2.getNormals();
+
+		List<Vec3> terminators = new ArrayList<>();
+		if (s1Norm.length * s2Norm.length == 0) {
+			terminators.add(s1.getCenter().sub(s2.getCenter()).normalize());
+		} else {
+			Collections.addAll(terminators, s1Norm);
+			Collections.addAll(terminators, s2Norm);
+
+			for (int i = 0; i < s1Norm.length; i++) {
+				for (int j = 0; j < s2Norm.length; j++) {
+					Vec3 cross = s1Norm[i].cross(s2Norm[j]);
+					double len = cross.length();
+					if (len > 1E-30) {
+						terminators.add(cross.scale(1 / len));
+					}
+				}
+			}
+		}
+
+		return intersects(s1, s2, terminators);
+	}
+
+	private static boolean intersects(ConvexShape a, ConvexShape b, List<Vec3> terminators) {
+
+		double pMin = -Double.MAX_VALUE;
+		double pMax = Double.MAX_VALUE;
+
+		for (int i = 0; i < terminators.size(); i++) {
+			Vec3 terminator = terminators.get(i);
+			double aMin = a.getProjectionMin(terminator);
+			double aMax = a.getProjectionMax(terminator);
+			double bMin = b.getProjectionMin(terminator);
+			double bMax = b.getProjectionMax(terminator);
+
+			double tMin = aMin - bMax;
+			double tMax = aMax - bMin;
+
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean intersectsAABB(AABB a, AABB b) {
+
+		double pMin = -Double.MAX_VALUE;
+		double pMax = Double.MAX_VALUE;
+
+		var axs = Direction.Axis.VALUES;
+
+		for (int i = 0; i < axs.length; i++) {
+			Direction.Axis axis = axs[i];
+			double aMin = a.getProjectionMin(axis);
+			double aMax = a.getProjectionMax(axis);
+			double bMin = b.getProjectionMin(axis);
+			double bMax = b.getProjectionMax(axis);
+
+			double tMin = aMin - bMax;
+			double tMax = aMax - bMin;
+
+			if (tMin > pMin) {
+				pMin = tMin;
+			}
+			if (tMax < pMax) {
+				pMax = tMax;
+			}
+			if (pMax < pMin) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private static Collision intersectionMoving(ConvexShape a, ConvexShape b, List<Vec3> terminators, Vec3 velocityBA) {

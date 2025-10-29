@@ -17,6 +17,9 @@ public non-sealed interface CompositeShape extends Shape {
 	CompositeShape rotate(Matrix3 m3);
 
 	@Override
+	CompositeShape rotate(Quat q);
+
+	@Override
 	CompositeShape move(Vec3 delta);
 
 	@Override
@@ -86,6 +89,19 @@ public non-sealed interface CompositeShape extends Shape {
 		return nearest;
 	}
 
+	static boolean intersects(CompositeShape composite, ConvexShape convex) {
+		AABB convexAABB = convex.getBoundingBox();
+		ConvexShape[] shapes = composite.simplify(convexAABB);
+		if (shapes.length == 0) return false;
+		for (int i = 0; i < shapes.length; i++) {
+			final ConvexShape subShape = shapes[i];
+			if (subShape.intersects(convex)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	static Collision collideComposite(CompositeShape shapeA, CompositeShape shapeB, Vec3 velocityBA, CollisionContext context) {
 		final AABB bAABB = shapeB.getBoundingBox();
 		final ConvexShape[] shapesA = shapeA.simplify(bAABB);
@@ -111,15 +127,45 @@ public non-sealed interface CompositeShape extends Shape {
 		return nearest;
 	}
 
+	static boolean intersectsComposite(CompositeShape shapeA, CompositeShape shapeB) {
+		final AABB bAABB = shapeB.getBoundingBox();
+		final ConvexShape[] shapesA = shapeA.simplify(bAABB);
+		if (shapesA.length == 0) return false;
+		final AABB aAABB = shapeA.getBoundingBox();
+		final ConvexShape[] shapesB = shapeB.simplify(aAABB);
+		if (shapesB.length == 0) return false;
+
+		for (int i = 0; i < shapesA.length; i++) {
+			final ConvexShape subShapeA = shapesA[i];
+			final AABB subShapeAAABB = subShapeA.getBoundingBox();
+			for (int j = 0; j < shapesB.length; j++) {
+				final ConvexShape subShapeB = shapesB[i];
+				if (subShapeAAABB.intersects(subShapeB.getBoundingBox())) {
+					if (subShapeA.intersects(subShapeB)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	@Override
 	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
-		if (shapeB instanceof ConvexShape convex) {
-			return collideConvex(this, convex, velocityBA, context);
-		} else if (shapeB instanceof CompositeShape composite) {
-			return collideComposite(this, composite, velocityBA.inverse(), context);
+		if (shapeB.isConvex()) {
+			return collideConvex(this, (ConvexShape) shapeB, velocityBA, context);
+		} else {
+			return collideComposite(this, (CompositeShape) shapeB, velocityBA.inverse(), context);
 		}
-		throw new UnsupportedOperationException("Unable to collide \"%s\" with \"%s\"".formatted(this, shapeB));
+	}
 
+	@Override
+	default boolean intersects(Shape shapeB) {
+		if (shapeB.isConvex()) {
+			return intersects(this, (ConvexShape) shapeB);
+		} else {
+			return intersectsComposite(this, (CompositeShape) shapeB);
+		}
 	}
 
 	default AABB createBounding() {

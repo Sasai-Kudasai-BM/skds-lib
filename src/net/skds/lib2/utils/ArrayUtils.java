@@ -23,6 +23,15 @@ public class ArrayUtils {
 		return (T[]) EMPTY_OBJECT;
 	}
 
+	public static <T> T[] merge(T[] a1, T[] a2) {
+		if (a1.length == 0) return a2;
+		if (a2.length == 0) return a1;
+		int al = a1.length;
+		a1 = Arrays.copyOf(a1, al + a2.length);
+		System.arraycopy(a2, 0, a1, al, a2.length);
+		return a1;
+	}
+
 	public static void movePart(Object array, int from, int to, int count) {
 		System.arraycopy(array, from, array, to, count);
 	}
@@ -465,6 +474,27 @@ public class ArrayUtils {
 		@Override
 		public int hashCode() {
 			return hash;
+		}
+	}
+
+	public static final class GrowingArray<T> {
+		private int pos = 0;
+		private T[] array;
+
+		@SuppressWarnings("unchecked")
+		public GrowingArray(Class<?> type, int initialSize) {
+			this.array = (T[]) Array.newInstance(type, initialSize);
+		}
+
+		public void add(T value) {
+			if (++pos >= array.length) {
+				array = Arrays.copyOf(array, array.length * 2);
+			}
+			array[pos - 1] = value;
+		}
+
+		public T[] getArray() {
+			return Arrays.copyOf(array, pos);
 		}
 	}
 
