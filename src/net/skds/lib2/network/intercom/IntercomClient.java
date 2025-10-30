@@ -4,6 +4,8 @@ import lombok.CustomLog;
 import lombok.Getter;
 import net.skds.lib2.network.tcp.ClientsideTCPConnectionOptions;
 import net.skds.lib2.network.tcp.TCPConnectionFactory;
+import net.skds.lib2.security.CustomX509TrustManager;
+import net.skds.lib2.security.SKDSTrusted;
 import net.skds.lib2.utils.ThreadUtils;
 
 import java.io.IOException;
@@ -15,6 +17,8 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 
 	@Getter
 	private final Configuration configuration;
+	@Getter
+	private final CustomX509TrustManager trustManager;
 	private final TCPConnectionFactory<ClientIntercomConnection, IntercomClient> connectionFactory;
 
 	@Getter
@@ -23,6 +27,7 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 	public IntercomClient(Configuration configuration, TCPConnectionFactory<ClientIntercomConnection, IntercomClient> connectionFactory) {
 		this.connectionFactory = connectionFactory;
 		this.configuration = configuration;
+		this.trustManager = SKDSTrusted.createTrustManager();
 	}
 
 	public boolean connected() {

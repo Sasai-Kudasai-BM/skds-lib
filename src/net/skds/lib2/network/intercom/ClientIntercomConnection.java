@@ -5,18 +5,28 @@ import net.skds.lib2.network.intercom.packet.HandshakeStatus;
 import net.skds.lib2.network.intercom.packet.system.*;
 import net.skds.lib2.network.tcp.TCPConnectionOptions;
 import net.skds.lib2.security.AuthorizationData;
+import net.skds.lib2.security.CertificateStatus;
+import net.skds.lib2.security.X509Utils;
+import net.skds.lib2.utils.logger.SKDSLogger;
 
+import java.io.ByteArrayInputStream;
 import java.nio.channels.SocketChannel;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public abstract class ClientIntercomConnection extends IntercomConnection<ClientIntercomConnection> {
 
 
 	public ClientIntercomConnection(SocketChannel channel,
-									IntercomConnectionOwner<ClientIntercomConnection, ?> connectionOwner,
+									IntercomClient client,
 									IntercomSettings intercomSettings,
 									TCPConnectionOptions options
 	) {
-		super(channel, false, connectionOwner, intercomSettings, options);
+		super(channel, false, client, intercomSettings, options);
+	}
+
+	public IntercomClient getClient() {
+		return (IntercomClient) getConnectionOwner();
 	}
 
 	public void startHandshake(@Nullable SecurityLevel securityLevel) {
@@ -31,7 +41,7 @@ public abstract class ClientIntercomConnection extends IntercomConnection<Client
 	public void handshakeSuccess() {
 		if (getSecurityLevel().checkCertificate) {
 			validateHandshakeStatus(HandshakeStatus.HANDSHAKE, HandshakeStatus.CERT_VALIDATION);
-			throw new UnsupportedOperationException("TODO");// TODO
+			// wait for certificate
 		} else {
 			validateHandshakeStatus(HandshakeStatus.HANDSHAKE, HandshakeStatus.AUTHORIZATION);
 			send(new AuthorizationStartC2SPacket(getAuthorizationData()));
@@ -60,7 +70,19 @@ public abstract class ClientIntercomConnection extends IntercomConnection<Client
 	}
 
 	public final void receiveCertificate(byte[] certData) {
-		throw new UnsupportedOperationException("TODO");// TODO
+		validateHandshakeStatus(HandshakeStatus.CERT_VALIDATION);
+		X509Certificate[] certificates = X509Utils.readCertificates(new ByteArrayInputStream(certData));
+		CertificateStatus status = CertificateStatus.INVALID;
+		try {
+			status = getClient().getTrustManager().checkCertChain(certificates, getAddress().getHostName());
+		} catch (CertificateException e) {
+			e.printStackTrace(SKDSLogger.WARN_PRINTSTREAM);
+		}
+		if (status.isOk()) {
+			validateHandshakeStatus(HandshakeStatus.CERT_VALIDATION, HandshakeStatus.AUTHORIZATION);
+		} else {
+			disconnect("Certificate status: " + status);
+		}
 	}
 
 	public final void onAuthorize(String error) {

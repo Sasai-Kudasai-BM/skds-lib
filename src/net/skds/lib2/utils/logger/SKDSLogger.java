@@ -10,8 +10,15 @@ public class SKDSLogger {
 
 	public static final PrintStream ORIGINAL_OUT = System.out;
 	public static final PrintStream ORIGINAL_ERR = System.err;
-	public static final PrintStream REPLACED_OUT = new CustomPrintStream(CustomPrintStream.Type.OUT, ORIGINAL_OUT);
-	public static final PrintStream REPLACED_ERR = new CustomPrintStream(CustomPrintStream.Type.ERR, ORIGINAL_ERR);
+	public static final PrintStream REPLACED_OUT = new CustomPrintStream(LoggerLevel.SYSTEM_OUT, ORIGINAL_OUT, GLOBAL_LOGGER);
+	public static final PrintStream REPLACED_ERR = new CustomPrintStream(LoggerLevel.SYSTEM_ERR, ORIGINAL_ERR, GLOBAL_LOGGER);
+
+	public static final PrintStream DEBUG_PRINTSTREAM = new CustomPrintStream(LoggerLevel.DEBUG, ORIGINAL_OUT, GLOBAL_LOGGER);
+	public static final PrintStream INFO_PRINTSTREAM = new CustomPrintStream(LoggerLevel.INFO, ORIGINAL_OUT, GLOBAL_LOGGER);
+	public static final PrintStream LOG_PRINTSTREAM = new CustomPrintStream(LoggerLevel.LOG, ORIGINAL_OUT, GLOBAL_LOGGER);
+	public static final PrintStream WARN_PRINTSTREAM = new CustomPrintStream(LoggerLevel.WARN, ORIGINAL_OUT, GLOBAL_LOGGER);
+	public static final PrintStream ERROR_PRINTSTREAM = new CustomPrintStream(LoggerLevel.ERROR, ORIGINAL_OUT, GLOBAL_LOGGER);
+	
 	private static final int DEPTH = 3;
 	static final PrintStream[] PRINT_STREAM_ARRAY = {};
 

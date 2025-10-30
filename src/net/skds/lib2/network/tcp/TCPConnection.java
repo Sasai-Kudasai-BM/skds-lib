@@ -108,7 +108,7 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 	}
 
 	protected long checkTimeout() {
-		if (!isAlive()) return -1;
+		if (!isAlive() || true) return -1;
 		if (lastTalk + options.getSilenceTimeout() < System.currentTimeMillis()) {
 			try {
 				timeoutDisconnect();

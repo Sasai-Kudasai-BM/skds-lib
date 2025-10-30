@@ -154,9 +154,10 @@ public class ContinuousBuffer {
 			if (available == 0) {
 				break; // no more space in buffer
 			}
-			System.arraycopy(n.buffer, rp, b, offset + readCount, available);
-			n.readPosition = rp + available;
-			readCount += available;
+			int toRead = Math.min(count, available);
+			System.arraycopy(n.buffer, rp, b, offset + readCount, toRead);
+			n.readPosition = rp + toRead;
+			readCount += toRead;
 		}
 		this.available -= readCount;
 		return readCount;
@@ -183,9 +184,10 @@ public class ContinuousBuffer {
 			if (available == 0) {
 				break; // no more space in buffer
 			}
-			b.put(offset + readCount, n.buffer, rp, available);
-			n.readPosition = rp + available;
-			readCount += available;
+			int toRead = Math.min(count, available);
+			b.put(offset + readCount, n.buffer, rp, toRead);
+			n.readPosition = rp + toRead;
+			readCount += toRead;
 		}
 		this.available -= readCount;
 		return readCount;

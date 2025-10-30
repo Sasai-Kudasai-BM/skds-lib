@@ -24,17 +24,20 @@ public abstract class ServerIntercomConnection extends IntercomConnection<Server
 		send(new PublicInfoResponseS2CPacket(getPublicInfo()));
 	}
 
+	protected abstract byte[] getCertificates();
 
 	public void onEncryptionSuccess(EncryptionSuccessC2SPacket packet) {
-		if (getSecurityLevel().checkCertificate) {
+		boolean checkCert = getSecurityLevel().checkCertificate;
+		if (checkCert) {
 			validateHandshakeStatus(HandshakeStatus.ENCRYPTION, HandshakeStatus.CERT_VALIDATION, packet);
 		} else {
 			validateHandshakeStatus(HandshakeStatus.ENCRYPTION, HandshakeStatus.AUTHORIZATION, packet);
+			// wait for authorization
 		}
 		((ServerIntercomEncryption) this.encryption).applySecret(packet.getKey());
 		enableEncryption();
-		if (getSecurityLevel().checkCertificate) {
-			throw new UnsupportedOperationException("TODO"); // TODO
+		if (checkCert) {
+			send(new CertificateS2CPacket(getCertificates()));
 		}
 	}
 
@@ -47,7 +50,7 @@ public abstract class ServerIntercomConnection extends IntercomConnection<Server
 			ServerIntercomEncryption e = new ServerIntercomEncryption();
 			this.encryption = e;
 			e.createPublicRSAKey().thenAccept(k -> {
-				validateHandshakeStatus(HandshakeStatus.NONE, HandshakeStatus.ENCRYPTION);
+				validateHandshakeStatus(HandshakeStatus.HANDSHAKE, HandshakeStatus.ENCRYPTION);
 				send(new EncryptionStartS2CPacket(k.getEncoded()));
 			}).exceptionally(SKDSUtils.getCatcher());
 		} else {
