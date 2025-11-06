@@ -21,7 +21,10 @@ import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 @SuppressWarnings("unused")
 public sealed interface Quat permits QuatD, QuatF {
 
-	Quat ONE = QuatD.ONE;
+	QuatD ONE = new QuatD(0, 0, 0, 1);
+	QuatD ROT_180_X = new QuatD(1, 0, 0, 0);
+	QuatD ROT_180_Y = new QuatD(0, 1, 0, 0);
+	QuatD ROT_180_Z = new QuatD(0, 0, 1, 0);
 
 	double x();
 
@@ -74,7 +77,7 @@ public sealed interface Quat permits QuatD, QuatF {
 
 	static QuatD fromAxisDegrees(Vec3 axis, double angle) {
 		if (Math.abs(angle) < 1E-30) {
-			return QuatD.ONE;
+			return Quat.ONE;
 		}
 		double f = FastMath.sinDegr(angle / 2.0);
 		return new QuatD(
@@ -87,7 +90,7 @@ public sealed interface Quat permits QuatD, QuatF {
 
 	static QuatD fromAxisRad(Vec3 axis, double angle) {
 		if (Math.abs(angle) < 1E-30) {
-			return QuatD.ONE;
+			return Quat.ONE;
 		}
 		double f = FastMath.sinRad(angle / 2.0);
 		return new QuatD(

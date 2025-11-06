@@ -20,10 +20,10 @@ public class ClientIntercomEncryption extends IntercomEncryption {
 
 			PublicKey key = keyFactory.generatePublic(new X509EncodedKeySpec(rsaSecret, "RSA"));
 			Cipher secretEncryptor = Cipher.getInstance("RSA");
-			secretEncryptor.init(Cipher.DECRYPT_MODE, key);
+			secretEncryptor.init(Cipher.ENCRYPT_MODE, key);
 
 			SecretKey aesKey = generator.generateKey();
-			IvParameterSpec iv = new IvParameterSpec(aesKey.getEncoded());
+			IvParameterSpec iv = new IvParameterSpec(aesKey.getEncoded(), 0, 16);
 			this.encryptor = Cipher.getInstance("AES/CFB8/NoPadding");
 			encryptor.init(Cipher.ENCRYPT_MODE, aesKey, iv);
 			this.decryptor = Cipher.getInstance("AES/CFB8/NoPadding");

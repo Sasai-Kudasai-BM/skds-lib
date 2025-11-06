@@ -1,18 +1,25 @@
 package net.skds.tests.tcp;
 
+import net.skds.lib2.network.AddressLocation;
 import net.skds.lib2.network.intercom.*;
 import net.skds.lib2.network.tcp.ClientsideTCPConnectionOptions;
 import net.skds.lib2.network.tcp.ServersideTCPConnectionOptions;
 import net.skds.lib2.security.AuthorizationData;
+import net.skds.lib2.utils.SKDSFiles;
 import net.skds.lib2.utils.ThreadUtils;
 import net.skds.lib2.utils.logger.SKDSLogger;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.security.cert.CertificateEncodingException;
 import java.util.concurrent.CompletableFuture;
 
 public class IntercomTest {
 
-	static void main() {
+	private static final byte[] certificates = getCertificate();
+
+	static void main() throws CertificateEncodingException {
 		SKDSLogger.replaceOuts();
 
 		InetSocketAddress address = new InetSocketAddress(12214);
@@ -40,7 +47,7 @@ public class IntercomTest {
 		IntercomServer.Configuration serverConfiguration = new IntercomServer.Configuration(
 				serverOptions,
 				SecurityOptions.DEFAULT,
-				IntercomSettings.DEFAULT,
+				new IntercomSettings(128, 6, AddressLocation.LOCALHOST),
 				"ServerTest"
 		);
 		return new IntercomServer(serverConfiguration, (sc, s) ->
@@ -51,6 +58,11 @@ public class IntercomTest {
 					@Override
 					protected String getPublicInfo() {
 						return "aboba";
+					}
+
+					@Override
+					protected byte[] getCertificates() {
+						return certificates;
 					}
 
 					@Override
@@ -72,12 +84,21 @@ public class IntercomTest {
 		);
 	}
 
+
+	private static byte[] getCertificate() {
+		try {
+			return Files.readAllBytes(SKDSFiles.DESKTOP_PATH.resolve("ssl", "test.pem"));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private static IntercomClient getIntercomClient() {
 		ClientsideTCPConnectionOptions clientOptions = new ClientsideTCPConnectionOptions();
 		IntercomClient.Configuration clientConfiguration = new IntercomClient.Configuration(
 				clientOptions,
 				SecurityOptions.DEFAULT,
-				IntercomSettings.DEFAULT,
+				new IntercomSettings(128, 6, AddressLocation.LOCALHOST),
 				"ClientTest"
 		);
 		return new IntercomClient(clientConfiguration, (sc, c) ->
@@ -114,7 +135,7 @@ public class IntercomTest {
 					@Override
 					public void receivePublicInfo(String info) {
 						System.out.println(info);
-						startHandshake(null);
+						startHandshake(SecurityLevel.WEB_SAFE);
 					}
 				})
 		);

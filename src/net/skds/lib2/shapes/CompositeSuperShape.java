@@ -50,6 +50,11 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 		}
 	}
 
+	@Override
+	public int hashCode() {
+		return bounding.hashCode();
+	}
+
 	public static CompositeSuperShape of(Shape[] shapes) {
 		if (shapes == null || shapes.length == 0) {
 			return EMPTY;
@@ -126,7 +131,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 	}
 
 	@Override
-	public Shape rotate(Quat q) {
+	public CompositeShape rotate(Quat q) {
 		return rotate(Matrix3.fromQuat(q));
 	}
 
@@ -297,10 +302,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 			if (!this.bounding.equals(compositeShape.getBoundingBox())) {
 				return false;
 			}
-			if (!Arrays.equals(this.shapes, compositeShape.getAllShapes())) {
-				return false;
-			}
-			return true;
+			return Arrays.equals(this.shapes, compositeShape.getAllShapes());
 		}
 		return false;
 	}

@@ -173,14 +173,11 @@ public final class Sphere implements ConvexShape {
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
-		if (obj == null) return false;
-		if (obj instanceof Sphere s) {
-			return equals(s);
-		}
-		if (obj instanceof ConvexShape s) {
-			return ConvexShape.equals(this, s);
-		}
-		return false;
+		return switch (obj) {
+			case Sphere s -> equals(s);
+			case ConvexShape s -> ConvexShape.equals(this, s);
+			case null, default -> false;
+		};
 	}
 
 	public boolean equals(Sphere other) {
@@ -191,9 +188,6 @@ public final class Sphere implements ConvexShape {
 
 	@Override
 	public int hashCode() {
-		int result = center.hashCode();
-		long temp = Double.doubleToLongBits(radius);
-		result = 31 * result + (int) (temp ^ (temp >>> 32));
-		return result;
+		return getBoundingBox().hashCode();
 	}
 }

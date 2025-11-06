@@ -6,30 +6,22 @@ import java.io.OutputStream;
 
 class CustomPrintStream extends CustomAbstractPrintStream {
 
-	protected final Type type;
+	protected final LoggerLevel type;
+	protected final SKDSLogger logger;
 
-	public CustomPrintStream(Type t, OutputStream out) {
+	public CustomPrintStream(LoggerLevel t, OutputStream out, SKDSLogger logger) {
 		super(out);
 		this.type = t;
-	}
-
-	public enum Type {
-		ERR, OUT;
+		this.logger = logger;
 	}
 
 	@Override
 	protected void logLine(String x, boolean ln) {
-		switch (this.type) {
-			case OUT -> SKDSLogger.GLOBAL_LOGGER.log0(LoggerLevel.SYSTEM_OUT, 4, ln, ln, x);
-			case ERR -> SKDSLogger.GLOBAL_LOGGER.log0(LoggerLevel.SYSTEM_ERR, 4, ln, ln, x);
-		}
+		logger.log0(type, 4, ln, ln, x);
 	}
 
 	@Override
 	public void println() {
-		switch (this.type) {
-			case OUT -> SKDSLogger.GLOBAL_LOGGER.printLn(LoggerLevel.SYSTEM_OUT);
-			case ERR -> SKDSLogger.GLOBAL_LOGGER.printLn(LoggerLevel.SYSTEM_ERR);
-		}
+		logger.printLn(type);
 	}
 }

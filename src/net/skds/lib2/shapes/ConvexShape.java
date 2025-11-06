@@ -97,12 +97,20 @@ public non-sealed interface ConvexShape extends Shape {
 
 	@Override
 	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
-		if (shapeB instanceof ConvexShape convex) {
-			return ConvexCollision.collide(this, convex, velocityBA, context);
-		} else if (shapeB instanceof CompositeShape composite) {
-			return CompositeShape.collideConvex(composite, this, velocityBA.inverse(), context);
+		if (shapeB.isConvex()) {
+			return ConvexCollision.collide(this, (ConvexShape) shapeB, velocityBA, context);
+		} else {
+			return CompositeShape.collideConvex((CompositeShape) shapeB, this, velocityBA.inverse(), context);
 		}
-		throw new UnsupportedOperationException("Unable to collide \"%s\" with \"%s\"".formatted(this, shapeB));
+	}
+
+	@Override
+	default boolean intersects(Shape shapeB) {
+		if (shapeB.isConvex()) {
+			return ConvexCollision.intersects(this, (ConvexShape) shapeB);
+		} else {
+			return CompositeShape.intersects((CompositeShape) shapeB, this);
+		}
 	}
 
 	@Override
@@ -241,14 +249,18 @@ public non-sealed interface ConvexShape extends Shape {
 		if (shape1 == null || shape2 == null) {
 			return false;
 		}
-		if (shape1 instanceof AABB aabb1 && shape2 instanceof AABB aabb2) {
-			return aabb1.equals(aabb2);
-		}
-		if (shape1 instanceof OBB obb1 && shape2 instanceof OBB obb2) {
-			return obb1.equals(obb2);
-		}
-		if (shape1 instanceof AABB aabb && shape2 instanceof OBB obb && Matrix3.equals(obb.normals, Matrix3.SINGLE)) {
-			return aabb.equals(obb.getBoundingBox());
+		switch (shape1) {
+			case AABB aabb1 when shape2 instanceof AABB aabb2 -> {
+				return aabb1.equals(aabb2);
+			}
+			case OBB obb1 when shape2 instanceof OBB obb2 -> {
+				return obb1.equals(obb2);
+			}
+			case AABB aabb when shape2 instanceof OBB obb && Matrix3.equals(obb.normals, Matrix3.SINGLE) -> {
+				return aabb.equals(obb.getBoundingBox());
+			}
+			default -> {
+			}
 		}
 		if (shape2 instanceof AABB aabb && shape1 instanceof OBB obb && Matrix3.equals(obb.normals, Matrix3.SINGLE)) {
 			return aabb.equals(obb.getBoundingBox());

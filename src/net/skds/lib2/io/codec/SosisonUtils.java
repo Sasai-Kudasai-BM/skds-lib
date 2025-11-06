@@ -243,6 +243,15 @@ public class SosisonUtils {
 		return fancyRegistry.getSerializer(type).toJson(object);
 	}
 
+	public static boolean saveJson(Object cfg) {
+		Class<?> tClass = cfg.getClass();
+		DefaultFile df = tClass.getAnnotation(DefaultFile.class);
+		if (df == null) {
+			throw new IllegalArgumentException("Class \"" + tClass.getSimpleName() + "\" is not annotated with @DefaultFile");
+		}
+		return saveJson(df.value(), cfg);
+	}
+
 	public static boolean saveJson(String path, Object cfg) {
 		return saveJson(Path.of(path), cfg);
 	}

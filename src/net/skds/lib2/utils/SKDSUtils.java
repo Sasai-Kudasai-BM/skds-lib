@@ -17,8 +17,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -114,6 +114,23 @@ public class SKDSUtils {
 	public static byte[] createOptimalSizedBuffer(int dataLen) {
 		if (dataLen == 0) return ArrayUtils.EMPTY_BYTE;
 		return new byte[dataLen < DEFAULT_BUFFER_SIZE ? dataLen : DEFAULT_BUFFER_SIZE];
+	}
+
+
+	public static <T> T castOrThrow(Object o, Class<T> type, String message) {
+		try {
+			return type.cast(o);
+		} catch (ClassCastException e) {
+			throw new RuntimeException(message, e);
+		}
+	}
+
+	public static <T> T castOrThrow(Object o, Class<T> type) {
+		try {
+			return type.cast(o);
+		} catch (ClassCastException e) {
+			throw new RuntimeException("Not a " + type.getSimpleName(), e);
+		}
 	}
 
 	public static String hashFile(File f) {

@@ -22,6 +22,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 
 	public static final AABB EMPTY = new AABB(0, 0, 0, 0, 0, 0);
 	public static final AABB ONE = new AABB(0, 0, 0, 1, 1, 1);
+	public static final AABB ONE_CENTERED = new AABB(-.5, -.5, -.5, .5, .5, .5);
 
 	private static final Vec3[] normals = {Vec3.XP, Vec3.YP, Vec3.ZP};
 
@@ -621,10 +622,18 @@ public final class AABB implements ConvexShape, TypedConfig {
 
 	@Override
 	public Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
-		if (shapeB instanceof AABB sb) {
+		if (shapeB.isConvex() && shapeB instanceof AABB sb) {
 			return ConvexCollision.collideAABB(this, sb, velocityBA, context);
 		}
 		return ConvexShape.super.collide(shapeB, velocityBA, context);
+	}
+
+	@Override
+	public boolean intersects(Shape shapeB) {
+		if (shapeB.isConvex() && shapeB instanceof AABB sb) {
+			return ConvexCollision.intersectsAABB(this, sb);
+		}
+		return ConvexShape.super.intersects(shapeB);
 	}
 
 	@Override

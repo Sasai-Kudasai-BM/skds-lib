@@ -39,7 +39,7 @@ public class ServerIntercomEncryption extends IntercomEncryption {
 		try {
 			secret = decryptor.doFinal(secret);
 			SecretKey key = new SecretKeySpec(secret, 0, secret.length, "AES");
-			IvParameterSpec iv = new IvParameterSpec(secret);
+			IvParameterSpec iv = new IvParameterSpec(secret, 0, 16);
 			this.encryptor = Cipher.getInstance("AES/CFB8/NoPadding");
 			encryptor.init(Cipher.ENCRYPT_MODE, key, iv);
 			this.decryptor = Cipher.getInstance("AES/CFB8/NoPadding");
@@ -57,6 +57,6 @@ public class ServerIntercomEncryption extends IntercomEncryption {
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-		generator.initialize(1024 * 4);
+		generator.initialize(1024 * 2);
 	}
 }

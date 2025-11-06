@@ -32,7 +32,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 	private final LinkedBlockingQueue<IntercomInputPacket<?>> inputPacketQueue = new LinkedBlockingQueue<>();
 	private final LinkedBlockingQueue<IntercomOutputPacket> outputPacketQueue = new LinkedBlockingQueue<>();
 	@Getter
-	private IntercomConnectionOwner<C, ?> connectionOwner;
+	private final IntercomConnectionOwner<C, ?> connectionOwner;
 
 	private ExtendedDataInput input = ExtendedDataInput.wrap(getInputStream());
 	private ExtendedDataOutput output = ExtendedDataOutput.wrap(getOutputStream());
@@ -135,6 +135,13 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 		this.handshakeStatus = next;
 	}
 
+	public synchronized void validateHandshakeStatus(HandshakeStatus required) {
+		if (this.handshakeStatus != required) {
+			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s"
+					.formatted(required, this.handshakeStatus));
+		}
+	}
+
 	void enableEncryption() {
 		IntercomEncryption e = this.encryption;
 		this.input = ExtendedDataInput.wrap(e.wrapInput(getInputStream()));
@@ -159,7 +166,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 		var dl = this.connectionOwner;
 		if (dl != null) {
 			dl.onDisconnect((C) this);
-			this.connectionOwner = null;
+			//this.connectionOwner = null;
 		}
 		super.safeClose();
 	}
@@ -171,7 +178,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 		if (dl != null) {
 			log.warn("disconnectListener in close");
 			dl.onDisconnect((C) this);
-			this.connectionOwner = null;
+			//this.connectionOwner = null;
 		}
 		super.close();
 	}
