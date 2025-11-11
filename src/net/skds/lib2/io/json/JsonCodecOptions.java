@@ -23,7 +23,7 @@ public interface JsonCodecOptions extends CodecOptions {
 		FANCY;
 	}
 
-	public enum JsonCapabilityVersion {
+	enum JsonCapabilityVersion {
 		JSON,
 		JSON_WITH_COMMENTS,
 		JSON5

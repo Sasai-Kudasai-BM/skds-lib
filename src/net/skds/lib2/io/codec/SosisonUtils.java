@@ -10,6 +10,7 @@ import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
 import net.skds.lib2.io.codec.typed.TypedMapAdapter;
 import net.skds.lib2.io.exception.ParseException;
+import net.skds.lib2.io.json.JsonCodecOptions;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.w3e.lib.utils.FileUtils;
@@ -33,6 +34,8 @@ public class SosisonUtils {
 	private static CodecRegistry compactRegistry;
 	@Getter
 	private static CodecRegistry fancyRegistry;
+	@Getter
+	private static CodecRegistry json5Registry;
 	private static UniversalCodecOptions options;
 	private static final CodecFactory.MapJsonFactory userMapCodecFactory = CodecFactory.newMapFactory();
 	private static CodecFactory userCodecFactory = userMapCodecFactory;
@@ -50,6 +53,11 @@ public class SosisonUtils {
 		UniversalCodecOptions op = options.clone();
 		compactRegistry = new CodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FLAT), userCodecFactory);
 		fancyRegistry = new CodecRegistry(op.setDecorationType(UniversalCodecOptions.DecorationType.FANCY), userCodecFactory);
+		json5Registry = new CodecRegistry(op
+				.setDecorationType(UniversalCodecOptions.DecorationType.FANCY)
+				.setCapabilityVersion(JsonCodecOptions.JsonCapabilityVersion.JSON5),
+				userCodecFactory
+		);
 	}
 
 	public static void addRedirectType(Type original, Type replaced) {
