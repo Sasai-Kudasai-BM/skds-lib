@@ -43,8 +43,8 @@ public class HttpUtils { // TODO
 
 
 	public static DownloadProcess downloadFromNet(String url) {
-		try {
-			HttpClient client = builder.build();
+		try (HttpClient client = builder.build()) {
+
 			HttpRequest request = HttpRequest.newBuilder(URI.create(url)).build();
 			//System.out.println(request.headers().map());
 			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofInputStream());
@@ -56,7 +56,7 @@ public class HttpUtils { // TODO
 				return new DownloadProcess(response.statusCode(), 0, response.body());
 				//throw new RuntimeException("content-length not provided");
 			}
-			int len = Integer.parseInt(cl.get(0));
+			int len = Integer.parseInt(cl.getFirst());
 			return new DownloadProcess(response.statusCode(), len, response.body());
 
 		} catch (Exception e) {
@@ -88,8 +88,7 @@ public class HttpUtils { // TODO
 	}
 
 	public static Response doRequest(HttpRequest request) {
-		try {
-			HttpClient client = builder.build();
+		try (HttpClient client = builder.build()) {
 			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofByteArray());
 			return new Response(response.statusCode(), response.body(), response);
 		} catch (Exception e) {
@@ -99,8 +98,7 @@ public class HttpUtils { // TODO
 	}
 
 	public static Response doRequest(String url, byte[] requestBody) {
-		try {
-			HttpClient client = builder.build();
+		try (HttpClient client = builder.build()) {
 			HttpRequest request = HttpRequest.newBuilder(URI.create(url))
 					.POST(HttpRequest.BodyPublishers.ofByteArray(requestBody))
 					.build();
