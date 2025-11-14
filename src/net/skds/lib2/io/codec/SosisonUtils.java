@@ -36,6 +36,8 @@ public class SosisonUtils {
 	private static CodecRegistry fancyRegistry;
 	@Getter
 	private static CodecRegistry json5Registry;
+	@Getter
+	private static CodecRegistry jsonCRegistry;
 	private static UniversalCodecOptions options;
 	private static final CodecFactory.MapJsonFactory userMapCodecFactory = CodecFactory.newMapFactory();
 	private static CodecFactory userCodecFactory = userMapCodecFactory;
@@ -56,6 +58,10 @@ public class SosisonUtils {
 		json5Registry = new CodecRegistry(op
 				.setDecorationType(UniversalCodecOptions.DecorationType.FANCY)
 				.setCapabilityVersion(JsonCodecOptions.JsonCapabilityVersion.JSON5),
+				userCodecFactory);
+		jsonCRegistry = new CodecRegistry(op
+				.setDecorationType(UniversalCodecOptions.DecorationType.FANCY)
+				.setCapabilityVersion(JsonCodecOptions.JsonCapabilityVersion.JSON_WITH_COMMENTS),
 				userCodecFactory
 		);
 	}
