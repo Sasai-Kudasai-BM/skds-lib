@@ -72,7 +72,6 @@ public class AABBTree<T> {
 		return intersections;
 	}
 
-
 	public NodeRayCollision<T> rayTrace(Vec3 start, Vec3 end, CollisionContext context) {
 		Node root = this.root;
 		if (root == null || !root.bounding.intersectsRay(start, end)) {
@@ -137,7 +136,6 @@ public class AABBTree<T> {
 		if (node != null) {
 			foreach0(action, node);
 		}
-
 	}
 
 	private void foreach0(Consumer<TreeNode<T>> action, Node n) {
@@ -194,6 +192,10 @@ public class AABBTree<T> {
 		if (!a.isValid() || !a.isNormal()) {
 			throw new IllegalArgumentException("Invalid " + a);
 		}
+	}
+
+	public void clear() {
+		this.root = null;
 	}
 
 	private class Node implements TreeNode<T> {
