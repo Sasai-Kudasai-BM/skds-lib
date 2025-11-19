@@ -18,10 +18,9 @@ public class JsonTestFrame extends JFrame {
 		Map<String, JsonTest.JsonTestRun> runs = JsonTest.createRuns();
 
 		for (Entry<String, JsonTest.JsonTestRun> entry : runs.entrySet()) {
-			JsonTest.JsonTestRegistry registry = new JsonTest.JsonTestRegistry();
 			JButton button = new JButton(entry.getKey());
 			JsonTest.JsonTestRun value = entry.getValue();
-			button.addActionListener(e -> value.run(registry));
+			button.addActionListener(_ -> value.run(new JsonTest.JsonTestRegistry()));
 			add(button);
 		}
 
@@ -33,7 +32,7 @@ public class JsonTestFrame extends JFrame {
 		setVisible(true);
 	}
 
-	public static void main(String[] args) {
+	static void main() {
 		new JsonTestFrame();
 	}
 }

@@ -6,8 +6,7 @@ import net.skds.lib2.utils.function.MultiSupplier;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -202,6 +201,68 @@ public class ReflectUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static List<ReflectSuperType> getReflectSuperTypes(Class<?> tClass) {
+		return getReflectSuperTypes(tClass, Object.class);
+	}
+
+	public static List<ReflectSuperType> getReflectSuperTypes(Class<?> tClass, Class<?> typeTargetClass) {
+		List<ReflectSuperType> classes = new ArrayList<>();
+
+		while (true) {
+			if (tClass != null) {
+				AnnotatedType annotatedSuperclass = tClass.getAnnotatedSuperclass();
+				if (annotatedSuperclass instanceof AnnotatedType annotatedParameterizedType) {
+					Type type = annotatedParameterizedType.getType();
+					if (type instanceof ParameterizedType parameterizedType) {
+						try {
+							if (typeTargetClass.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+								Type[] parameters = parameterizedType.getActualTypeArguments();
+								if (parameters.length > 0) {
+									classes.add(new ReflectSuperType(tClass, parameters));
+								}
+							}
+						} catch (Exception _) {
+						}
+					}
+					if (type instanceof Class<?> parameterizedType) {
+						try {
+							if (typeTargetClass.isAssignableFrom(parameterizedType)) {
+								Type[] parameters = parameterizedType.getTypeParameters();
+								if (parameters.length > 0) {
+									classes.add(new ReflectSuperType(tClass, parameters));
+								}
+							}
+						} catch (Exception _) {
+						}
+					}
+				}
+			}
+
+			Class<?> s = tClass.getSuperclass();
+
+			if (s == null) {
+				if (!classes.isEmpty()) {
+					break;
+				}
+				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass + "\"");
+			}
+
+			tClass = s;
+		}
+		return classes;
+	}
+
+	public record ReflectSuperType(Class<?> cl, Type[] superParameters) {
+
+		@Override
+		public String toString() {
+			return "ReflectSuperType{" +
+					"cl=" + cl +
+					", superParameters=" + Arrays.toString(superParameters) +
+					'}';
+		}
 	}
 
 }

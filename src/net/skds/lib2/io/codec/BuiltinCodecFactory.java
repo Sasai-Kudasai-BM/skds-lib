@@ -355,14 +355,63 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> keySerializer;
 		final UniversalSerializer<Object> valueSerializer;
 
+		@Deprecated // TODO ugly hack
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		public MapCodec(Type tClass, UniversalCodec[] codec, Supplier<Map<Object, Object>> consturctor, CodecRegistry registry) {
+		public MapCodec(Class<?> tClass, CodecRegistry registry) {
+			super(tClass, registry);
+
+			this.constructor = (Supplier<Map<Object, Object>>) ReflectUtils.getConstructor(tClass);
+
+			UniversalDeserializer<Object> keyDeserializer;
+			UniversalDeserializer<Object> valueDeserializer;
+			UniversalSerializer<Object> keySerializer;
+			UniversalSerializer<Object> valueSerializer;
+
+			Class<?> c = tClass;
+
+			while (true) {
+				Class<?> s = c.getSuperclass();
+
+				if (s != null) {
+					AnnotatedType annotatedSuperclass = c.getAnnotatedSuperclass();
+					if (annotatedSuperclass instanceof AnnotatedParameterizedType annotatedParameterizedType) {
+						Type type = annotatedParameterizedType.getType();
+						if (type instanceof ParameterizedType parameterizedType) {
+							try {
+								if (Map.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+									Type[] parameters = parameterizedType.getActualTypeArguments();
+									keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
+									valueDeserializer = registry.getDeserializerIndirect(parameters[1]);
+									keySerializer = getUniversalSerializer(parameters[0], registry);
+									valueSerializer = getUniversalSerializer(parameters[1], registry);
+									break;
+								}
+							} catch (Exception _) {
+							}
+						}
+					}
+				}
+
+				if (s == null) {
+					throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass + "\"");
+				}
+				c = s;
+			}
+
+			this.keyDeserializer = keyDeserializer;
+			this.valueDeserializer = valueDeserializer;
+			this.keySerializer = keySerializer;
+			this.valueSerializer = valueSerializer;
+		}
+
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public MapCodec(Type tClass, UniversalCodec[] codec, Supplier<Map> constructor, CodecRegistry registry) {
 			super(tClass, registry);
 			this.keyDeserializer = codec[0];
 			this.valueDeserializer = codec[1];
 			this.keySerializer = codec[0];
 			this.valueSerializer = codec[1];
-			this.constructor = consturctor;
+			this.constructor = (Supplier<Map<Object, Object>>) (Supplier) constructor;
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
@@ -439,6 +488,9 @@ public class BuiltinCodecFactory implements CodecFactory {
 						map.put(key, value);
 					}
 					reader.endObject();
+					if (map instanceof PostDeserializeCall postDeserializeCall) {
+						postDeserializeCall.postDeserialized();
+					}
 					return map;
 				}
 				default -> throw new ParseException("Unexpected token " + type);
@@ -451,6 +503,41 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final Supplier<Collection<Object>> constructor;
 		final UniversalDeserializer<Object> deserializer;
 		final UniversalSerializer<Object> serializer;
+
+		@Deprecated // TODO ugly hack
+		@SuppressWarnings({"unchecked", "rawtypes"})
+		public CollectionCodec(Class<?> tClass, CodecRegistry registry) {
+			super(tClass, registry);
+
+			this.constructor = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
+
+			boolean superType = false;
+			Type type = null;
+			var classes = ReflectUtils.getReflectSuperTypes(tClass).reversed();
+			b1:
+			for (var cl : classes) {
+				for (var t : cl.superParameters()) {
+					if (t instanceof TypeVariable<?> typeVariable) {
+						if (typeVariable.getName().equals("E")) {
+							superType = true;
+							continue b1;
+						}
+						continue;
+					}
+					if (superType && (t instanceof Class<?> || t instanceof ParameterizedType)) {
+						type = t;
+						break b1;
+					}
+				}
+			}
+
+			if (type == null) {
+				throw new IllegalArgumentException("Unable to create codec for non-canonical collection declaration \"" + tClass.getName() + "\"");
+			}
+
+			this.deserializer = registry.getDeserializerIndirect(type);
+			this.serializer = getUniversalSerializer(type, registry);
+		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
 		public CollectionCodec(Type tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<?>> defaultSupplier) {
@@ -481,10 +568,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 			}
 			this.constructor = tmpC;
 		}
-
-		/*private <E extends Enum<E>> Class<E> castEnum(Class<?> tClass) {
-			return AutoCast.cast(tClass);
-		}*/
 
 		@Override
 		public void write(Collection<Object> value, UniversalWriter writer) throws IOException {
@@ -524,6 +607,9 @@ public class BuiltinCodecFactory implements CodecFactory {
 						i++;
 					}
 					reader.endList();
+					if (list instanceof PostDeserializeCall postDeserializeCall) {
+						postDeserializeCall.postDeserialized();
+					}
 					return list;
 				}
 				default -> throw new ParseException("Unexpected token " + type);

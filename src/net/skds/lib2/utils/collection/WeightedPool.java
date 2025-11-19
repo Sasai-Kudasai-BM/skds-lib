@@ -17,7 +17,7 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 
 	private Entry[] entries;
 
-	public WeightedPool(Iterable<T> values, Object2FloatFunction<T> weightGetter) {
+	public WeightedPool(Iterable<? extends T> values, Object2FloatFunction<T> weightGetter) {
 		float ws = 0;
 		int c = 0;
 		for (T val : values) {
@@ -39,10 +39,10 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		this.entries = entries;
 	}
 
-	public WeightedPool(Iterable<Obj2FloatPair<T>> values) {
+	public WeightedPool(Iterable<? extends Obj2FloatPair<? extends T>> values) {
 		float ws = 0;
 		int c = 0;
-		for (Obj2FloatPair<T> val : values) {
+		for (Obj2FloatPair<? extends T> val : values) {
 			c++;
 			float w = val.floatValue();
 			if (w <= 0) throw new IllegalArgumentException("Invalid weightGetter: Return values must be positive");
@@ -51,7 +51,7 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		float w = 0;
 		@SuppressWarnings("unchecked") Entry[] entries = ArrayUtils.createGenericArray(Entry.class, c);
 		int i = 0;
-		for (Obj2FloatPair<T> val : values) {
+		for (Obj2FloatPair<? extends T> val : values) {
 			float weight = val.floatValue();
 			w += weight;
 			Entry e = new Entry(val.objectValue(), weight, w / ws, weight / ws);
