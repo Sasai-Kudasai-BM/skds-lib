@@ -1,13 +1,8 @@
 package net.skds.lib2.utils;
 
 import lombok.experimental.UtilityClass;
-import net.skds.lib2.natives.MemoryAccess;
 
-import java.io.*;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
-import java.nio.file.Files;
+import java.io.File;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -45,12 +40,12 @@ public class SKDSFiles {
 	}
 
 	public static void collectFileTree(File root, Collection<File> collection) {
-		collectFileTree(root, _ -> true, collection);
+		collectFileTree(root, SKDSUtils.truePredicate(), collection);
 	}
 
 	public static List<File> collectFileTree(File root) {
 		ArrayList<File> files = new ArrayList<>();
-		collectFileTree(root, _ -> true, files);
+		collectFileTree(root, SKDSUtils.truePredicate(), files);
 		return files;
 	}
 
@@ -76,8 +71,8 @@ public class SKDSFiles {
 				return;
 			}
 			File[] files = root.listFiles();
-			if (files != null) for (int i = 0; i < files.length; i++) {
-				collectFileTree(files[i], filter, collection, depth - 1);
+			if (files != null) for (File file : files) {
+				collectFileTree(file, filter, collection, depth - 1);
 			}
 		} else if (filter.test(root)) {
 			collection.add(root);
@@ -85,7 +80,7 @@ public class SKDSFiles {
 	}
 
 	public static void collectFilesAndDirs(File root, Collection<File> collection) {
-		collectFilesAndDirs(root, _ -> true, collection);
+		collectFilesAndDirs(root, SKDSUtils.truePredicate(), collection);
 	}
 
 	public static List<File> collectFiles(File root) {
@@ -143,43 +138,6 @@ public class SKDSFiles {
 		}
 	}
 
-	public static MemorySegment readToNativeMemory(File file) throws IOException {
-		return readToNativeMemory(Arena.ofAuto(), file);
-	}
-
-	public static MemorySegment readToNativeMemory(Arena arena, File file) throws IOException {
-		if (!file.exists()) return MemorySegment.NULL;
-		try (InputStream is = new FileInputStream(file)) {
-			long readSize = file.length();
-			MemorySegment segment = arena.allocate(readSize);
-			int bufSize = SKDSUtils.getDefaultBufferSize(readSize);
-			byte[] buffer = new byte[bufSize];
-			for (int r = 0; r < readSize; ) {
-				int read = is.read(buffer);
-				if (read == 0) return segment.reinterpret(r);
-				MemorySegment.copy(buffer, 0, segment, ValueLayout.JAVA_BYTE, r, read);
-				r += read;
-			}
-			return segment;
-		}
-	}
-
-	public static void writeFromNativeMemory(Path path, long address, long bytes) throws IOException {
-		writeFromNativeMemory(path, MemoryAccess.ALL_MEMORY, address, bytes);
-	}
-
-	public static void writeFromNativeMemory(Path path, MemorySegment segment, long offset, long bytes) throws IOException {
-		Files.createDirectories(path.getParent());
-		if (segment == null) segment = MemoryAccess.ALL_MEMORY;
-		try (OutputStream os = Files.newOutputStream(path, DEFAULT_OPTIONS)) {
-			int bufSize = SKDSUtils.getDefaultBufferSize(bytes);
-			byte[] buffer = new byte[bufSize];
-			for (long remaning = bytes; remaning > 0; remaning -= bufSize) {
-				MemorySegment.copy(buffer, 0, segment, ValueLayout.JAVA_BYTE, segment.address() + offset + bytes - remaning, (int) Math.min(remaning, bufSize));
-				os.write(buffer);
-			}
-		}
-	}
 
 	static {
 		Path desktopPath = null;

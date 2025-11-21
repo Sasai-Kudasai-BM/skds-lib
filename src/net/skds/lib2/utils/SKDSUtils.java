@@ -39,6 +39,7 @@ public class SKDSUtils {
 	public static final Runnable EMPTY_RUNNABLE = () -> {
 	};
 	public static final Predicate<?> TRUE_PREDICATE = o -> true;
+	public static final Predicate<?> FALSE_PREDICATE = o -> false;
 
 	public static final Random R = new Random();
 
@@ -401,6 +402,11 @@ public class SKDSUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> Predicate<T> truePredicate() {
 		return (Predicate<T>) TRUE_PREDICATE;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Predicate<T> falsePredicate() {
+		return (Predicate<T>) FALSE_PREDICATE;
 	}
 
 	public static void collectFileTree(File root, Collection<File> collection) {

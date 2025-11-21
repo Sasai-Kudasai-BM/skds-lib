@@ -356,7 +356,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> valueSerializer;
 
 		@Deprecated // TODO ugly hack
-		@SuppressWarnings({"unchecked", "rawtypes"})
+		@SuppressWarnings({"unchecked"})
 		public MapCodec(Class<?> tClass, CodecRegistry registry) {
 			super(tClass, registry);
 
@@ -386,7 +386,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 									valueSerializer = getUniversalSerializer(parameters[1], registry);
 									break;
 								}
-							} catch (Exception _) {
+							} catch (Exception ignored) {
 							}
 						}
 					}

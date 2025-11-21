@@ -223,7 +223,7 @@ public class ReflectUtils {
 									classes.add(new ReflectSuperType(tClass, parameters));
 								}
 							}
-						} catch (Exception _) {
+						} catch (Exception ignored) {
 						}
 					}
 					if (type instanceof Class<?> parameterizedType) {
@@ -234,7 +234,7 @@ public class ReflectUtils {
 									classes.add(new ReflectSuperType(tClass, parameters));
 								}
 							}
-						} catch (Exception _) {
+						} catch (Exception ignored) {
 						}
 					}
 				}
