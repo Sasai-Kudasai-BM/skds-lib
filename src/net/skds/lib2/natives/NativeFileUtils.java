@@ -10,6 +10,8 @@ import java.lang.foreign.ValueLayout;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static net.skds.lib2.utils.SKDSFiles.DEFAULT_OPTIONS;
+
 @UtilityClass
 public class NativeFileUtils {
 
