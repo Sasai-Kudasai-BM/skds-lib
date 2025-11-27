@@ -66,6 +66,14 @@ public record Vec2F(float xf, float yf) implements Vec2 {
 		}
 
 		@Override
+		public String valueAsKeyString(Vec2 val) {
+			if (val == null) {
+				return null;
+			}
+			return "[" + val.xf() + "," + val.yf() + "]";
+		}
+
+		@Override
 		public void write(Vec2 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();

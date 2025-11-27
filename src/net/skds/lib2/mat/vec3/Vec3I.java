@@ -1,13 +1,11 @@
 package net.skds.lib2.mat.vec3;
 
-import net.skds.lib2.io.chars.StringCharInput;
 import net.skds.lib2.io.codec.AbstractCodec;
 import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.exception.ParseException;
-import net.skds.lib2.io.json.JsonReaderImpl;
 import net.skds.lib2.mat.FastMath;
 
 import java.io.IOException;
@@ -16,7 +14,7 @@ import java.lang.reflect.Type;
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
 @SuppressWarnings("unused")
-@DefaultCodec(Vec3I.JCodec.class)
+@DefaultCodec(Vec3I.Codec.class)
 public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 
 	public static final Vec3I XN = new Vec3I(-1, 0, 0);
@@ -230,13 +228,13 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 	}
 
 	@Override
-	public final int compareTo(Vec3 o) {
+	public int compareTo(Vec3 o) {
 		return Vec3.compare(this, o);
 	}
 
-	static final class JCodec extends AbstractCodec<Vec3> {
+	static final class Codec extends AbstractCodec<Vec3> {
 
-		public JCodec(Type type, CodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 
@@ -246,11 +244,6 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 				return null;
 			}
 			return "[" + val.xi() + "," + val.yi() + "," + val.zi() + "]";
-		}
-
-		@Override
-		public Vec3 stringKeyToValue(String key) throws IOException {
-			return read(new JsonReaderImpl(new StringCharInput(key), this.registry));
 		}
 
 		@Override

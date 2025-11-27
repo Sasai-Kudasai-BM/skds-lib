@@ -29,7 +29,6 @@ public final class JsonReaderImpl implements UniversalReader {
 		this.skipCodec = registry.getCodec(JsonElement.class);
 	}
 
-
 	private void validateEntryType(SosisonEntryType expected) throws IOException {
 		SosisonEntryType next = this.nextEntryType();
 		if (next != expected) {
@@ -125,7 +124,6 @@ public final class JsonReaderImpl implements UniversalReader {
 		resetLastEntry();
 		return StringUtils.readQuoted(input, '"');
 	}
-
 
 	@Override
 	public UUID readUUID() throws IOException {

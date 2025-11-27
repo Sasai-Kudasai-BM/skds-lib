@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
-@DefaultCodec(Vec3D.JCodec.class)
+@DefaultCodec(Vec3D.Codec.class)
 public record Vec3D(double x, double y, double z) implements Vec3 {
 
 	public static final Vec3D XN = new Vec3D(-1.0D, 0.0D, 0.0D);
@@ -142,10 +142,18 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractCodec<Vec3> {
+	static final class Codec extends AbstractCodec<Vec3> {
 
-		public JCodec(Type type, CodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
+		}
+
+		@Override
+		public String valueAsKeyString(Vec3 val) {
+			if (val == null) {
+				return null;
+			}
+			return "[" + val.x() + "," + val.y() + "," + val.z() + "]";
 		}
 
 		@Override

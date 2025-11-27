@@ -44,8 +44,16 @@ public class StringUtils {
 		return "%e".formatted(value);
 	}
 
+	public static String hexIntUC(int value) {
+		return "0x%X".formatted(value);
+	}
+
 	public static String hexIntUC(long value) {
 		return "0x%X".formatted(value);
+	}
+
+	public static String hexIntLC(int value) {
+		return "0x%x".formatted(value);
 	}
 
 	public static String hexIntLC(long value) {

@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 @SuppressWarnings("unused")
-@DefaultCodec(Vec3F.JCodec.class)
+@DefaultCodec(Vec3F.Codec.class)
 public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 
 	public static final Vec3F XN = new Vec3F(-1.0F, 0.0F, 0.0F);
@@ -172,10 +172,18 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractCodec<Vec3> {
+	static final class Codec extends AbstractCodec<Vec3> {
 
-		public JCodec(Type type, CodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
+		}
+
+		@Override
+		public String valueAsKeyString(Vec3 val) {
+			if (val == null) {
+				return null;
+			}
+			return "[" + val.xf() + "," + val.yf() + "," + val.zf() + "]";
 		}
 
 		@Override

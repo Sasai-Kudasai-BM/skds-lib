@@ -21,7 +21,7 @@ import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
 // TODO проверить гетеры
 @SuppressWarnings("unused")
-@DefaultCodec(Vec3.JCodec.class)
+@DefaultCodec(Vec3.Codec.class)
 public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 
 	Vec3D XN = new Vec3D(-1.0D, 0.0D, 0.0D);
@@ -1656,13 +1656,27 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return new Vec4D(this.x(), this.y(), this.z(), 1);
 	}
 
-	final class JCodec extends AbstractCodec<Vec3> {
+	final class Codec extends AbstractCodec<Vec3> {
 
 		private final UniversalSerializer<Vec3I> veci = this.registry.getSerializerIndirect(Vec3I.class);
-		private final UniversalSerializer<Vec3> vecd = this.registry.getSerializerIndirect(Vec3D.class);
+		private final UniversalCodec<Vec3> vecd = this.registry.getCodecIndirect(Vec3D.class);
 
-		public JCodec(Type type, CodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
+		}
+
+		@Override
+		public String valueAsKeyString(Vec3 val) {
+			if (val instanceof Vec3I vec) {
+				return this.veci.valueAsKeyString(vec);
+			} else {
+				return this.vecd.valueAsKeyString(val);
+			}
+		}
+
+		@Override
+		public Vec3 stringKeyToValue(String key) throws IOException {
+			return this.vecd.stringKeyToValue(key);
 		}
 
 		@Override

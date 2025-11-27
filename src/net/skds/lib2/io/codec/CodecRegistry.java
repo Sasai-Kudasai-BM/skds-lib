@@ -207,6 +207,10 @@ public class CodecRegistry {
 			getOrCreateCodec().write(value, writer);
 		}
 
+		@Override
+		public String toString() {
+			return super.toString() + "(" + type + ")";
+		}
 	}
 
 	@RequiredArgsConstructor
@@ -240,6 +244,10 @@ public class CodecRegistry {
 			return getOrCreateCodec().read(reader);
 		}
 
+		@Override
+		public String toString() {
+			return super.toString() + "(" + type + ")";
+		}
 	}
 
 	@RequiredArgsConstructor
@@ -273,6 +281,10 @@ public class CodecRegistry {
 			getOrCreateCodec().write(value, writer);
 		}
 
+		@Override
+		public String toString() {
+			return super.toString() + "(" + type + ")";
+		}
 	}
 
 }

@@ -14,7 +14,7 @@ import java.lang.reflect.Type;
 import java.util.Random;
 
 @SuppressWarnings("unused")
-@DefaultCodec(Vec2.JCodec.class)
+@DefaultCodec(Vec2.Codec.class)
 public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, Vec2I {
 
 	Vec2 XP = Vec2D.XP;
@@ -1078,13 +1078,27 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		return new Vec2D(this.x(), this.y());
 	}
 
-	static final class JCodec extends AbstractCodec<Vec2> {
+	final class Codec extends AbstractCodec<Vec2> {
 
 		private final UniversalSerializer<Vec2I> veci = this.registry.getSerializerIndirect(Vec2I.class);
-		private final UniversalSerializer<Vec2> vecd = this.registry.getSerializerIndirect(Vec2D.class);
+		private final UniversalCodec<Vec2> vecd = this.registry.getCodecIndirect(Vec2D.class);
 
-		public JCodec(Type type, CodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
+		}
+
+		@Override
+		public String valueAsKeyString(Vec2 val) {
+			if (val instanceof Vec2I vec) {
+				return this.veci.valueAsKeyString(vec);
+			} else {
+				return this.vecd.valueAsKeyString(val);
+			}
+		}
+
+		@Override
+		public Vec2 stringKeyToValue(String key) throws IOException {
+			return this.vecd.stringKeyToValue(key);
 		}
 
 		@Override

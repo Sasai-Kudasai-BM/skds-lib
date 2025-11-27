@@ -12,10 +12,12 @@ import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.AutoCast;
+import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 import net.skds.lib2.utils.function.MultiSupplier;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -24,6 +26,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
+
+import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
 @CustomLog
 public class BuiltinCodecFactory implements CodecFactory {
@@ -46,6 +50,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 			URI.class, (CodecFactory) URICodec::new,
 			URL.class, (CodecFactory) URLCodec::new,
 			UUID.class, (CodecFactory) UUIDCodec::new,
+			Color.class, (CodecFactory) ColorCodec::new,
 
 			Number.class, (CodecFactory) NumberCodec::new,
 			Byte.class, (CodecFactory) WrappedByteCodec::new,
@@ -478,12 +483,18 @@ public class BuiltinCodecFactory implements CodecFactory {
 					Map<Object, Object> map = constructor.get();
 					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String name = reader.readName(); // TODO check
-						Object key = keyDeserializer.stringKeyToValue(name);
+						Object key;
+						try {
+							key = keyDeserializer.stringKeyToValue(name);
+						} catch (Exception ex) {
+							this.keyDeserializer.stringKeyToValue(name);
+							throw new ParseException("Exception while read \"" + name + "\", " + keyDeserializer, ex);
+						}
 						Object value;
 						try {
 							value = valueDeserializer.read(reader);
 						} catch (Exception ex) {
-							throw new ParseException("Exception while read " + name, ex);
+							throw new ParseException("Exception while read " + name + "\"", ex);
 						}
 						map.put(key, value);
 					}
@@ -1144,6 +1155,72 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
+	public static final class ColorCodec extends AbstractCodec<Color> {
+
+		public ColorCodec(Type type, CodecRegistry registry) {
+			super(type, registry);
+		}
+
+		@Override
+		public String valueAsKeyString(Color val) {
+			return String.valueOf(val.getRGB());
+		}
+
+		@Override
+		public void write(Color value, UniversalWriter writer) throws IOException {
+			if (value != null) {
+				writer.writeHex(value.getRGB());
+			}
+		}
+
+		@Override
+		public Color read(UniversalReader reader) throws IOException {
+			var type = reader.nextEntryType();
+			return switch (type) {
+				case NULL -> null;
+				case STRING -> new Color(reader.readInt(), true);
+				case BEGIN_LIST -> {
+					reader.beginList();
+					int r = reader.readInt();
+					int g = reader.readInt();
+					int b = reader.readInt();
+					int a = 255;
+					if (reader.nextEntryType() != SosisonEntryType.END_LIST) {
+						a = reader.readInt();
+					}
+					Color color = new Color(r, g, b, a);
+					reader.endList();
+					yield color;
+				}
+				case BEGIN_OBJECT -> {
+					reader.beginObject();
+					int r = 255;
+					int g = 255;
+					int b = 255;
+					int a = 255;
+					while (reader.nextEntryType() != END_OBJECT) {
+						String s = reader.readName();
+						int i = reader.readInt();
+						switch (s.toLowerCase()) {
+							case "r" -> r = i;
+							case "g" -> g = i;
+							case "b" -> b = i;
+							case "a" -> a = i;
+						}
+					}
+					reader.endObject();
+					yield new Color(r, g, b, a);
+				}
+				default -> {
+					if (type.isNumber()) {
+						yield new Color(reader.readInt(), true);
+					}
+					throw new ParseException("Unexpected token " + type);
+				}
+			};
+		}
+	}
+
 	public static final class EnumCodec<E extends Enum<E>> extends AbstractCodec<E> {
 
 		private final Class<E> eClass;
@@ -1204,9 +1281,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Integer stringKeyToValue(String key) throws IOException {
+			return key != null ? Integer.parseInt(key) : null;
+		}
+
+		@Override
 		public void write(Integer value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeLong(0);
+				writer.writeInt(0);
 				return;
 			}
 			writer.writeRaw(value.toString());
@@ -1230,6 +1312,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Integer stringKeyToValue(String key) throws IOException {
+			return key != null ? Integer.parseInt(key) : 0;
+		}
+
+		@Override
 		public void write(Integer value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
@@ -1240,6 +1327,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		@Override
 		public Integer read(UniversalReader reader) throws IOException {
+			try {
+				reader.nextEntryType();
+			} catch (Exception e) {
+				reader.nextEntryType();
+			}
 			SosisonEntryType type = reader.nextEntryType();
 			if (type == SosisonEntryType.NULL) {
 				reader.skipNull();
@@ -1258,7 +1350,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@Override
 		public void write(Byte value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeLong(0);
+				writer.writeByte((byte) 0);
 				return;
 			}
 			writer.writeInt(value);
@@ -1308,6 +1400,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Number stringKeyToValue(String key) throws IOException {
+			return key != null ? Numbers.parseNumber(key) : null;
+		}
+
+		@Override
 		public void write(Number value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
@@ -1334,6 +1431,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Boolean stringKeyToValue(String key) throws IOException {
+			return Boolean.parseBoolean(key);
+		}
+
+		@Override
 		public void write(Boolean value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeBoolean(false);
@@ -1357,6 +1459,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		public WrappedBooleanCodec(Type type, CodecRegistry registry) {
 			super(registry);
+		}
+
+		@Override
+		public Boolean stringKeyToValue(String key) throws IOException {
+			return key != null ? Boolean.parseBoolean(key) : null;
 		}
 
 		@Override
@@ -1388,7 +1495,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@Override
 		public void write(Character value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeLong(0);
+				writer.writeString(StringUtils.unicodeCharUC((char) 0));
 				return;
 			}
 			writer.writeString(StringUtils.unicodeCharUC(value));
@@ -1468,9 +1575,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Short stringKeyToValue(String key) throws IOException {
+			return key != null ? Short.valueOf(key) : null;
+		}
+
+		@Override
 		public void write(Short value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeLong(0);
+				writer.writeShort((short) 0);
 				return;
 			}
 			writer.writeInt(value);
@@ -1491,6 +1603,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		public WrappedShortCodec(Type type, CodecRegistry registry) {
 			super(registry);
+		}
+
+		@Override
+		public Short stringKeyToValue(String key) throws IOException {
+			return key != null ? Short.valueOf(key) : 0;
 		}
 
 		@Override
@@ -1520,6 +1637,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Long stringKeyToValue(String key) throws IOException {
+			return key != null ? Long.parseLong(key) : null;
+		}
+
+		@Override
 		public void write(Long value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeLong(0);
@@ -1543,6 +1665,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		public WrappedLongCodec(Type type, CodecRegistry registry) {
 			super(registry);
+		}
+
+		@Override
+		public Long stringKeyToValue(String key) throws IOException {
+			return key != null ? Long.parseLong(key) : null;
 		}
 
 		@Override
@@ -1572,9 +1699,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Float stringKeyToValue(String key) throws IOException {
+			return key != null ? Float.parseFloat(key) : null;
+		}
+
+		@Override
 		public void write(Float value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeLong(0);
+				writer.writeFloat(0);
 				return;
 			}
 			writer.writeFloat(value);
@@ -1595,6 +1727,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		public WrappedFloatCodec(Type type, CodecRegistry registry) {
 			super(registry);
+		}
+
+		@Override
+		public Float stringKeyToValue(String key) throws IOException {
+			return key != null ? Float.parseFloat(key) : null;
 		}
 
 		@Override
@@ -1624,9 +1761,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public Double stringKeyToValue(String key) throws IOException {
+			return key != null ? Double.parseDouble(key) : null;
+		}
+
+		@Override
 		public void write(Double value, UniversalWriter writer) throws IOException {
 			if (value == null) {
-				writer.writeLong(0);
+				writer.writeDouble(0);
 				return;
 			}
 			writer.writeDouble(value);
@@ -1647,6 +1789,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		public WrappedDoubleCodec(Type type, CodecRegistry registry) {
 			super(registry);
+		}
+
+		@Override
+		public Double stringKeyToValue(String key) throws IOException {
+			return key != null ? Double.parseDouble(key) : null;
 		}
 
 		@Override

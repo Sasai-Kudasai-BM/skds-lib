@@ -118,7 +118,10 @@ public final class FormattedJsonWriter implements UniversalWriter {
 			pushValue();
 			output.append(StringUtils.hexIntUC(n));
 		} else {
-			writeLong(n);
+			pushValue();
+			output.append('"');
+			output.append(StringUtils.hexIntUC(n));
+			output.append('"');
 		}
 	}
 
@@ -128,7 +131,10 @@ public final class FormattedJsonWriter implements UniversalWriter {
 			pushValue();
 			output.append(StringUtils.hexIntUC(n));
 		} else {
-			writeInt(n);
+			pushValue();
+			output.append('"');
+			output.append(StringUtils.hexIntUC(n));
+			output.append('"');
 		}
 	}
 
