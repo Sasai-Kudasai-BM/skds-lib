@@ -157,6 +157,11 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 		}
 
 		@Override
+		public Vec3 stringKeyToValue(String key) throws IOException {
+			return stringKeyToCompositeValue(key);
+		}
+
+		@Override
 		public void write(Vec3 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();

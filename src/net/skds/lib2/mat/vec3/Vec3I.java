@@ -247,6 +247,11 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 		}
 
 		@Override
+		public Vec3 stringKeyToValue(String key) throws IOException {
+			return stringKeyToCompositeValue(key);
+		}
+
+		@Override
 		public void write(Vec3 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();

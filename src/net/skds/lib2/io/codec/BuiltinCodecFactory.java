@@ -487,7 +487,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 						try {
 							key = keyDeserializer.stringKeyToValue(name);
 						} catch (Exception ex) {
-							this.keyDeserializer.stringKeyToValue(name);
+							//this.keyDeserializer.stringKeyToValue(name);
 							throw new ParseException("Exception while read \"" + name + "\", " + keyDeserializer, ex);
 						}
 						Object value;
@@ -1027,6 +1027,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
+		public UUID stringKeyToValue(String key) throws IOException {
+			return super.stringKeyToValue(key);
+		}
+
+		@Override
 		public UUID read(UniversalReader reader) throws IOException {
 			return reader.readUUID();
 		}
@@ -1164,6 +1169,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@Override
 		public String valueAsKeyString(Color val) {
 			return String.valueOf(val.getRGB());
+		}
+
+		@Override
+		public Color stringKeyToValue(String key) throws IOException {
+			return stringKeyToCompositeValue(key);
 		}
 
 		@Override
