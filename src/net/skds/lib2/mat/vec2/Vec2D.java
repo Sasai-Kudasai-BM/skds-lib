@@ -61,6 +61,11 @@ public record Vec2D(double x, double y) implements Vec2 {
 		}
 
 		@Override
+		public Vec2 stringKeyToValue(String key) throws IOException {
+			return stringKeyToCompositeValue(key);
+		}
+
+		@Override
 		public void write(Vec2 value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();

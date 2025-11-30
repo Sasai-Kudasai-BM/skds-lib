@@ -11,7 +11,7 @@ import net.skds.lib2.io.sosison.SosisonEntryType;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-@DefaultCodec(Vec2I.JCodec.class)
+@DefaultCodec(Vec2I.Codec.class)
 public record Vec2I(int xi, int yi) implements Vec2 {
 
 	public static final Vec2I ZERO = new Vec2I(0, 0);
@@ -94,9 +94,9 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 		return this;
 	}
 
-	static final class JCodec extends AbstractCodec<Vec2> {
+	static final class Codec extends AbstractCodec<Vec2> {
 
-		public JCodec(Type type, CodecRegistry registry) {
+		public Codec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
 
@@ -106,6 +106,11 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 				return null;
 			}
 			return "[" + val.xi() + "," + val.yi() + "]";
+		}
+
+		@Override
+		public Vec2 stringKeyToValue(String key) throws IOException {
+			return stringKeyToCompositeValue(key);
 		}
 
 		@Override
