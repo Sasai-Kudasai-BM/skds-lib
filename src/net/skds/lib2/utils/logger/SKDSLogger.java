@@ -18,7 +18,7 @@ public class SKDSLogger {
 	public static final PrintStream LOG_PRINTSTREAM = new CustomPrintStream(LoggerLevel.LOG, ORIGINAL_OUT, GLOBAL_LOGGER);
 	public static final PrintStream WARN_PRINTSTREAM = new CustomPrintStream(LoggerLevel.WARN, ORIGINAL_OUT, GLOBAL_LOGGER);
 	public static final PrintStream ERROR_PRINTSTREAM = new CustomPrintStream(LoggerLevel.ERROR, ORIGINAL_OUT, GLOBAL_LOGGER);
-	
+
 	private static final int DEPTH = 3;
 	static final PrintStream[] PRINT_STREAM_ARRAY = {};
 
@@ -28,7 +28,7 @@ public class SKDSLogger {
 	protected LinkedList<PrintStream> attachedPrintStreams = new LinkedList<>();
 	protected PrintStream[] attachedPrintStreamsArray = {};
 	protected boolean useGlobalPrintStream = true;
-	protected boolean useFileOut = true;
+	protected boolean useFileOut = SKDSLoggerConfig.getInstance().isUseFileOut();
 
 	public SKDSLogger() {
 		Class<?> c;
