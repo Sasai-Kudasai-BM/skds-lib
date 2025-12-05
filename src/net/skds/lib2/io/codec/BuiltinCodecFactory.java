@@ -10,10 +10,7 @@ import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.json.elements.*;
 import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.reflection.ReflectUtils;
-import net.skds.lib2.utils.ArrayUtils;
-import net.skds.lib2.utils.AutoCast;
-import net.skds.lib2.utils.Numbers;
-import net.skds.lib2.utils.StringUtils;
+import net.skds.lib2.utils.*;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 import net.skds.lib2.utils.function.MultiSupplier;
 
@@ -516,7 +513,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> serializer;
 
 		@Deprecated // TODO ugly hack
-		@SuppressWarnings({"unchecked", "rawtypes"})
+		@SuppressWarnings({"unchecked"})
 		public CollectionCodec(Class<?> tClass, CodecRegistry registry) {
 			super(tClass, registry);
 
@@ -945,7 +942,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 					return null;
 				}
 				case STRING -> {
-					URI uri = URI.create(reader.readString());
+					URI uri = URI.create(SKDSFiles.toCanonicalPath(reader.readString()));
 					if (uri.getScheme() == null) {
 						return Path.of(uri.getPath());
 					}
@@ -958,11 +955,13 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@Override
 		public void write(Path value, UniversalWriter writer) throws IOException {
 			URI uri = value.toUri();
+			String strVal;
 			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
-				writer.writeString(value.toString());
-				return;
+				strVal = value.toString();
+			} else {
+				strVal = value.toUri().toString();
 			}
-			writer.writeString(value.toUri().toString());
+			writer.writeString(SKDSFiles.toCanonicalPath(strVal));
 		}
 	}
 

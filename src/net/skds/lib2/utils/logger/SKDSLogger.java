@@ -27,8 +27,8 @@ public class SKDSLogger {
 
 	protected LinkedList<PrintStream> attachedPrintStreams = new LinkedList<>();
 	protected PrintStream[] attachedPrintStreamsArray = {};
-	protected boolean useGlobalPrintStream = true;
-	protected boolean useFileOut = SKDSLoggerConfig.getInstance().isUseFileOut();
+	private boolean useGlobalPrintStream = true;
+	private Boolean useFileOut = null;
 
 	public SKDSLogger() {
 		Class<?> c;
@@ -76,9 +76,9 @@ public class SKDSLogger {
 			if (config.isLogStackTop()) {
 				stackTop = Thread.currentThread().getStackTrace()[depth];
 			}
-			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut, ln);
+			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreamsArray, useGlobalPrintStream, isAttachToFile(), ln);
 		} else {
-			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut);
+			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, isAttachToFile());
 		}
 		LogWriter.INSTANCE.add(e);
 	}
@@ -192,6 +192,11 @@ public class SKDSLogger {
 	}
 
 	public boolean isAttachToFile() {
+		if (this.useFileOut == null) {
+			SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
+			if (config == null) return false;
+			this.useFileOut = config.isUseFileOut();
+		}
 		return this.useFileOut;
 	}
 
@@ -204,7 +209,7 @@ public class SKDSLogger {
 	void printLn(LoggerLevel level) {
 		if (!configGetter.get().getLevels().contains(level)) return;
 		long time = System.currentTimeMillis();
-		LogPrintln e = new LogPrintln(time, level, attachedPrintStreamsArray, useGlobalPrintStream, useFileOut);
+		LogPrintln e = new LogPrintln(time, level, attachedPrintStreamsArray, useGlobalPrintStream, isAttachToFile());
 		LogWriter.INSTANCE.add(e);
 	}
 }

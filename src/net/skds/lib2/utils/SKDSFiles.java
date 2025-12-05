@@ -3,38 +3,105 @@ package net.skds.lib2.utils;
 import lombok.experimental.UtilityClass;
 
 import java.io.File;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 @UtilityClass
 public class SKDSFiles {
 
+	public static final FileVisitor<Path> DELETER = new FileVisitor<>() {
+		@Override
+		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+			Files.delete(file);
+			return FileVisitResult.CONTINUE;
+		}
+
+		@Override
+		public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+			if (exc instanceof NoSuchFileException) {
+				return FileVisitResult.CONTINUE;
+			} else {
+				throw exc;
+			}
+		}
+
+		@Override
+		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+			Files.delete(dir);
+			return FileVisitResult.CONTINUE;
+		}
+	};
+
 	public static final OpenOption[] DEFAULT_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
+	public static final Set<OpenOption> DEFAULT_OPTIONS_SET = Set.of(DEFAULT_OPTIONS);
+	public static final boolean IS_PATH_CANONICAL = File.separatorChar == '/';
 
 	public static final Path DESKTOP_PATH;
+
+	public static String toCanonicalPath(String path) {
+		return path.replace('\\', '/');
+	}
+
+	public static String toCanonicalPathIfNeeded(String path) {
+		return path.replace(File.separatorChar, '/');
+	}
+
+	public static <T extends DirtyAble> void saveAsync(Path path, T value, BiConsumer<Path, T> saver) {
+		if (value.isDirty()) {
+			ThreadUtils.runTaskNewThread(() -> {
+				synchronized (path) {
+					if (value.isDirty()) {
+						saver.accept(path, value);
+						value.unmarkDirty();
+					}
+				}
+			});
+		}
+	}
+
+	public static void deleteFileOrDirectory(Path path) throws IOException {
+		if (Files.isDirectory(path)) {
+			Files.walkFileTree(path, DELETER);
+		} else if (Files.isRegularFile(path)) {
+			Files.delete(path);
+		}
+	}
+
+	public static void createFileAndParentDir(Path path) throws IOException {
+		Files.createDirectories(path.toAbsolutePath().getParent());
+		Files.newByteChannel(path, DEFAULT_OPTIONS_SET).close();
+	}
+
+	public static void createFileAndParentDir(Path path, byte[] bytes) throws IOException {
+		Files.createDirectories(path.toAbsolutePath().getParent());
+		Files.write(path, bytes, DEFAULT_OPTIONS);
+	}
 
 	public static void deleteDirectory(File dir) {
 		if (dir.isDirectory()) {
 			for (File file : Objects.requireNonNull(dir.listFiles())) {
 				if (file.isFile()) {
 					if (!file.delete()) {
-						throw new RuntimeException("Unable to file " + file.getAbsolutePath());
+						throw new RuntimeException("Unable to delete file " + file.getAbsolutePath());
 					}
 				} else {
 					deleteDirectory(file);
 					if (!file.delete()) {
-						throw new RuntimeException("Unable to directory " + file.getAbsoluteFile());
+						throw new RuntimeException("Unable to delete directory " + file.getAbsoluteFile());
 					}
 				}
 			}
 			if (!dir.delete()) {
-				throw new RuntimeException("Unable to directory " + dir.getAbsoluteFile());
+				throw new RuntimeException("Unable to delete directory " + dir.getAbsoluteFile());
 			}
 		}
 	}

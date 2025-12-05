@@ -57,20 +57,20 @@ public class Types {
 		}
 
 		@Override
-		public boolean equals(Object other) {
-			return other instanceof ParameterizedType
-					&& Types.equals(this, (ParameterizedType) other);
-		}
-
-		private static int hashCodeOrZero(Object o) {
-			return o != null ? o.hashCode() : 0;
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			return o instanceof ParameterizedType that &&
+					Objects.equals(ownerType, that.getOwnerType()) &&
+					Objects.equals(rawType, that.getRawType()) &&
+					Arrays.equals(typeArguments, that.getActualTypeArguments());
 		}
 
 		@Override
 		public int hashCode() {
-			return Arrays.hashCode(typeArguments)
-					^ rawType.hashCode()
-					^ hashCodeOrZero(ownerType);
+			return Arrays.hashCode(typeArguments) ^
+					Objects.hashCode(ownerType) ^
+					Objects.hashCode(rawType);
 		}
 
 		@Override

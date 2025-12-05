@@ -1,6 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import lombok.CustomLog;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import net.skds.lib2.annotations.NotNull;
@@ -25,7 +24,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.function.Supplier;
 
-@CustomLog
 @UtilityClass
 @SuppressWarnings("unused")
 public class SosisonUtils {
