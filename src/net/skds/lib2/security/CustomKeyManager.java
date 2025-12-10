@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class CustomKeyManager extends X509ExtendedKeyManager {
 	private final Map<String, X509Credentials> credentialsMap = new HashMap<>();
 	private final Map<String, String> aliasMap = new HashMap<>();
-	private final String defaultAlias;
+	private static final String LOCALHOST = "localhost";
 
 	public CustomKeyManager(KeyStore ks, Function<String, char[]> passwords)
 			throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, CertificateParsingException {
@@ -48,7 +48,6 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 				this.credentialsMap.put(alias, cred);
 			}
 		}
-		this.defaultAlias = ks.aliases().nextElement();
 	}
 
 	public static KeyManager[] of(KeyStore ks, Function<String, char[]> passwords) {
@@ -61,7 +60,7 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public X509Certificate[] getCertificateChain(String alias, String host) {
 		if (alias == null) {
 			return null;
@@ -106,8 +105,13 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 		if (engine.getHandshakeSession() instanceof ExtendedSSLSession es) {
 			var names = es.getRequestedServerNames();
 			if (!names.isEmpty() && names.getFirst() instanceof SNIHostName hn) {
-				return aliasMap.get(hn.getAsciiName());
-			} else return defaultAlias;
+				String n = hn.getAsciiName();
+				String cert = aliasMap.get(n);
+				if (cert == null) {
+					return LOCALHOST;
+				}
+				return cert;
+			} else return LOCALHOST;
 		}
 		return this.chooseServerAlias(keyType, issuers, null);
 	}
@@ -117,7 +121,7 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 		if (keyType == null) {
 			return null;
 		} else {
-			return socket != null ? aliasMap.get(socket.getInetAddress().getHostName()) : defaultAlias;
+			return socket != null ? aliasMap.get(socket.getInetAddress().getHostName()) : LOCALHOST;
 		}
 	}
 

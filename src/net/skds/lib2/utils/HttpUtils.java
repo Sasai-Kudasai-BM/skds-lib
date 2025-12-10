@@ -66,8 +66,8 @@ public class HttpUtils { // TODO
 	}
 
 	public static String downloadString(String url) {
-		try {
-			byte[] data = URI.create(url).toURL().openConnection().getInputStream().readAllBytes();
+		try (InputStream is = URI.create(url).toURL().openConnection().getInputStream()) {
+			byte[] data = is.readAllBytes();
 			return new String(data, StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			e.printStackTrace();

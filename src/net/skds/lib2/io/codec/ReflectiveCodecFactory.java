@@ -342,7 +342,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				try {
 					args[i] = deserializers[i].read(reader);
 				} catch (Exception e) {
-					throw new RuntimeException("Exception while read enum component \"" + tClass.getName() + ":" + names[i] + "\"", e);
+					throw new RuntimeException("Exception while read record component \"" + tClass.getName() + ":" + names[i] + "\"", e);
 				}
 			}
 			reader.endObject();
