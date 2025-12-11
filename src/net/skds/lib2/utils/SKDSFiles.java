@@ -86,6 +86,14 @@ public class SKDSFiles {
 		Files.write(path, bytes, DEFAULT_OPTIONS);
 	}
 
+	public static void createParentDir(Path path) {
+		try {
+			Files.createDirectories(path.toAbsolutePath().getParent());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static void deleteDirectory(File dir) {
 		if (dir.isDirectory()) {
 			for (File file : Objects.requireNonNull(dir.listFiles())) {

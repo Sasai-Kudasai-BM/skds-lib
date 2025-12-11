@@ -23,6 +23,7 @@ import java.util.function.IntConsumer;
 public class HttpUtils { // TODO
 
 	private static final HttpClient.Builder builder = HttpClient.newBuilder()
+			.version(HttpClient.Version.HTTP_2)
 			.connectTimeout(Duration.ofSeconds(10));
 
 	public static Map<String, String> queryToMap(String query) {
@@ -43,11 +44,12 @@ public class HttpUtils { // TODO
 
 
 	public static DownloadProcess downloadFromNet(String url) {
-		try (HttpClient client = builder.build()) {
-
+		try {
+			@SuppressWarnings("resource")
+			HttpClient client = builder.build();
 			HttpRequest request = HttpRequest.newBuilder(URI.create(url)).build();
 			//System.out.println(request.headers().map());
-			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofInputStream());
+			var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
 			if (response.statusCode() != 200) {
 				throw new RuntimeException("non-ok response " + response.statusCode() + " on " + url);
 			}
@@ -60,9 +62,8 @@ public class HttpUtils { // TODO
 			return new DownloadProcess(response.statusCode(), len, response.body());
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException("Unable to download " + url, e);
 		}
-		throw new RuntimeException("Unable to download " + url);
 	}
 
 	public static String downloadString(String url) {
@@ -76,8 +77,9 @@ public class HttpUtils { // TODO
 	}
 
 	public static byte[] downloadBytes(String url) {
-		try {
-			return URI.create(url).toURL().openConnection().getInputStream().readAllBytes();
+		try (InputStream is = URI.create(url).toURL().openConnection().getInputStream()) {
+			byte[] data = is.readAllBytes();
+			return data;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -110,7 +112,7 @@ public class HttpUtils { // TODO
 		throw new RuntimeException("Unable to download " + url);
 	}
 
-	public static class DownloadProcess {
+	public static class DownloadProcess implements AutoCloseable {
 
 		private final BufferedInputStream inputStream;
 		@Getter
@@ -179,6 +181,11 @@ public class HttpUtils { // TODO
 
 		public boolean isReady() {
 			return progress == content.length;
+		}
+
+		@Override
+		public void close() throws Exception {
+			inputStream.close();
 		}
 	}
 }
