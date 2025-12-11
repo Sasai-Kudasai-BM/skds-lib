@@ -1,10 +1,9 @@
 package net.skds.lib2.network.intercom;
 
 import lombok.Getter;
+import net.skds.lib2.utils.exception.TODOException;
 
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -27,10 +26,12 @@ public abstract class IntercomEncryption {
 	//}
 
 	public InputStream wrapInput(InputStream in) {
-		return new CipherInputStream(in, decryptor);
+		//return new CipherInputStream(in, decryptor);
+		throw new TODOException();
 	}
 
 	public OutputStream wrapOutput(OutputStream out) {
-		return new CipherOutputStream(out, encryptor);
+		//return new CipherOutputStream(out, encryptor);
+		throw new TODOException();
 	}
 }

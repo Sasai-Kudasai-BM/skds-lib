@@ -12,14 +12,13 @@ import net.skds.lib2.utils.logger.SKDSLogger;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
-import java.security.cert.CertificateEncodingException;
 import java.util.concurrent.CompletableFuture;
 
 public class IntercomTest {
 
 	private static final byte[] certificates = getCertificate();
 
-	static void main() throws CertificateEncodingException {
+	static void main() {
 		SKDSLogger.replaceOuts();
 
 		InetSocketAddress address = new InetSocketAddress(12214);
@@ -89,7 +88,8 @@ public class IntercomTest {
 		try {
 			return Files.readAllBytes(SKDSFiles.DESKTOP_PATH.resolve("ssl", "test.pem"));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			e.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
+			return null;
 		}
 	}
 
@@ -135,7 +135,7 @@ public class IntercomTest {
 					@Override
 					public void receivePublicInfo(String info) {
 						System.out.println(info);
-						startHandshake(SecurityLevel.WEB_SAFE);
+						startHandshake(SecurityLevel.LOCALHOST);
 					}
 				})
 		);
