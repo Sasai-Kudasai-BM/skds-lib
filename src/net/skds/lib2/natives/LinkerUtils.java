@@ -113,6 +113,19 @@ public final class LinkerUtils {
 		);
 	}
 
+	public static MethodHandle createHandleCritical(SymbolLookup library, String name, boolean allowHeapAccess, MemoryLayout returnType, MemoryLayout... arguments) {
+		Optional<MemorySegment> op = library.find(name);
+		if (op.isEmpty()) {
+			log.warn("Can not find method " + name + fd(returnType, arguments));
+			return null;
+		}
+		return LINKER.downcallHandle(
+				op.get(),
+				fd(returnType, arguments),
+				Linker.Option.critical(allowHeapAccess)
+		);
+	}
+
 	/**
 	 * @noinspection OptionalIsPresent
 	 */
