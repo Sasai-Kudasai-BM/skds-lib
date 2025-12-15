@@ -90,7 +90,7 @@ public interface UniversalReader {
 			default -> throw new ParseException("Expected STRING, LIST or NULL but next entry is " + nextEntryType());
 		}
 	}
-	
+
 	default short[] readShortArray() throws IOException {
 		switch (nextEntryType()) {
 			case NULL -> {
@@ -164,7 +164,7 @@ public interface UniversalReader {
 				ArrayUtils.IntGrowingArray array = new ArrayUtils.IntGrowingArray(16);
 				SosisonEntryType et;
 				while ((et = nextEntryType()) != SosisonEntryType.END_LIST) {
-					if (!et.isNumber()) {
+					if (!(et.isNumber() || et == SosisonEntryType.STRING)) {
 						throw new ParseException("Non-number member in primitive array");
 					}
 					array.add(readInt());
