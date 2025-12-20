@@ -90,7 +90,7 @@ public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C,
 			try {
 				@SuppressWarnings("resource") final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
 				//key.cancel();
-				log.debug("[Monitor] accepting " + sc.getRemoteAddress());
+				//log.debug("[Monitor] accepting " + sc.getRemoteAddress());
 				connectionFactory.createConnection(sc, this).thenAccept(cc -> {
 					if (cc == null) {
 						disconnectKey(key);

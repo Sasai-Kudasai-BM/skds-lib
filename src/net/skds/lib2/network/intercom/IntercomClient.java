@@ -2,6 +2,7 @@ package net.skds.lib2.network.intercom;
 
 import lombok.CustomLog;
 import lombok.Getter;
+import net.skds.lib2.network.intercom.packet.IntercomOutputPacket;
 import net.skds.lib2.network.tcp.ClientsideTCPConnectionOptions;
 import net.skds.lib2.network.tcp.TCPConnectionFactory;
 import net.skds.lib2.security.CustomX509TrustManager;
@@ -36,10 +37,16 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 		return false;
 	}
 
+	public void sendPacket(IntercomOutputPacket packet) {
+		var c = connection;
+		if (c != null) c.send(packet);
+	}
+
 	public boolean tryConnect(InetSocketAddress address, int attempts, int delay) {
 		int i = 0;
-		while (attempts - i != 0) {
+		for (; i < attempts || attempts <= 0; i++) {
 			log.info("[" + configuration.name() + "] Connecting to " + address);
+			//noinspection resource
 			if (connect(address) != null) {
 				break;
 			}
@@ -48,10 +55,11 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 			ThreadUtils.await(delay);
 		}
 		if (connected()) {
+
 			log.info("[" + configuration.name() + "] Connected to " + address);
 			return true;
 		} else {
-			log.error("[" + configuration.name() + "] Unable to connect to " + address + " in " + i + " attempts");
+			log.error("[" + configuration.name() + "] Unable to connect to " + address + " in " + (i + 1) + " attempts");
 		}
 		return false;
 	}
@@ -64,6 +72,7 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 			c.validateClientside();
 			onConnect(c);
 			c.startThreads();
+			c.requestPublicInfo();
 			return c;
 		} catch (IOException e) {
 			log.error(e);

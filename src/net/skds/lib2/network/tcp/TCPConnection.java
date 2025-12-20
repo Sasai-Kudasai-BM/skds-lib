@@ -7,6 +7,7 @@ import net.skds.lib2.misc.timer.SimpleTimer;
 import net.skds.lib2.network.exception.WrongSideException;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.ThreadUtils;
+import net.skds.lib2.utils.logger.SKDSLogger;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -50,6 +51,8 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 	private boolean packetTerminated = false;
 
 	private boolean threadsStarted = false;
+
+	private boolean closed = false;
 
 	public TCPConnection(SocketChannel channel, boolean isServerside, O options) {
 		this.serverside = isServerside;
@@ -108,12 +111,12 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 	}
 
 	protected long checkTimeout() {
-		if (!isAlive() || true) return -1;
+		if (!isAlive()) return -1;
 		if (lastTalk + options.getSilenceTimeout() < System.currentTimeMillis()) {
 			try {
 				timeoutDisconnect();
 			} catch (IOException e) {
-				e.printStackTrace(System.err);
+				e.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 			}
 			return -1;
 		}
@@ -121,7 +124,7 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 	}
 
 	public boolean isAlive() {
-		return channel.isConnected();
+		return channel.isConnected() && !closed;
 	}
 
 	protected void timeoutDisconnect() throws IOException {
@@ -140,7 +143,9 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 
 	@Override
 	public void close() throws IOException {
-		log.info("Disconnect " + channel);
+		log.log("Disconnect " + channel);
+		if (closed) throw new IllegalStateException();
+		closed = true;
 		channel.close();
 	}
 
@@ -152,17 +157,18 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 		} catch (ClosedChannelException | SocketException closed) {
 			safeClose();
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			e.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 			safeClose();
 		}
 	}
 
-	protected void safeClose() {
+	protected synchronized void safeClose() {
 		try {
 			if (isAlive()) {
 				close();
 			}
-		} catch (IOException ignored) {
+		} catch (IOException e) {
+			e.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 		}
 	}
 
@@ -188,7 +194,7 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 		} catch (ClosedChannelException | SocketException closed) {
 			safeClose();
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			e.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 			safeClose();
 		}
 	}

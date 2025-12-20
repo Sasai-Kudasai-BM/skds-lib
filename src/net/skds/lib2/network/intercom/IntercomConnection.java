@@ -18,6 +18,7 @@ import net.skds.lib2.network.intercom.packet.system.PingPacket;
 import net.skds.lib2.network.tcp.TCPConnection;
 import net.skds.lib2.network.tcp.TCPConnectionOptions;
 import net.skds.lib2.utils.SKDSUtils;
+import net.skds.lib2.utils.logger.SKDSLogger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -161,13 +162,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void safeClose() {
-		var dl = this.connectionOwner;
-		if (dl != null) {
-			dl.onDisconnect((C) this);
-			//this.connectionOwner = null;
-		}
 		super.safeClose();
 	}
 
@@ -176,7 +171,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 	public void close() throws IOException {
 		var dl = this.connectionOwner;
 		if (dl != null) {
-			log.warn("disconnectListener in close");
+			//log.warn("disconnectListener in close");
 			dl.onDisconnect((C) this);
 			//this.connectionOwner = null;
 		}
@@ -227,12 +222,14 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 						log.warn("Unknown packet: " + header);
 						return;
 					}
-					IntercomInputPacket<C> packet = (IntercomInputPacket<C>) packetReader.read(in);
+					IntercomInputPacket<C> packet = (IntercomInputPacket<C>) packetReader.read(in, registry);
 					if (!validateReceiveSide(packet.getDirection())) throw new WrongSideException(header.toString());
 					if (forceInstantHandle || packet.isInstantHandle()) {
 						packet.handle((C) this);
 					} else {
-						inputPacketQueue.offer(packet);
+						if (!connectionOwner.packetInbound((C) this, packet)) {
+							inputPacketQueue.offer(packet);
+						}
 					}
 					resetTimeout();
 				} catch (Exception ex) {
@@ -240,7 +237,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 						throw new IOException(ex);
 					} else {
 						log.warn("Exception while reading packet " + header + ": " + ex);
-						ex.printStackTrace(System.err);
+						ex.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 					}
 				}
 			}
