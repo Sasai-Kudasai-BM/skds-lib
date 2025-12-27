@@ -1,7 +1,7 @@
 package net.skds.lib2.misc.noise;
 
 import net.skds.lib2.mat.FastMath;
-import net.skds.lib2.misc.random.StateFuncRandom;
+import net.skds.lib2.misc.random.StaticRandom;
 
 import java.util.Arrays;
 
@@ -12,7 +12,7 @@ public class Noise {
 	//private final float phaseScale;
 	private final float[] amplitudes;
 	private final float[] scales;
-	private final StateFuncRandom[] layers;
+	private final StaticRandom[] layers;
 	//private final int layerCount;
 	@SuppressWarnings({"unused", "FieldCanBeLocal"})
 	private final int actualLayerCount;
@@ -38,10 +38,10 @@ public class Noise {
 		}
 		this.actualLayerCount = n;
 		this.amplitudes = Arrays.copyOf(amplitudes, n);
-		this.layers = new StateFuncRandom[n];
+		this.layers = new StaticRandom[n];
 		for (int i = 0; i < n; i++) {
 			pss[i] /= ps;
-			layers[i] = new StateFuncRandom((seed ^ i) + 37);
+			layers[i] = new StaticRandom((seed ^ i) + 37);
 		}
 		this.scales = Arrays.copyOf(pss, n);
 		this.weightCorrection = 1 / weight;
@@ -52,7 +52,7 @@ public class Noise {
 		float value = 0;
 		for (int i = 0; i < actualLayerCount; i++) {
 			float ps = scales[i];
-			StateFuncRandom sfr = layers[i];
+			StaticRandom sfr = layers[i];
 
 			double xi = x * ps;
 			double yi = y * ps;
@@ -68,14 +68,14 @@ public class Noise {
 			int z1 = FastMath.ceil(zi);
 			float kz = (float) (zi - z0);
 
-			float v000 = sfr.randomize(x0, y0, z0);
-			float v100 = sfr.randomize(x1, y0, z0);
-			float v010 = sfr.randomize(x0, y1, z0);
-			float v110 = sfr.randomize(x1, y1, z0);
-			float v001 = sfr.randomize(x0, y0, z1);
-			float v101 = sfr.randomize(x1, y0, z1);
-			float v011 = sfr.randomize(x0, y1, z1);
-			float v111 = sfr.randomize(x1, y1, z1);
+			float v000 = sfr.randomizeFloat(x0, y0, z0);
+			float v100 = sfr.randomizeFloat(x1, y0, z0);
+			float v010 = sfr.randomizeFloat(x0, y1, z0);
+			float v110 = sfr.randomizeFloat(x1, y1, z0);
+			float v001 = sfr.randomizeFloat(x0, y0, z1);
+			float v101 = sfr.randomizeFloat(x1, y0, z1);
+			float v011 = sfr.randomizeFloat(x0, y1, z1);
+			float v111 = sfr.randomizeFloat(x1, y1, z1);
 
 			float b00 = interpolation.interpolate(kz, v000, v001);
 			float b10 = interpolation.interpolate(kz, v100, v101);
@@ -95,7 +95,7 @@ public class Noise {
 		float value = 0;
 		for (int i = 0; i < actualLayerCount; i++) {
 			float ps = scales[i];
-			StateFuncRandom sfr = layers[i];
+			StaticRandom sfr = layers[i];
 			double xi = x * ps;
 			double yi = y * ps;
 
@@ -107,10 +107,10 @@ public class Noise {
 			float ky = (float) (yi - y0);
 
 
-			float v00 = sfr.randomize(x0, y0);
-			float v10 = sfr.randomize(x1, y0);
-			float v01 = sfr.randomize(x0, y1);
-			float v11 = sfr.randomize(x1, y1);
+			float v00 = sfr.randomizeFloat(x0, y0);
+			float v10 = sfr.randomizeFloat(x1, y0);
+			float v01 = sfr.randomizeFloat(x0, y1);
+			float v11 = sfr.randomizeFloat(x1, y1);
 
 			float s0 = interpolation.interpolate(ky, v00, v01);
 			float s1 = interpolation.interpolate(ky, v10, v11);

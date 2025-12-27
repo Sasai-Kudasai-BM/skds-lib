@@ -346,8 +346,8 @@ public class NoiseFrame extends JFrame {
 			ImageUtils.PerPixelDraw draw = (x, y) -> {
 				float vx = (x - w2) / scale - cx;
 				float vy = (y - h2) / scale - cy;
-				float value = noise.getValueInPoint(vx, vy, depth);
-				//float value = noise.getValueInPoint(vx, vy);
+				//float value = noise.getValueInPoint(vx, vy, depth);
+				float value = noise.getValueInPoint(vx, vy);
 				return colorScheme.getColor((value + colorBias) * colorScale);
 			};
 
@@ -385,5 +385,9 @@ public class NoiseFrame extends JFrame {
 
 	private interface ColorScheme {
 		int getColor(float value);
+	}
+
+	static void main() {
+		new NoiseFrame();
 	}
 }

@@ -1,8 +1,10 @@
 package net.skds.lib2.security;
 
+import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.SKDSUtils;
 
 import javax.crypto.Cipher;
+import javax.crypto.ShortBufferException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,32 +14,52 @@ public class CipherInputStream extends FilterInputStream {
 	private final Cipher cipher;
 	private final byte[] miniBuffer = new byte[1];
 	private final byte[] inputBuffer = new byte[SKDSUtils.DEFAULT_BUFFER_SIZE];
-	private byte[] outputBuffer;
+	private final byte[] outputBuffer = new byte[SKDSUtils.DEFAULT_BUFFER_SIZE];
 	private int pos = 0;
 	private int limit = 0;
 
 
-	protected CipherInputStream(InputStream in, Cipher cipher) {
+	public CipherInputStream(InputStream in, Cipher cipher) {
 		super(in);
 		this.cipher = cipher;
 	}
 
 	private int bufferAvailable(int ensure) throws IOException {
-		if (pos < limit) throw new IllegalStateException("pos < limit");
-		int toRead = Math.min(Math.max(in.available(), ensure), inputBuffer.length);
-		if (toRead == 0) {
-			return 0;
+		int available = limit - pos;
+		if (available < 0) throw new IllegalStateException("pos < limit");
+		ensure -= available;
+		if (ensure > 0) {
+			if (pos > 0) {
+				if (available > 0) {
+					if (pos > outputBuffer.length / 2) {
+						ArrayUtils.rewind(outputBuffer, pos, available);
+						pos = 0;
+						limit = available;
+					}
+				} else {
+					pos = 0;
+					limit = 0;
+				}
+			}
+			int rd = 0;
+			int toRead = Math.min(Math.max(in.available(), ensure), inputBuffer.length);
+			while (toRead > 0) {
+				int r = in.read(inputBuffer, 0, toRead);
+				if (r == -1) break;
+				try {
+					for (int upd = 0; upd < r; ) {
+						upd += cipher.update(inputBuffer, 0, r, outputBuffer, pos + rd + upd);
+					}
+				} catch (ShortBufferException e) {
+					throw new IOException(e);
+				}
+				toRead -= r;
+				limit += r;
+				rd += r;
+			}
+			return available();
 		}
-		int r = in.read(inputBuffer, 0, toRead);
-		outputBuffer = cipher.update(inputBuffer, 0, r);
-		pos = 0;
-		limit = r;
-		return r;
-	}
-
-
-	private int readAvailable(byte[] b, int off, int len) throws IOException {
-		return 0;
+		return available;
 	}
 
 	@Override
@@ -53,14 +75,31 @@ public class CipherInputStream extends FilterInputStream {
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		return 0;
+		int rd = 0;
+		while (rd < len) {
+			int available = bufferAvailable(len);
+			if (available == 0) break;
+			int toCopy = Math.min(available, len);
+			rd += toCopy;
+			System.arraycopy(this.outputBuffer, this.pos, b, off, toCopy);
+			this.pos += toCopy;
+		}
+		return rd;
 	}
 
 	@Override
 	public long skip(long n) throws IOException {
-		return 0;
+		int rd = 0;
+		while (rd < n) {
+			int available = bufferAvailable((int) n);
+			if (available == 0) break;
+			int toCopy = Math.min(available, (int) n);
+			rd += toCopy;
+			this.pos += toCopy;
+		}
+		return rd;
 	}
-	
+
 
 	@Override
 	public int available() throws IOException {

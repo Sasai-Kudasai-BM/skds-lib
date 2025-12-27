@@ -144,6 +144,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 	}
 
 	void enableEncryption() {
+		log.debug(this + " enableEncryption");
 		IntercomEncryption e = this.encryption;
 		this.input = ExtendedDataInput.wrap(e.wrapInput(getInputStream()));
 		this.output = ExtendedDataOutput.wrap(e.wrapOutput(getOutputStream()));
@@ -350,6 +351,4 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 		} catch (InterruptedException ignored) {
 		}
 	}
-
-
 }

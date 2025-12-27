@@ -80,6 +80,8 @@ public abstract class ClientIntercomConnection extends IntercomConnection<Client
 		}
 		if (status.isOk()) {
 			validateHandshakeStatus(HandshakeStatus.CERT_VALIDATION, HandshakeStatus.AUTHORIZATION);
+			onCertificateValidated();
+			send(new AuthorizationStartC2SPacket(getAuthorizationData()));
 		} else {
 			disconnect("Certificate status: " + status);
 		}
@@ -104,5 +106,7 @@ public abstract class ClientIntercomConnection extends IntercomConnection<Client
 	protected abstract void onAuthorizationSuccess();
 
 	protected abstract void onAuthorizationFail(String error);
+
+	protected abstract void onCertificateValidated();
 
 }

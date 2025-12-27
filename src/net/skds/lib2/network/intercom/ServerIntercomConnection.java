@@ -37,6 +37,7 @@ public abstract class ServerIntercomConnection extends IntercomConnection<Server
 		((ServerIntercomEncryption) this.encryption).applySecret(packet.getKey());
 		enableEncryption();
 		if (checkCert) {
+			validateHandshakeStatus(HandshakeStatus.CERT_VALIDATION, HandshakeStatus.AUTHORIZATION);
 			send(new CertificateS2CPacket(getCertificates()));
 		}
 	}

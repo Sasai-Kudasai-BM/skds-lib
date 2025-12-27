@@ -6,6 +6,7 @@ import lombok.CustomLog;
 import lombok.NoArgsConstructor;
 import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
+import net.skds.lib2.utils.logger.SKDSLogger;
 
 import javax.management.MBeanServer;
 import java.awt.*;
@@ -46,7 +47,7 @@ public class SKDSUtils {
 	public static final UUID NULL_UUID = new UUID(0, 0);
 
 	private static final Function<Throwable, Object> CATCHER = t -> {
-		t.printStackTrace();
+		t.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 		return null;
 	};
 	private static final Consumer<?> EMPTY_CONSUMER = o -> {
@@ -456,34 +457,36 @@ public class SKDSUtils {
 	}
 
 	public static ByteBuffer compress(byte[] data, int offset, int len, int compressionLevel) {
-		Deflater deflater = new Deflater(compressionLevel);
-		deflater.setInput(data, offset, len);
-		deflater.finish();
-		byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
-		ByteArrayExtendedDataOutput bao = new ByteArrayExtendedDataOutput(len + 32);
-		do {
-			int i = deflater.deflate(outBuffer);
-			bao.write(outBuffer, 0, i);
-		} while (!deflater.finished());
+		try (Deflater deflater = new Deflater(compressionLevel)) {
+			deflater.setInput(data, offset, len);
+			deflater.finish();
+			byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
+			ByteArrayExtendedDataOutput bao = new ByteArrayExtendedDataOutput(len + 32);
+			do {
+				int i = deflater.deflate(outBuffer);
+				bao.write(outBuffer, 0, i);
+			} while (!deflater.finished());
 
-		deflater.end();
-		return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
+			deflater.end();
+			return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
+		}
 	}
 
 	public static void compress(byte[] data, int offset, int len, int compressionLevel, DataOutput output) {
-		Deflater deflater = new Deflater(compressionLevel);
-		deflater.setInput(data, offset, len);
-		deflater.finish();
-		byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
-		try {
-			do {
-				int i = deflater.deflate(outBuffer);
-				output.write(outBuffer, 0, i);
-			} while (!deflater.finished());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		try (Deflater deflater = new Deflater(compressionLevel)) {
+			deflater.setInput(data, offset, len);
+			deflater.finish();
+			byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
+			try {
+				do {
+					int i = deflater.deflate(outBuffer);
+					output.write(outBuffer, 0, i);
+				} while (!deflater.finished());
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			deflater.end();
 		}
-		deflater.end();
 	}
 
 	public static ByteBuffer compress(byte[] data, int offset, int len) {
@@ -499,19 +502,20 @@ public class SKDSUtils {
 	}
 
 	public static ByteBuffer decompress(byte[] data, int offset, int len, int uncompressedSize) throws DataFormatException {
-		Inflater inflater = new Inflater();
-		inflater.setInput(data, offset, len);
-		ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
-		while (true) {
-			inflater.inflate(outBuffer);
-			if (!inflater.finished()) {
-				if (!outBuffer.hasRemaining()) {
-					throw new RuntimeException("Decompressed data size is larger than specified " + uncompressedSize);
-				}
-			} else break;
+		try (Inflater inflater = new Inflater()) {
+			inflater.setInput(data, offset, len);
+			ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
+			while (true) {
+				inflater.inflate(outBuffer);
+				if (!inflater.finished()) {
+					if (!outBuffer.hasRemaining()) {
+						throw new RuntimeException("Decompressed data size is larger than specified " + uncompressedSize);
+					}
+				} else break;
+			}
+			inflater.end();
+			return outBuffer.flip();
 		}
-		inflater.end();
-		return outBuffer.flip();
 	}
 
 	private static String getOSAndArc() {

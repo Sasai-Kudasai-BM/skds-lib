@@ -1,5 +1,9 @@
 package net.skds.lib2.misc.random;
 
+/**
+ * @deprecated use{@link StaticRandom}
+ */
+@Deprecated
 public final class StateFuncRandom {
 
 	private static final long multiplier = 0x5DEECE66DL;

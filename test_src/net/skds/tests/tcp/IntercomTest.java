@@ -21,21 +21,29 @@ public class IntercomTest {
 	static void main() {
 		SKDSLogger.replaceOuts();
 
-		InetSocketAddress address = new InetSocketAddress(12214);
+		InetSocketAddress address = new InetSocketAddress("localhost", 12214);
 
 		IntercomClient client = getIntercomClient();
 
 		IntercomServer server = getIntercomServer();
 		server.start(address);
 
-		ThreadUtils.await(100);
+		//ThreadUtils.await(100);
 		CompletableFuture.supplyAsync(() -> client.tryConnect(address, 10, 500))
 				.thenAccept(r -> {
 					System.out.println("Connected: " + r);
 					if (r) {
 						var connection = client.getConnection();
-						connection.requestPublicInfo();
-						connection.nextPacket(true).handle(connection);
+						new Thread("test handler") {
+							@Override
+							public void run() {
+								while (isAlive()) {
+									var p = connection.nextPacket(true);
+									p.handle(connection);
+									System.out.println(p);
+								}
+							}
+						}.start();
 					}
 				});
 
@@ -61,23 +69,24 @@ public class IntercomTest {
 
 					@Override
 					protected byte[] getCertificates() {
+						System.out.println("S: getCertificates");
 						return certificates;
 					}
 
 					@Override
 					protected String processAuthorization(AuthorizationData authorizationData) {
-						System.out.println(authorizationData);
+						System.out.println("S: " + authorizationData);
 						return null;
 					}
 
 					@Override
 					protected void onAuthorizationSuccess(AuthorizationData authorizationData) {
-						System.out.println("onAuthorizationSuccess");
+						System.out.println("S: onAuthorizationSuccess");
 					}
 
 					@Override
 					public void receivePublicInfo(String info) {
-						System.out.println(info);
+						System.out.println("S: " + info);
 					}
 				})
 		);
@@ -113,12 +122,13 @@ public class IntercomTest {
 
 					@Override
 					protected AuthorizationData getAuthorizationData() {
+						System.out.println("C: getAuthorizationData");
 						return AuthorizationData.TRUSTED;
 					}
 
 					@Override
 					protected void onAuthorizationSuccess() {
-						System.out.println("onAuthorizationSuccess");
+						System.out.println("C: onAuthorizationSuccess");
 						ThreadUtils.runTickable(() -> {
 							if (isAlive()) {
 								ping();
@@ -129,13 +139,18 @@ public class IntercomTest {
 
 					@Override
 					protected void onAuthorizationFail(String error) {
-						System.out.println(error);
+						System.out.println("C: " + error);
+					}
+
+					@Override
+					protected void onCertificateValidated() {
+						System.out.println("C: onCertificateValidated");
 					}
 
 					@Override
 					public void receivePublicInfo(String info) {
-						System.out.println(info);
-						startHandshake(SecurityLevel.LOCALHOST);
+						System.out.println("C: " + info);
+						startHandshake(SecurityLevel.WEB_SAFE);
 					}
 				})
 		);
