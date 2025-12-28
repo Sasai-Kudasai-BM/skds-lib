@@ -1,0 +1,13 @@
+package net.skds.lib2.io.codec.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.FIELD, ElementType.TYPE, ElementType.RECORD_COMPONENT})
+@Retention(RetentionPolicy.RUNTIME)
+// TODO enumNameDataFixer
+public @interface EnumNameDataFixer {
+	Class<?> value();
+}

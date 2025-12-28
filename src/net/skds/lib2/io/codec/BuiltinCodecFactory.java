@@ -1263,12 +1263,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 					return null;
 				}
 				case STRING -> {
-					String s = reader.readString();
-					try {
-						return Enum.valueOf(eClass, s);
-					} catch (IllegalArgumentException e) {
-						return null;
-					}
+					return SosisonUtils.parseEnum(reader.readString(), eClass);
 				}
 				default -> {
 					if (type.isNumber()) {

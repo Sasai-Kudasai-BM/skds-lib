@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import net.skds.lib2.annotations.NotNull;
 import net.skds.lib2.io.codec.annotation.DefaultFile;
+import net.skds.lib2.io.codec.annotation.EnumNameDataFixer;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
@@ -113,6 +114,31 @@ public class SosisonUtils {
 			e.printStackTrace(System.err);
 		}
 		return null;
+	}
+
+	public static <E extends Enum<E>> E parseEnum(String value, Class<E> type) {
+		return parseEnum(value, type, false);
+	}
+
+	// TODO enumNameDataFixer
+	@SuppressWarnings("unchecked")
+	public static <E extends Enum<E>> E parseEnum(String value, Class<E> type, boolean throwException) {
+		try {
+			try {
+				return Enum.valueOf(type, value);
+			} catch (Exception e) {
+				EnumNameDataFixer annotation = type.getAnnotation(EnumNameDataFixer.class);
+				if (annotation != null) {
+					IEnumNameDataFixer<E> fixer = (IEnumNameDataFixer<E>) annotation.value().newInstance();
+					return fixer.fixName(value);
+				}
+				throw e;
+			}
+		} catch (Exception e) {
+			if (throwException)
+				throw new IllegalStateException(e);
+			return null;
+		}
 	}
 
 	public static <T> T readJson(String file, Class<T> clazz) {
@@ -314,6 +340,7 @@ public class SosisonUtils {
 		}
 		return false;
 	}
+
 
 	static {
 		setOptions(new UniversalCodecOptionsImpl());
