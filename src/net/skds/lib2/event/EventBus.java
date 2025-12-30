@@ -14,6 +14,10 @@ public class EventBus<T extends Event> {
 		listeners.remove(listener);
 	}
 
+	public void clear() {
+		listeners.clear();
+	}
+
 	public boolean post(T event) {
 		listeners.forEach(listener -> {
 			listener.onEvent(event);
