@@ -3,6 +3,7 @@ package net.skds.lib2.io.codec;
 import lombok.CustomLog;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
+import net.skds.lib2.io.codec.annotation.EnumNameDataFixer;
 import net.skds.lib2.io.codec.nulls.NullCodec;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
@@ -1263,7 +1264,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 					return null;
 				}
 				case STRING -> {
-					return SosisonUtils.parseEnum(reader.readString(), eClass);
+					return parseEnum(reader.readString(), eClass);
 				}
 				default -> {
 					if (type.isNumber()) {
@@ -1275,6 +1276,30 @@ public class BuiltinCodecFactory implements CodecFactory {
 						throw new ParseException("Unexpected token " + type);
 				}
 			}
+		}
+	}
+
+	public static <E extends Enum<E>> E parseEnum(String value, Class<E> type) {
+		return parseEnum(value, type, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <E extends Enum<E>> E parseEnum(String value, Class<E> type, boolean throwException) {
+		try {
+			try {
+				return Enum.valueOf(type, value);
+			} catch (IllegalArgumentException | NullPointerException e) {
+				EnumNameDataFixer annotation = type.getAnnotation(EnumNameDataFixer.class);
+				if (annotation != null) {
+					IEnumNameDataFixer<E> fixer = (IEnumNameDataFixer<E>) ReflectUtils.getConstructor(annotation.value()).get();
+					return fixer.fixName(value);
+				}
+				throw e;
+			}
+		} catch (Exception e) {
+			if (throwException)
+				throw new IllegalStateException(e);
+			return null;
 		}
 	}
 
