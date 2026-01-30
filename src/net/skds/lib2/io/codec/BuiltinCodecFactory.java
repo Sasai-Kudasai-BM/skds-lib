@@ -22,6 +22,8 @@ import java.lang.reflect.*;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
+import java.sql.Time;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -49,6 +51,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 			URL.class, (CodecFactory) URLCodec::new,
 			UUID.class, (CodecFactory) UUIDCodec::new,
 			Color.class, (CodecFactory) ColorCodec::new,
+			Date.class, (CodecFactory) DateCodec::new,
 
 			Number.class, (CodecFactory) NumberCodec::new,
 			Byte.class, (CodecFactory) WrappedByteCodec::new,
@@ -1156,6 +1159,40 @@ public class BuiltinCodecFactory implements CodecFactory {
 					}
 					throw new ParseException("Unexpected token " + type);
 				}
+			}
+		}
+	}
+
+	public static final class DateCodec extends AbstractCodec<Date> {
+
+		public DateCodec(Type type, CodecRegistry registry) {
+			super(type, registry);
+		}
+
+		@Override
+		public Date read(UniversalReader reader) throws IOException {
+			switch (reader.nextEntryType()) {
+				case NULL -> {
+					reader.skipNull();
+					return null;
+				}
+				case LONG -> {
+					return new Time(reader.readLong());
+				}
+				case STRING -> {
+					String s = reader.readString();
+					return Date.from(Instant.parse(s));
+				}
+			}
+			throw new ParseException("Unable to parse date");
+		}
+
+		@Override
+		public void write(Date value, UniversalWriter writer) throws IOException {
+			if (value == null) {
+				writer.writeNull();
+			} else {
+				writer.writeString(value.toInstant().toString());
 			}
 		}
 	}
