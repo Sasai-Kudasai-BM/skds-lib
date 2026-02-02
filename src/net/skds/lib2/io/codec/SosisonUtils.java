@@ -170,7 +170,11 @@ public class SosisonUtils {
 	}
 
 	public static <T> T readJson(@NotNull Class<T> tClass) {
-		DefaultFile df = tClass.getAnnotation(DefaultFile.class);
+		Class<?> cl = tClass;
+		while (cl.isArray()) {
+			cl = cl.componentType();
+		}
+		DefaultFile df = cl.getAnnotation(DefaultFile.class);
 		if (df == null) {
 			throw new IllegalArgumentException("Class \"" + tClass.getSimpleName() + "\" is not annotated with @DefaultFile");
 		}
