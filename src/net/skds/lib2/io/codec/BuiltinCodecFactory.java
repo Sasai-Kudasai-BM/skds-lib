@@ -353,7 +353,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class MapCodec extends AbstractCodec<Map<Object, Object>> {
+	public static class MapCodec extends AbstractCodec<Map<?, ?>> {
 
 		final Supplier<Map<Object, Object>> constructor;
 		final UniversalDeserializer<Object> keyDeserializer;
@@ -451,7 +451,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
-		public void write(Map<Object, Object> value, UniversalWriter writer) throws IOException {
+		public void write(Map<?, ?> value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
@@ -462,7 +462,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 				writer.lineBreakEnable(true);
 			}
 
-			for (Map.Entry<Object, Object> entry : value.entrySet()) {
+			for (Map.Entry<?, ?> entry : value.entrySet()) {
 				Object k = entry.getKey();
 				Object v = entry.getValue();
 				writer.writeName(keySerializer.valueAsKeyString(k));
@@ -472,7 +472,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
-		public Map<Object, Object> read(UniversalReader reader) throws IOException {
+		public Map<?, ?> read(UniversalReader reader) throws IOException {
 			SosisonEntryType type = reader.nextEntryType();
 			switch (type) {
 				case NULL -> {
