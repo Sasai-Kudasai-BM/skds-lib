@@ -1,6 +1,7 @@
 package net.skds.lib2.reflection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public record HiddenField<T>(Field field) {
 
@@ -10,6 +11,10 @@ public record HiddenField<T>(Field field) {
 
 	public int getModifiers() {
 		return this.field.getModifiers();
+	}
+
+	public boolean isTransient() {
+		return Modifier.isTransient(this.getModifiers());
 	}
 
 	@SuppressWarnings("unchecked")
