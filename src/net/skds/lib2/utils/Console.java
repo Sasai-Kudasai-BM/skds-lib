@@ -1,10 +1,12 @@
 package net.skds.lib2.utils;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("unused")
 public class Console {
@@ -26,15 +28,17 @@ public class Console {
 		}
 		basicInit = true;
 
+		regCommand("kill", arg -> System.exit(0), _ -> "kill java");
+		regCommand("gc", arg -> gc(), _ -> "call System.gc()");
+		regCommand("mem", arg -> mem(), _ -> "print memory state");
+		regCommand("dump", arg -> SKDSUtils.dumpHeap("heap.hprof"), _ -> "save dump to heap.hprof");
+		regCommand("help", this::help, arg -> "prints help command with args");
+	}
 
-		regCommand("kill", arg -> System.exit(0));
-		regCommand("gc", arg -> {
-			System.out.println("Performing gc...");
-			System.gc();
-			mem();
-		});
-		regCommand("mem", arg -> mem());
-		regCommand("dump", arg -> SKDSUtils.dumpHeap("heap.hprof"));
+	private void gc() {
+		System.out.println("Performing gc...");
+		System.gc();
+		mem();
 	}
 
 	private void mem() {
@@ -50,6 +54,28 @@ public class Console {
 		System.out.println("Allocated: " + percentForm.format(allocatedP) + "   " + SKDSUtils.memoryCompact(allocated));
 		System.out.println("Used:      " + percentForm.format(usedP) + "   " + SKDSUtils.memoryCompact(used));
 		System.out.println("========= Memory end =========");
+	}
+
+	private void help(String[] arg) {
+		if (arg.length == 1) {
+			System.out.println(this.commands.keySet());
+		} else {
+			Command command = this.commands.get(arg[1]);
+			if (command == null) {
+				System.err.println("cant find command \"" + arg[1] + "\"");
+			} else {
+				if (command.help == null) {
+					System.err.println("command \"" + arg[1] + "\" has no help");
+				} else {
+					String help = command.help.apply(arg);
+					if (help == null) {
+						System.err.println("command \"" + arg[1] + "\" with args:\n" + Arrays.toString(arg) + "\n has incorrect result");
+					} else {
+						System.out.println("help \"" + arg[1] + "\" -> " + help);
+					}
+				}
+			}
+		}
 	}
 
 	public void start() {
@@ -82,11 +108,15 @@ public class Console {
 	}
 
 	public void regCommand(String name, Consumer<String[]> action) {
-		Command command = new Command(name, action);
+		regCommand(name, action, null);
+	}
+
+	public void regCommand(String name, Consumer<String[]> action, Function<String[], String> help) {
+		Command command = new Command(name, action, help);
 		commands.put(name, command);
 	}
 
-	private record Command(String name, Consumer<String[]> action) {
+	private record Command(String name, Consumer<String[]> action, Function<String[], String> help) {
 
 	}
 
