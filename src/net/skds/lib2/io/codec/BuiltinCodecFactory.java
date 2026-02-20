@@ -156,9 +156,9 @@ public class BuiltinCodecFactory implements CodecFactory {
 				return new MapCodec(cl, pt.getActualTypeArguments(), registry);
 			} else if (Collection.class.isAssignableFrom(cl)) {
 				if (Set.class.isAssignableFrom(cl)) {
-					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, HashSet::new);
+					return new CollectionCodec(cl, pt.getActualTypeArguments(), HashSet::new, registry);
 				} else {
-					return new CollectionCodec(cl, pt.getActualTypeArguments(), registry, ArrayList::new);
+					return new CollectionCodec(cl, pt.getActualTypeArguments(), ArrayList::new, registry);
 				}
 			}
 		} else if (type instanceof GenericArrayType gat) {
@@ -495,7 +495,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 						try {
 							value = valueDeserializer.read(reader);
 						} catch (Exception ex) {
-							throw new ParseException("Exception while read " + name + "\"", ex);
+							throw new ParseException("Exception while read \"" + name + "\"", ex);
 						}
 						map.put(key, value);
 					}
@@ -510,7 +510,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class CollectionCodec extends AbstractCodec<Collection<Object>> {
+	public static class CollectionCodec extends AbstractCodec<Collection<?>> {
 
 		final Supplier<Collection<Object>> constructor;
 		final UniversalDeserializer<Object> deserializer;
@@ -552,7 +552,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		public CollectionCodec(Type tClass, UniversalCodec<?> codec, CodecRegistry registry, Supplier<Collection<?>> defaultSupplier) {
+		public CollectionCodec(Type tClass, UniversalCodec<?> codec, Supplier<Collection<?>> defaultSupplier, CodecRegistry registry) {
 			super(tClass, registry);
 			this.deserializer = (UniversalDeserializer<Object>) codec;
 			this.serializer = (UniversalSerializer<Object>) codec;
@@ -560,7 +560,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		public CollectionCodec(Class<?> tClass, Type[] parameters, CodecRegistry registry, Supplier<Collection<Object>> defaultSupplier) {
+		public CollectionCodec(Class<?> tClass, Type[] parameters, Supplier<Collection<Object>> defaultSupplier, CodecRegistry registry) {
 			super(tClass, registry);
 			this.deserializer = registry.getDeserializerIndirect(parameters[0]);
 			this.serializer = getUniversalSerializer(parameters[0], registry);
@@ -582,7 +582,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 
 		@Override
-		public void write(Collection<Object> value, UniversalWriter writer) throws IOException {
+		public void write(Collection<?> value, UniversalWriter writer) throws IOException {
 			if (value == null) {
 				writer.writeNull();
 				return;
