@@ -53,6 +53,7 @@ public class ReflectUtils {
 				try {
 					return (T) c.newInstance(arg);
 				} catch (Exception e) {
+					System.err.println("error with " + tClass + " " + c);
 					throw new RuntimeException(e);
 				}
 			};
