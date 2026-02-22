@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public abstract class JsonTestYup implements TypedConfig {
+public abstract class JsonTestYup implements TypedConfig<ConfigType<?>> {
 
 	public static void test(JsonTestRegistry registry) {
 		Map<String, YupCT> yupMap = Map.of(

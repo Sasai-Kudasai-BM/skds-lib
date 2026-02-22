@@ -34,7 +34,7 @@ public class JsonTestNest {
 		public List<JTN> list = Arrays.asList(new JTNParent());
 	}
 
-	private abstract static class JTN implements TypedConfig {
+	private abstract static class JTN implements TypedConfig<ConfigType<?>> {
 
 	}
 

@@ -9,7 +9,7 @@ import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 @ToString
 @NoArgsConstructor
-public class JsonTestEmptyTyped implements TypedConfig {
+public class JsonTestEmptyTyped implements TypedConfig<ConfigType<?>> {
 
 	public static void test(JsonTestRegistry registry) {
 		JsonTestEmptyTyped test = new JsonTestEmptyTyped();

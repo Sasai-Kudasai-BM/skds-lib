@@ -5,7 +5,6 @@ import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
-import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
@@ -15,7 +14,7 @@ import net.skds.lib2.utils.AutoString;
 import java.lang.reflect.Type;
 
 @DefaultCodec(OBB.JCodec.class)
-public class OBB implements ConvexShape, TypedConfig {
+public class OBB implements ConvexShape, TypedConfig<ShapeType> {
 
 	public final Matrix3 normals;
 	public final Vec3 center;
@@ -208,7 +207,7 @@ public class OBB implements ConvexShape, TypedConfig {
 	}
 
 	@Override
-	public final ConfigType<?> getConfigType() {
+	public final ShapeType getConfigType() {
 		return ShapeType.OBB;
 	}
 

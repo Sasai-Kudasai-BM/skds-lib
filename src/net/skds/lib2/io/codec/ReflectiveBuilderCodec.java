@@ -18,6 +18,11 @@ public abstract class ReflectiveBuilderCodec<T> extends AbstractCodec<T> {
 			}
 			type = pt.getRawType();
 		}
+		if (builderType instanceof Class<?> builderTypeClass) {
+			if (!DeserializeBuilder.class.isAssignableFrom(builderTypeClass)) {
+				throw new IllegalStateException(builderTypeClass + " is not implementing " + DeserializeBuilder.class);
+			}
+		}
 		this.deserializer = registry.getDeserializerIndirect(builderType);
 		this.serializer = (UniversalSerializer<T>) ReflectiveCodecFactory.INSTANCE.createSerializer(cl, registry);
 	}

@@ -95,10 +95,14 @@ public class SosisonUtils {
 		//fancyRegistry.getCodec(type);
 	}
 
+	public static <T> T parseJson0(String text, Class<T> type) {
+		UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+		return deserializer.parse(text);
+	}
+
 	public static <T> T parseJson(String text, Class<T> type) {
 		try {
-			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
-			return deserializer.parse(text);
+			return parseJson0(text, type);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -126,7 +130,7 @@ public class SosisonUtils {
 	public static <T> T readJson(Path file, Class<T> clazz) {
 		try {
 			String text = Files.readString(file);
-			return parseJson(text, clazz);
+			return parseJson0(text, clazz);
 		} catch (Exception e) {
 			new ParseException("Exception while reading " + file, e).printStackTrace(System.err);
 		}
@@ -136,7 +140,7 @@ public class SosisonUtils {
 	public static <T> T readJson(InputStream is, Class<T> clazz) {
 		try {
 			String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-			return parseJson(text, clazz);
+			return parseJson0(text, clazz);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -155,7 +159,7 @@ public class SosisonUtils {
 	public static <T> T readJson(Path file, Type type) {
 		try {
 			String text = Files.readString(file);
-			return parseJson(text, type);
+			return parseJson0(text, type);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
@@ -203,7 +207,7 @@ public class SosisonUtils {
 		try {
 			if (Files.exists(file)) {
 				String text = Files.readString(file);
-				return parseJson(text, tClass);
+				return parseJson0(text, tClass);
 			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
@@ -221,17 +225,21 @@ public class SosisonUtils {
 	public static <T> T readJson(InputStream is, Type type) {
 		try {
 			String text = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-			return parseJson(text, type);
+			return parseJson0(text, type);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 		return null;
 	}
 
+	public static <T> T parseJson0(String text, Type type) {
+		UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
+		return deserializer.parse(text);
+	}
+
 	public static <T> T parseJson(String text, Type type) {
 		try {
-			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
-			return deserializer.parse(text);
+			return parseJson0(text, type);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}

@@ -5,7 +5,6 @@ import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
-import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
@@ -18,7 +17,7 @@ import java.util.Collection;
 
 @SuppressWarnings("unused")
 @DefaultCodec(AABB.JCodec.class)
-public final class AABB implements ConvexShape, TypedConfig {
+public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 
 	public static final AABB EMPTY = new AABB(0, 0, 0, 0, 0, 0);
 	public static final AABB ONE = new AABB(0, 0, 0, 1, 1, 1);
@@ -746,7 +745,7 @@ public final class AABB implements ConvexShape, TypedConfig {
 	}
 
 	@Override
-	public final ConfigType<?> getConfigType() {
+	public final ShapeType getConfigType() {
 		return ShapeType.AABB;
 	}
 }

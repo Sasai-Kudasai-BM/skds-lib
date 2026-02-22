@@ -3,9 +3,9 @@ package net.skds.tests.json;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
-import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public abstract class JsonTestDg<T> implements TypedConfig {
+public abstract class JsonTestDg<T> implements TypedConfig<ConfigType<?>> {
 
 	private static final DgAdapter<?> dg0 = new DgAdapter<>(Dg0.TYPE, Dg0.class);
 	private static final DgAdapter<?> dg1 = new DgAdapter<>(Dg1.TYPE, Dg1.class);
@@ -163,10 +163,10 @@ public abstract class JsonTestDg<T> implements TypedConfig {
 	}
 
 	@AllArgsConstructor
-	public static class DgAdapter<CT> implements ConfigType<CT> {
+	private static class DgAdapter<CT> implements ConfigType<CT> {
 
 		private final String keyName;
-		@Getter(onMethod_ = {@Override})
+		@Getter(onMethod_ = @Override)
 		private final Class<CT> typeClass;
 
 		@Override

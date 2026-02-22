@@ -7,7 +7,6 @@ import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
-import net.skds.lib2.io.codec.typed.ConfigType;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 @DefaultCodec(CompositeSuperShape.JCodec.class)
-public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
+public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<ShapeType> {
 
 	private static final ConvexShape[] empty = {};
 
@@ -327,7 +326,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig {
 	}
 
 	@Override
-	public final ConfigType<?> getConfigType() {
+	public final ShapeType getConfigType() {
 		return ShapeType.COMPOSITE;
 	}
 }
