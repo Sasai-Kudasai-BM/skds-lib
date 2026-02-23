@@ -959,13 +959,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		@Override
 		public void write(Path value, UniversalWriter writer) throws IOException {
 			URI uri = value.toUri();
-			String strVal;
 			if (uri.getScheme() == null || uri.getScheme().equals("file")) {
-				strVal = value.toString();
-			} else {
-				strVal = value.toUri().toString();
+				writer.writeString(uri.toString().replace("\\", "/"));
+				return;
 			}
-			writer.writeString(SKDSFiles.toCanonicalPath(strVal));
+			writer.writeString(uri.toString());
 		}
 	}
 
