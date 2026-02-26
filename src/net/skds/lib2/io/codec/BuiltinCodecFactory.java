@@ -105,6 +105,19 @@ public class BuiltinCodecFactory implements CodecFactory {
 	}
 
 	@Override
+	public UniversalDeserializer<?> createDeserializer(Type type, CodecRegistry registry) {
+		if (type instanceof Class<?> cl) {
+			if (Map.class.isAssignableFrom(cl)) {
+				return new MapCodec(cl, registry);
+			}
+			if (Collection.class.isAssignableFrom(cl)) {
+				return new CollectionCodec(cl, registry);
+			}
+		}
+		return createCodec(type, registry);
+	}
+
+	@Override
 	public UniversalCodec<?> createCodec(Type type, CodecRegistry registry) {
 		CodecFactory fac = map.get(type);
 		if (fac != null) {
@@ -361,23 +374,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> keySerializer;
 		final UniversalSerializer<Object> valueSerializer;
 
-		@Deprecated // TODO ugly hack
-		@SuppressWarnings({"unchecked"})
 		public MapCodec(Class<?> tClass, CodecRegistry registry) {
-			super(tClass, registry);
-
-			this.constructor = (Supplier<Map<Object, Object>>) ReflectUtils.getConstructor(tClass);
-
-			UniversalDeserializer<Object> keyDeserializer;
-			UniversalDeserializer<Object> valueDeserializer;
-			UniversalSerializer<Object> keySerializer;
-			UniversalSerializer<Object> valueSerializer;
-
+			Type[] parameters;
 			Class<?> c = tClass;
-
 			while (true) {
 				Class<?> s = c.getSuperclass();
-
 				if (s != null) {
 					AnnotatedType annotatedSuperclass = c.getAnnotatedSuperclass();
 					if (annotatedSuperclass instanceof AnnotatedParameterizedType annotatedParameterizedType) {
@@ -385,29 +386,19 @@ public class BuiltinCodecFactory implements CodecFactory {
 						if (type instanceof ParameterizedType parameterizedType) {
 							try {
 								if (Map.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
-									Type[] parameters = parameterizedType.getActualTypeArguments();
-									keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
-									valueDeserializer = registry.getDeserializerIndirect(parameters[1]);
-									keySerializer = getUniversalSerializer(parameters[0], registry);
-									valueSerializer = getUniversalSerializer(parameters[1], registry);
-									break;
+									parameters = parameterizedType.getActualTypeArguments();
+									if (parameters.length == 2) break;
 								}
 							} catch (Exception ignored) {
 							}
 						}
 					}
-				}
-
-				if (s == null) {
+				} else {
 					throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass + "\"");
 				}
 				c = s;
 			}
-
-			this.keyDeserializer = keyDeserializer;
-			this.valueDeserializer = valueDeserializer;
-			this.keySerializer = keySerializer;
-			this.valueSerializer = valueSerializer;
+			this(tClass, parameters, registry);
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
@@ -516,39 +507,41 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalDeserializer<Object> deserializer;
 		final UniversalSerializer<Object> serializer;
 
-		@Deprecated // TODO ugly hack
 		@SuppressWarnings({"unchecked"})
 		public CollectionCodec(Class<?> tClass, CodecRegistry registry) {
-			super(tClass, registry);
-
-			this.constructor = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
-
-			boolean superType = false;
-			Type type = null;
-			var classes = ReflectUtils.getReflectSuperTypes(tClass).reversed();
-			b1:
-			for (var cl : classes) {
-				for (var t : cl.superParameters()) {
-					if (t instanceof TypeVariable<?> typeVariable) {
-						if (typeVariable.getName().equals("E")) {
-							superType = true;
-							continue b1;
+			Type[] parameters;
+			Class<?> c = tClass;
+			while (true) {
+				Class<?> s = c.getSuperclass();
+				if (s != null) {
+					AnnotatedType annotatedSuperclass = c.getAnnotatedSuperclass();
+					if (annotatedSuperclass instanceof AnnotatedParameterizedType annotatedParameterizedType) {
+						Type type = annotatedParameterizedType.getType();
+						if (type instanceof ParameterizedType parameterizedType) {
+							try {
+								if (Collection.class.isAssignableFrom((Class<?>) parameterizedType.getRawType())) {
+									parameters = parameterizedType.getActualTypeArguments();
+									if (parameters.length == 1) break;
+								}
+							} catch (Exception ignored) {
+							}
 						}
-						continue;
 					}
-					if (superType && (t instanceof Class<?> || t instanceof ParameterizedType)) {
-						type = t;
-						break b1;
-					}
+				} else {
+					throw new IllegalArgumentException("Unable to create codec for non-canonical collection declaration \"" + tClass + "\"");
+				}
+				c = s;
+			}
+			Supplier<Collection<Object>> tmpC;
+			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
+				throw new IllegalArgumentException("Unable to create codec for abstract class \"" + tClass + "\"");
+			} else {
+				tmpC = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
+				if (tmpC == null) {
+					throw new IllegalArgumentException("Class \"" + tClass.getName() + "\" have no empty constructor!");
 				}
 			}
-
-			if (type == null) {
-				throw new IllegalArgumentException("Unable to create codec for non-canonical collection declaration \"" + tClass.getName() + "\"");
-			}
-
-			this.deserializer = registry.getDeserializerIndirect(type);
-			this.serializer = getUniversalSerializer(type, registry);
+			this(tClass, parameters, tmpC, registry);
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})

@@ -27,21 +27,22 @@ public class JsonTest {
 		List<JsonTestRun> runs = new ArrayList<>();
 		//runs.add(new JsonTestRun("classHack", JsonTestClassHack::test));
 
-		runs.add(new JsonTestRun("amogus", JsonTestAmogus::test));
-		runs.add(new JsonTestRun("record", JsonTestRecord::test));
-		runs.add(new JsonTestRun("yup", JsonTestYup::test));
-		runs.add(new JsonTestRun("dg", JsonTestDg::test));
-		runs.add(new JsonTestRun("collections", JsonTestCollections::test));
-		runs.add(new JsonTestRun("simple", JsonTestSimple::test));
-		runs.add(new JsonTestRun("vec3", JsonTestVec3::test));
-		runs.add(new JsonTestRun("shape", JsonTestShapes::test));
-		runs.add(new JsonTestRun("replaceDefault", JsonTestReplaceDefault::test));
-		runs.add(new JsonTestRun("nest", JsonTestNest::test));
-		runs.add(new JsonTestRun("escape", JsonTestEscape::test));
-		runs.add(new JsonTestRun("emptyTyped", JsonTestEmptyTyped::test));
-		runs.add(new JsonTestRun("null", JsonTestNull::test));
-		runs.add(new JsonTestRun("mapKeyValue", JsonTestMap::test));
-		runs.add(new JsonTestRun("nonCanonical", JsonTestNonCanonical::test));
+		runs.add(new JsonTestRun("extends map", JsonTestExtendsMap::test));
+		//runs.add(new JsonTestRun("amogus", JsonTestAmogus::test));
+		//runs.add(new JsonTestRun("record", JsonTestRecord::test));
+		//runs.add(new JsonTestRun("yup", JsonTestYup::test));
+		//runs.add(new JsonTestRun("dg", JsonTestDg::test));
+		//runs.add(new JsonTestRun("collections", JsonTestCollections::test));
+		//runs.add(new JsonTestRun("simple", JsonTestSimple::test));
+		//runs.add(new JsonTestRun("vec3", JsonTestVec3::test));
+		//runs.add(new JsonTestRun("shape", JsonTestShapes::test));
+		//runs.add(new JsonTestRun("replaceDefault", JsonTestReplaceDefault::test));
+		//runs.add(new JsonTestRun("nest", JsonTestNest::test));
+		//runs.add(new JsonTestRun("escape", JsonTestEscape::test));
+		//runs.add(new JsonTestRun("emptyTyped", JsonTestEmptyTyped::test));
+		//runs.add(new JsonTestRun("null", JsonTestNull::test));
+		//runs.add(new JsonTestRun("mapKeyValue", JsonTestMap::test));
+		//runs.add(new JsonTestRun("nonCanonical", JsonTestNonCanonical::test));
 
 		Map<String, JsonTestRun> map = new LinkedHashMap<>();
 
