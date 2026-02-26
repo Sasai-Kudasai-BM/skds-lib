@@ -1,6 +1,8 @@
 package net.skds.tests.json;
 
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.skds.lib2.io.codec.SosisonUtils;
+import net.skds.lib2.io.codec.annotation.HiddenInheritance;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -12,9 +14,14 @@ public class JsonTestExtendsMap {
 
 		Test test = new Test();
 		test.put("a", "a1");
+
 		Test2 test2 = new Test2();
 		test2.add("a");
 		test2.add("b");
+
+		Int2IntOpenHashMap test3 = new Int2IntOpenHashMap();
+		test3.put(1, 2);
+		test3.put(2, 3);
 
 		System.out.println(SosisonUtils.toJson(test));
 		System.out.println(SosisonUtils.parseJson("""
@@ -33,12 +40,22 @@ public class JsonTestExtendsMap {
 				]
 				""", Test2.class)
 		);
+		System.out.println(SosisonUtils.toJson(test3));
+		System.out.println(SosisonUtils.parseJson("""
+				{
+					"1": 2,
+					"2": 3
+				}
+				""", Int2IntOpenHashMap.class)
+		);
 	}
 
+	@HiddenInheritance
 	private static class Test extends LinkedHashMap<String, String> {
 
 	}
 
+	@HiddenInheritance
 	private static class Test2 extends LinkedList<String> {
 
 	}

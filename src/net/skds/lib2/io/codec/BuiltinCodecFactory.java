@@ -4,6 +4,7 @@ import lombok.CustomLog;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
 import net.skds.lib2.io.codec.annotation.EnumNameDataFixer;
+import net.skds.lib2.io.codec.annotation.HiddenInheritance;
 import net.skds.lib2.io.codec.nulls.NullCodec;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
 import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
@@ -106,7 +107,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 	@Override
 	public UniversalDeserializer<?> createDeserializer(Type type, CodecRegistry registry) {
-		if (type instanceof Class<?> cl) {
+		if (type instanceof Class<?> cl && cl.getAnnotation(HiddenInheritance.class) != null) {
 			if (Map.class.isAssignableFrom(cl)) {
 				return new MapCodec(cl, registry);
 			}
