@@ -65,7 +65,10 @@ public class SosisonUtils {
 	}
 
 	public static void addRedirectType(Type original, Type replaced) {
-		addFactory(original, (t, r) -> new ReplacedCodec(t, replaced, r));
+		if (original.equals(replaced)) {
+			throw new RuntimeException("duplicate type " + original);
+		}
+		addFactory(original, (t, r) -> r.getCodec(replaced));
 	}
 
 	public static void addFactory(Type type, CodecFactory factory) {

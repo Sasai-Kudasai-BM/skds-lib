@@ -2,7 +2,7 @@ package net.skds.lib2.io.codec;
 
 import java.io.IOException;
 
-public final class CombinedCodec<T> implements UniversalCodec<T> {
+public class CombinedCodec<T> implements UniversalCodec<T> {
 
 	private final CodecRegistry registry;
 	private final UniversalSerializer<T> serializer;
@@ -24,17 +24,17 @@ public final class CombinedCodec<T> implements UniversalCodec<T> {
 	}
 
 	@Override
-	public T read(UniversalReader reader) throws IOException {
+	public final T read(UniversalReader reader) throws IOException {
 		return deserializer.read(reader);
 	}
 
 	@Override
-	public void write(T value, UniversalWriter writer) throws IOException {
+	public final void write(T value, UniversalWriter writer) throws IOException {
 		serializer.write(value, writer);
 	}
 
 	@Override
-	public String valueAsKeyString(T val) {
+	public final String valueAsKeyString(T val) {
 		return serializer.valueAsKeyString(val);
 	}
 }

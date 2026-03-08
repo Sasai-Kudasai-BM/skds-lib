@@ -1,5 +1,6 @@
 package net.skds.lib2.io.codec;
 
+import lombok.AllArgsConstructor;
 import lombok.CustomLog;
 import net.skds.lib2.io.codec.annotation.CodecRoleConstrains;
 import net.skds.lib2.io.codec.annotation.SerializationAlias;
@@ -18,6 +19,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @CustomLog
 public class ReflectiveCodecFactory implements CodecFactory {
@@ -110,7 +112,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		if (codecRole != null && !codecRole.value().isCanSerialize()) {
 			return new UnsupportedCodec<>(tClass, registry);
 		}
-		return (UniversalDeserializer<T>) new ReflectiveDeserializer(tClass, registry);
+		return (UniversalDeserializer<T>) new ReflectiveDeserializer<>(tClass, registry);
 	}
 
 	private UniversalCodec<?> getReflectiveCodec(Class<?> tClass, CodecRegistry registry) {
@@ -121,7 +123,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 					return SerializeOnlyCodec.ofSerializer(new ReflectiveSerializer(tClass, registry), tClass, registry);
 				}
 				case DESERIALIZE -> {
-					return DeserializeOnlyCodec.ofDeserializer(new ReflectiveDeserializer(tClass, registry), tClass, registry);
+					return DeserializeOnlyCodec.ofDeserializer(new ReflectiveDeserializer<>(tClass, registry), tClass, registry);
 				}
 				case NONE -> {
 					return new UnsupportedCodec<>(tClass, registry);
@@ -130,7 +132,27 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				}
 			}
 		}
-		return new CombinedCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer(tClass, registry));
+		return new CombinedCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer<>(tClass, registry));
+	}
+
+	public static class CombinedReflectiveCodec extends CombinedCodec<Object> {
+
+		public <T> CombinedReflectiveCodec(Class<T> tClass, FieldCodec[] codecs, Supplier<T> constructor, CodecRegistry registry) {
+			super(new ReflectiveSerializer(
+							tClass,
+							codecs,
+							registry
+					),
+					new ReflectiveDeserializer<>(
+							tClass,
+							Arrays.stream(codecs).collect(Collectors.toMap(
+									e -> e.field.getName(),
+									e -> e
+							)),
+							constructor,
+							registry
+					));
+		}
 	}
 
 	private UniversalCodec<?> getRecordCodec(Class<?> tClass, CodecRegistry registry) {
@@ -153,22 +175,28 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		return new CombinedCodec<>(new RecordSerializer(tClass, registry), new RecordDeserializer(tClass, registry));
 	}
 
-	public static class ReflectiveDeserializer implements UniversalDeserializer<Object> {
+	public static class ReflectiveDeserializer<T> implements UniversalDeserializer<T> {
 
-		final Class<?> tClass;
-		final Supplier<Object> constructor;
+		final Class<T> tClass;
+		final Supplier<T> constructor;
 		final Map<String, FieldCodec> readers;
 		final CodecRegistry registry;
 
-		@SuppressWarnings("unchecked")
-		public ReflectiveDeserializer(Class<?> tClass, CodecRegistry registry) {
+		public ReflectiveDeserializer(Class<T> tClass, Map<String, FieldCodec> readers, Supplier<T> constructor, CodecRegistry registry) {
+			this.tClass = tClass;
+			this.readers = readers;
+			this.constructor = constructor;
+			this.registry = registry;
+		}
+
+		public ReflectiveDeserializer(Class<T> tClass, CodecRegistry registry) {
 			this.tClass = tClass;
 			this.registry = registry;
-			Supplier<Object> tmpC;
+			Supplier<T> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				throw new IllegalArgumentException("Class \"" + tClass.getName() + "\" is abstract type and can not be created by ReflectiveCodec");
 			} else {
-				tmpC = ReflectUtils.getConstructor((Class<Object>) tClass);
+				tmpC = ReflectUtils.getConstructor((Class<T>) tClass);
 				if (tmpC == null) {
 					throw new RuntimeException("Class \"" +
 							tClass.getName() +
@@ -186,12 +214,12 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 
 		@Override
-		public Object read(UniversalReader reader) throws IOException {
+		public T read(UniversalReader reader) throws IOException {
 			if (reader.nextEntryType() == SosisonEntryType.NULL) {
 				reader.skipNull();
 				return null;
 			}
-			Object o = constructor.get();
+			T o = constructor.get();
 			reader.beginObject();
 			while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 				String name = reader.readName();
@@ -219,6 +247,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
+	@AllArgsConstructor
 	public static class ReflectiveSerializer implements UniversalSerializer<Object> {
 
 		final Class<?> tClass;
@@ -377,16 +406,16 @@ public class ReflectiveCodecFactory implements CodecFactory {
 	}
 
 	@SuppressWarnings({"WrapperTypeMayBePrimitive", "unchecked"})
-	private static Predicate<Object> getSkipPredicate(SkipSerialization ss, Class<?> type) {
+	private static <T> Predicate<T> getSkipPredicate(SkipSerialization ss, Class<?> type) {
 		Class<? extends Predicate<?>> p = ss.predicate();
 		if (p != SkipSerialization.BLANK_PREDICATE) {
 			Supplier<? extends Predicate<?>> constructor = ReflectUtils.getConstructor(p);
 			if (constructor == null) {
 				throw new NullPointerException("constructor of " + p + " is invalid");
 			}
-			return (Predicate<Object>) constructor.get();
+			return (Predicate<T>) constructor.get();
 		}
-		Predicate<Object> predicate = SKDSUtils.falsePredicate();
+		Predicate<T> predicate = SKDSUtils.falsePredicate();
 		if (type.isPrimitive()) {
 			if (type == byte.class) {
 				byte value = ss.defaultByte();
@@ -454,7 +483,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				}
 			}
 			if (ss.skipNull()) {
-				predicate = ((Predicate<Object>) Objects::isNull).or(predicate);
+				predicate = ((Predicate<T>) Objects::isNull).or(predicate);
 			}
 
 		}
@@ -612,7 +641,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 					fields.add(new CharFieldCodec(f, registry));
 				}
 			} else {
-				ObjFieldCodec codec = new ObjFieldCodec(f, registry);
+				ObjFieldCodec<?> codec = new ObjFieldCodec<>(f, registry);
 				fields.add(codec);
 			}
 		}
@@ -625,13 +654,13 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	private static abstract class FieldCodec {
-		protected final Field field;
+	public static abstract class FieldCodec {
+		public final Field field;
 		protected final String name;
 		protected final String comment;
 		protected final SkipSerialization skipSerialization;
 
-		private FieldCodec(Field field) {
+		protected FieldCodec(Field field) {
 			this.field = field;
 			field.setAccessible(true);
 			JsonComment com = field.getAnnotation(JsonComment.class);
@@ -647,11 +676,11 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			this.skipSerialization = field.getAnnotation(SkipSerialization.class);
 		}
 
-		abstract void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException;
+		protected abstract void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException;
 
-		abstract void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException;
+		protected abstract void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException;
 
-		abstract boolean checkSkip(Object o) throws IllegalAccessException;
+		protected abstract boolean checkSkip(Object o) throws IllegalAccessException;
 
 		void comment(UniversalWriter writer) throws IOException {
 			if (comment != null) {
@@ -660,232 +689,252 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	private static class ByteFieldCodec extends FieldCodec {
+	public static class ByteFieldCodec extends FieldCodec {
 
-		private ByteFieldCodec(Field field) {
+		public ByteFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeInt(field.getByte(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setByte(o, (byte) reader.readInt());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			byte value = field.getByte(o);
 			return value == skipSerialization.defaultByte();
 		}
 	}
 
-	private static class ShortFieldCodec extends FieldCodec {
+	public static class ShortFieldCodec extends FieldCodec {
 
-		private ShortFieldCodec(Field field) {
+		public ShortFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeInt(field.getShort(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setShort(o, (short) reader.readInt());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			short value = field.getShort(o);
 			return value == skipSerialization.defaultShort();
 		}
 	}
 
-	private static class IntFieldCodec extends FieldCodec {
+	public static class IntFieldCodec extends FieldCodec {
 
-		private IntFieldCodec(Field field) {
+		public IntFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeInt(field.getInt(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setInt(o, reader.readInt());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			int value = field.getInt(o);
 			return value == skipSerialization.defaultInt();
 		}
 	}
 
-	private static class LongFieldCodec extends FieldCodec {
+	public static class LongFieldCodec extends FieldCodec {
 
-		private LongFieldCodec(Field field) {
+		public LongFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeLong(field.getLong(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setLong(o, reader.readLong());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			long value = field.getLong(o);
 			return value == skipSerialization.defaultLong();
 		}
 	}
 
-	private static class FloatFieldCodec extends FieldCodec {
+	public static class FloatFieldCodec extends FieldCodec {
 
-		private FloatFieldCodec(Field field) {
+		public FloatFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeFloat(field.getFloat(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setFloat(o, reader.readFloat());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			float value = field.getFloat(o);
 			return value == skipSerialization.defaultFloat();
 		}
 	}
 
-	private static class DoubleFieldCodec extends FieldCodec {
+	public static class DoubleFieldCodec extends FieldCodec {
 
-		private DoubleFieldCodec(Field field) {
+		public DoubleFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeDouble(field.getDouble(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setDouble(o, reader.readDouble());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			double value = field.getDouble(o);
 			return value == skipSerialization.defaultDouble();
 		}
 	}
 
-	private static class CharFieldCodec extends FieldCodec {
-		final UniversalDeserializer<Character> deserializer;
+	public static class CharFieldCodec extends FieldCodec {
+		private final UniversalDeserializer<Character> deserializer;
 
-		private CharFieldCodec(Field field, CodecRegistry registry) {
+		public CharFieldCodec(Field field, CodecRegistry registry) {
 			super(field);
 			this.deserializer = registry.getDeserializerIndirect(char.class);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeLong(field.getChar(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setChar(o, deserializer.read(reader));
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			char value = field.getChar(o);
 			return value == skipSerialization.defaultChar();
 		}
 	}
 
-	private static class BooleanFieldCodec extends FieldCodec {
+	public static class BooleanFieldCodec extends FieldCodec {
 
-		private BooleanFieldCodec(Field field) {
+		public BooleanFieldCodec(Field field) {
 			super(field);
 		}
 
 		@Override
-		void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
 			writer.writeBoolean(field.getBoolean(o));
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
+		protected void read(UniversalReader reader, Object o) throws IOException, IllegalAccessException {
 			field.setBoolean(o, reader.readBoolean());
 		}
 
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			boolean value = field.getBoolean(o);
 			return value == skipSerialization.defaultBoolean();
 		}
 	}
 
-	private static class ObjFieldCodec extends FieldCodec {
+	public static class ObjFieldCodec<T> extends FieldCodec {
 
-		final UniversalSerializer<Object> serializer;
-		final UniversalDeserializer<Object> deserializer;
-		final Predicate<Object> skipPredicate;
+		private final UniversalSerializer<T> serializer;
+		private final UniversalDeserializer<T> deserializer;
+		private final Predicate<T> skipPredicate;
 
-		private ObjFieldCodec(Field field, CodecRegistry registry) {
+		public ObjFieldCodec(Field field, UniversalCodec<T> codec) {
+			super(field);
+			this.serializer = codec;
+			this.deserializer = codec;
+			this.skipPredicate = this.skipSerialization == null ? SKDSUtils.falsePredicate() : getSkipPredicate(this.skipSerialization, field.getType());
+		}
+
+		public ObjFieldCodec(Field field, UniversalCodec<T> codec, Predicate<T> skipPredicate) {
+			this(field, codec, codec, skipPredicate);
+		}
+
+		public ObjFieldCodec(Field field, UniversalSerializer<T> serializer, UniversalDeserializer<T> deserializer, Predicate<T> skipPredicate) {
+			super(field);
+			this.serializer = serializer;
+			this.deserializer = deserializer;
+			this.skipPredicate = skipPredicate;
+		}
+
+		@SuppressWarnings("unchecked")
+		public ObjFieldCodec(Field field, CodecRegistry registry) {
 			super(field);
 			Type t = field.getGenericType();
-			UniversalCodec<Object> c = BuiltinCodecFactory.getDefaultCodec(field, t, registry);
+			UniversalCodec<T> c = (UniversalCodec<T>) BuiltinCodecFactory.getDefaultCodec(field, t, registry);
 			if (c != null) {
 				this.serializer = c;
 				this.deserializer = c;
 			} else {
-				this.serializer = BuiltinCodecFactory.getUniversalSerializer(t, registry);
+				this.serializer = (UniversalSerializer<T>) BuiltinCodecFactory.getUniversalSerializer(t, registry);
 				this.deserializer = registry.getDeserializerIndirect(t);
 			}
 			this.skipPredicate = this.skipSerialization == null ? SKDSUtils.falsePredicate() : getSkipPredicate(this.skipSerialization, field.getType());
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		void write(UniversalWriter writer, Object o) throws IllegalAccessException {
+		protected void write(UniversalWriter writer, Object o) throws IllegalAccessException {
 			Object value = field.get(o);
 			try {
-				serializer.write(value, writer);
+				serializer.write((T) value, writer);
 			} catch (Exception e) {
 				throw new RuntimeException("Field while error: " + this.field.getDeclaringClass().getName() + ":" + this.field.getName(), e);
 			}
 		}
 
 		@Override
-		void read(UniversalReader reader, Object o) {
+		protected void read(UniversalReader reader, Object o) {
 			try {
 				field.set(o, deserializer.read(reader));
 			} catch (Exception e) {
@@ -893,11 +942,13 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		boolean checkSkip(Object o) throws IllegalAccessException {
+		protected boolean checkSkip(Object o) throws IllegalAccessException {
 			if (skipSerialization == null) return false;
 			Object value = field.get(o);
-			return skipPredicate.test(value);
+			return skipPredicate.test((T) value);
 		}
 	}
+
 }
