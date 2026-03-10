@@ -14,9 +14,13 @@ public interface CacheSupplier<T> extends Supplier<T> {
 
 	@RequiredArgsConstructor
 	class CacheSupplierImpl<T> implements CacheSupplier<T> {
-		private final Supplier<T> sup;
-		private boolean initialized = false; 
+		private Supplier<T> sup;
+		private boolean initialized = false;
 		private T value = null;
+
+		public CacheSupplierImpl(Supplier<T> sup) {
+			this.sup = sup;
+		}
 
 		@Override
 		public void resetCache() {
@@ -29,6 +33,7 @@ public interface CacheSupplier<T> extends Supplier<T> {
 			if (!this.initialized) {
 				this.initialized = true;
 				this.value = sup.get();
+				this.sup = null;
 			}
 			return this.value;
 		}
