@@ -53,7 +53,7 @@ public interface ExtendedDataOutput extends DataOutput {
 	}
 
 	default void writeSizedString(String s) throws IOException {
-		if (s.isEmpty()) {
+		if (s == null || s.isEmpty()) {
 			writeVarInt(0);
 			return;
 		}
