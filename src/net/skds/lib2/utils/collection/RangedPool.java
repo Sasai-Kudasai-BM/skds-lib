@@ -38,6 +38,13 @@ public sealed class RangedPool<T> implements Iterable<Obj2FloatPair<T>> {
 		return (RangedPool<T>) EMPTY;
 	}
 
+	public Obj2FloatPair<T> getMin() {
+		return this.entries[0];
+	}
+
+	public Obj2FloatPair<T> getMax() {
+		return this.entries[this.entries.length - 1];
+	}
 
 	public T get(float f) {
 		if (entries.length == 0) return null;
