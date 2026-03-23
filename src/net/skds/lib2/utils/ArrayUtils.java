@@ -32,10 +32,12 @@ public class ArrayUtils {
 		return a1;
 	}
 
+	@SuppressWarnings("all")
 	public static void movePart(Object array, int from, int to, int count) {
 		System.arraycopy(array, from, array, to, count);
 	}
 
+	@SuppressWarnings("all")
 	public static void rewind(Object array, int from, int count) {
 		System.arraycopy(array, from, array, 0, count);
 	}
