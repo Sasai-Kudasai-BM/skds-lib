@@ -19,6 +19,9 @@ public final class SKDSLoggerConfig {
 	private static SKDSLoggerConfig instance;
 
 	@Getter
+	private final Cfg cfg;
+
+	@Getter
 	private final long logFileSplitSize;
 	@Getter
 	private final EnumSet<LoggerLevel> levels;
@@ -38,6 +41,7 @@ public final class SKDSLoggerConfig {
 	private final String logDir;
 
 	public SKDSLoggerConfig(Cfg cfg) {
+		this.cfg = cfg;
 		this.dateFormat = new SimpleDateFormat(cfg.dateFormat, Locale.ENGLISH);
 		this.timeFormat = new SimpleDateFormat(cfg.timeFormat, Locale.ENGLISH);
 		this.logThread = cfg.includeThread;
