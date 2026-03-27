@@ -16,6 +16,8 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -136,12 +138,12 @@ public class SKDSUtils {
 	}
 
 	public static String hashFile(File f) {
+		MessageDigest md = getSHA1();
+		if (!f.exists()) {
+			return HEX_FORMAT_LC.formatHex(md.digest());
+		}
 		try (InputStream is = new FileInputStream(f)) {
 			byte[] buffer = SKDSUtils.createOptimalSizedBuffer(f.length());
-			MessageDigest md = getSHA1();
-			if (!f.exists()) {
-				return HEX_FORMAT_LC.formatHex(md.digest());
-			}
 			int c;
 			while ((c = is.read(buffer)) >= 0) {
 				md.update(buffer, 0, c);
@@ -152,13 +154,29 @@ public class SKDSUtils {
 		}
 	}
 
+	public static byte[] hashFile(Path f, MessageDigest md) {
+		if (!Files.exists(f)) {
+			return md.digest();
+		}
+		try (InputStream is = Files.newInputStream(f)) {
+			byte[] buffer = SKDSUtils.createOptimalSizedBuffer(Files.size(f));
+			int c;
+			while ((c = is.read(buffer)) >= 0) {
+				md.update(buffer, 0, c);
+			}
+			return md.digest();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static byte[] hashFileArray(File f) {
+		MessageDigest md = getSHA1();
+		if (!f.exists()) {
+			return md.digest();
+		}
 		try (InputStream is = new BufferedInputStream(new FileInputStream(f))) {
 			byte[] buffer = SKDSUtils.createOptimalSizedBuffer(f.length());
-			MessageDigest md = getSHA1();
-			if (!f.exists()) {
-				return md.digest();
-			}
 			int c;
 			while ((c = is.read(buffer)) >= 0) {
 				md.update(buffer, 0, c);
