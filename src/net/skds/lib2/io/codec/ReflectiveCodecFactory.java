@@ -106,13 +106,12 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		return (UniversalSerializer<T>) new ReflectiveSerializer(tClass, registry);
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> UniversalDeserializer<T> getReflectiveDeserializer(Class<T> tClass, CodecRegistry registry) {
 		CodecRoleConstrains codecRole = tClass.getAnnotation(CodecRoleConstrains.class);
 		if (codecRole != null && !codecRole.value().isCanSerialize()) {
 			return new UnsupportedCodec<>(tClass, registry);
 		}
-		return (UniversalDeserializer<T>) new ReflectiveDeserializer<>(tClass, registry);
+		return new ReflectiveDeserializer<>(tClass, registry);
 	}
 
 	private UniversalCodec<?> getReflectiveCodec(Class<?> tClass, CodecRegistry registry) {
