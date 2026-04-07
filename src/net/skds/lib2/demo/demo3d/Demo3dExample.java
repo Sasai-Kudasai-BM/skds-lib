@@ -110,14 +110,41 @@ public class Demo3dExample {
 	}
 
 	public static void initIntersects(Demo3dShapeCollector frame) {
-		AABB box = new AABB(Vec3.of(61.25, 53.01, -0.85), Vec3.of(61.5, 53.51, -0.75));
-		AABB aabb1 = new AABB(Vec3.of(56, 48, -4), Vec3.of(59, 53, -1));
+		AABB shape = AABB.ONE_CENTERED;
 
-		frame.addShape(box);
-		frame.addShape(aabb1);
+		frame.addShape(shape);
 
-		System.out.println(aabb1.intersects((Shape) box));
-		System.out.println(box.intersects((Shape) aabb1));
+		AABB box0 = AABB.ONE_CENTERED.scale(0.5);
+
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				for (int z = -1; z <= 1; z++) {
+					Vec3 pos = Vec3.of(x, y, z);
+					AABB box = box0.move(pos.scale(1));
+					if (shape.intersects(box)) {
+						System.out.println(pos);
+						frame.addShape(box);
+						break;
+					}
+					if (box.intersects(shape)) {
+						System.err.println("intersects not same for swap " + pos);
+						frame.addShape(box);
+						break;
+					}
+					if (shape.intersects((Shape) box)) {
+						System.err.println(pos);
+						frame.addShape(box);
+						continue;
+					}
+					if (box.intersects((Shape) shape)) {
+						System.err.println("intersects not same for swap " + pos);
+						frame.addShape(box);
+						continue;
+					}
+					frame.addShape(box);
+				}
+			}
+		}
 	}
 
 	private static class Demo3dFrameCollisionBox extends Demo3dShape.Demo3dShapeInterractable {
