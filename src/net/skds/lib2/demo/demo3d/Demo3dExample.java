@@ -18,7 +18,7 @@ import java.util.Iterator;
 public class Demo3dExample {
 
 	public static <T extends Demo3dShapeCollector> T init(T frame) {
-		initCollisionPeople(frame);
+		initIntersects(frame);
 		return frame;
 	}
 
@@ -107,6 +107,17 @@ public class Demo3dExample {
 	public static void initCollisionFile(Demo3dShapeCollector frame) {
 		FileCollide collision = new FileCollide();
 		frame.addShape(collision);
+	}
+
+	public static void initIntersects(Demo3dShapeCollector frame) {
+		AABB box = new AABB(Vec3.of(61.25, 53.01, -0.85), Vec3.of(61.5, 53.51, -0.75));
+		AABB aabb1 = new AABB(Vec3.of(56, 48, -4), Vec3.of(59, 53, -1));
+
+		frame.addShape(box);
+		frame.addShape(aabb1);
+
+		System.out.println(aabb1.intersects((Shape) box));
+		System.out.println(box.intersects((Shape) aabb1));
 	}
 
 	private static class Demo3dFrameCollisionBox extends Demo3dShape.Demo3dShapeInterractable {
@@ -662,4 +673,6 @@ public class Demo3dExample {
 			this.setHuman(human);
 		}
 	}
+
+
 }
