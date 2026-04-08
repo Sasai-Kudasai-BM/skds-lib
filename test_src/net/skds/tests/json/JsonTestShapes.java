@@ -1,9 +1,9 @@
 package net.skds.tests.json;
 
 import lombok.CustomLog;
-import net.skds.lib2.demo.demo3d.Demo3dExample;
-import net.skds.lib2.demo.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 import net.skds.lib2.io.codec.UniversalCodec;
+import net.skds.tests.demo3d.Demo3dExample;
+import net.skds.tests.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 import net.skds.tests.json.JsonTest.JsonTestRegistry;
 
 @CustomLog

@@ -287,18 +287,12 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 	}
 
 	public int hashCode() {
-		long l = Double.doubleToLongBits(this.minX);
-		int i = (int) (l ^ l >>> 32);
-		l = Double.doubleToLongBits(this.minY);
-		i = 31 * i + (int) (l ^ l >>> 32);
-		l = Double.doubleToLongBits(this.minZ);
-		i = 31 * i + (int) (l ^ l >>> 32);
-		l = Double.doubleToLongBits(this.maxX);
-		i = 31 * i + (int) (l ^ l >>> 32);
-		l = Double.doubleToLongBits(this.maxY);
-		i = 31 * i + (int) (l ^ l >>> 32);
-		l = Double.doubleToLongBits(this.maxZ);
-		i = 31 * i + (int) (l ^ l >>> 32);
+		int i = Double.hashCode(this.minX);
+		i = 31 * i + Double.hashCode(this.minY);
+		i = 31 * i + Double.hashCode(this.minZ);
+		i = 31 * i + Double.hashCode(this.maxX);
+		i = 31 * i + Double.hashCode(this.maxY);
+		i = 31 * i + Double.hashCode(this.maxZ);
 		return i;
 	}
 
@@ -630,7 +624,7 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 	@Override
 	public boolean intersects(Shape shapeB) {
 		if (shapeB.isConvex() && shapeB instanceof AABB sb) {
-			return ConvexCollision.intersectsAABB(this, sb);
+			return intersects(sb);
 		}
 		return ConvexShape.super.intersects(shapeB);
 	}

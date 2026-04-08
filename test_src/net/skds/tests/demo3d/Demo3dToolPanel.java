@@ -1,11 +1,11 @@
-package net.skds.lib2.demo.demo3d;
+package net.skds.tests.demo3d;
 
 import lombok.CustomLog;
-import net.skds.lib2.demo.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 import net.skds.lib2.io.codec.SosisonUtils;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.shapes.*;
+import net.skds.lib2.shapes.Shape;
+import net.skds.tests.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 
 import javax.swing.*;
 import java.awt.*;

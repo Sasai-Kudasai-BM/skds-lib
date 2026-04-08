@@ -1,15 +1,13 @@
-package net.skds.lib2.demo.demo3d;
+package net.skds.tests.demo3d;
 
 import lombok.CustomLog;
-import net.skds.lib2.demo.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.shapes.AABB;
-import net.skds.lib2.shapes.Collision;
-import net.skds.lib2.shapes.CompositeSuperShape;
-import net.skds.lib2.shapes.Shape;
+import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.shapes.*;
+import net.skds.tests.demo3d.Demo3dShapeCollector.Demo3dShapeCollectorImpl;
 
 import java.util.Iterator;
 
@@ -136,12 +134,17 @@ public class Demo3dExample {
 						frame.addShape(box);
 						continue;
 					}
+					if (ConvexCollision.collideAABB(box, shape, new Vec3D(0.1), CollisionContext.DEFAULT) != null) {
+						System.err.println(pos);
+						frame.addShape(box);
+						continue;
+					}
 					if (box.intersects((Shape) shape)) {
 						System.err.println("intersects not same for swap " + pos);
 						frame.addShape(box);
 						continue;
 					}
-					frame.addShape(box);
+					//frame.addShape(box);
 				}
 			}
 		}

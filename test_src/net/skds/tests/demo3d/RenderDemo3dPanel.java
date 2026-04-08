@@ -1,28 +1,17 @@
-package net.skds.lib2.demo.demo3d;
-
-import net.skds.lib2.demo.demo3d.Demo3dShape.DemoShape3dHolder;
-import net.skds.lib2.mat.MatrixStack;
-import net.skds.lib2.mat.matrix4.Matrix4;
-import net.skds.lib2.mat.vec3.Vec3;
-import net.skds.lib2.shapes.Collision;
-import net.skds.lib2.shapes.CollisionContext;
-import net.skds.lib2.shapes.CompositeShape;
-import net.skds.lib2.shapes.ConvexShape;
-import net.skds.lib2.shapes.Shape;
-import net.skds.lib2.utils.linkiges.Pair;
-
-import javax.swing.*;
+package net.skds.tests.demo3d;
 
 import lombok.AllArgsConstructor;
 import lombok.ToString;
+import net.skds.lib2.mat.MatrixStack;
+import net.skds.lib2.mat.matrix4.Matrix4;
+import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.shapes.*;
+import net.skds.lib2.shapes.Shape;
+import net.skds.lib2.utils.linkiges.Pair;
+import net.skds.tests.demo3d.Demo3dShape.DemoShape3dHolder;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.RenderingHints;
-import java.awt.Stroke;
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,8 +54,8 @@ public class RenderDemo3dPanel extends JPanel {
 		DemoShape3dHolder result = null;
 		for (DemoShape3dHolder s : list) {
 			Shape shape = s.getShape();
-			Collision collision = shape.raytrace(startPos, 
-				endPos, CollisionContext.DEFAULT
+			Collision collision = shape.raytrace(startPos,
+					endPos, CollisionContext.DEFAULT
 			);
 
 			if (collision != null && collision.distance() <= distance) {
@@ -137,6 +126,7 @@ public class RenderDemo3dPanel extends JPanel {
 		private final Shape shape;
 		private final boolean root;
 		private final boolean render;
+
 		@Override
 		public int compareTo(RenderObject o) {
 			return -Double.compare(this.shape.getCenter().squareDistanceTo(demo.getCameraPos()), o.shape.getCenter().squareDistanceTo(demo.getCameraPos()));
@@ -145,9 +135,9 @@ public class RenderDemo3dPanel extends JPanel {
 
 	private Vec3 createAxisPoint(Vec3 pos) {
 		return this.demo.getCameraPos().add(
-			Vec3.ZN
-			.transform(this.demo.getLastRot())
-			.add(pos.scale(0.025)).scale(0.5)
+				Vec3.ZN
+						.transform(this.demo.getLastRot())
+						.add(pos.scale(0.025)).scale(0.5)
 		);
 	}
 
@@ -168,7 +158,7 @@ public class RenderDemo3dPanel extends JPanel {
 			return;
 		}
 		if (object.getClass().isArray()) {
-			for (Object o : ((Object[])object)) {
+			for (Object o : ((Object[]) object)) {
 				collectShapeHolder(o, apply);
 			}
 			return;
@@ -208,7 +198,7 @@ public class RenderDemo3dPanel extends JPanel {
 			return;
 		}
 		if (object.getClass().isArray()) {
-			for (Object o : ((Object[])object)) {
+			for (Object o : ((Object[]) object)) {
 				collectShape(o, apply, false);
 			}
 			return;

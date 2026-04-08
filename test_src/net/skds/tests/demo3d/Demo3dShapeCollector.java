@@ -1,12 +1,12 @@
-package net.skds.lib2.demo.demo3d;
+package net.skds.tests.demo3d;
+
+import net.skds.lib2.shapes.Shape;
+import net.skds.tests.demo3d.Demo3dShape.DemoShape3dHolder;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
-
-import net.skds.lib2.demo.demo3d.Demo3dShape.DemoShape3dHolder;
-import net.skds.lib2.shapes.Shape;
 
 public interface Demo3dShapeCollector {
 
@@ -57,7 +57,7 @@ public interface Demo3dShapeCollector {
 				return;
 			}
 			if (shape.getClass().isArray()) {
-				for (Object object : ((Object[])shape)) {
+				for (Object object : ((Object[]) shape)) {
 					apply(object);
 				}
 				return;

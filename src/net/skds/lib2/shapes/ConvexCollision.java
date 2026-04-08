@@ -92,37 +92,6 @@ public class ConvexCollision {
 		return true;
 	}
 
-	public static boolean intersectsAABB(AABB a, AABB b) {
-
-		double pMin = -Double.MAX_VALUE;
-		double pMax = Double.MAX_VALUE;
-
-		var axs = Direction.Axis.VALUES;
-
-		for (int i = 0; i < axs.length; i++) {
-			Direction.Axis axis = axs[i];
-			double aMin = a.getProjectionMin(axis);
-			double aMax = a.getProjectionMax(axis);
-			double bMin = b.getProjectionMin(axis);
-			double bMax = b.getProjectionMax(axis);
-
-			double tMin = aMin - bMax;
-			double tMax = aMax - bMin;
-
-			if (tMin > pMin) {
-				pMin = tMin;
-			}
-			if (tMax < pMax) {
-				pMax = tMax;
-			}
-			if (pMax < pMin) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	private static Collision intersectionMoving(ConvexShape a, ConvexShape b, List<Vec3> terminators, Vec3 velocityBA) {
 
 		double pMin = 0;

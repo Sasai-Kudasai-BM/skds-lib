@@ -1,4 +1,4 @@
-package net.skds.lib2.demo.demo3d;
+package net.skds.tests.demo3d;
 
 import lombok.AccessLevel;
 import lombok.Getter;
