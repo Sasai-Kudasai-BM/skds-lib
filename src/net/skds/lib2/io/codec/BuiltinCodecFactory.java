@@ -1332,7 +1332,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class IntCodec extends AbstractCodec<Integer> {
+	public static class IntCodec extends AbstractCodec<Integer> {
 
 		public IntCodec(Type type, CodecRegistry registry) {
 			super(registry);

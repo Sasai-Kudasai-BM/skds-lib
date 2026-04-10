@@ -29,6 +29,7 @@ public interface UniversalWriter {
 
 	void writeString(String s) throws IOException;
 
+	@Deprecated
 	void writeRaw(String s) throws IOException;
 
 	default void writeString(String name, String s) throws IOException {
