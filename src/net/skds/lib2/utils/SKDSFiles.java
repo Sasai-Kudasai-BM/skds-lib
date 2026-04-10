@@ -86,6 +86,11 @@ public class SKDSFiles {
 		Files.write(path, bytes, DEFAULT_OPTIONS);
 	}
 
+	public static void createFileAndParentDir(Path path, String string) throws IOException {
+		Files.createDirectories(path.toAbsolutePath().getParent());
+		Files.writeString(path, string, DEFAULT_OPTIONS);
+	}
+
 	public static void createParentDir(Path path) {
 		try {
 			Files.createDirectories(path.toAbsolutePath().getParent());
