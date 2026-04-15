@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public final class ByteArrayExtendedDataOutput implements ExtendedDataOutput {
+public final class ByteArrayExtendedDataOutput implements ExtendedDataOutput, Cloneable {
 
 	private byte[] buffer;
 	private int pos = 0;
@@ -143,4 +143,13 @@ public final class ByteArrayExtendedDataOutput implements ExtendedDataOutput {
 		buffer.get(offset, this.buffer, pos, len);
 		pos += len;
 	}
+
+	@Override
+	public ByteArrayExtendedDataOutput clone() {
+		ByteArrayExtendedDataOutput output = new ByteArrayExtendedDataOutput();
+		output.buffer = this.buffer.clone();
+		output.pos = this.pos;
+		return output;
+	}
+
 }
