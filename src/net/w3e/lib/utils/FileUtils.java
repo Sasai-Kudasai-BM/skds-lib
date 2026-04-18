@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class FileUtils {
 
@@ -29,6 +30,29 @@ public class FileUtils {
 			Files.copy(in.toPath(), out.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static void copyFiles(File source, File dest) throws IOException {
+		Path sourceFilePath = source.toPath();
+		try (Stream<Path> stream = Files.walk(sourceFilePath)) {
+			Path destFilePath = dest.toPath();
+			stream.forEach(sourcePath -> {
+				try {
+					// Resolve the corresponding path in the destination
+					Path targetPath = destFilePath.resolve(sourceFilePath.relativize(sourcePath));
+
+					if (Files.isDirectory(sourcePath)) {
+						if (!Files.exists(targetPath)) {
+							Files.createDirectories(targetPath);
+						}
+					} else {
+						Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException("Failed to copy: " + sourcePath, e);
+				}
+			});
 		}
 	}
 
