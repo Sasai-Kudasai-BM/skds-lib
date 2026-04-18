@@ -46,6 +46,10 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 	}
 
+	public JsonObject computeIfAbsentJsonObjet(String key) {
+		return this.computeIfAbsent(key, _ -> new JsonObject()).getAsJsonObject();
+	}
+
 	public JsonObject getAsJsonObjectOr(String key, JsonObject or) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -54,7 +58,6 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return or;
 		}
 	}
-
 
 	public JsonArray getAsJsonArrayOrNull(String key) {
 		JsonElement element = this.get(key);
@@ -74,6 +77,10 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 	}
 
+	public JsonArray computeIfAbsentJsonArray(String key) {
+		return this.computeIfAbsent(key, _ -> new JsonArray()).getAsJsonArray();
+	}
+
 	public JsonArray getAsJsonArrayOr(String key, JsonArray or) {
 		JsonElement element = this.get(key);
 		if (element != null) {
@@ -82,7 +89,6 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 			return or;
 		}
 	}
-
 
 	public String getAsJsonStringOrNull(String key) {
 		JsonElement element = this.get(key);
@@ -111,7 +117,6 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 	}
 
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -122,6 +127,11 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		}
 		sb.append('}');
 		return sb.toString();
+	}
+
+	@Override
+	public JsonElement put(String key, JsonElement value) {
+		return super.put(key, value != null ? value : JsonElement.NULL);
 	}
 
 	public JsonElement put(String key, Number value) {

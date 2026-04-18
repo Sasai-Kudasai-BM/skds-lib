@@ -36,6 +36,11 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		super(initialCapacity);
 	}
 
+	@Override
+	public boolean add(JsonElement jsonElement) {
+		return super.add(jsonElement != null ? jsonElement : JsonElement.NULL);
+	}
+
 	public boolean add(Number value) {
 		return super.add(new JsonNumber(value));
 	}
