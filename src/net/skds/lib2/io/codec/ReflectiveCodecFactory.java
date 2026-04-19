@@ -6,6 +6,7 @@ import net.skds.lib2.io.codec.annotation.CodecRoleConstrains;
 import net.skds.lib2.io.codec.annotation.SerializationAlias;
 import net.skds.lib2.io.codec.annotation.SkipSerialization;
 import net.skds.lib2.io.codec.annotation.TransientComponent;
+import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.annotation.JsonComment;
 import net.skds.lib2.io.sosison.SosisonEntryType;
 import net.skds.lib2.reflection.ReflectUtils;
@@ -234,7 +235,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				}
 			}
 			reader.endObject();
-			if (o instanceof PostDeserializeCall pdc) {
+			if (o instanceof PostDeserializeCall pdc && !(o instanceof TypedConfig)) {
 				pdc.postDeserialized();
 			}
 			return o;
@@ -377,7 +378,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 
 			wrapPrimitives(components, args);
 			Object o = constructor.get(args);
-			if (o instanceof PostDeserializeCall pdc) {
+			if (o instanceof PostDeserializeCall pdc && (o instanceof TypedConfig<?>)) {
 				pdc.postDeserialized();
 			}
 			return o;
