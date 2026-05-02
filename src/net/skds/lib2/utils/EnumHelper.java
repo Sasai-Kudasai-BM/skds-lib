@@ -10,7 +10,11 @@ public interface EnumHelper<T extends Enum<T>> {
 
 	@SuppressWarnings("unchecked")
 	private T[] enumValues() {
-		return (T[]) asEnum().getClass().getEnumConstants();
+		Class<?> cl = asEnum().getClass();
+		while (cl.getSuperclass() != Enum.class) {
+			cl = cl.getSuperclass();
+		}
+		return (T[]) cl.getEnumConstants();
 	}
 
 	default boolean lEqual(T other) {
