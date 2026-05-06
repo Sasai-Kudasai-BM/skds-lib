@@ -7,6 +7,61 @@ import net.skds.lib2.mat.FastMath;
 @UtilityClass
 public class ColorUtils {
 
+	public static final FloatColorScheme[] FLOAT_COLOR_SCHEMES = {
+			new FloatColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int hue = ColorUtils.hueRGB(FastMath.clamp((1 - value) * 0.667f, 0, 0.667f));
+					return ColorUtils.packARGB(hue, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "HUE";
+				}
+			},
+			new FloatColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int hue = ColorUtils.hueRGB(FastMath.clamp(value * 0.667f, 0, 0.667f));
+					return ColorUtils.packARGB(hue, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "HUE INVERTED";
+				}
+			},
+			new FloatColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int br = FastMath.clamp((int) (value * 255), 0, 255);
+					return ColorUtils.packARGB(br, br, br, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "GRAY";
+				}
+			},
+			new FloatColorScheme() {
+				@Override
+				public int getColor(float value) {
+					int br = FastMath.clamp((int) ((1 - value) * 255), 0, 255);
+					return ColorUtils.packARGB(br, br, br, 255);
+				}
+
+				@Override
+				public String toString() {
+					return "GRAY INVERTED";
+				}
+			}
+	};
+
+	public interface FloatColorScheme {
+		int getColor(float value);
+	}
+
 	public static int hueRGBv0(float hue) {
 		hue = FastMath.mod1(hue);
 		int huInt = (int) (hue * 255 * 3);

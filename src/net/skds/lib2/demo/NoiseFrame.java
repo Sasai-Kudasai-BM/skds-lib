@@ -1,7 +1,7 @@
 package net.skds.lib2.demo;
 
 import net.skds.lib2.mat.FastMath;
-import net.skds.lib2.misc.noise.Noise;
+import net.skds.lib2.misc.noise.NoiseModel;
 import net.skds.lib2.utils.ColorUtils;
 import net.skds.lib2.utils.ImageUtils;
 
@@ -14,57 +14,6 @@ import java.util.Objects;
 
 public class NoiseFrame extends JFrame {
 
-	private static final ColorScheme[] schemes = {
-			new ColorScheme() {
-				@Override
-				public int getColor(float value) {
-					int hue = ColorUtils.hueRGB(FastMath.clamp((1 - value) * 0.667f, 0, 0.667f));
-					return ColorUtils.packARGB(hue, 255);
-				}
-
-				@Override
-				public String toString() {
-					return "HUE";
-				}
-			},
-			new ColorScheme() {
-				@Override
-				public int getColor(float value) {
-					int hue = ColorUtils.hueRGB(FastMath.clamp(value * 0.667f, 0, 0.667f));
-					return ColorUtils.packARGB(hue, 255);
-				}
-
-				@Override
-				public String toString() {
-					return "HUE INVERTED";
-				}
-			},
-			new ColorScheme() {
-				@Override
-				public int getColor(float value) {
-					int br = FastMath.clamp((int) (value * 255), 0, 255);
-					return ColorUtils.packARGB(br, br, br, 255);
-				}
-
-				@Override
-				public String toString() {
-					return "GRAY";
-				}
-			},
-			new ColorScheme() {
-				@Override
-				public int getColor(float value) {
-					int br = FastMath.clamp((int) ((1 - value) * 255), 0, 255);
-					return ColorUtils.packARGB(br, br, br, 255);
-				}
-
-				@Override
-				public String toString() {
-					return "GRAY INVERTED";
-				}
-			}
-	};
-
 	private static final InterpolationHolder[] interpolations = {
 			new InterpolationHolder(FastMath::cosInterpolate, "COS"),
 			new InterpolationHolder(FastMath::lerp, "LERP"),
@@ -72,10 +21,10 @@ public class NoiseFrame extends JFrame {
 	};
 
 	private static final AmplitudeFuncHolder[] amplitudeFunctions = {
-			new AmplitudeFuncHolder(Noise.AmplitudeFunction.FIBONACCI, "FIBONACCI"),
-			new AmplitudeFuncHolder(Noise.AmplitudeFunction.EXPONENT, "EXPONENT"),
-			new AmplitudeFuncHolder(Noise.AmplitudeFunction.SQUARE, "SQUARE"),
-			new AmplitudeFuncHolder(Noise.AmplitudeFunction.LINEAR, "LINEAR"),
+			new AmplitudeFuncHolder(NoiseModel.AmplitudeFunction.FIBONACCI, "FIBONACCI"),
+			new AmplitudeFuncHolder(NoiseModel.AmplitudeFunction.EXPONENT, "EXPONENT"),
+			new AmplitudeFuncHolder(NoiseModel.AmplitudeFunction.SQUARE, "SQUARE"),
+			new AmplitudeFuncHolder(NoiseModel.AmplitudeFunction.LINEAR, "LINEAR"),
 	};
 
 	private record InterpolationHolder(FastMath.FloatInterpolation interpolation, String name) {
@@ -85,7 +34,7 @@ public class NoiseFrame extends JFrame {
 		}
 	}
 
-	private record AmplitudeFuncHolder(Noise.AmplitudeFunction af, String name) {
+	private record AmplitudeFuncHolder(NoiseModel.AmplitudeFunction af, String name) {
 		@Override
 		public String toString() {
 			return name;
@@ -109,12 +58,12 @@ public class NoiseFrame extends JFrame {
 	private float colorScale = 1.5f;
 	private float colorBias = -.2f;
 
-	private Noise.AmplitudeFunction amplitudeFunction = amplitudeFunctions[0].af;
+	private NoiseModel.AmplitudeFunction amplitudeFunction = amplitudeFunctions[0].af;
 	private FastMath.FloatInterpolation interpolation = interpolations[0].interpolation;
-	private ColorScheme colorScheme = schemes[0];
+	private ColorUtils.FloatColorScheme colorScheme = ColorUtils.FLOAT_COLOR_SCHEMES[0];
 	private long seed = 0;
 
-	private Noise noise;
+	private NoiseModel noiseModel;
 
 
 	//private static final float[] amps = {1, 1, 1, 0, 1, 1, 0, 1};
@@ -205,9 +154,9 @@ public class NoiseFrame extends JFrame {
 			add(slider5);
 
 			add(new JLabel("Color scheme"));
-			JComboBox<ColorScheme> schemeSelector = new JComboBox<>(schemes);
+			JComboBox<ColorUtils.FloatColorScheme> schemeSelector = new JComboBox<>(ColorUtils.FLOAT_COLOR_SCHEMES);
 			schemeSelector.addActionListener(_ -> {
-				colorScheme = (ColorScheme) schemeSelector.getSelectedItem();
+				colorScheme = (ColorUtils.FloatColorScheme) schemeSelector.getSelectedItem();
 				noisePanel.repaint();
 			});
 			add(schemeSelector);
@@ -289,7 +238,7 @@ public class NoiseFrame extends JFrame {
 		//for (int i = 0; i < amps.length; i++) {
 		//	amps[i] = ampSliders.get(i).getValue() * 1e-2f;
 		//}
-		this.noise = new Noise(seed, harmonics, amplitudeFunction, exponent, interpolation);
+		this.noiseModel = new NoiseModel(seed, harmonics, amplitudeFunction, exponent, interpolation);
 		noisePanel.repaint();
 	}
 
@@ -347,7 +296,7 @@ public class NoiseFrame extends JFrame {
 				float vx = (x - w2) / scale - cx;
 				float vy = (y - h2) / scale - cy;
 				//float value = noise.getValueInPoint(vx, vy, depth);
-				float value = noise.getValueInPoint(vx, vy);
+				float value = noiseModel.getValueInPoint(vx, vy);
 				return colorScheme.getColor((value + colorBias) * colorScale);
 			};
 
@@ -383,9 +332,6 @@ public class NoiseFrame extends JFrame {
 		}
 	}
 
-	private interface ColorScheme {
-		int getColor(float value);
-	}
 
 	static void main() {
 		new NoiseFrame();

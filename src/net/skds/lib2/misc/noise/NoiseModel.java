@@ -1,26 +1,22 @@
 package net.skds.lib2.misc.noise;
 
 import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.misc.fields.FloatField2D;
+import net.skds.lib2.misc.fields.FloatField2DImpl;
 import net.skds.lib2.misc.random.StaticRandom;
 
 import java.util.Arrays;
 
-public class Noise {
+public class NoiseModel {
 
 	private final float weightCorrection;
-	//private final float exponent;
-	//private final float phaseScale;
 	private final float[] amplitudes;
 	private final float[] scales;
 	private final StaticRandom[] layers;
-	//private final int layerCount;
-	@SuppressWarnings({"unused", "FieldCanBeLocal"})
 	private final int actualLayerCount;
 	private final FastMath.FloatInterpolation interpolation;
 
-	public Noise(long seed, int layerCount, AmplitudeFunction amplitudeFunction, float exponent, FastMath.FloatInterpolation interpolation) {
-		//this.exponent = exponent;
-		//this.layerCount = layerCount;
+	public NoiseModel(long seed, int layerCount, AmplitudeFunction amplitudeFunction, float exponent, FastMath.FloatInterpolation interpolation) {
 		this.interpolation = interpolation;
 		float[] amplitudes = new float[layerCount];
 		float[] pss = new float[layerCount];
@@ -121,8 +117,7 @@ public class Noise {
 		return value * weightCorrection;
 	}
 
-	/*
-	public Field createFieldBuffer(int width, int height) {
+	public Field createFieldBuffer(int width, int height, int x, int y) {
 		FloatField2D[] fields = new FloatField2D[actualLayerCount];
 		for (int i = 0; i < actualLayerCount; i++) {
 			float ps = scales[i];
@@ -135,6 +130,7 @@ public class Noise {
 		return new Field(fields, scales, width, height);
 	}
 
+	/*
 	public void fillFields(Field nf, double xOffset, double yOffset) {
 		if (nf.fields.length != this.actualLayerCount) throw new IllegalArgumentException("Incompatible field depth");
 		for (int i = 0; i < actualLayerCount; i++) {
@@ -195,10 +191,10 @@ public class Noise {
 
 	}
 
+	 //*/
 	public record Field(FloatField2D[] fields, float[] phaseScales, int targetWidth, int targetHeight) {
 	}
 
-	 //*/
 
 	public interface AmplitudeFunction {
 		float amplitude(int layer, float exponent);

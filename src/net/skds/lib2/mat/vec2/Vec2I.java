@@ -8,6 +8,7 @@ import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.sosison.SosisonEntryType;
 
+import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
@@ -22,6 +23,10 @@ public record Vec2I(int xi, int yi) implements Vec2 {
 
 	public Vec2I(int size) {
 		this(size, size);
+	}
+
+	public Vec2I(Point point) {
+		this(point.x, point.y);
 	}
 
 	@Override

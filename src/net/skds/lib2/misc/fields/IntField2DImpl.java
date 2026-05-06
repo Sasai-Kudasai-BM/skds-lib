@@ -1,6 +1,6 @@
 package net.skds.lib2.misc.fields;
 
-public class IntField2DImpl implements IntField2D {
+public final class IntField2DImpl implements IntField2D {
 
 	private final int width;
 	private final int height;
