@@ -189,13 +189,17 @@ public class TextClassBuilder {
 					.append(" **/\n").repeat("\t", tabs);
 			return;
 		}
-		sb.append("/**\n").repeat("\t", tabs)
-				.append("*<pre>\n").repeat("\t", tabs);
-		for (int i = 0; i < javadoc.lines().size(); i++) {
-			sb.append("* ").append(javadoc.lines().get(i)).append("\n").repeat("\t", tabs);
+		sb.append("/**\n").repeat("\t", tabs);
+		if (javadoc.block()) {
+			sb.append("* <pre>\n").repeat("\t", tabs);
 		}
-		sb.append("*</pre>").append("\n").repeat("\t", tabs)
-				.append("**/\n").repeat("\t", tabs);
+		for (int i = 0; i < javadoc.lines().size(); i++) {
+			sb.append(" * ").append(javadoc.lines().get(i)).append("\n").repeat("\t", tabs);
+		}
+		if (javadoc.block()) {
+			sb.append("* </pre>").append("\n").repeat("\t", tabs);
+		}
+		sb.append("**/\n").repeat("\t", tabs);
 	}
 
 	static void appendModifiers(StringBuilder sb, int modifiers) {
