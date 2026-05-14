@@ -1,5 +1,6 @@
 package net.skds.lib2.utils;
 
+import lombok.CustomLog;
 import lombok.experimental.UtilityClass;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
+@CustomLog
 @UtilityClass
 public class SKDSFiles {
 
@@ -42,6 +44,7 @@ public class SKDSFiles {
 	};
 
 	public static final OpenOption[] DEFAULT_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
+	public static final CopyOption[] DEFAULT_COPY_OPTIONS = {StandardCopyOption.REPLACE_EXISTING};
 	public static final Set<OpenOption> DEFAULT_OPTIONS_SET = Set.of(DEFAULT_OPTIONS);
 	public static final boolean IS_PATH_CANONICAL = File.separatorChar == '/';
 
@@ -65,6 +68,39 @@ public class SKDSFiles {
 					}
 				}
 			});
+		}
+	}
+
+	public static void copyDirectory(Path src, Path dst) throws IOException {
+		if (Files.isDirectory(src)) {
+			Files.walkFileTree(src, new FileVisitor<>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					Path destPath = dst.resolve(src.relativize(dir));
+					Files.createDirectories(destPath);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Path destPath = dst.resolve(src.relativize(file));
+					Files.copy(file, destPath, DEFAULT_COPY_OPTIONS);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFileFailed(Path file, IOException exc) {
+					log.warn("Failed to copy file \"" + file + "\": " + exc.getMessage());
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} else {
+			throw new IllegalStateException("Source path is not a directory");
 		}
 	}
 
