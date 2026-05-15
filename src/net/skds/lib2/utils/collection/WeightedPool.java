@@ -204,6 +204,18 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		this.entries = newEntries;
 	}
 
+	public boolean isEmpty() {
+		return this.entries.length == 0;
+	}
+
+	public float getWeightSummary() {
+		float weight = 0;
+		for (Entry entry : this.entries) {
+			weight += entry.weight;
+		}
+		return weight;
+	}
+
 	@Override
 	public WeightedPool<T> clone() {
 		return new WeightedPool<>(this);
@@ -275,6 +287,11 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 
 		@Override
 		public T get(float f) {
+			return null;
+		}
+
+		@Override
+		public T getAndRemove(float f) {
 			return null;
 		}
 	}
