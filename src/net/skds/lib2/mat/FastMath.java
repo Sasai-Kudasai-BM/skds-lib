@@ -346,40 +346,14 @@ public class FastMath {
 	}
 
 	public static long roundLong(double value) {
-		long i = (long) value;
-		double d = value - i;
-		if (d >= 0) {
-			if (d >= 0.5) {
-				return i + 1;
-			} else {
-				return i;
-			}
-		} else {
-			if (d <= -0.5) {
-				return i - 1;
-			} else {
-				return i;
-			}
-		}
+		double shift = value > 0 ? 0.5 : -0.5;
+		return (int) (value + shift);
 	}
 
 
 	public static int round(float value) {
-		int i = (int) value;
-		float d = value - i;
-		if (d >= 0) {
-			if (d >= 0.5f) {
-				return i + 1;
-			} else {
-				return i;
-			}
-		} else {
-			if (d <= -0.5f) {
-				return i - 1;
-			} else {
-				return i;
-			}
-		}
+		float shift = value > 0 ? 0.5f : -0.5f;
+		return (int) (value + shift);
 	}
 
 	public static int floor(double value) {
