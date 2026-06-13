@@ -116,7 +116,7 @@ public class SimpleTimer {
 
 			@Override
 			public void stop() {
-				throw new UnsupportedOperationException("This instance will not bu stopped");
+				throw new UnsupportedOperationException("This instance must not be stopped");
 			}
 		};
 	}

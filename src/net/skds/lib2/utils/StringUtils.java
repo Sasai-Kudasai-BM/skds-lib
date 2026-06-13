@@ -109,6 +109,31 @@ public class StringUtils {
 		return Character.toLowerCase(str.charAt(0)) + str.substring(1);
 	}
 
+	public static String snakeToCamelCase(String str) {
+		int under = str.indexOf('_');
+		if (under == -1) return str;
+		int l = str.length();
+		StringBuilder sb = new StringBuilder(l);
+		boolean big = false;
+		if (under > 0) {
+			big = true;
+			sb.append(str, 0, under);
+		}
+		for (int i = under; i < l; i++) {
+			char c = str.charAt(i);
+			if (c == '_') {
+				big = true;
+				continue;
+			}
+			if (big) {
+				c = Character.toUpperCase(c);
+				big = false;
+			}
+			sb.append(c);
+		}
+		return sb.toString();
+	}
+
 	public static String cutStringBefore(String str, char split) {
 		int i = str.indexOf(split);
 		if (i == -1) {
