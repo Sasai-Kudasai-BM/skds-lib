@@ -54,7 +54,7 @@ public non-sealed interface CompositeShape extends Shape {
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape subShape = shapes[i];
 			Collision c = subShape.raytrace(from, to, context);
-			if (c != null && context.compare(c, nearest, velocity) < 0) {
+			if (context.filterCollision(c, velocity) && context.compare(c, nearest, velocity) < 0) {
 				nearest = c;
 			}
 		}
@@ -82,7 +82,7 @@ public non-sealed interface CompositeShape extends Shape {
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape subShape = shapes[i];
 			Collision c = subShape.collide(convex, velocityBA, context);
-			if (c != null && context.compare(c, nearest, velocityBA) < 0) {
+			if (context.filterCollision(c, velocityBA) && context.compare(c, nearest, velocityBA) < 0) {
 				nearest = c;
 			}
 		}
@@ -118,7 +118,7 @@ public non-sealed interface CompositeShape extends Shape {
 				final ConvexShape subShapeB = shapesB[i];
 				if (subShapeAAABB.intersects(subShapeB.getBoundingBox())) {
 					final Collision c = subShapeA.collide(subShapeB, velocityBA, context);
-					if (c != null && context.compare(c, nearest, velocityBA) < 0) {
+					if (context.filterCollision(c, velocityBA) && context.compare(c, nearest, velocityBA) < 0) {
 						nearest = c;
 					}
 				}

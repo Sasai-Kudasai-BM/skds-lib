@@ -11,5 +11,13 @@ public interface CollisionContext extends CollisionPredicate {
 		return true;
 	}
 
+	default boolean filterCollision(Collision collision, Vec3 velocity) {
+		return collision != null;
+	}
+
+	default boolean filterCollision(Collision collision, Vec3 from, Vec3 to) {
+		return collision != null;
+	}
+
 	CollisionContext DEFAULT = (a, b, _) -> a.compareTo(b);
 }

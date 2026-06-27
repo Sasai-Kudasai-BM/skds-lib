@@ -255,29 +255,29 @@ public class SKDSUtils {
 
 	public static String memoryCompact(long bytes) {
 		if (bytes < 1L << 10) {
-			return bytes + " Bytes";
+			return bytes + " B";
 		} else if (bytes < 1L << 20) {
-			return "%.2f kBytes".formatted(bytes / 1024d);
+			return "%.2f kiB".formatted(bytes / 1024d);
 		} else if (bytes < 1L << 30) {
-			return "%.2f MBytes".formatted(bytes / (1024d * 1024));
+			return "%.2f MiB".formatted(bytes / (1024d * 1024));
 		} else if (bytes < 1L << 40) {
-			return "%.2f GBytes".formatted(bytes / (1024d * 1024 * 1024));
+			return "%.2f GiB".formatted(bytes / (1024d * 1024 * 1024));
 		} else {
-			return "%.2f TBytes".formatted(bytes / (1024d * 1024 * 1024 * 1024));
+			return "%.2f TiB".formatted(bytes / (1024d * 1024 * 1024 * 1024));
 		}
 	}
 
 	public static String memoryCompact(long bytes, long of) {
 		if (of < 1L << 10) {
-			return "%s / %s Bytes".formatted(bytes, of);
+			return "%s / %s B".formatted(bytes, of);
 		} else if (of < 1L << 20) {
-			return "%.2f / %.2f kBytes".formatted(bytes / 1024d, of / 1024d);
+			return "%.2f / %.2f kiB".formatted(bytes / 1024d, of / 1024d);
 		} else if (of < 1L << 30) {
-			return "%.2f / %.2f MBytes".formatted(bytes / (1024d * 1024), of / (1024d * 1024));
+			return "%.2f / %.2f MiB".formatted(bytes / (1024d * 1024), of / (1024d * 1024));
 		} else if (of < 1L << 40) {
-			return "%.2f / %.2f GBytes".formatted(bytes / (1024d * 1024 * 1024), of / (1024d * 1024 * 1024));
+			return "%.2f / %.2f GiB".formatted(bytes / (1024d * 1024 * 1024), of / (1024d * 1024 * 1024));
 		} else {
-			return "%.2f / %.2f TBytes".formatted(bytes / (1024d * 1024 * 1024 * 1024), of / (1024d * 1024 * 1024 * 1024));
+			return "%.2f / %.2f TiB".formatted(bytes / (1024d * 1024 * 1024 * 1024), of / (1024d * 1024 * 1024 * 1024));
 		}
 	}
 
