@@ -4,7 +4,6 @@ import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 import net.skds.lib2.mat.VarInt;
 import net.skds.lib2.mat.VarLong;
 import net.skds.lib2.mat.quat.QuatF;
-import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 import net.skds.lib2.mat.vec3.Vec3F;
 import net.skds.lib2.utils.ArrayUtils;
@@ -200,11 +199,11 @@ public interface ExtendedDataInput extends DataInput {
 		return new Vec3D(readDouble(), readDouble(), readDouble());
 	}
 
-	default Vec3F readFloatVector(Vec3 vec) throws IOException {
+	default Vec3F readFloatVector() throws IOException {
 		return new Vec3F(readFloat(), readFloat(), readFloat());
 	}
 
-	default QuatF readFloatQuat(Vec3 vec) throws IOException {
+	default QuatF readFloatQuat() throws IOException {
 		return new QuatF(readFloat(), readFloat(), readFloat(), readFloat());
 	}
 
