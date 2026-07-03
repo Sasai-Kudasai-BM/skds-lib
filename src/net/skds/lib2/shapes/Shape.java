@@ -14,6 +14,8 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Shape move(Vec3 delta);
 
+	Shape move(double dx, double dy, double dz);
+
 	Shape rotate(Matrix3 m3);
 
 	default Shape rotate(Quat q) {

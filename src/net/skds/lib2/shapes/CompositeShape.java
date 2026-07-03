@@ -23,6 +23,9 @@ public non-sealed interface CompositeShape extends Shape {
 	CompositeShape move(Vec3 delta);
 
 	@Override
+	CompositeShape move(double dx, double dy, double dz);
+
+	@Override
 	CompositeShape moveRotScale(Vec3 pos, Matrix3 m3, double scale);
 
 	@Override
@@ -46,6 +49,7 @@ public non-sealed interface CompositeShape extends Shape {
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
+		if (!context.canCollide(this, null)) return null;
 		if (!getBoundingBox().intersectsRay(from, to)) return null;
 		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
 		if (shapes.length == 0) return null;
@@ -152,6 +156,9 @@ public non-sealed interface CompositeShape extends Shape {
 
 	@Override
 	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
+		if (!context.canCollide(this, shapeB)) {
+			return null;
+		}
 		if (shapeB.isConvex()) {
 			return collideConvex(this, (ConvexShape) shapeB, velocityBA, context);
 		} else {

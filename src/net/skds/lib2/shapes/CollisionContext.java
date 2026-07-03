@@ -7,7 +7,7 @@ public interface CollisionContext extends CollisionPredicate {
 	int compare(Collision a, Collision b, Vec3 velocity);
 
 	@Override
-	default boolean canCollide(Shape shape) {
+	default boolean canCollide(Shape shapeA, Shape shapeB) {
 		return true;
 	}
 

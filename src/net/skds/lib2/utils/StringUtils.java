@@ -78,12 +78,29 @@ public class StringUtils {
 		StringBuilder sb = new StringBuilder(l);
 		char c0 = str.charAt(0);
 		boolean upp = Character.isUpperCase(c0);
-		sb.append(upp ? c0 : Character.toUpperCase(c0));
+		sb.append(Character.toUpperCase(c0));
 		for (int i = 1; i < l; i++) {
 			char c = str.charAt(i);
 			boolean upp2 = Character.isUpperCase(c);
 			if (!upp && upp2) sb.append('_');
-			sb.append(upp2 ? c : Character.toUpperCase(c));
+			sb.append(Character.toUpperCase(c));
+			upp = upp2;
+		}
+		return sb.toString();
+	}
+
+	public static String lowercaseUnderlined(String str) {
+		int l = str.length();
+		if (l <= 1) return str.toUpperCase();
+		StringBuilder sb = new StringBuilder(l);
+		char c0 = str.charAt(0);
+		boolean upp = Character.isUpperCase(c0);
+		sb.append(Character.toLowerCase(c0));
+		for (int i = 1; i < l; i++) {
+			char c = str.charAt(i);
+			boolean upp2 = Character.isUpperCase(c);
+			if (!upp && upp2) sb.append('_');
+			sb.append(Character.toLowerCase(c));
 			upp = upp2;
 		}
 		return sb.toString();

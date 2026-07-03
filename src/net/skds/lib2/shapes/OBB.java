@@ -51,6 +51,11 @@ public class OBB implements ConvexShape, TypedConfig<ShapeType> {
 	}
 
 	@Override
+	public OBB move(double dx, double dy, double dz) {
+		return new OBB(center.add(dx, dy, dz), this.dimensions, normals, attachment);
+	}
+
+	@Override
 	public OBB rotate(Matrix3 m3) {
 		return new OBB(center, this.dimensions, m3.multiply(normals), attachment);
 	}
