@@ -21,6 +21,9 @@ class LogWriter extends Thread {
 
 	private boolean running = true;
 
+	private EntryType lastOutType = null;
+	private EntryType lastErrType = null;
+
 	private final LinkedBlockingQueue<LogWriteable> entries = new LinkedBlockingQueue<>();
 	private final FileLogWriter fileWriter;
 
@@ -52,7 +55,7 @@ class LogWriter extends Thread {
 		while (running) {
 			try {
 				LogWriteable le = entries.take();
-				le.write();
+				checkAndWrite(le);
 			} catch (Exception e) {
 				e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
 			}
@@ -60,20 +63,32 @@ class LogWriter extends Thread {
 		LogWriteable le;
 		while ((le = entries.poll()) != null) {
 			try {
-				le.write();
+				checkAndWrite(le);
 			} catch (Exception e) {
 				e.printStackTrace(SKDSLogger.ORIGINAL_ERR);
 			}
 		}
 	}
 
+	//private void validateEntrySequence(LogWriteable le, EntryType last) {
+	//}
+
+	// TODO
+	private void checkAndWrite(LogWriteable le) {
+		//switch (le.outType()) {
+		//	case OUT -> validateEntrySequence(le, lastOutType);
+		//	case ERR -> validateEntrySequence(le, lastErrType);
+		//}
+		le.write();
+	}
+
 	static void write(Date date, String msg, LoggerLevel level, PrintStream[] attachedStreams, boolean useGlobalPrintStream, String fileOut) {
 		SKDSLoggerConfig config = SKDSLoggerConfig.getInstance();
 		try {
 			if (useGlobalPrintStream) {
-				switch (level) {
-					case WARN, ERROR, SYSTEM_ERR -> SKDSLogger.ORIGINAL_ERR.print(msg);
-					default -> SKDSLogger.ORIGINAL_OUT.print(msg);
+				switch (level.outType) {
+					case ERR -> SKDSLogger.ORIGINAL_ERR.print(msg);
+					case OUT -> SKDSLogger.ORIGINAL_OUT.print(msg);
 				}
 			}
 			for (PrintStream ps : attachedStreams) {
@@ -94,6 +109,10 @@ class LogWriter extends Thread {
 
 	interface LogWriteable {
 		void write();
+
+		EntryType entryType();
+
+		OutType outType();
 	}
 
 	private class FileLogWriter extends Thread {
@@ -171,7 +190,8 @@ class LogWriter extends Thread {
 		long splitSize;
 		StringBuffer buffer = new StringBuffer(64);
 
-		public FileEntry(String name) {}
+		public FileEntry(String name) {
+		}
 	}
 
 	//private record FileKey(String name, SKDSLoggerConfig config) {

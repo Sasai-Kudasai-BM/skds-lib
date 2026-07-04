@@ -10,7 +10,7 @@ record LogLnEntry(long time, String message, LoggerLevel level, String thread, S
 				  String loggingClass, PrintStream[] attachedStreams, boolean useGlobalPrintStream,
 				  boolean useFileOut, boolean ln) implements LogWriter.LogWriteable {
 
-	private static final String TERMINATION = '\n' + AnsiEscape.NORMAL.sequence;
+	static final String TERMINATION = '\n' + AnsiEscape.NORMAL.sequence;
 	//public static final int TERMINATION_LENGTH = TERMINATION.length() - 1;
 
 	@Override
@@ -38,8 +38,24 @@ record LogLnEntry(long time, String message, LoggerLevel level, String thread, S
 		logMsg.append(this.message);
 		String message = logMsg.toString();
 		String decoratedMsg = level.getColor() + message + (ln ? TERMINATION : "");
-		String fileOut = useFileOut ? message + "\n" : null;
+		String fileOut = null;
+		if (useFileOut) {
+			fileOut = message;
+			if (ln) {
+				fileOut += "\n";
+			}
+		}
 
 		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, fileOut);
+	}
+
+	@Override
+	public EntryType entryType() {
+		return EntryType.PRINT_LN;
+	}
+
+	@Override
+	public OutType outType() {
+		return level.outType;
 	}
 }

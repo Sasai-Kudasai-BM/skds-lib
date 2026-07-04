@@ -12,4 +12,14 @@ record LogPrintln(long time, LoggerLevel level, PrintStream[] attachedStreams, b
 		String decoratedMsg = "\n";
 		LogWriter.write(date, decoratedMsg, level, attachedStreams, useGlobalPrintStream, useFileOut ? decoratedMsg : null);
 	}
+
+	@Override
+	public EntryType entryType() {
+		return EntryType.LINE;
+	}
+
+	@Override
+	public OutType outType() {
+		return level.outType;
+	}
 }

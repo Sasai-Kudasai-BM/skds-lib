@@ -32,7 +32,7 @@ public class DebugReloadPostDeserializeCall {
 			var iterator = counter.iterator();
 			while (iterator.hasNext()) {
 				for (StackTraceElement traceElement : iterator.next()) {
-					log.errorContinue("\n" + traceElement);
+					log.error(traceElement);
 				}
 				if (iterator.hasNext()) {
 					System.err.println();

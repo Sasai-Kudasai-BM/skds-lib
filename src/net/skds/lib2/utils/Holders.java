@@ -245,9 +245,17 @@ public final class Holders {
 	@AllArgsConstructor
 	public static class BooleanHolder {
 
-		@Getter
 		@Setter
 		protected boolean value;
+
+		@Deprecated
+		public boolean isValue() {
+			return value;
+		}
+
+		public boolean getValue() {
+			return value;
+		}
 
 		@Override
 		public String toString() {
@@ -264,7 +272,7 @@ public final class Holders {
 		protected byte value;
 
 		public byte increment() {
-			return increment((byte)1);
+			return increment((byte) 1);
 		}
 
 		public byte increment(byte inc) {
@@ -272,7 +280,7 @@ public final class Holders {
 		}
 
 		public byte decrement() {
-			return decrement((byte)1);
+			return decrement((byte) 1);
 		}
 
 		public byte decrement(byte inc) {
@@ -308,6 +316,7 @@ public final class Holders {
 		public char decrement(int inc) {
 			return value -= inc;
 		}
+
 		@Override
 		public String toString() {
 			return "Holder(" + value + ")";
@@ -323,7 +332,7 @@ public final class Holders {
 		protected short value;
 
 		public short increment() {
-			return increment((short)1);
+			return increment((short) 1);
 		}
 
 		public short increment(short inc) {
@@ -331,7 +340,7 @@ public final class Holders {
 		}
 
 		public short decrement() {
-			return decrement((short)1);
+			return decrement((short) 1);
 		}
 
 		public short decrement(short inc) {
