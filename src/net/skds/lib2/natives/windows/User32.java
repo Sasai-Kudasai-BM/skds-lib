@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandle;
 
 import static net.skds.lib2.natives.LinkerUtils.*;
 
+@SuppressWarnings({"DataFlowIssue", "UnusedReturnValue", "unused"})
 public class User32 extends AbstractLinkedLibrary {
 
 	private static User32 instance;
@@ -20,6 +21,8 @@ public class User32 extends AbstractLinkedLibrary {
 	private final MethodHandle getMessage = createHandle(lib, "GetMessageW", BOOLEAN, PTR, PTR, INT, INT);
 	private final MethodHandle setWindowsHookExA = createHandle(lib, "SetWindowsHookExA", PTR, INT, PTR, PTR, INT);
 	private final MethodHandle unhookWindowsHookEx = createHandle(lib, "UnhookWindowsHookEx", BOOLEAN, PTR);
+	//private final MethodHandle registerRawInputDevices = createHandle(lib, "RegisterRawInputDevices", BOOLEAN, PTR, INT, INT);
+	//private final MethodHandle getRawInputData = createHandle(lib, "GetRawInputData", INT, PTR, INT, PTR, PTR, INT);
 
 	private User32() {
 		super("user32");
@@ -32,6 +35,24 @@ public class User32 extends AbstractLinkedLibrary {
 			throw new RuntimeException(e);
 		}
 	}
+
+	/*
+	public int getRawInputData(long hRawInput, int uiCommand, long pData, long pcbSize, int cbSizeHeader) {
+		try {
+			return (int) getRawInputData.invokeExact(hRawInput, uiCommand, pData, pcbSize, cbSizeHeader);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public boolean registerRawInputDevices(long pRawInputDevices, int uiNumDevices, int cbSize) {
+		try {
+			return (boolean) registerRawInputDevices.invokeExact(pRawInputDevices, uiNumDevices, cbSize);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+	 */
 
 	public boolean unhookWindowsHookEx(long pHook) {
 		try {
