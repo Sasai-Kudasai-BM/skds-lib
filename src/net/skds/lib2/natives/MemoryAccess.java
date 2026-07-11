@@ -72,7 +72,7 @@ public class MemoryAccess {
 		MemorySegment.copy(segment, FLOAT, offset, array, 0, length);
 		return array;
 	}
-	
+
 	public static double[] getDoubleArray(MemorySegment segment, long offset, int length) {
 		double[] array = new double[length];
 		MemorySegment.copy(segment, DOUBLE, offset, array, 0, length);
@@ -191,15 +191,15 @@ public class MemoryAccess {
 	}
 
 	public static long alloc4(Arena arena, int count) {
-		return arena.allocate(count, 4).address();
+		return arena.allocate(count * 4L, 4).address();
 	}
 
 	public static long alloc2(Arena arena, int count) {
-		return arena.allocate(count, 2).address();
+		return arena.allocate(count * 2L, 2).address();
 	}
 
 	public static long alloc8(Arena arena, int count) {
-		return arena.allocate(count, 8).address();
+		return arena.allocate(count * 8L, 8).address();
 	}
 
 	public static long[] allocPointers(Arena arena, int count) {
