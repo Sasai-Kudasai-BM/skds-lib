@@ -11,7 +11,9 @@ import static net.skds.lib2.natives.LinkerUtils.*;
 @SuppressWarnings({"DataFlowIssue", "UnusedReturnValue", "unused"})
 public class User32 extends AbstractLinkedLibrary {
 
-	private static User32 instance;
+	private static final class Holder {
+		private static final User32 INSTANCE = new User32();
+	}
 
 	public final UpcallLink<LowLevelKeyboardProc> lowLevelKeyboardProcUL = LinkerUtils.createUpcallLink(User32.LowLevelKeyboardProc.class);
 	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = LinkerUtils.createUpcallLink(User32.LowLevelMouseProc.class);
@@ -98,20 +100,6 @@ public class User32 extends AbstractLinkedLibrary {
 
 
 	public static User32 getInstance() {
-		User32 inst = instance;
-		if (inst == null) {
-			synchronized (User32.class) {
-				inst = instance;
-				if (inst == null) {
-					try {
-						inst = new User32();
-						instance = inst;
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
-		return inst;
+		return Holder.INSTANCE;
 	}
 }

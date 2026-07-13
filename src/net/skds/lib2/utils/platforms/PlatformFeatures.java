@@ -8,7 +8,17 @@ import java.awt.event.MouseListener;
 
 public abstract sealed class PlatformFeatures permits WindowsPlatform {
 
-	private static PlatformFeatures instance;
+	private static final class InstanceHolder {
+		private static final PlatformFeatures instance = switch (SKDSUtils.OS_TYPE) {
+			case WINDOWS -> new WindowsPlatform();
+			default ->
+					throw new UnsupportedSystemException(SKDSUtils.OS_TYPE + " platform-dependent features are not supported");
+		};
+	}
+
+	public static PlatformFeatures getInstance() {
+		return InstanceHolder.instance;
+	}
 
 	public abstract void addKeyListener(KeyListener listener);
 
@@ -17,18 +27,4 @@ public abstract sealed class PlatformFeatures permits WindowsPlatform {
 	public abstract void addMouseListener(MouseListener listener);
 
 	public abstract void removeMouseListener(MouseListener listener);
-
-	public static PlatformFeatures getInstance() {
-		PlatformFeatures platform = instance;
-		if (platform == null) {
-			platform = switch (SKDSUtils.OS_TYPE) {
-				case WINDOWS -> new WindowsPlatform();
-				default ->
-						throw new UnsupportedSystemException(SKDSUtils.OS_TYPE + " platform-dependent features are not supported");
-			};
-			instance = platform;
-		}
-		return platform;
-	}
-
 }

@@ -1,11 +1,11 @@
 package net.skds.lib2.awtutils;
 
 import lombok.experimental.UtilityClass;
+import net.skds.lib2.utils.exception.UnsupportedSystemException;
 
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.Method;
-import java.util.function.Function;
 
 @UtilityClass
 public class AWTUtils {
@@ -34,8 +34,13 @@ public class AWTUtils {
 	 * </pre>
 	 */
 	public static long getHWnd(Window window) {
-		final class HWNDAccessor {
-			static Function<Window, Long> accessor = w0 -> {
+		@FunctionalInterface
+		interface Accessor {
+			long get(Window window);
+
+			Accessor ACCESSOR = createAccessor();
+
+			private static Accessor createAccessor() {
 				try {
 					Class<?> ac = Class.forName("sun.awt.AWTAccessor");
 					Class<?> cac = Class.forName("sun.awt.AWTAccessor$ComponentAccessor");
@@ -47,7 +52,7 @@ public class AWTUtils {
 					Object a = ga.invoke(null);
 					gp.setAccessible(true);
 					ghw.setAccessible(true);
-					Function<Window, Long> accessor2 = w -> {
+					return w -> {
 						try {
 							Object peer = gp.invoke(a, w);
 							return (long) ghw.invoke(peer);
@@ -55,13 +60,92 @@ public class AWTUtils {
 							throw new RuntimeException(e);
 						}
 					};
-					accessor = accessor2;
-					return accessor2.apply(w0);
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
-			};
+			}
 		}
-		return HWNDAccessor.accessor.apply(window);
+		return Accessor.ACCESSOR.get(window);
+	}
+
+	/**
+	 * <h2>!!! Only for Linux/X11 !!!</h2>
+	 *
+	 * <pre>
+	 * use with <code>--add-exports java.desktop/sun.awt.X11=ALL-UNNAMED</code>
+	 * </pre>
+	 */
+	public static long getX11Display() {
+		@FunctionalInterface
+		interface Accessor {
+			long get();
+
+			Accessor ACCESSOR = createAccessor();
+
+			private static Accessor createAccessor() {
+				try {
+					Toolkit toolkit = Toolkit.getDefaultToolkit();
+					Class<?> tc = toolkit.getClass();
+					if (!tc.getName().equals("sun.awt.X11.XToolkit")) {
+						throw new UnsupportedSystemException("getX11Display is not supported on your system");
+					}
+					Method gd = tc.getMethod("getDisplay");
+					gd.setAccessible(true);
+					return () -> {
+						try {
+							return (long) gd.invoke(null);
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+					};
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return Accessor.ACCESSOR.get();
+	}
+
+	/**
+	 * <h2>!!! Only for Linux/X11 !!!</h2>
+	 *
+	 * <pre>
+	 * use with <code>--add-exports java.desktop/sun.awt=ALL-UNNAMED
+	 * --add-exports java.desktop/sun.awt.X11=ALL-UNNAMED</code>
+	 * </pre>
+	 */
+	public static long getX11WindowId(Window window) {
+		@FunctionalInterface
+		interface Accessor {
+			long get(Window window);
+
+			Accessor ACCESSOR = createAccessor();
+
+			private static Accessor createAccessor() {
+				try {
+					Class<?> ac = Class.forName("sun.awt.AWTAccessor");
+					Class<?> cac = Class.forName("sun.awt.AWTAccessor$ComponentAccessor");
+					Method ga = ac.getMethod("getComponentAccessor");
+					Method gp = cac.getMethod("getPeer", Component.class);
+					ga.setAccessible(true);
+					Object a = ga.invoke(null);
+					gp.setAccessible(true);
+					Class<?> xwc = Class.forName("sun.awt.X11.XBaseWindow");
+					Method gxp = xwc.getMethod("getWindow");
+					gxp.setAccessible(true);
+					return w -> {
+						try {
+							Object peer = gp.invoke(a, w);
+							return (long) gxp.invoke(peer);
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+					};
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return Accessor.ACCESSOR.get(window);
 	}
 }
