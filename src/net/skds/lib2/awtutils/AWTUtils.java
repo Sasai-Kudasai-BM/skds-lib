@@ -42,19 +42,12 @@ public class AWTUtils {
 
 			private static Accessor createAccessor() {
 				try {
-					Class<?> ac = Class.forName("sun.awt.AWTAccessor");
-					Class<?> cac = Class.forName("sun.awt.AWTAccessor$ComponentAccessor");
 					Class<?> cpc = Class.forName("sun.awt.windows.WComponentPeer");
-					Method ga = ac.getMethod("getComponentAccessor");
-					Method gp = cac.getMethod("getPeer", Component.class);
 					Method ghw = cpc.getMethod("getHWnd");
-					ga.setAccessible(true);
-					Object a = ga.invoke(null);
-					gp.setAccessible(true);
 					ghw.setAccessible(true);
 					return w -> {
 						try {
-							Object peer = gp.invoke(a, w);
+							Object peer = getWindowPeer(w);
 							return (long) ghw.invoke(peer);
 						} catch (Exception e) {
 							throw new RuntimeException(e);
@@ -123,6 +116,75 @@ public class AWTUtils {
 
 			private static Accessor createAccessor() {
 				try {
+					Class<?> xwc = Class.forName("sun.awt.X11.XBaseWindow");
+					Method gxp = xwc.getMethod("getWindow");
+					gxp.setAccessible(true);
+					return w -> {
+						try {
+							Object peer = getWindowPeer(w);
+							return (long) gxp.invoke(peer);
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+					};
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return Accessor.ACCESSOR.get(window);
+	}
+
+	/**
+	 * <h2>!!! Only for Linux/X11 !!!</h2>
+	 *
+	 * <pre>
+	 * use with <code>--add-exports java.desktop/sun.awt=ALL-UNNAMED
+	 * --add-exports java.desktop/sun.awt.X11=ALL-UNNAMED
+	 * --add-opens java.desktop/sun.awt.X11=ALL-UNNAMED</code>
+	 * </pre>
+	 */
+	public static int getX11WindowVisualId(Window window) {
+		@FunctionalInterface
+		interface Accessor {
+			int get(Window window);
+
+			Accessor ACCESSOR = createAccessor();
+
+			private static Accessor createAccessor() {
+				try {
+					Class<?> xwc = Class.forName("sun.awt.X11.XWindow");
+					Method ggc = xwc.getMethod("getGraphicsConfiguration");
+					ggc.setAccessible(true);
+					Class<?> x11gcc = Class.forName("sun.awt.X11GraphicsConfig");
+					Method gv = x11gcc.getMethod("getVisual");
+					gv.setAccessible(true);
+					return w -> {
+						try {
+							Object peer = getWindowPeer(w);
+							Object gc = ggc.invoke(peer);
+							return (int) gv.invoke(gc);
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+					};
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return Accessor.ACCESSOR.get(window);
+	}
+
+	private static Object getWindowPeer(Window window) throws Exception {
+		@FunctionalInterface
+		interface Accessor {
+			Object get(Window window) throws Exception;
+
+			Accessor ACCESSOR = createAccessor();
+
+			private static Accessor createAccessor() {
+				try {
 					Class<?> ac = Class.forName("sun.awt.AWTAccessor");
 					Class<?> cac = Class.forName("sun.awt.AWTAccessor$ComponentAccessor");
 					Method ga = ac.getMethod("getComponentAccessor");
@@ -130,13 +192,9 @@ public class AWTUtils {
 					ga.setAccessible(true);
 					Object a = ga.invoke(null);
 					gp.setAccessible(true);
-					Class<?> xwc = Class.forName("sun.awt.X11.XBaseWindow");
-					Method gxp = xwc.getMethod("getWindow");
-					gxp.setAccessible(true);
 					return w -> {
 						try {
-							Object peer = gp.invoke(a, w);
-							return (long) gxp.invoke(peer);
+							return gp.invoke(a, w);
 						} catch (Exception e) {
 							throw new RuntimeException(e);
 						}
