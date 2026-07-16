@@ -7,7 +7,7 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.VarHandle;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * <p>AKA "Safe UnsafeAnal", "SafeAnal"</p>
@@ -111,21 +111,27 @@ public class MemoryAccess {
 		return Arena.ofAuto().allocateFrom(string);
 	}
 
-	public static long loadCStringArray(Arena arena, List<String> strings) {
+	public static long loadCStringArray(Arena arena, Collection<String> strings) {
 		int count = strings.size();
 		long[] pointers = new long[count];
-		for (int i = 0; i < count; i++) {
-			pointers[i] = arena.allocateFrom(strings.get(i)).address();
+		if (!strings.isEmpty()) {
+			int i = 0;
+			for (String str : strings) {
+				pointers[i++] = arena.allocateFrom(str).address();
+			}
 		}
 		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers).address();
 	}
 
-	public static MemorySegment loadCStringArray(List<String> strings) {
+	public static MemorySegment loadCStringArray(Collection<String> strings) {
 		Arena arena = Arena.ofAuto();
 		int count = strings.size();
 		long[] pointers = new long[count];
-		for (int i = 0; i < count; i++) {
-			pointers[i] = arena.allocateFrom(strings.get(i)).address();
+		if (!strings.isEmpty()) {
+			int i = 0;
+			for (String str : strings) {
+				pointers[i++] = arena.allocateFrom(str).address();
+			}
 		}
 		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers);
 	}
