@@ -1,13 +1,13 @@
 package net.w3e.lib.reflection;
 
+import net.skds.lib2.benchmark.Benchmark;
+import net.skds.lib2.mat.FastMath;
+import net.skds.lib2.utils.logger.SKDSLogger;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import net.skds.lib2.benchmark.Benchmark;
-import net.skds.lib2.mat.FastMath;
-import net.skds.lib2.utils.logger.SKDSLogger;
 
 @SuppressWarnings("unused")
 public class ReflectUtilsTest {
@@ -21,13 +21,14 @@ public class ReflectUtilsTest {
 			@Override
 			protected void prepare() {
 			}
+
 			@Override
 			protected void bench() {
 				for (int i = 0; i < 1000; i++) {
 					try {
 						method.invoke(null);
 					} catch (IllegalAccessException | InvocationTargetException e) {
-						e.printStackTrace();
+						e.printStackTrace(System.err);
 						System.exit(0);
 					}
 				}
@@ -44,13 +45,14 @@ public class ReflectUtilsTest {
 			@Override
 			protected void prepare() {
 			}
+
 			@Override
 			protected void bench() {
 				for (int i = 0; i < 1000; i++) {
 					try {
 						handle.invoke();
 					} catch (Throwable e) {
-						e.printStackTrace();
+						e.printStackTrace(System.err);
 						System.exit(0);
 					}
 				}
@@ -64,13 +66,14 @@ public class ReflectUtilsTest {
 			@Override
 			protected void prepare() {
 			}
+
 			@Override
 			protected void bench() {
 				for (int i = 0; i < 1000; i++) {
 					try {
 						handle.invokeExact();
 					} catch (Throwable e) {
-						e.printStackTrace();
+						e.printStackTrace(System.err);
 						System.exit(0);
 					}
 				}

@@ -26,7 +26,7 @@ public class JsonTestEscape {
 		try {
 			StringUtils.writeQuoted(output, input, '"');
 		} catch (EndOfOutputException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		System.out.println("|%s| -> |%s|".formatted(input, output.toString()));
 	}

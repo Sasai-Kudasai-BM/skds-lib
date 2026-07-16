@@ -8,7 +8,7 @@ public interface UnsafeRunnable extends Runnable {
 		try {
 			runUnsafe();
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 	}
 

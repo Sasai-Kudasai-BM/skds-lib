@@ -71,7 +71,7 @@ public class HttpUtils { // TODO
 			byte[] data = is.readAllBytes();
 			return new String(data, StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		throw new RuntimeException("Unable to download " + url);
 	}
@@ -81,7 +81,7 @@ public class HttpUtils { // TODO
 			byte[] data = is.readAllBytes();
 			return data;
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		throw new RuntimeException("Unable to download " + url);
 	}
@@ -94,7 +94,7 @@ public class HttpUtils { // TODO
 			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofByteArray());
 			return new Response(response.statusCode(), response.body(), response);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		throw new RuntimeException("Unable to download " + request.uri());
 	}
@@ -107,7 +107,7 @@ public class HttpUtils { // TODO
 			var response = client.send(request, ri -> HttpResponse.BodySubscribers.ofByteArray());
 			return new Response(response.statusCode(), response.body(), response);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		throw new RuntimeException("Unable to download " + url);
 	}

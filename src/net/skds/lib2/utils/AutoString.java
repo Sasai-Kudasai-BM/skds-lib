@@ -10,25 +10,20 @@ import java.util.Map;
 
 public interface AutoString {
 
-	public static String build(Object object, String fields) {
+	static String build(Object object, String fields) {
 		if (object == null) {
 			return "null";
 		}
-		StringBuilder builder = new StringBuilder("{");
 
-		builder.append("\"class\":\"");
-		builder.append(object.getClass().getSimpleName());
-		builder.append("\",");
-
-		builder.append("\"hash\":");
-		builder.append(object.hashCode());
-		builder.append(",");
-
-		builder.append("\"fields\":{");
-		builder.append(fields);
-		builder.append("}}");
-
-		return builder.toString();
+		return "{" + "\"class\":\"" +
+				object.getClass().getSimpleName() +
+				"\"," +
+				"\"hash\":" +
+				object.hashCode() +
+				"," +
+				"\"fields\":{" +
+				fields +
+				"}}";
 	}
 
 	default String autoString() {
@@ -61,7 +56,7 @@ public interface AutoString {
 			try {
 				value = field.get(object);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
+				e.printStackTrace(System.err);
 			}
 			if (value instanceof AutoString autoString) {
 				builder.append(autoString.autoString());
