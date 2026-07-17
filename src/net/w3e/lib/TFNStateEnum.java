@@ -1,5 +1,9 @@
 package net.w3e.lib;
 
+import net.skds.lib2.io.codec.IEnumNameDataFixer;
+import net.skds.lib2.io.codec.annotation.EnumNameDataFixer;
+
+@EnumNameDataFixer(TFNStateEnum.NameFixer.class)
 public enum TFNStateEnum implements ITFNStateEnum {
 	TRUE,
 	FALSE,
@@ -65,5 +69,14 @@ public enum TFNStateEnum implements ITFNStateEnum {
 			return this;
 		}
 		return this.isTrue() || value.isTrue() ? TRUE : FALSE;
+	}
+
+	static class NameFixer implements IEnumNameDataFixer<TFNStateEnum> {
+
+		@Override
+		public TFNStateEnum fixName(String name) {
+			return valueOf(Boolean.valueOf(name));
+		}
+
 	}
 }
