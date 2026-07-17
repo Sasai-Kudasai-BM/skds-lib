@@ -208,6 +208,18 @@ public class MemoryAccess {
 		return arena.allocate(count * 8L, 8).address();
 	}
 
+	public static MemorySegment alloc4M(Arena arena, int count) {
+		return arena.allocate(count * 4L, 4);
+	}
+
+	public static MemorySegment alloc2M(Arena arena, int count) {
+		return arena.allocate(count * 2L, 2);
+	}
+
+	public static MemorySegment alloc8M(Arena arena, int count) {
+		return arena.allocate(count * 8L, 8);
+	}
+
 	public static long[] allocPointers(Arena arena, int count) {
 		long totalSize = count * 8L;
 		final long[] arr = new long[count];
