@@ -101,6 +101,21 @@ public final class LinkerUtils {
 		return SymbolLookup.libraryLookup(libPath, arena);
 	}
 
+	public static MethodHandle createHandle(long fp, MemoryLayout returnType, MemoryLayout... arguments) {
+		return LINKER.downcallHandle(
+				MemorySegment.ofAddress(fp),
+				fd(returnType, arguments)
+		);
+	}
+
+	public static MethodHandle createHandleCritical(long fp, boolean allowHeapAccess, MemoryLayout returnType, MemoryLayout... arguments) {
+		return LINKER.downcallHandle(
+				MemorySegment.ofAddress(fp),
+				fd(returnType, arguments),
+				Linker.Option.critical(allowHeapAccess)
+		);
+	}
+
 	public static MethodHandle createHandle(SymbolLookup library, String name, MemoryLayout returnType, MemoryLayout... arguments) {
 		Optional<MemorySegment> op = library.find(name);
 		if (op.isEmpty()) {
