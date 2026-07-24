@@ -102,6 +102,7 @@ public final class LinkerUtils {
 	}
 
 	public static MethodHandle createHandle(long fp, MemoryLayout returnType, MemoryLayout... arguments) {
+		if (fp == 0) return null;
 		return LINKER.downcallHandle(
 				MemorySegment.ofAddress(fp),
 				fd(returnType, arguments)
@@ -109,6 +110,7 @@ public final class LinkerUtils {
 	}
 
 	public static MethodHandle createHandleCritical(long fp, boolean allowHeapAccess, MemoryLayout returnType, MemoryLayout... arguments) {
+		if (fp == 0) return null;
 		return LINKER.downcallHandle(
 				MemorySegment.ofAddress(fp),
 				fd(returnType, arguments),
