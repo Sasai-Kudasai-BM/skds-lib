@@ -9,7 +9,7 @@ public final class SKDSLoggerFactory {
 		try {
 			c = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 			return null;
 		}
 		return new SKDSLogger(c);

@@ -83,6 +83,11 @@ public final class Sphere implements ConvexShape {
 	}
 
 	@Override
+	public ConvexShape move(double dx, double dy, double dz) {
+		return new Sphere(center.add(dx, dy, dz), radius, attachment);
+	}
+
+	@Override
 	public Sphere rotate(Matrix3 m3) {
 		return this;
 	}
@@ -135,6 +140,7 @@ public final class Sphere implements ConvexShape {
 
 	@Override
 	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
+		if (!context.canCollide(this, null)) return null;
 		double dist = from.distanceTo(center);
 		double dirL = from.distanceTo(to);
 		if (dist <= radius) {

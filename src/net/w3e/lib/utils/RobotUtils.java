@@ -1,10 +1,6 @@
 package net.w3e.lib.utils;
 
-import java.awt.AWTException;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.PointerInfo;
-import java.awt.Robot;
+import java.awt.*;
 
 public class RobotUtils {
 
@@ -25,8 +21,9 @@ public class RobotUtils {
 	public static int[] mousePos() {
 		PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 		Point point = pointerInfo.getLocation();
-		int xOld = (int)point.getX();
-		int yOld = (int)point.getY();
-		return new int[] {xOld, yOld};
+		int xOld = (int) point.getX();
+		int yOld = (int) point.getY();
+		return new int[]{xOld, yOld};
 	}
+
 }

@@ -57,7 +57,7 @@ public class SKDSTimer {
 				try {
 					check();
 				} catch (Exception e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 		}, "SKDS-Timer");

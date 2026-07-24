@@ -29,7 +29,7 @@ public class FileUtils {
 			createParentDirs(out);
 			Files.copy(in.toPath(), out.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 	}
 
@@ -82,9 +82,9 @@ public class FileUtils {
 		}
 	}
 
-	public static boolean createParentDirs(Path path) {
+	public static void createParentDirs(Path path) {
 		File file = getParentFile(path);
-		return file.mkdirs();
+		file.mkdirs();
 	}
 
 	public static void deleteFilesFromDirectory(File folder) {

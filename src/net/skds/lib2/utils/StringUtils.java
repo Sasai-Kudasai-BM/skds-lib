@@ -78,12 +78,29 @@ public class StringUtils {
 		StringBuilder sb = new StringBuilder(l);
 		char c0 = str.charAt(0);
 		boolean upp = Character.isUpperCase(c0);
-		sb.append(upp ? c0 : Character.toUpperCase(c0));
+		sb.append(Character.toUpperCase(c0));
 		for (int i = 1; i < l; i++) {
 			char c = str.charAt(i);
 			boolean upp2 = Character.isUpperCase(c);
 			if (!upp && upp2) sb.append('_');
-			sb.append(upp2 ? c : Character.toUpperCase(c));
+			sb.append(Character.toUpperCase(c));
+			upp = upp2;
+		}
+		return sb.toString();
+	}
+
+	public static String lowercaseUnderlined(String str) {
+		int l = str.length();
+		if (l <= 1) return str.toUpperCase();
+		StringBuilder sb = new StringBuilder(l);
+		char c0 = str.charAt(0);
+		boolean upp = Character.isUpperCase(c0);
+		sb.append(Character.toLowerCase(c0));
+		for (int i = 1; i < l; i++) {
+			char c = str.charAt(i);
+			boolean upp2 = Character.isUpperCase(c);
+			if (!upp && upp2) sb.append('_');
+			sb.append(Character.toLowerCase(c));
 			upp = upp2;
 		}
 		return sb.toString();
@@ -107,6 +124,31 @@ public class StringUtils {
 			return String.valueOf(Character.toLowerCase(str.charAt(0)));
 		}
 		return Character.toLowerCase(str.charAt(0)) + str.substring(1);
+	}
+
+	public static String snakeToCamelCase(String str) {
+		int under = str.indexOf('_');
+		if (under == -1) return str;
+		int l = str.length();
+		StringBuilder sb = new StringBuilder(l);
+		boolean big = false;
+		if (under > 0) {
+			big = true;
+			sb.append(str, 0, under);
+		}
+		for (int i = under; i < l; i++) {
+			char c = str.charAt(i);
+			if (c == '_') {
+				big = true;
+				continue;
+			}
+			if (big) {
+				c = Character.toUpperCase(c);
+				big = false;
+			}
+			sb.append(c);
+		}
+		return sb.toString();
 	}
 
 	public static String cutStringBefore(String str, char split) {

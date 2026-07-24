@@ -190,7 +190,7 @@ public class ReflectUtils {
 			Method method = tClass.getDeclaredMethod(methodName, args);
 			return METHOD_LOOKUP.unreflect(method);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return null;
 	}
@@ -199,7 +199,7 @@ public class ReflectUtils {
 		try {
 			return METHOD_LOOKUP.unreflect(method);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 		return null;
 	}

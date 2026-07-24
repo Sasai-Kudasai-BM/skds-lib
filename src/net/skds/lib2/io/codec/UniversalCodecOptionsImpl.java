@@ -5,7 +5,6 @@ import net.skds.lib2.io.json.JsonCodecOptions;
 
 import java.lang.reflect.Modifier;
 
-
 public class UniversalCodecOptionsImpl implements UniversalCodecOptions {
 
 	// common

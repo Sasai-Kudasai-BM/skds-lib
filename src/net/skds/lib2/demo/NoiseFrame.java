@@ -272,6 +272,7 @@ public class NoiseFrame extends JFrame {
 					mx = e.getX();
 					my = e.getY();
 					repaint();
+					
 				}
 			});
 
@@ -296,7 +297,7 @@ public class NoiseFrame extends JFrame {
 				float vx = (x - w2) / scale - cx;
 				float vy = (y - h2) / scale - cy;
 				//float value = noise.getValueInPoint(vx, vy, depth);
-				float value = noiseModel.getValueInPoint(vx, vy);
+				float value = noiseModel.getValueInPoint(vx, vy, depth);
 				return colorScheme.getColor((value + colorBias) * colorScale);
 			};
 

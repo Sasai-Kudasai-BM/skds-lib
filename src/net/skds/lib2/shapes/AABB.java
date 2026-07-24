@@ -394,6 +394,7 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 		return new AABB(d, e, f, g, h, i, attachment);
 	}
 
+	@Override
 	public AABB move(double x, double y, double z) {
 		return new AABB(this.minX + x, this.minY + y, this.minZ + z, this.maxX + x, this.maxY + y, this.maxZ + z, attachment);
 	}
@@ -522,6 +523,7 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 
 	@Override
 	public Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
+		if (!context.canCollide(this, null)) return null;
 		Vec3 dir = to.sub(from);
 		double pMin = 0;
 		double pMax = 1;
@@ -616,6 +618,9 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 	@Override
 	public Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
 		if (shapeB.isConvex() && shapeB instanceof AABB sb) {
+			if (!context.canCollide(this, shapeB)) {
+				return null;
+			}
 			return ConvexCollision.collideAABB(this, sb, velocityBA, context);
 		}
 		return ConvexShape.super.collide(shapeB, velocityBA, context);

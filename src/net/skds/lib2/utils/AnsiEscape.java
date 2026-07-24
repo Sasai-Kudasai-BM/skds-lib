@@ -56,6 +56,15 @@ public enum AnsiEscape {
 		this.sequence = START_KEYCODE + code + "m";
 	}
 
+	public static String clearBack(int pos) {
+		// stupid intellij console
+		return "\b".repeat(pos) + "\u001b[0K";
+	}
+
+	public static String clearLine() {
+		return "\u001b[2K\r";
+	}
+
 	public static String getDefaultStyle() {
 		return DEFAULT_STYLE;
 	}
@@ -81,7 +90,8 @@ public enum AnsiEscape {
 				}
 				first = false;
 				sb.append(escape.getCode());
-			} catch (final Exception ignored) {}
+			} catch (final Exception ignored) {
+			}
 		}
 		sb.append("m");
 		return sb.toString();

@@ -110,11 +110,16 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 
 	@Override
 	public CompositeSuperShape move(Vec3 delta) {
+		return move(delta.x(), delta.y(), delta.z());
+	}
+
+	@Override
+	public CompositeSuperShape move(double dx, double dy, double dz) {
 		final Shape[] shapes = new Shape[this.shapes.length];
 		for (int i = 0; i < shapes.length; i++) {
-			shapes[i] = this.shapes[i].move(delta);
+			shapes[i] = this.shapes[i].move(dx, dy, dz);
 		}
-		return new CompositeSuperShape(shapes, center.add(delta), attachment);
+		return new CompositeSuperShape(shapes, center.add(dx, dy, dz), attachment);
 	}
 
 	@Override

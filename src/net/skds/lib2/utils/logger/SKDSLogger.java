@@ -78,9 +78,22 @@ public class SKDSLogger {
 			}
 			e = new LogLnEntry(time, message, level, thread, stackTop, loggingClass, attachedPrintStreamsArray, useGlobalPrintStream, isAttachToFile(), ln);
 		} else {
-			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, isAttachToFile());
+			e = new LogEntry(time, message, level, attachedPrintStreamsArray, useGlobalPrintStream, isAttachToFile(), ln);
 		}
 		LogWriter.INSTANCE.add(e);
+	}
+
+	protected void update0(LoggerLevel level, int chars, String msg) {
+		final SKDSLoggerConfig config = configGetter.get();
+		if (!config.getLevels().contains(level)) return;
+
+		if (chars != 0) {
+			LogWriter.INSTANCE.add(new ResetEntry(chars, level, attachedPrintStreamsArray, useGlobalPrintStream));
+		}
+		if (msg != null) {
+			long time = System.currentTimeMillis();
+			LogWriter.INSTANCE.add(new LogEntry(time, msg, level, attachedPrintStreamsArray, useGlobalPrintStream, false, false));
+		}
 	}
 
 	public void sout(Object msg) {
@@ -111,58 +124,124 @@ public class SKDSLogger {
 		log0(LoggerLevel.ERROR, DEPTH, true, true, msg);
 	}
 
+	public void soutNoBreak(Object msg) {
+		log0(LoggerLevel.SYSTEM_OUT, DEPTH, false, true, msg);
+	}
+
+	public void serrNoBreak(Object msg) {
+		log0(LoggerLevel.SYSTEM_ERR, DEPTH, false, true, msg);
+	}
+
+	public void debugNoBreak(Object msg) {
+		log0(LoggerLevel.DEBUG, DEPTH, false, true, msg);
+	}
+
+	public void infoNoBreak(Object msg) {
+		log0(LoggerLevel.INFO, DEPTH, false, true, msg);
+	}
+
+	public void logNoBreak(Object msg) {
+		log0(LoggerLevel.LOG, DEPTH, false, true, msg);
+	}
+
+	public void warnNoBreak(Object msg) {
+		log0(LoggerLevel.WARN, DEPTH, false, true, msg);
+	}
+
+	public void errorNoBreak(Object msg) {
+		log0(LoggerLevel.ERROR, DEPTH, false, true, msg);
+	}
+
+	public void outFinish(Object msg) {
+		log0(LoggerLevel.SYSTEM_OUT, DEPTH, true, false, msg);
+	}
+
+	public void errFinish(Object msg) {
+		log0(LoggerLevel.SYSTEM_ERR, DEPTH, true, false, msg);
+	}
+
+	public void outUpdate(int backChars, Object msg) {
+		update0(LoggerLevel.SYSTEM_OUT, backChars, String.valueOf(msg));
+	}
+
+	public void errUpdate(int backChars, Object msg) {
+		update0(LoggerLevel.SYSTEM_ERR, backChars, String.valueOf(msg));
+	}
+
+	public void outClear() {
+		update0(LoggerLevel.SYSTEM_OUT, -1, null);
+	}
+
+	public void errClear() {
+		update0(LoggerLevel.SYSTEM_ERR, -1, null);
+	}
+
+	@Deprecated(forRemoval = true)
 	public void soutNoWrap(Object msg) {
 		log0(LoggerLevel.SYSTEM_OUT, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void serrNoWrap(Object msg) {
 		log0(LoggerLevel.SYSTEM_ERR, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void debugNoWrap(Object msg) {
 		log0(LoggerLevel.DEBUG, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void infoNoWrap(Object msg) {
 		log0(LoggerLevel.INFO, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void logNoWrap(Object msg) {
 		log0(LoggerLevel.LOG, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void warnNoWrap(Object msg) {
 		log0(LoggerLevel.WARN, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void errorNoWrap(Object msg) {
 		log0(LoggerLevel.ERROR, DEPTH, false, true, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void soutContinue(Object msg) {
 		log0(LoggerLevel.SYSTEM_OUT, DEPTH, false, false, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void serrContinue(Object msg) {
 		log0(LoggerLevel.SYSTEM_ERR, DEPTH, false, false, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void debugContinue(Object msg) {
 		log0(LoggerLevel.DEBUG, DEPTH, false, false, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void infoContinue(Object msg) {
 		log0(LoggerLevel.INFO, DEPTH, false, false, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void logContinue(Object msg) {
 		log0(LoggerLevel.LOG, DEPTH, false, false, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void warnContinue(Object msg) {
 		log0(LoggerLevel.WARN, DEPTH, false, false, msg);
 	}
 
+	@Deprecated(forRemoval = true)
 	public void errorContinue(Object msg) {
 		log0(LoggerLevel.ERROR, DEPTH, false, false, msg);
 	}

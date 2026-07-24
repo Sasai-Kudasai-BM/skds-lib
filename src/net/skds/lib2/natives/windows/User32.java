@@ -8,9 +8,12 @@ import java.lang.invoke.MethodHandle;
 
 import static net.skds.lib2.natives.LinkerUtils.*;
 
+@SuppressWarnings({"DataFlowIssue", "UnusedReturnValue", "unused"})
 public class User32 extends AbstractLinkedLibrary {
 
-	private static User32 instance;
+	private static final class Holder {
+		private static final User32 INSTANCE = new User32();
+	}
 
 	public final UpcallLink<LowLevelKeyboardProc> lowLevelKeyboardProcUL = LinkerUtils.createUpcallLink(User32.LowLevelKeyboardProc.class);
 	public final UpcallLink<LowLevelMouseProc> lowLevelMouseProc = LinkerUtils.createUpcallLink(User32.LowLevelMouseProc.class);
@@ -20,6 +23,8 @@ public class User32 extends AbstractLinkedLibrary {
 	private final MethodHandle getMessage = createHandle(lib, "GetMessageW", BOOLEAN, PTR, PTR, INT, INT);
 	private final MethodHandle setWindowsHookExA = createHandle(lib, "SetWindowsHookExA", PTR, INT, PTR, PTR, INT);
 	private final MethodHandle unhookWindowsHookEx = createHandle(lib, "UnhookWindowsHookEx", BOOLEAN, PTR);
+	//private final MethodHandle registerRawInputDevices = createHandle(lib, "RegisterRawInputDevices", BOOLEAN, PTR, INT, INT);
+	//private final MethodHandle getRawInputData = createHandle(lib, "GetRawInputData", INT, PTR, INT, PTR, PTR, INT);
 
 	private User32() {
 		super("user32");
@@ -32,6 +37,24 @@ public class User32 extends AbstractLinkedLibrary {
 			throw new RuntimeException(e);
 		}
 	}
+
+	/*
+	public int getRawInputData(long hRawInput, int uiCommand, long pData, long pcbSize, int cbSizeHeader) {
+		try {
+			return (int) getRawInputData.invokeExact(hRawInput, uiCommand, pData, pcbSize, cbSizeHeader);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public boolean registerRawInputDevices(long pRawInputDevices, int uiNumDevices, int cbSize) {
+		try {
+			return (boolean) registerRawInputDevices.invokeExact(pRawInputDevices, uiNumDevices, cbSize);
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+	}
+	 */
 
 	public boolean unhookWindowsHookEx(long pHook) {
 		try {
@@ -77,20 +100,6 @@ public class User32 extends AbstractLinkedLibrary {
 
 
 	public static User32 getInstance() {
-		User32 inst = instance;
-		if (inst == null) {
-			synchronized (User32.class) {
-				inst = instance;
-				if (inst == null) {
-					try {
-						inst = new User32();
-						instance = inst;
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
-		return inst;
+		return Holder.INSTANCE;
 	}
 }

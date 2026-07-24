@@ -29,7 +29,7 @@ public final class LinkerUtils {
 	public static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.loaderLookup();
 	public static final MethodHandles.Lookup METHOD_LOOKUP = MethodHandles.lookup();
 
-	private static final Map<Class<?>, ValueLayout> primitiveLayouts = new HashMap<>();
+	private static final Map<Class<?>, LayoutInfo> PRIMITIVE_LAYOUTS = new HashMap<>(16, .5f);
 
 	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
 	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
@@ -67,12 +67,12 @@ public final class LinkerUtils {
 		for (int i = 0; i < args.length; i++) {
 			Class<?> a = argTypes[i];
 			if (!a.isPrimitive()) throw new IllegalArgumentException("non-primitive argument type " + a);
-			args[i] = primitiveLayouts.get(a);
+			args[i] = PRIMITIVE_LAYOUTS.get(a).layout;
 		}
 		if (returnType == void.class) {
 			return FunctionDescriptor.ofVoid(args);
 		} else {
-			ValueLayout rt = primitiveLayouts.get(returnType);
+			ValueLayout rt = PRIMITIVE_LAYOUTS.get(returnType).layout;
 			return FunctionDescriptor.of(rt, args);
 		}
 	}
@@ -191,15 +191,23 @@ public final class LinkerUtils {
 	public record TypeGlue(ValueLayout nType, Class<?> jType) {
 	}
 
+	public record LayoutInfo(ValueLayout layout, String name, Class<?> tClass) {
+	}
+
+	public static LayoutInfo getLayoutInfo(Class<?> cl) {
+		return PRIMITIVE_LAYOUTS.get(cl);
+	}
+
 	static {
-		primitiveLayouts.put(byte.class, ValueLayout.JAVA_BYTE);
-		primitiveLayouts.put(boolean.class, ValueLayout.JAVA_BOOLEAN);
-		primitiveLayouts.put(short.class, ValueLayout.JAVA_SHORT);
-		primitiveLayouts.put(char.class, ValueLayout.JAVA_CHAR);
-		primitiveLayouts.put(int.class, ValueLayout.JAVA_INT);
-		primitiveLayouts.put(float.class, ValueLayout.JAVA_FLOAT);
-		primitiveLayouts.put(long.class, ValueLayout.JAVA_LONG);
-		primitiveLayouts.put(double.class, ValueLayout.JAVA_DOUBLE);
+		PRIMITIVE_LAYOUTS.put(void.class, new LayoutInfo(null, "VOID", ValueLayout.class));
+		PRIMITIVE_LAYOUTS.put(byte.class, new LayoutInfo(ValueLayout.JAVA_BYTE, "BYTE", ValueLayout.OfByte.class));
+		PRIMITIVE_LAYOUTS.put(boolean.class, new LayoutInfo(ValueLayout.JAVA_BOOLEAN, "BOOLEAN", ValueLayout.OfBoolean.class));
+		PRIMITIVE_LAYOUTS.put(short.class, new LayoutInfo(ValueLayout.JAVA_SHORT, "SHORT", ValueLayout.OfShort.class));
+		PRIMITIVE_LAYOUTS.put(char.class, new LayoutInfo(ValueLayout.JAVA_CHAR, "CHAR", ValueLayout.OfChar.class));
+		PRIMITIVE_LAYOUTS.put(int.class, new LayoutInfo(ValueLayout.JAVA_INT, "INT", ValueLayout.OfInt.class));
+		PRIMITIVE_LAYOUTS.put(float.class, new LayoutInfo(ValueLayout.JAVA_FLOAT, "FLOAT", ValueLayout.OfFloat.class));
+		PRIMITIVE_LAYOUTS.put(long.class, new LayoutInfo(ValueLayout.JAVA_LONG, "LONG", ValueLayout.OfLong.class));
+		PRIMITIVE_LAYOUTS.put(double.class, new LayoutInfo(ValueLayout.JAVA_DOUBLE, "DOUBLE", ValueLayout.OfDouble.class));
 	}
 
 }

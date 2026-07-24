@@ -73,7 +73,7 @@ public class CachedFileCollection {
 			//log.debug("read %s %.2fk:%.2fk".formatted(key.path(), offset / 1024f, size / 1024f));
 			return new FileChunk(len, offset, data);
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 			return null;
 		}
 	}

@@ -20,12 +20,12 @@ public class UpcallLink<T> {
 				Arena.ofAuto()
 		);
 	}
-	
+
 	public MemorySegment bind(T receiver, Arena arena) {
 		return LinkerUtils.LINKER.upcallStub(
 				virtualHandle.bindTo(receiver),
 				descriptor,
-				LinkerUtils.ARENA
+				arena
 		);
 	}
 }

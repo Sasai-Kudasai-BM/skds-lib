@@ -77,6 +77,9 @@ public non-sealed interface ConvexShape extends Shape {
 	ConvexShape move(Vec3 delta);
 
 	@Override
+	ConvexShape move(double dx, double dy, double dz);
+
+	@Override
 	ConvexShape rotate(Matrix3 m3);
 
 	@Override
@@ -97,6 +100,9 @@ public non-sealed interface ConvexShape extends Shape {
 
 	@Override
 	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
+		if (!context.canCollide(this, shapeB)) {
+			return null;
+		}
 		if (shapeB.isConvex()) {
 			return ConvexCollision.collide(this, (ConvexShape) shapeB, velocityBA, context);
 		} else {
@@ -115,6 +121,7 @@ public non-sealed interface ConvexShape extends Shape {
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
+		if (!context.canCollide(this, null)) return null;
 		Vec3 dir = to.sub(from);
 		double pMin = 0;
 		double pMax = 1;

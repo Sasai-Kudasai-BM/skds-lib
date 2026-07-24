@@ -6,9 +6,12 @@ import java.lang.invoke.MethodHandle;
 
 import static net.skds.lib2.natives.LinkerUtils.*;
 
+@SuppressWarnings("DataFlowIssue")
 public class Kernel32 extends AbstractLinkedLibrary {
-
-	private static Kernel32 instance;
+	
+	private static final class Holder {
+		private static final Kernel32 INSTANCE = new Kernel32();
+	}
 
 	private final MethodHandle getModuleHandle = createHandle(lib, "GetModuleHandleW", PTR, PTR);
 	private final MethodHandle getLastError = createHandle(lib, "GetLastError", INT);
@@ -34,20 +37,6 @@ public class Kernel32 extends AbstractLinkedLibrary {
 	}
 
 	public static Kernel32 getInstance() {
-		Kernel32 inst = instance;
-		if (inst == null) {
-			synchronized (Kernel32.class) {
-				inst = instance;
-				if (inst == null) {
-					try {
-						inst = new Kernel32();
-						instance = inst;
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
-				}
-			}
-		}
-		return inst;
+		return Holder.INSTANCE;
 	}
 }

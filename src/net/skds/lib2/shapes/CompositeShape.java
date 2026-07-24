@@ -23,6 +23,9 @@ public non-sealed interface CompositeShape extends Shape {
 	CompositeShape move(Vec3 delta);
 
 	@Override
+	CompositeShape move(double dx, double dy, double dz);
+
+	@Override
 	CompositeShape moveRotScale(Vec3 pos, Matrix3 m3, double scale);
 
 	@Override
@@ -46,6 +49,7 @@ public non-sealed interface CompositeShape extends Shape {
 
 	@Override
 	default Collision raytrace(Vec3 from, Vec3 to, CollisionContext context) {
+		if (!context.canCollide(this, null)) return null;
 		if (!getBoundingBox().intersectsRay(from, to)) return null;
 		ConvexShape[] shapes = simplify(AABB.fromToNormalized(from, to));
 		if (shapes.length == 0) return null;
@@ -54,7 +58,7 @@ public non-sealed interface CompositeShape extends Shape {
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape subShape = shapes[i];
 			Collision c = subShape.raytrace(from, to, context);
-			if (c != null && context.compare(c, nearest, velocity) < 0) {
+			if (context.filterCollision(c, velocity) && context.compare(c, nearest, velocity) < 0) {
 				nearest = c;
 			}
 		}
@@ -82,7 +86,7 @@ public non-sealed interface CompositeShape extends Shape {
 		for (int i = 0; i < shapes.length; i++) {
 			final ConvexShape subShape = shapes[i];
 			Collision c = subShape.collide(convex, velocityBA, context);
-			if (c != null && context.compare(c, nearest, velocityBA) < 0) {
+			if (context.filterCollision(c, velocityBA) && context.compare(c, nearest, velocityBA) < 0) {
 				nearest = c;
 			}
 		}
@@ -118,7 +122,7 @@ public non-sealed interface CompositeShape extends Shape {
 				final ConvexShape subShapeB = shapesB[i];
 				if (subShapeAAABB.intersects(subShapeB.getBoundingBox())) {
 					final Collision c = subShapeA.collide(subShapeB, velocityBA, context);
-					if (c != null && context.compare(c, nearest, velocityBA) < 0) {
+					if (context.filterCollision(c, velocityBA) && context.compare(c, nearest, velocityBA) < 0) {
 						nearest = c;
 					}
 				}
@@ -152,6 +156,9 @@ public non-sealed interface CompositeShape extends Shape {
 
 	@Override
 	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
+		if (!context.canCollide(this, shapeB)) {
+			return null;
+		}
 		if (shapeB.isConvex()) {
 			return collideConvex(this, (ConvexShape) shapeB, velocityBA, context);
 		} else {

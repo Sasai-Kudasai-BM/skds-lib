@@ -90,7 +90,7 @@ public class AABBTree<T> {
 			if (l != null && l.bounding.intersectsRay(start, end)) {
 				if (l.isLeaf()) {
 					Node chosen = l;
-					if (context.canCollide(chosen.bounding)) {
+					if (context.canCollide(chosen.bounding, null)) {
 						Collision collision = chosen.bounding.raytrace(start, end, context);
 						if (collision != null) {
 							if (nearest == null || collision.compareTo(nearest) < 0) {
@@ -106,7 +106,7 @@ public class AABBTree<T> {
 			if (r != null && r.bounding.intersectsRay(start, end)) {
 				if (r.isLeaf()) {
 					Node chosen = r;
-					if (context.canCollide(chosen.bounding)) {
+					if (context.canCollide(chosen.bounding, null)) {
 						Collision collision = chosen.bounding.raytrace(start, end, context);
 						if (collision != null) {
 							if (nearest == null || collision.compareTo(nearest) < 0) {

@@ -1295,6 +1295,9 @@ public class BuiltinCodecFactory implements CodecFactory {
 				case STRING -> {
 					return parseEnum(reader.readString(), eClass);
 				}
+				case BOOLEAN -> {
+					return parseEnum(String.valueOf(reader.readBoolean()), eClass);
+				}
 				default -> {
 					if (type.isNumber()) {
 						int n = reader.readInt();

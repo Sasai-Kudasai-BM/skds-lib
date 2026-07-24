@@ -132,8 +132,10 @@ public class SosisonUtils {
 
 	public static <T> T readJson(Path file, Class<T> clazz) {
 		try {
-			String text = Files.readString(file);
-			return parseJson0(text, clazz);
+			if (Files.exists(file)) {
+				String text = Files.readString(file);
+				return parseJson0(text, clazz);
+			}
 		} catch (Exception e) {
 			new ParseException("Exception while reading " + file, e).printStackTrace(System.err);
 		}
@@ -161,8 +163,10 @@ public class SosisonUtils {
 
 	public static <T> T readJson(Path file, Type type) {
 		try {
-			String text = Files.readString(file);
-			return parseJson0(text, type);
+			if (Files.exists(file)) {
+				String text = Files.readString(file);
+				return parseJson0(text, type);
+			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}

@@ -88,7 +88,7 @@ public class Console {
 				try {
 					processLine(scanner.nextLine());
 				} catch (Exception e) {
-					e.printStackTrace();
+					e.printStackTrace(System.err);
 				}
 			}
 		}, "Console");
