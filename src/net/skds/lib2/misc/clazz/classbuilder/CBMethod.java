@@ -46,11 +46,10 @@ public sealed class CBMethod extends CBElement permits CBConstructor {
 		if (body != null) {
 			sb.append(" {\n\t\t");
 			TextClassBuilder.writeTabbed(body.write(), sb);
-			sb.append("}\n\t");
+			sb.append("}");
 		} else {
 			sb.append(";");
 		}
-		sb.append("\n\t");
 	}
 
 	@Override

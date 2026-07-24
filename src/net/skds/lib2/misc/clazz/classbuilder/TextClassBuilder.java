@@ -120,14 +120,21 @@ public class TextClassBuilder {
 			sb.append(" ");
 		}
 
-		sb.append("{\n\t");
+		sb.append("{\n");
 
 		Class<?> lastElementType = null;
+		int lastSize = 0;
 
 		for (Object e : elements) {
-			if (lastElementType != e.getClass()) {
-				lastElementType = e.getClass();
+			if (lastSize != sb.length()) {
+				if (lastElementType != e.getClass()) {
+					if (lastElementType != null) {
+						sb.append("\n");
+					}
+					lastElementType = e.getClass();
+				}
 				sb.append("\n\t");
+				lastSize = sb.length();
 			}
 			switch (e) {
 				case String s -> writeComment(s, sb);
@@ -135,28 +142,28 @@ public class TextClassBuilder {
 				case CBJavadoc jd -> writeJavadoc(jd, sb);
 				case TextClassBuilder tcb -> {
 					if (tcb == this) throw new IllegalStateException("Recursion");
-					writeTabbed(tcb.bodyToString(), sb);
+					String body = tcb.bodyToString();
+					if (!body.isBlank()) writeTabbed(body, sb);
 				}
 				default -> throw new IllegalArgumentException("Invalid class element " + e);
 			}
 			//sb.append("\n\t");
 		}
 
-
-		sb.setLength(sb.length() - 1);
-		return sb.append("}").toString();
+		//sb.setLength(sb.length() - 1);
+		return sb.append("\n}").toString();
 	}
 
 	static void writeComment(Object comment, StringBuilder sb) {
 		if (comment instanceof CBJavadoc javadoc) {
 			writeJavadoc(javadoc, sb);
 		} else if (comment instanceof String s) {
-			writeComment(s, sb);
+			if (!s.isBlank()) writeComment(s, sb);
 		} else throw new IllegalArgumentException("Illegal comment " + comment);
 	}
 
 	static void writeComment(String comment, StringBuilder sb) {
-		if (comment.isEmpty()) return;
+		if (comment.isBlank()) return;
 		String[] sa = comment.split("\n");
 		if (sa.length == 1) {
 			sb.append("// ").append(sa[0]);
@@ -167,18 +174,28 @@ public class TextClassBuilder {
 			}
 			sb.append("*/");
 		}
-		sb.append("\n\t");
+		//sb.append("\n\t");
 	}
 
 	static void writeTabbed(String value, StringBuilder sb) {
 		String[] sa = value.split("\n");
 		for (int i = 0; i < sa.length; i++) {
-			sb.append(sa[i]).append("\n\t");
+			sb.append(sa[i]);
+			if (sa.length > 1) {
+				sb.append("\n\t");
+			}
 		}
 	}
 
 	static void writeJavadoc(CBJavadoc javadoc, StringBuilder sb) {
-		writeJavadoc(javadoc, sb, 1);
+		boolean empty = true;
+		for (String str : javadoc.lines()) {
+			if (str != null && !str.isBlank()) {
+				empty = false;
+				break;
+			}
+		}
+		if (!empty) writeJavadoc(javadoc, sb, 1);
 	}
 
 	static void writeJavadoc(CBJavadoc javadoc, StringBuilder sb, int tabs) {
