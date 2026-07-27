@@ -222,6 +222,9 @@ public class SosisonUtils {
 		Supplier<T> constructor = ReflectUtils.getConstructor(tClass);
 		if (constructor != null) {
 			T obj = constructor.get();
+			if (obj instanceof PostDeserializeCall pdc) {
+				pdc.postDeserialized();
+			}
 			saveJson(file, obj);
 			return obj;
 		} else {
