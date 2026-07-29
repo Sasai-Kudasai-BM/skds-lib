@@ -30,14 +30,12 @@ public record CodeBody(List<String> body, List<CBType> imports) {
 	public String write() {
 		StringBuilder sb = new StringBuilder();
 		if (multiline()) {
-			if (!body.isEmpty()) {
-				for (String l : body) {
-					sb.append(l).append("\n");
-				}
-				sb.setLength(sb.length() - 1);
+			for (String l : body) {
+				sb.append(l).append("\n");
 			}
+			sb.setLength(sb.length() - 1);
 		} else if (!body.isEmpty()) {
-			sb.append(body.get(0));
+			sb.append(body.getFirst());
 		}
 		return sb.toString();
 	}

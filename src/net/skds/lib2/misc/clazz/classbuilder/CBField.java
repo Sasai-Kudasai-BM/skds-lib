@@ -23,7 +23,7 @@ public final class CBField extends CBElement {
 
 		if (initializer != null) {
 			sb.append(" = ");
-			TextClassBuilder.writeTabbed(initializer.write(), sb);
+			TextClassBuilder.writeTabbed1(initializer.write(), sb);
 		} else {
 			sb.append(";");
 		}

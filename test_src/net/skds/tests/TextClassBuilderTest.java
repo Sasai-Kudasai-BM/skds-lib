@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class TextClassBuilderTest {
 
-	public static void main(String[] args) {
+	static void main() {
 		SKDSLogger.replaceOuts();
 
 
@@ -30,7 +30,7 @@ public class TextClassBuilderTest {
 						CBType.of(void.class),
 						List.of(new CBAnnotation(Override.class)),
 						new CBJavadoc("method", "doc"),
-						List.of(new CBMethod.Arg(int.class, "i")),
+						List.of(new CBArgument(int.class, "i")),
 						new CodeBody(List.of("System.out.println(i);"), null)
 				))
 				.addElement(new CBMethod(
@@ -40,8 +40,8 @@ public class TextClassBuilderTest {
 						List.of(new CBAnnotation(Override.class)),
 						new CBJavadoc("method", "doc"),
 						List.of(
-								new CBMethod.Arg(int.class, "i"),
-								new CBMethod.Arg(int.class, "j", List.of(
+								new CBArgument(int.class, "i"),
+								new CBArgument(int.class, "j", List.of(
 										new CBAnnotation(
 												CBType.of(Override.class),
 												null,
