@@ -30,16 +30,16 @@ import java.util.function.Consumer;
 
 public class ForeignWrapper {
 
-	private static final String CLASS_PREFIX = ForeignWrapper.class.getName() + "$wrapped_";
+	private static final String CLASS_SUFFIX = "_wrapped";
 	private static final WrapperClassLoader CLASS_LOADER = new WrapperClassLoader();
 	private static final ConcurrentHashMap<Class<?>, Object> INSTANCES = new ConcurrentHashMap<>(8, .5f);
 
 	public static <T> T wrap(Class<T> c) {
-		return wrap(c, null);
+		return wrap(c, null, Arena.ofAuto());
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T wrap(Class<T> c, Path libraryPath) {
+	public static <T> T wrap(Class<T> c, Path libraryPath, Arena arena) {
 		checkInterface(c);
 		Object inst = INSTANCES.get(c);
 		if (inst != null) {
@@ -55,7 +55,6 @@ public class ForeignWrapper {
 			}
 		}
 		var constructor = Objects.requireNonNull(ReflectUtils.getMultiConstructor(wrapper, SymbolLookup.class), "Invalid wrapper");
-		Arena arena = Arena.ofAuto();
 		SymbolLookup lookup = null;
 		if (libraryPath != null) {
 			lookup = SymbolLookup.libraryLookup(libraryPath, arena);
@@ -82,7 +81,7 @@ public class ForeignWrapper {
 
 	@SuppressWarnings("unchecked")
 	private static <T, W extends T> Class<W> createWrapper(Class<T> c) {
-		String className = CLASS_PREFIX + c.getName().replace('.', '_').replace("$", "_s_");
+		String className = c.getName() + CLASS_SUFFIX;
 		ClassDesc classDesc = ClassDesc.of(className);
 		Builder builder = new Builder(c, classDesc);
 		byte[] classBytes = ClassFile.of().build(classDesc, builder);
