@@ -11,7 +11,9 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
 @DefaultCodec(Vec2.Codec.class)
@@ -1146,6 +1148,20 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 			}
 
 			return new Vec2D(x, y);
+		}
+	}
+
+	class SkipZeroPredicate implements Predicate<Vec2> {
+		@Override
+		public boolean test(Vec2 vec3) {
+			return Objects.equals(vec3, ZERO);
+		}
+	}
+
+	class SkipSinglePredicate implements Predicate<Vec2> {
+		@Override
+		public boolean test(Vec2 vec3) {
+			return Objects.equals(vec3, SINGLE);
 		}
 	}
 }

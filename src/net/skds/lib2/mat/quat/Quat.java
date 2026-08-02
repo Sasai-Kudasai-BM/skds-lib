@@ -14,6 +14,8 @@ import net.skds.lib2.mat.vec3.Vec3F;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
@@ -663,6 +665,13 @@ public sealed interface Quat permits QuatD, QuatF {
 						throw new ParseException("Unsupported token in quaternion \"" + reader.nextEntryType() + "\"");
 			}
 			return new QuatD(x, y, z, w);
+		}
+	}
+
+	class SkipOnePredicate implements Predicate<Quat> {
+		@Override
+		public boolean test(Quat quat) {
+			return Objects.equals(quat, ONE);
 		}
 	}
 }

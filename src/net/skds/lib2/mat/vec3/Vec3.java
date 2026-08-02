@@ -15,7 +15,9 @@ import net.skds.lib2.mat.vec4.Vec4I;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
@@ -1762,4 +1764,17 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		}
 	}
 
+	class SkipZeroPredicate implements Predicate<Vec3> {
+		@Override
+		public boolean test(Vec3 vec3) {
+			return Objects.equals(vec3, ZERO);
+		}
+	}
+
+	class SkipSinglePredicate implements Predicate<Vec3> {
+		@Override
+		public boolean test(Vec3 vec3) {
+			return Objects.equals(vec3, SINGLE);
+		}
+	}
 }

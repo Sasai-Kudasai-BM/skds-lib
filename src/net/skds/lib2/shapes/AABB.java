@@ -5,6 +5,7 @@ import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.annotation.SkipSerialization;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
@@ -27,6 +28,7 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 
 	public final double minX, minY, minZ, maxX, maxY, maxZ;
 
+	@SkipSerialization
 	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 
@@ -744,7 +746,7 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 	}
 
 	@Override
-	public final ShapeType getConfigType() {
+	public ShapeType getConfigType() {
 		return ShapeType.AABB;
 	}
 }
