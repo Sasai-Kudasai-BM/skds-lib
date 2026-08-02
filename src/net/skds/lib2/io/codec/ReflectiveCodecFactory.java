@@ -2,10 +2,7 @@ package net.skds.lib2.io.codec;
 
 import lombok.AllArgsConstructor;
 import lombok.CustomLog;
-import net.skds.lib2.io.codec.annotation.CodecRoleConstrains;
-import net.skds.lib2.io.codec.annotation.SerializationAlias;
-import net.skds.lib2.io.codec.annotation.SkipSerialization;
-import net.skds.lib2.io.codec.annotation.TransientComponent;
+import net.skds.lib2.io.codec.annotation.*;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.annotation.JsonComment;
 import net.skds.lib2.io.sosison.SosisonEntryType;
@@ -623,6 +620,14 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			}
 			Class<?> ct = f.getType();
 			if (ct.isPrimitive()) {
+				DefaultCodec defaultCodec = f.getAnnotation(DefaultCodec.class);
+				if (defaultCodec != null) {
+					var codec = BuiltinCodecFactory.getDefaultCodec(defaultCodec, f, f.getGenericType(), registry);
+					if (codec != null) {
+						fields.add(new ObjFieldCodec<>(f, registry));
+						continue;
+					}
+				}
 				if (ct == int.class) {
 					fields.add(new IntFieldCodec(f));
 				} else if (ct == float.class) {

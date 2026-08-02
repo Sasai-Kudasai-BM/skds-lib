@@ -220,7 +220,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 		};
 	}
 
-	@SuppressWarnings("unchecked")
 	public static UniversalCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement,
 														 Type type,
 														 CodecRegistry registry
@@ -234,6 +233,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 				return getDefaultEnumTypedCodec(annotatedElement, type, registry);
 			}
 		}
+		return getDefaultCodec(defaultCodec, annotatedElement, type, registry);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static UniversalCodec<Object> getDefaultCodec(DefaultCodec defaultCodec, AnnotatedElement annotatedElement,
+														 Type type,
+														 CodecRegistry registry
+	) {
 		Class<?> factoryClass = defaultCodec.value();
 		if (CodecFactory.class.isAssignableFrom(factoryClass)) {
 			Supplier<CodecFactory> constructor = (Supplier<CodecFactory>) ReflectUtils.getConstructor(factoryClass);
@@ -1485,7 +1492,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class BooleanCodec extends AbstractCodec<Boolean> {
+	public static class BooleanCodec extends AbstractCodec<Boolean> {
 
 		public BooleanCodec(Type type, CodecRegistry registry) {
 			super(registry);
