@@ -434,7 +434,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 			Supplier<Map<Object, Object>> tmpC;
 			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
 				tmpC = HashMap::new;
-			} else if (EnumMap.class.isAssignableFrom(tClass)) {
+			} else if (EnumMap.class == tClass) {
 				tmpC = () -> {
 					Map map = new EnumMap<>((Class) parameters[0]);
 					return (Map<Object, Object>) map;
