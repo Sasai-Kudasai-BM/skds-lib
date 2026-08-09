@@ -49,8 +49,12 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		return super.add(new JsonBoolean(value));
 	}
 
-	public boolean add(String value) {
-		return super.add(new JsonString(value));
+	public boolean add(CharSequence value) {
+		return super.add(new JsonString(value.toString()));
+	}
+
+	public boolean add(Enum<?> value) {
+		return super.add(new JsonString(value.name()));
 	}
 
 	public boolean addNull() {

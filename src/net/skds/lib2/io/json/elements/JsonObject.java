@@ -146,6 +146,10 @@ public final class JsonObject extends HashMap<String, JsonElement> implements Js
 		return super.put(key, new JsonString(value.toString()));
 	}
 
+	public JsonElement put(String key, Enum<?> value) {
+		return super.put(key, new JsonString(value.name()));
+	}
+
 	public JsonElement putNull(String key) {
 		return super.put(key, JsonElement.NULL);
 	}
