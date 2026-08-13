@@ -422,7 +422,6 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 
 	@Override
 	public AABB scale(double scale) {
-		Vec3 center = getCenter();
 		AABB box = fromCenter(getCenter(), sizeX() * scale, sizeY() * scale, sizeZ() * scale);
 		box.setAttachment(attachment);
 		return box;
