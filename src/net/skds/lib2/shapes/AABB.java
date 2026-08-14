@@ -428,6 +428,13 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 		return box;
 	}
 
+	public AABB scale(double scaleX, double scaleY, double scaleZ) {
+		Vec3 center = getCenter();
+		AABB box = fromCenter(getCenter(), sizeX() * scaleX, sizeY() * scaleY, sizeZ() * scaleZ);
+		box.setAttachment(attachment);
+		return box;
+	}
+
 	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
 		OBB obb = new OBB(getCenter().add(pos), this.dimensions().scale(scale), m3);
