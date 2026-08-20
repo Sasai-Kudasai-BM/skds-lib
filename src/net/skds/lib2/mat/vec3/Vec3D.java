@@ -153,7 +153,7 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 			if (val == null) {
 				return null;
 			}
-			return "[" + val.x() + "," + val.y() + "," + val.z() + "]";
+			return val.getAsArrayString();
 		}
 
 		@Override

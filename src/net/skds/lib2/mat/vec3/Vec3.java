@@ -1658,6 +1658,10 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return new Vec4D(this.x(), this.y(), this.z(), 1);
 	}
 
+	default String getAsArrayString() {
+		return "[" + this.x() + "," + this.y() + "," + this.z() + "]";
+	}
+
 	final class Codec extends AbstractCodec<Vec3> {
 
 		private final UniversalSerializer<Vec3I> veci = this.registry.getSerializerIndirect(Vec3I.class);
@@ -1669,11 +1673,10 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 
 		@Override
 		public String valueAsKeyString(Vec3 val) {
-			if (val instanceof Vec3I vec) {
-				return this.veci.valueAsKeyString(vec);
-			} else {
-				return this.vecd.valueAsKeyString(val);
+			if (val == null) {
+				return null;
 			}
+			return val.getAsArrayString();
 		}
 
 		@Override

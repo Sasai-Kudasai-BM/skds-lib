@@ -228,6 +228,11 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 	}
 
 	@Override
+	public String getAsArrayString() {
+		return "[" + this.xi() + "," + this.yi() + "," + this.zi() + "]";
+	}
+
+	@Override
 	public int compareTo(Vec3 o) {
 		return Vec3.compare(this, o);
 	}
@@ -243,7 +248,7 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 			if (val == null) {
 				return null;
 			}
-			return "[" + val.xi() + "," + val.yi() + "," + val.zi() + "]";
+			return val.getAsArrayString();
 		}
 
 		@Override
