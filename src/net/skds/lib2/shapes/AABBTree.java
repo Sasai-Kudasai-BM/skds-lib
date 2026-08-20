@@ -3,8 +3,10 @@ package net.skds.lib2.shapes;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.utils.Removable;
+import net.skds.lib2.utils.linkiges.Pair;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -89,7 +91,7 @@ public class AABBTree<T> {
 			Node r = n.right;
 			if (l != null && l.bounding.intersectsRay(start, end)) {
 				if (l.isLeaf()) {
-					Node chosen = l;
+					@SuppressWarnings("UnnecessaryLocalVariable") Node chosen = l;
 					if (context.canCollide(chosen.bounding, null)) {
 						Collision collision = chosen.bounding.raytrace(start, end, context);
 						if (collision != null) {
@@ -105,7 +107,7 @@ public class AABBTree<T> {
 			}
 			if (r != null && r.bounding.intersectsRay(start, end)) {
 				if (r.isLeaf()) {
-					Node chosen = r;
+					@SuppressWarnings("UnnecessaryLocalVariable") Node chosen = r;
 					if (context.canCollide(chosen.bounding, null)) {
 						Collision collision = chosen.bounding.raytrace(start, end, context);
 						if (collision != null) {
@@ -122,7 +124,56 @@ public class AABBTree<T> {
 		} while (!stack.isEmpty());
 		//System.out.println("Iterations " + c);
 		if (nearestNode == null) return null;
-		return new NodeRayCollision<>(nearest.distance(), nearest.depth(), nearest.point(), nearest.normal(), nearest.direction(), nearestNode);
+		return new NodeRayCollision<>(nearest, nearestNode);
+	}
+
+	public List<NodeRayCollision<T>> rayTraceList(Vec3 start, Vec3 end, CollisionContext context) {
+		Node root = this.root;
+		if (root == null || !root.bounding.intersectsRay(start, end)) {
+			return null;
+		}
+		List<Pair<Collision, TreeNode<T>>> nodes = new ArrayList<>();
+		ArrayList<Node> stack = new ArrayList<>();
+		stack.add(root);
+		//int c = 0;
+		do {
+			//c++;
+			Node n = stack.removeLast();
+			Node l = n.left;
+			Node r = n.right;
+			if (l != null && l.bounding.intersectsRay(start, end)) {
+				if (l.isLeaf()) {
+					@SuppressWarnings("UnnecessaryLocalVariable") Node chosen = l;
+					if (context.canCollide(chosen.bounding, null)) {
+						Collision collision = chosen.bounding.raytrace(start, end, context);
+						if (collision != null) {
+							nodes.add(new Pair<>(collision, chosen));
+						}
+					}
+				} else {
+					stack.add(l);
+				}
+			}
+			if (r != null && r.bounding.intersectsRay(start, end)) {
+				if (r.isLeaf()) {
+					@SuppressWarnings("UnnecessaryLocalVariable") Node chosen = r;
+					if (context.canCollide(chosen.bounding, null)) {
+						Collision collision = chosen.bounding.raytrace(start, end, context);
+						if (collision != null) {
+							nodes.add(new Pair<>(collision, chosen));
+						}
+					}
+				} else {
+					stack.add(r);
+				}
+			}
+		} while (!stack.isEmpty());
+		//System.out.println("Iterations " + c);
+		if (nodes.isEmpty()) {
+			return null;
+		}
+		nodes.sort(Comparator.comparing(Pair::a));
+		return nodes.stream().map(e -> new NodeRayCollision<>(e.a(), e.b())).toList();
 	}
 
 	private void normalize(Node n) {
@@ -427,6 +478,11 @@ public class AABBTree<T> {
 									  Direction direction,
 									  AABBTree.TreeNode<T> node
 	) {
+
+		public NodeRayCollision(Collision collision, TreeNode<T> node) {
+			this(collision.distance(), collision.depth(), collision.point(), collision.normal(), collision.direction(), node);
+		}
+
 		public Collision asStandardCollision() {
 			return new Collision(distance, depth, normal, point, direction, node.getBounding(), null);
 		}
