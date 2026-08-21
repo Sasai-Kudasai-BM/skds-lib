@@ -1,5 +1,8 @@
 package net.w3e.lib.utils;
 
+import lombok.experimental.UtilityClass;
+import net.minecraft.server.packs.resources.ResourceProvider;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,76 +12,65 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import lombok.experimental.UtilityClass;
-
 @UtilityClass
 public class ResourceUtil {
 
-	private static final Path rootPath;
+	public static List<String> listAllResources(String folderPath) {
+		List<String> resultFiles = new ArrayList<>();
+		ClassLoader classLoader = ResourceUtil.class.getClassLoader();
 
-	static {
-		ClassLoader classLoader = getContextClassLoader();
-
-		URL resource = classLoader.getResource("");
-
-		Path path = null;
 		try {
-			URI uri = Objects.requireNonNull(resource).toURI();
-			if (!uri.getScheme().equals("jar")) {
-				path = Paths.get(resource.toURI());
-			}
-		} catch (Exception ignored) {}
-		rootPath = path;
-	}
+			Enumeration<URL> urls = classLoader.getResources(folderPath);
 
-	private static void walk(Path path, Collection<Path> collection) {
-		try (Stream<Path> walk = Files.walk(path, Integer.MAX_VALUE)) {
-			for (Iterator<Path> it = walk.iterator(); it.hasNext(); ) {
-				Path p = it.next();
-				if (!Files.isDirectory(p)) {
-					if (rootPath != null) {
-						try {
-							p = rootPath.relativize(p);
-						} catch (Exception e) {}
+			while (urls.hasMoreElements()) {
+				URL url = urls.nextElement();
+				URI uri = url.toURI();
+
+				if ("jar".equals(uri.getScheme())) {
+					FileSystem fileSystem;
+					boolean closeFs = false;
+					try {
+						fileSystem = FileSystems.getFileSystem(uri);
+					} catch (FileSystemNotFoundException e) {
+						fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
+						closeFs = true;
 					}
-					collection.add(p);
-				} else if (!path.equals(p)) {
-					walk(p, collection);
-				}
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
-	public static Set<Path> getResourceFiles(String root) {
-		Set<Path> list = new HashSet<>();
-		getResourceFiles(list, root);
-		return list;
-	}
-
-	public static void getResourceFiles(Collection<Path> collection, String root) {
-		try {
-			URI uri = Objects.requireNonNull(ResourceUtil.class.getClassLoader().getResource(root)).toURI();
-
-			Path myPath;
-			if (uri.getScheme().equals("jar")) {
-				try {
-					FileSystem fs = FileSystems.getFileSystem(uri);
-					myPath = fs.getPath(root);
-					walk(myPath, collection);
-				} catch (FileSystemNotFoundException e) {
-					try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-						myPath = fileSystem.getPath(root);
-						walk(myPath, collection);
+					try {
+						Path pathInJar = fileSystem.getPath(folderPath);
+						scanPath(pathInJar, folderPath, resultFiles);
+					} finally {
+						if (closeFs) {
+							fileSystem.close();
+						}
 					}
+				} else if ("file".equals(uri.getScheme())) {
+					Path pathOnDisk = Paths.get(uri);
+					scanPath(pathOnDisk, folderPath, resultFiles);
 				}
-			} else {
-				myPath = Paths.get(uri);
-				walk(myPath, collection);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			System.err.println("Error while scan resources: " + e.getMessage());
+		}
+
+		return resultFiles;
+	}
+
+	private static void scanPath(Path rootPath, String originalFolder, List<String> resultList) throws IOException {
+		if (!Files.exists(rootPath)) return;
+
+		try (Stream<Path> walk = Files.walk(rootPath)) {
+			walk.filter(Files::isRegularFile).forEach(path -> {
+				String rawPath = path.toString();
+
+				rawPath = rawPath.replace("\\", "/");
+
+				int startIndex = rawPath.indexOf(originalFolder);
+				if (startIndex != -1) {
+					String cleanResourcePath = rawPath.substring(startIndex);
+					resultList.add(cleanResourcePath);
+				}
+			});
 		}
 	}
 
@@ -87,13 +79,7 @@ public class ResourceUtil {
 	}
 
 	public static InputStream getResourceAsStream(String resource) {
-		final InputStream in = getContextClassLoader().getResourceAsStream(resource);
-
-		return in == null ? ResourceUtil.class.getResourceAsStream(resource) : in;
-	}
-
-	private static ClassLoader getContextClassLoader() {
-		return ClassLoader.getSystemClassLoader();
+		return ResourceProvider.class.getClassLoader().getResourceAsStream(resource);
 	}
 
 	public static void printClassPath() {
