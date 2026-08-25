@@ -159,10 +159,16 @@ public class CodecRegistry {
 	}
 
 	public <T> UniversalDeserializer<T> getDeserializerIndirect(Type type) {
+		/*if (TypeVariable.class.isAssignableFrom(type.getClass())) {
+			throw new IllegalStateException("");
+		}*/
 		return new DeserializerIndirect<>(type);
 	}
 
 	public <T> UniversalSerializer<T> getSerializerIndirect(Type type) {
+		/*if (TypeVariable.class.isAssignableFrom(type.getClass())) {
+			throw new IllegalStateException("");
+		}*/
 		return new SerializerIndirect<>(type);
 	}
 
