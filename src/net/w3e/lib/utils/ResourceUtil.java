@@ -1,7 +1,6 @@
 package net.w3e.lib.utils;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.server.packs.resources.ResourceProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +78,7 @@ public class ResourceUtil {
 	}
 
 	public static InputStream getResourceAsStream(String resource) {
-		return ResourceProvider.class.getClassLoader().getResourceAsStream(resource);
+		return ResourceUtil.class.getClassLoader().getResourceAsStream(resource);
 	}
 
 	public static void printClassPath() {
