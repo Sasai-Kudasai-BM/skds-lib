@@ -7,6 +7,7 @@ import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
 import net.skds.lib2.io.codec.ToStringSerializer;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
+import net.skds.lib2.io.codec.annotation.SkipSerialization;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
@@ -29,6 +30,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 	private final Shape[] shapes;
 	private final transient AABB bounding;
 	private final Vec3 center;
+	@SkipSerialization
 	@DefaultCodec(ToStringSerializer.class)
 	private Object attachment;
 

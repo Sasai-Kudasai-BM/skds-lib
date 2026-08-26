@@ -1,15 +1,11 @@
 package net.skds.lib2.shapes;
 
-import net.skds.lib2.io.codec.CodecRegistry;
-import net.skds.lib2.io.codec.annotation.DefaultCodec;
-import net.skds.lib2.io.codec.typed.TypedEnumAdapter;
+import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
 import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 
-import java.lang.reflect.Type;
-
-@DefaultCodec(Shape.JCodec.class)
+@DefaultEnumTypedCodec(ShapeType.class)
 public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Shape move(Vec3 delta);
@@ -63,9 +59,4 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 		return -1;
 	}
 
-	final class JCodec extends TypedEnumAdapter<Shape, ShapeType> {
-		public JCodec(Type type, CodecRegistry registry) {
-			super(type, ShapeType.class, registry);
-		}
-	}
 }
