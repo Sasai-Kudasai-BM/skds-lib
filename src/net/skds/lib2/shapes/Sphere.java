@@ -73,11 +73,6 @@ public final class Sphere implements ConvexShape {
 	}
 
 	@Override
-	public Sphere rotate(Quat q) {
-		return this;
-	}
-
-	@Override
 	public Sphere move(Vec3 delta) {
 		return new Sphere(center.add(delta), radius, attachment);
 	}
@@ -93,8 +88,23 @@ public final class Sphere implements ConvexShape {
 	}
 
 	@Override
+	public Sphere rotate(Quat q) {
+		return this;
+	}
+
+	@Override
 	public Sphere scale(double scale) {
 		return new Sphere(center, radius * scale, attachment);
+	}
+
+	@Override
+	public Ellipsoid scale(Vec3 scale) {
+		return new Ellipsoid(this.center, this.radius * scale.x(), this.radius * scale.y(), this.radius * scale.z(), Quat.ONE, this.attachment);
+	}
+
+	@Override
+	public Ellipsoid scale(double scaleX, double scaleY, double scaleZ) {
+		return new Ellipsoid(this.center, this.radius * scaleX, this.radius * scaleY, this.radius * scaleZ, Quat.ONE, this.attachment);
 	}
 
 	@Override

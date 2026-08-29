@@ -14,6 +14,12 @@ public non-sealed interface CompositeShape extends Shape {
 	CompositeShape scale(double scale);
 
 	@Override
+	CompositeShape scale(Vec3 scale);
+
+	@Override
+	CompositeShape scale(double scaleX, double scaleY, double scaleZ);
+
+	@Override
 	CompositeShape rotate(Matrix3 m3);
 
 	@Override

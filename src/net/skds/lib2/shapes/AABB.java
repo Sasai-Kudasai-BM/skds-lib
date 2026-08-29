@@ -158,6 +158,11 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 				center.y() + radius, center.z() + radius);
 	}
 
+	public static AABB fromRadius(Vec3 center, double radiusX, double radiusY, double radiusZ) {
+		return new AABB(center.x() - radiusX, center.y() - radiusY, center.z() - radiusZ, center.x() + radiusX,
+				center.y() + radiusY, center.z() + radiusZ);
+	}
+
 	public static AABB fromSize(Vec3 size) {
 		double dx = size.x() / 2;
 		double dy = size.y() / 2;
@@ -427,6 +432,15 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 		return box;
 	}
 
+	@Override
+	public AABB scale(Vec3 scale) {
+		Vec3 center = getCenter();
+		AABB box = fromCenter(getCenter(), sizeX() * scale.x(), sizeY() * scale.y(), sizeZ() * scale.z());
+		box.setAttachment(attachment);
+		return box;
+	}
+
+	@Override
 	public AABB scale(double scaleX, double scaleY, double scaleZ) {
 		Vec3 center = getCenter();
 		AABB box = fromCenter(getCenter(), sizeX() * scaleX, sizeY() * scaleY, sizeZ() * scaleZ);

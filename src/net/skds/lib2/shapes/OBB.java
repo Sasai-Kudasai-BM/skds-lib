@@ -71,6 +71,16 @@ public class OBB implements ConvexShape, TypedConfig<ShapeType> {
 	}
 
 	@Override
+	public OBB scale(Vec3 scale) {
+		return new OBB(center, this.dimensions.scale(scale), normals, attachment);
+	}
+
+	@Override
+	public OBB scale(double scaleX, double scaleY, double scaleZ) {
+		return new OBB(center, this.dimensions.scale(scaleX, scaleY, scaleZ), normals, attachment);
+	}
+
+	@Override
 	public OBB moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
 		return new OBB(center.add(pos), this.dimensions.scale(scale), m3.multiply(normals), attachment);
 	}

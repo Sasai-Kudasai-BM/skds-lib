@@ -88,15 +88,18 @@ public non-sealed interface ConvexShape extends Shape {
 	}
 
 	@Override
+	ConvexShape scale(double scale);
+
+	@Override
+	ConvexShape scale(Vec3 scale);
+
+	@Override
 	ConvexShape moveRotScale(Vec3 pos, Matrix3 m3, double scale);
 
 	@Override
 	default ConvexShape moveRotScale(Vec3 pos, Quat q, double scale) {
 		return moveRotScale(pos, Matrix3.fromQuat(q), scale);
 	}
-
-	@Override
-	ConvexShape scale(double scale);
 
 	@Override
 	default Collision collide(Shape shapeB, Vec3 velocityBA, CollisionContext context) {
@@ -249,6 +252,7 @@ public non-sealed interface ConvexShape extends Shape {
 
 	double surfaceArea();
 
+	// TODO ellipsoid
 	static boolean equals(ConvexShape shape1, ConvexShape shape2) {
 		if (shape1 == shape2) {
 			return true;

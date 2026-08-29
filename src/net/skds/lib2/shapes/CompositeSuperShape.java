@@ -154,6 +154,30 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 	}
 
 	@Override
+	public CompositeSuperShape scale(Vec3 scale) {
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			Shape shape = this.shapes[i];
+			Vec3 od = shape.getCenter().sub(center);
+			Vec3 nd = od.scale(scale);
+			shapes[i] = shape.move(nd.sub(od)).scale(scale);
+		}
+		return new CompositeSuperShape(shapes, center, attachment);
+	}
+
+	@Override
+	public CompositeSuperShape scale(double scaleX, double scaleY, double scaleZ) {
+		final Shape[] shapes = new Shape[this.shapes.length];
+		for (int i = 0; i < shapes.length; i++) {
+			Shape shape = this.shapes[i];
+			Vec3 od = shape.getCenter().sub(center);
+			Vec3 nd = od.scale(scaleX, scaleY, scaleZ);
+			shapes[i] = shape.move(nd.sub(od)).scale(scaleX, scaleY, scaleZ);
+		}
+		return new CompositeSuperShape(shapes, center, attachment);
+	}
+
+	@Override
 	public CompositeSuperShape moveRotScale(Vec3 pos, Matrix3 m3, double scale) {
 		final Shape[] shapes = new Shape[this.shapes.length];
 		for (int i = 0; i < shapes.length; i++) {

@@ -20,6 +20,10 @@ public sealed interface Shape permits ConvexShape, CompositeShape {
 
 	Shape scale(double scale);
 
+	Shape scale(Vec3 scale);
+
+	Shape scale(double scaleX, double scaleY, double scaleZ);
+
 	Shape moveRotScale(Vec3 pos, Matrix3 m3, double scale);
 
 	default Shape moveRotScale(Vec3 pos, Quat q, double scale) {
