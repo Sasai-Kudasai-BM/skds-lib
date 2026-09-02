@@ -5,6 +5,7 @@ import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec2.Vec2D;
 import net.skds.lib2.mat.vec3.Direction;
 import net.skds.lib2.mat.vec3.Vec3;
+import net.skds.lib2.utils.exception.TODOException;
 
 public final class Sphere implements ConvexShape {
 
@@ -99,12 +100,14 @@ public final class Sphere implements ConvexShape {
 
 	@Override
 	public Ellipsoid scale(Vec3 scale) {
-		return new Ellipsoid(this.center, this.radius * scale.x(), this.radius * scale.y(), this.radius * scale.z(), Quat.ONE, this.attachment);
+		throw new TODOException();
+		//return new Ellipsoid(this.center, this.radius * scale.x(), this.radius * scale.y(), this.radius * scale.z(), Quat.ONE, this.attachment);
 	}
 
 	@Override
 	public Ellipsoid scale(double scaleX, double scaleY, double scaleZ) {
-		return new Ellipsoid(this.center, this.radius * scaleX, this.radius * scaleY, this.radius * scaleZ, Quat.ONE, this.attachment);
+		throw new TODOException();
+		//return new Ellipsoid(this.center, this.radius * scaleX, this.radius * scaleY, this.radius * scaleZ, Quat.ONE, this.attachment);
 	}
 
 	@Override
