@@ -345,35 +345,34 @@ public class FastMath {
 		}
 	}
 
+	@Deprecated
 	public static long roundLong(double value) {
-		double shift = value > 0 ? 0.5 : -0.5;
-		return (int) (value + shift);
+		return Math.round(value);
 	}
 
-
+	@Deprecated
 	public static int round(float value) {
-		float shift = value > 0 ? 0.5f : -0.5f;
-		return (int) (value + shift);
+		return Math.round(value);
 	}
 
 	public static int floor(double value) {
 		int i = (int) value;
-		return i <= value ? i : i - 1;
+		return i - (value < i ? 1 : 0);
 	}
 
 	public static int ceil(double value) {
 		int i = (int) value;
-		return i >= value ? i : i + 1;
+		return i + (value > i ? 1 : 0);
 	}
 
 	public static int floor(float value) {
 		int i = (int) value;
-		return i <= value ? i : i - 1;
+		return i - (value < i ? 1 : 0);
 	}
 
 	public static int ceil(float value) {
 		int i = (int) value;
-		return i >= value ? i : i + 1;
+		return i + (value > i ? 1 : 0);
 	}
 
 	public static float invSqrt(float x) {
