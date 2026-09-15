@@ -1514,25 +1514,27 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	}
 
 	static boolean equals(Vec3 v1, Vec3 v2) {
-		if (v1 == v2) {
-			return true;
-		} else if ((v1 == null) != (v2 == null)) {
-			return false;
-		} else {
-			if (v1.x() != v2.x()) {
-				return false;
-			} else if (v1.y() != v2.y()) {
-				return false;
-			} else {
-				return v1.z() == v2.z();
-			}
-		}
+		if (v1 == v2) return true;
+		if (v1 == null || v2 == null) return false;
+		long diff = (Double.doubleToRawLongBits(v1.x()) ^ Double.doubleToRawLongBits(v2.x()))
+				| (Double.doubleToRawLongBits(v1.y()) ^ Double.doubleToRawLongBits(v2.y()))
+				| (Double.doubleToRawLongBits(v1.z()) ^ Double.doubleToRawLongBits(v2.z()));
+		return diff == 0L;
 	}
 
 	static int hashCode(Vec3 vec) {
-		int i = Double.hashCode(vec.x());
-		i = 31 * i + Double.hashCode(vec.y());
-		return 31 * i + Double.hashCode(vec.z());
+		long xBits = Double.doubleToRawLongBits(vec.x());
+		long yBits = Double.doubleToRawLongBits(vec.y());
+		long zBits = Double.doubleToRawLongBits(vec.z());
+		long hash = xBits * 73244475L
+				+ yBits * 90812321L
+				+ zBits * 47124311L;
+		hash ^= hash >>> 30;
+		hash *= 0xbf58476d1ce4e5b9L;
+		hash ^= hash >>> 27;
+		hash *= 0x94d049bb133111ebL;
+		hash ^= hash >>> 31;
+		return (int) hash;
 	}
 
 	default double[] asArray() {
@@ -1736,35 +1738,11 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	}
 
 	static int compare(Vec3 a, Vec3 b) {
-		if ((a instanceof Vec3I || a instanceof Direction) && (b instanceof Vec3I || b instanceof Direction)) {
-			if (a.xi() > b.xi()) {
-				return 1;
-			}
-			if (a.xi() < b.xi()) {
-				return -1;
-			}
-			if (a.yi() > b.yi()) {
-				return 1;
-			}
-			if (a.yi() < b.yi()) {
-				return -1;
-			}
-			return Integer.compare(a.zi(), b.zi());
-		} else {
-			if (a.x() > b.x()) {
-				return 1;
-			}
-			if (a.x() < b.x()) {
-				return -1;
-			}
-			if (a.y() > b.y()) {
-				return 1;
-			}
-			if (a.y() < b.y()) {
-				return -1;
-			}
-			return Double.compare(a.z(), b.z());
-		}
+		int diffX = Double.compare(a.x(), b.x());
+		if (diffX != 0) return diffX;
+		int diffY = Double.compare(a.y(), b.y());
+		if (diffY != 0) return diffY;
+		return Double.compare(a.z(), b.z());
 	}
 
 	class SkipZeroPredicate implements Predicate<Vec3> {
