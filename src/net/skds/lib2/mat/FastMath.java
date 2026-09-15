@@ -375,6 +375,20 @@ public class FastMath {
 		return i + (value > i ? 1 : 0);
 	}
 
+	public static int roundAwayFromZero(float value) {
+		int i = (int) value;
+		i += (value > i ? 1 : 0);
+		i -= (value < i ? 1 : 0);
+		return i;
+	}
+
+	public static int roundAwayFromZero(double value) {
+		int i = (int) value;
+		i += (value > i ? 1 : 0);
+		i -= (value < i ? 1 : 0);
+		return i;
+	}
+
 	public static float invSqrt(float x) {
 		float half = 0.5f * x;
 		int i = Float.floatToRawIntBits(x);
