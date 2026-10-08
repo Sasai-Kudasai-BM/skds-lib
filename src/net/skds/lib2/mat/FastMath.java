@@ -20,7 +20,17 @@ public class FastMath {
 	public static final float SQRT_2 = (float) Math.sqrt(2);
 	public static final float SQRT_3 = (float) Math.sqrt(3);
 
-	private static final float[] sinTable = new float[1024 * 4];
+	private static final int LUT_SIZE_D = 4096;
+	private static final int LUT_MASK_D = LUT_SIZE_D - 1;
+	private static final double DEG_TO_INDEX_D = LUT_SIZE_D / 360.0;
+	private static final int COS_SHIFT_D = LUT_SIZE_D / 4;
+	private static final double[] SIN_TABLE_D = new double[LUT_SIZE_D];
+
+	private static final int LUT_SIZE_F = 2048;
+	private static final int LUT_MASK_F = LUT_SIZE_F - 1;
+	private static final float DEG_TO_INDEX_F = LUT_SIZE_F / 360.0f;
+	private static final int COS_SHIFT_F = LUT_SIZE_F / 4;
+	private static final float[] SIN_TABLE_F = new float[LUT_SIZE_F];
 
 	public boolean isPowerOf2(int value) {
 		return 1 << Integer.numberOfTrailingZeros(value) == value;
@@ -85,6 +95,38 @@ public class FastMath {
 		} while (s >= 1 || s == 0);
 		double multiplier = Math.sqrt(-2 * Math.log(s) / s);
 		return v1 * multiplier;
+	}
+
+	public static int choose(int sign, int positive, int els) {
+		return sign > 0 ? positive : els;
+	}
+
+	public static float choose(int sign, float positive, float els) {
+		return sign > 0 ? positive : els;
+	}
+
+	public static double choose(int sign, double positive, double els) {
+		return sign > 0 ? positive : els;
+	}
+
+	public static long choose(int sign, long positive, long els) {
+		return sign > 0 ? positive : els;
+	}
+
+	public static int sign(double value) {
+		return value > 0 ? 1 : (value < 0 ? -1 : 0);
+	}
+
+	public static int sign(float value) {
+		return value > 0 ? 1 : (value < 0 ? -1 : 0);
+	}
+
+	public static int sign(int value) {
+		return Integer.compare(value, 0);
+	}
+
+	public static int sign(long value) {
+		return Long.compare(value, 0);
 	}
 
 	public static double modInt(double a, int b) {
@@ -281,46 +323,60 @@ public class FastMath {
 		return wrapDegrees(wrapDegrees(max - min) * t + min);
 	}
 
-	public static float sinDegr(float a) {
-		float pos = modInt(a * sinTable.length / 360f, sinTable.length);
-		if (pos < 0) {
-			pos += sinTable.length;
-		}
-		int b1 = ((int) pos) % sinTable.length;
-		int b2 = (b1 + 1) % sinTable.length;
+	public static float sinDegr(float angle) {
+		float pos = angle * DEG_TO_INDEX_F;
+		int b1 = (int) pos;
+		b1 -= (pos < b1) ? 1 : 0;
 		float part = pos - b1;
-		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
+		int idx1 = b1 & LUT_MASK_F;
+		int idx2 = (b1 + 1) & LUT_MASK_F;
+
+		return SIN_TABLE_F[idx1] * (1.0f - part) + SIN_TABLE_F[idx2] * part;
+	}
+
+	public static float cosDegr(float angle) {
+		float pos = angle * DEG_TO_INDEX_F;
+		int b1 = (int) pos;
+		b1 -= (pos < b1) ? 1 : 0;
+		float part = pos - b1;
+		int idx1 = (b1 + COS_SHIFT_F) & LUT_MASK_F;
+		int idx2 = (b1 + COS_SHIFT_F + 1) & LUT_MASK_F;
+
+		return SIN_TABLE_F[idx1] * (1.0f - part) + SIN_TABLE_F[idx2] * part;
+	}
+
+	public static double sinDegr(double angle) {
+		double pos = angle * DEG_TO_INDEX_D;
+		int b1 = (int) pos;
+		b1 -= (pos < b1) ? 1 : 0;
+		double part = pos - b1;
+		int idx1 = b1 & LUT_MASK_D;
+		int idx2 = (b1 + 1) & LUT_MASK_D;
+
+		return SIN_TABLE_D[idx1] * (1.0 - part) + SIN_TABLE_D[idx2] * part;
+	}
+
+	public static double cosDegr(double angle) {
+		double pos = angle * DEG_TO_INDEX_D;
+		int b1 = (int) pos;
+		b1 -= (pos < b1) ? 1 : 0;
+		double part = pos - b1;
+		int idx1 = (b1 + COS_SHIFT_D) & LUT_MASK_D;
+		int idx2 = (b1 + COS_SHIFT_D + 1) & LUT_MASK_D;
+
+		return SIN_TABLE_D[idx1] * (1.0 - part) + SIN_TABLE_D[idx2] * part;
 	}
 
 	public static float sinRad(float a) {
 		return sinDegr(a * RAD_2_DGR);
 	}
 
-	public static float cosDegr(final float x) {
-		return sinDegr(x + 90);
-	}
-
 	public static float cosRad(final float x) {
 		return sinRad(x + HALF_PI);
 	}
 
-	public static double sinDegr(double a) {
-		double pos = modInt(a * sinTable.length / 360f, sinTable.length);
-		if (pos < 0) {
-			pos += sinTable.length;
-		}
-		int b1 = ((int) pos) % sinTable.length;
-		int b2 = (b1 + 1) % sinTable.length;
-		double part = pos - b1;
-		return sinTable[b1] * (1 - part) + sinTable[b2] * part;
-	}
-
 	public static double sinRad(double a) {
 		return sinDegr(a * RAD_2_DGR);
-	}
-
-	public static double cosDegr(final double x) {
-		return sinDegr(x + 90);
 	}
 
 	public static double cosRad(final double x) {
@@ -389,6 +445,7 @@ public class FastMath {
 		return i;
 	}
 
+	@Deprecated
 	public static float invSqrt(float x) {
 		float half = 0.5f * x;
 		int i = Float.floatToRawIntBits(x);
@@ -399,6 +456,7 @@ public class FastMath {
 		return x;
 	}
 
+	@Deprecated
 	public static double invSqrt(double x) {
 		double half = 0.5d * x;
 		long i = Double.doubleToRawLongBits(x);
@@ -435,8 +493,11 @@ public class FastMath {
 	}
 
 	static {
-		for (int i = 0; i < sinTable.length; i++) {
-			sinTable[i] = (float) Math.sin(2 * Math.PI * i / sinTable.length);
+		for (int i = 0; i < LUT_SIZE_D; i++) {
+			SIN_TABLE_D[i] = Math.sin(Math.toRadians(i * 360.0 / LUT_SIZE_D));
+		}
+		for (int i = 0; i < LUT_SIZE_F; i++) {
+			SIN_TABLE_F[i] = (float) Math.sin(Math.toRadians(i * 360.0 / LUT_SIZE_F));
 		}
 	}
 }
