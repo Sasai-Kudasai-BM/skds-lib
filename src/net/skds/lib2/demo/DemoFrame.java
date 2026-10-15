@@ -55,6 +55,10 @@ public class DemoFrame extends JFrame {
 		button.addActionListener(_ -> new Demo2D().setLocationRelativeTo(this));
 		add(button);
 
+		button = new JButton("AABBTree");
+		button.addActionListener(_ -> new FastAABBTreeDemo().setLocationRelativeTo(this));
+		add(button);
+
 		//button = new JButton("floor");
 		//button.addActionListener(_ -> {
 		//	var list = List.of(0.1, 0.8, -0.1, -0.8, 0d);
