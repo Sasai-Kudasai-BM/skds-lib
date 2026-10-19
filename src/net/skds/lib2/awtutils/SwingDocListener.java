@@ -1,19 +1,15 @@
 package net.skds.lib2.awtutils;
 
-import lombok.Setter;
-
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.JTextComponent;
 import java.util.function.Consumer;
 
 public class SwingDocListener implements DocumentListener {
-
 	public SwingDocListener(Consumer<DocumentEvent> action) {
 		this.action = action;
 	}
 
-	@Setter
 	private Consumer<DocumentEvent> action;
 
 	public static SwingDocListener addListener(JTextComponent component, Consumer<DocumentEvent> action) {
@@ -41,5 +37,9 @@ public class SwingDocListener implements DocumentListener {
 		if (action != null) {
 			action.accept(e);
 		}
+	}
+
+	public void setAction(final Consumer<DocumentEvent> action) {
+		this.action = action;
 	}
 }

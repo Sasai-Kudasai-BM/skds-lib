@@ -1,10 +1,7 @@
 package net.skds.lib2.utils.logger;
 
-import lombok.Getter;
-import lombok.Setter;
 import net.skds.lib2.io.codec.SosisonUtils;
 import net.skds.lib2.utils.AnsiEscape;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -14,30 +11,16 @@ import java.util.Locale;
 import java.util.Map.Entry;
 
 public final class SKDSLoggerConfig {
-
-	@Getter
 	private static SKDSLoggerConfig instance;
-
-	@Getter
 	private final Cfg cfg;
-
-	@Getter
 	private final long logFileSplitSize;
-	@Getter
 	private final EnumSet<LoggerLevel> levels;
-	@Getter()
 	private final SimpleDateFormat timeFormat;
-	@Getter()
 	private final SimpleDateFormat dateFormat;
-	@Getter()
 	private final boolean logThread;
-	@Getter()
 	private final boolean useFileOut;
-	@Getter()
 	private final boolean logStackTop;
-	@Getter()
 	private final boolean includeLoggerClass;
-	@Getter()
 	private final String logDir;
 
 	public SKDSLoggerConfig(Cfg cfg) {
@@ -56,8 +39,7 @@ public final class SKDSLoggerConfig {
 		}
 	}
 
-	@Getter
-	@Setter
+
 	@SuppressWarnings("FieldMayBeFinal")
 	public static final class Cfg {
 		private String timeFormat = "HH:mm:ss.SSS";
@@ -70,6 +52,86 @@ public final class SKDSLoggerConfig {
 		private boolean useFileOut = false;
 		private EnumMap<LoggerLevel, AnsiEscape> ansiColors = new EnumMap<>(LoggerLevel.class);
 		private EnumSet<LoggerLevel> levels = EnumSet.allOf(LoggerLevel.class);
+
+		public String getTimeFormat() {
+			return this.timeFormat;
+		}
+
+		public String getDateFormat() {
+			return this.dateFormat;
+		}
+
+		public String getLogDir() {
+			return this.logDir;
+		}
+
+		public long getLogFileSplitSize() {
+			return this.logFileSplitSize;
+		}
+
+		public boolean isIncludeThread() {
+			return this.includeThread;
+		}
+
+		public boolean isIncludeLoggerClass() {
+			return this.includeLoggerClass;
+		}
+
+		public boolean isIncludeStackTop() {
+			return this.includeStackTop;
+		}
+
+		public boolean isUseFileOut() {
+			return this.useFileOut;
+		}
+
+		public EnumMap<LoggerLevel, AnsiEscape> getAnsiColors() {
+			return this.ansiColors;
+		}
+
+		public EnumSet<LoggerLevel> getLevels() {
+			return this.levels;
+		}
+
+		public void setTimeFormat(final String timeFormat) {
+			this.timeFormat = timeFormat;
+		}
+
+		public void setDateFormat(final String dateFormat) {
+			this.dateFormat = dateFormat;
+		}
+
+		public void setLogDir(final String logDir) {
+			this.logDir = logDir;
+		}
+
+		public void setLogFileSplitSize(final long logFileSplitSize) {
+			this.logFileSplitSize = logFileSplitSize;
+		}
+
+		public void setIncludeThread(final boolean includeThread) {
+			this.includeThread = includeThread;
+		}
+
+		public void setIncludeLoggerClass(final boolean includeLoggerClass) {
+			this.includeLoggerClass = includeLoggerClass;
+		}
+
+		public void setIncludeStackTop(final boolean includeStackTop) {
+			this.includeStackTop = includeStackTop;
+		}
+
+		public void setUseFileOut(final boolean useFileOut) {
+			this.useFileOut = useFileOut;
+		}
+
+		public void setAnsiColors(final EnumMap<LoggerLevel, AnsiEscape> ansiColors) {
+			this.ansiColors = ansiColors;
+		}
+
+		public void setLevels(final EnumSet<LoggerLevel> levels) {
+			this.levels = levels;
+		}
 	}
 
 	public static void set(Cfg cfg) {
@@ -90,5 +152,49 @@ public final class SKDSLoggerConfig {
 		}
 		if (cfg == null) cfg = new Cfg();
 		instance = new SKDSLoggerConfig(cfg);
+	}
+
+	public static SKDSLoggerConfig getInstance() {
+		return SKDSLoggerConfig.instance;
+	}
+
+	public Cfg getCfg() {
+		return this.cfg;
+	}
+
+	public long getLogFileSplitSize() {
+		return this.logFileSplitSize;
+	}
+
+	public EnumSet<LoggerLevel> getLevels() {
+		return this.levels;
+	}
+
+	public SimpleDateFormat getTimeFormat() {
+		return this.timeFormat;
+	}
+
+	public SimpleDateFormat getDateFormat() {
+		return this.dateFormat;
+	}
+
+	public boolean isLogThread() {
+		return this.logThread;
+	}
+
+	public boolean isUseFileOut() {
+		return this.useFileOut;
+	}
+
+	public boolean isLogStackTop() {
+		return this.logStackTop;
+	}
+
+	public boolean isIncludeLoggerClass() {
+		return this.includeLoggerClass;
+	}
+
+	public String getLogDir() {
+		return this.logDir;
 	}
 }

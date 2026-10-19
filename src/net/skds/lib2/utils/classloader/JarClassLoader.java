@@ -1,7 +1,5 @@
 package net.skds.lib2.utils.classloader;
 
-import lombok.CustomLog;
-
 import java.io.*;
 import java.net.*;
 import java.nio.file.Files;
@@ -11,12 +9,10 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-@CustomLog
 public final class JarClassLoader extends ClassLoader {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(JarClassLoader.class);
 	private static final int DOT_CLASS_LENGTH = ".class".length();
 	private final String PROTOCOL = "jcl-" + getClass().getSimpleName() + hashCode();
-
 	private final Map<String, byte[]> resourceMap;
 	private final MemoryURLStreamHandler handler;
 
@@ -123,7 +119,6 @@ public final class JarClassLoader extends ClassLoader {
 		if (resourceMap.get(binaryName) == null) {
 			return null;
 		}
-
 		try {
 			var uri = new URI(PROTOCOL, name, null);
 			return URL.of(uri, handler);
@@ -136,12 +131,10 @@ public final class JarClassLoader extends ClassLoader {
 	public Enumeration<URL> findResources(String name) {
 		return new Enumeration<>() {
 			private URL next = findResource(name);
-
 			@Override
 			public boolean hasMoreElements() {
 				return (next != null);
 			}
-
 			@Override
 			public URL nextElement() {
 				if (next == null) {
@@ -154,6 +147,7 @@ public final class JarClassLoader extends ClassLoader {
 		};
 	}
 
+
 	private class MemoryURLStreamHandler extends URLStreamHandler {
 		@Override
 		public URLConnection openConnection(URL u) {
@@ -162,8 +156,8 @@ public final class JarClassLoader extends ClassLoader {
 			}
 			return new MemoryURLConnection(u, resourceMap.get(processClassName(u.getPath())));
 		}
-
 	}
+
 
 	private static class MemoryURLConnection extends URLConnection {
 		private final byte[] bytes;

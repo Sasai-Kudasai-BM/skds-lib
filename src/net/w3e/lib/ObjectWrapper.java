@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 public record ObjectWrapper<O, R>(Class<O> rawFormat, Class<R> targetFormat, Converter<O, R> rawConverter,
-								  Converter<R, O> targetConverter) {
+                                  Converter<R, O> targetConverter) {
 
 	@FunctionalInterface
 	public interface Converter<A, B> {
@@ -66,13 +66,13 @@ public record ObjectWrapper<O, R>(Class<O> rawFormat, Class<R> targetFormat, Con
 		SosisonUtils.addFactory(converter.targetFormat, (type, registry) -> new ConverterCodec<>(converter, type, registry));
 	}
 
-	private static final ObjectWrapper.Converter<?, ?> UNIMPLEMENTED_METHOD_WRITE = _ -> {
+	private static final Converter<?, ?> UNIMPLEMENTED_METHOD_WRITE = unused -> {
 		throw new UnsupportedOperationException("Unimplemented method 'write'");
 	};
 
 	@SuppressWarnings("unchecked")
-	public static <O, R> ObjectWrapper.Converter<R, O> throwUnimplementedMethodWrite() {
-		return (ObjectWrapper.Converter<R, O>) UNIMPLEMENTED_METHOD_WRITE;
+	public static <O, R> Converter<R, O> throwUnimplementedMethodWrite() {
+		return (Converter<R, O>) UNIMPLEMENTED_METHOD_WRITE;
 	}
 
 	private static class ConverterCodec<O, R> extends AbstractCodec<R> {

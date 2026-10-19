@@ -1,6 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import lombok.RequiredArgsConstructor;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.io.chars.CharInput;
@@ -12,18 +11,15 @@ import net.skds.lib2.io.json.WrappedJsonReaderImpl;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.io.sosison.SosisonReader;
 import net.skds.lib2.io.sosison.SosisonWriter;
-
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
 import static net.skds.lib2.io.json.JsonCodecOptions.DecorationType.FANCY;
 
 public class CodecRegistry {
-
 	final UniversalCodecOptions options;
 	private final Map<Type, UniversalCodec<?>> codecMap = new ConcurrentHashMap<>();
 	private final Map<Type, UniversalSerializer<?>> serializerMap = new ConcurrentHashMap<>();
@@ -74,7 +70,6 @@ public class CodecRegistry {
 	public UniversalWriter createJsonWriter(CharOutput output) {
 		if (options.getDecorationType() == FANCY) {
 			return new FormattedJsonWriter(output, options.getTabulation(), options.getCapabilityVersion());
-
 		}
 		return new FlatJsonWriter(output);
 	}
@@ -89,14 +84,12 @@ public class CodecRegistry {
 	//		default -> new FlatJsonWriterImpl(output);
 	//	};
 	//}
-
 	@SuppressWarnings("unchecked")
 	public <T> UniversalCodec<T> getCodec(Type type) {
 		UniversalCodec<T> codec = (UniversalCodec<T>) codecMap.computeIfAbsent(type, codecMappingFunction);
 		if (codec == null) throw new RuntimeException("Unable to get codec for \"" + type + "\"");
 		return codec;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public <T> UniversalSerializer<T> getSerializer(Type type) {
@@ -172,11 +165,9 @@ public class CodecRegistry {
 		return new SerializerIndirect<>(type);
 	}
 
-	@RequiredArgsConstructor
+
 	private class CodecIndirect<T> implements UniversalCodec<T> {
-
 		private final Type type;
-
 		private UniversalCodec<T> codec;
 
 		private UniversalCodec<T> getOrCreateCodec() {
@@ -217,13 +208,15 @@ public class CodecRegistry {
 		public String toString() {
 			return super.toString() + "(" + type + ")";
 		}
+
+		public CodecIndirect(final Type type) {
+			this.type = type;
+		}
 	}
 
-	@RequiredArgsConstructor
+
 	private class DeserializerIndirect<T> implements UniversalDeserializer<T> {
-
 		private final Type type;
-
 		private UniversalDeserializer<T> deserializer;
 
 		private UniversalDeserializer<T> getOrCreateCodec() {
@@ -254,13 +247,15 @@ public class CodecRegistry {
 		public String toString() {
 			return super.toString() + "(" + type + ")";
 		}
+
+		public DeserializerIndirect(final Type type) {
+			this.type = type;
+		}
 	}
 
-	@RequiredArgsConstructor
+
 	private class SerializerIndirect<T> implements UniversalSerializer<T> {
-
 		private final Type type;
-
 		private UniversalSerializer<T> serializer;
 
 		private UniversalSerializer<T> getOrCreateCodec() {
@@ -291,6 +286,9 @@ public class CodecRegistry {
 		public String toString() {
 			return super.toString() + "(" + type + ")";
 		}
-	}
 
+		public SerializerIndirect(final Type type) {
+			this.type = type;
+		}
+	}
 }

@@ -1,7 +1,5 @@
 package net.skds.lib2.utils;
 
-import lombok.SneakyThrows;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.LockSupport;
@@ -9,19 +7,15 @@ import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public class ThreadUtils {
-
 	public static final ThreadGroup MAIN_GROUP = new ThreadGroup("Main");
 	public static final ThreadGroup UTIL_GROUP = new ThreadGroup("Util");
 	public static final ThreadGroup IO_GROUP = new ThreadGroup("IO");
-
 	private static final int threads = Math.max(4, Runtime.getRuntime().availableProcessors());
-
 	private static final ThreadFactory VT_FACTORY = Thread.ofVirtual().name("SKDS-VT-", 0).factory();
-
 	public static final Executor EXECUTOR = r -> VT_FACTORY.newThread(r).start();
 
 	//ForkJoinPool.commonPool();
-			/*
+	/*
 			new ForkJoinPool(threads,
 					p -> {
 						ForkJoinWorkerThread t = new ForkJoinWorkerThread(UTIL_GROUP, p, true) {
@@ -36,26 +30,27 @@ public class ThreadUtils {
 					false
 			);
 	// */
-
 	public static void main(String[] args) {
 		for (int i = 0; i < 100; i++) {
 			int j = i;
 			EXECUTOR.execute(() -> {
 				System.out.println(Thread.currentThread());
-				ThreadUtils.await(10_000);
+				ThreadUtils.await(10000);
 			});
 		}
-
-		ThreadUtils.await(10_000);
+		ThreadUtils.await(10000);
 	}
 
 	public static void runTaskNewThread(Runnable runnable) {
 		new SKDSThread(UTIL_GROUP, runnable).start();
 	}
 
-	@SneakyThrows
 	public static void await(long millis) {
-		Thread.sleep(millis);
+		try {
+			Thread.sleep(millis);
+		} catch (final Throwable $ex) {
+			throw lombok.Lombok.sneakyThrow($ex);
+		}
 	}
 
 	public static SKDSThread runNewThreadMainGroup(Runnable runnable, String name) {
@@ -77,7 +72,6 @@ public class ThreadUtils {
 			public void run() {
 				while (tick(tickable, period)) ;
 			}
-
 		};
 		t.setDaemon(true);
 		t.start();
@@ -95,7 +89,6 @@ public class ThreadUtils {
 					exceptionHandler.accept(e);
 				}
 			}
-
 		};
 		t.setDaemon(true);
 		t.start();
@@ -108,7 +101,6 @@ public class ThreadUtils {
 			public void run() {
 				while (tick(tickable, period)) ;
 			}
-
 		};
 		t.start();
 		return t;
@@ -125,7 +117,6 @@ public class ThreadUtils {
 					exceptionHandler.accept(e);
 				}
 			}
-
 		};
 		t.start();
 		return t;
@@ -134,7 +125,7 @@ public class ThreadUtils {
 	private static boolean tick(FiniteTickable tickable, int period) {
 		long t0 = System.nanoTime();
 		boolean tick = tickable.tick();
-		long endTime = t0 + (long) period * 1000_000L;
+		long endTime = t0 + (long) period * 1000000L;
 		long waitTime = endTime - System.nanoTime();
 		LockSupport.parkNanos(waitTime);
 		//while (endTime - System.nanoTime() > 5000L) {
@@ -164,8 +155,8 @@ public class ThreadUtils {
 		EXECUTOR.execute(runnable);
 	}
 
-	public static class SKDSThread extends Thread {
 
+	public static class SKDSThread extends Thread {
 		private static volatile int threadInitNumber;
 		private final Runnable task;
 
@@ -197,19 +188,17 @@ public class ThreadUtils {
 		public void run() {
 			task.run();
 		}
-
 	}
-
 
 	static {
 		if (SKDSUtils.OS_TYPE == SKDSUtils.OSType.WINDOWS) {
-			new Thread() { // dirty Windows timer fix
+			new Thread() {
+				// dirty Windows timer fix
 				{
 					this.setName("Dirty-Windows-timer-fix");
 					this.setDaemon(true);
 					this.start();
 				}
-
 				public void run() {
 					try {
 						Thread.sleep(Long.MAX_VALUE);

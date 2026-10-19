@@ -1,7 +1,5 @@
 package net.skds.lib2.network.intercom.packet.system;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.network.NetworkDirection;
@@ -10,13 +8,9 @@ import net.skds.lib2.network.intercom.ServerIntercomConnection;
 import net.skds.lib2.network.intercom.packet.IntercomPacket;
 import net.skds.lib2.network.intercom.packet.PacketType;
 import net.skds.lib2.network.intercom.packet.SystemPacketRegistry;
-
 import java.io.IOException;
 
-@AllArgsConstructor
-@Getter
 public class HandshakeStartC2SPacket implements IntercomPacket<ServerIntercomConnection> {
-
 	private final String name;
 	private final String publicInfo;
 	private final long timestamp;
@@ -42,7 +36,6 @@ public class HandshakeStartC2SPacket implements IntercomPacket<ServerIntercomCon
 		connection.handshakeStart(this);
 	}
 
-
 	@Override
 	public boolean isInstantHandle() {
 		return true;
@@ -61,5 +54,28 @@ public class HandshakeStartC2SPacket implements IntercomPacket<ServerIntercomCon
 	@Override
 	public PacketType packetType() {
 		return PacketType.SYSTEM_CRITICAL;
+	}
+
+	public HandshakeStartC2SPacket(final String name, final String publicInfo, final long timestamp, final SecurityLevel securityLevel) {
+		this.name = name;
+		this.publicInfo = publicInfo;
+		this.timestamp = timestamp;
+		this.securityLevel = securityLevel;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public String getPublicInfo() {
+		return this.publicInfo;
+	}
+
+	public long getTimestamp() {
+		return this.timestamp;
+	}
+
+	public SecurityLevel getSecurityLevel() {
+		return this.securityLevel;
 	}
 }

@@ -1,24 +1,15 @@
 package net.skds.lib2.io.codec;
 
-import lombok.Getter;
 import net.skds.lib2.io.json.JsonCodecOptions;
-
 import java.lang.reflect.Modifier;
 
 public class UniversalCodecOptionsImpl implements UniversalCodecOptions {
-
 	// common
-	@Getter(onMethod_ = @Override)
 	private int excludeFieldModifiers = Modifier.TRANSIENT | Modifier.STATIC;
-
 	// json
-	@Getter(onMethod_ = @Override)
-	private JsonCodecOptions.DecorationType decorationType = JsonCodecOptions.DecorationType.FLAT;
-	@Getter(onMethod_ = @Override)
+	private DecorationType decorationType = DecorationType.FLAT;
 	private JsonCapabilityVersion capabilityVersion = JsonCapabilityVersion.JSON;
-	@Getter(onMethod_ = @Override)
 	private String tabulation = "\t";
-
 	// sosison
 	private boolean sosisonComments = false;
 
@@ -34,7 +25,7 @@ public class UniversalCodecOptionsImpl implements UniversalCodecOptions {
 	}
 
 	@Override
-	public UniversalCodecOptionsImpl setDecorationType(JsonCodecOptions.DecorationType decorationType) {
+	public UniversalCodecOptionsImpl setDecorationType(DecorationType decorationType) {
 		this.decorationType = decorationType;
 		return this;
 	}
@@ -57,15 +48,32 @@ public class UniversalCodecOptionsImpl implements UniversalCodecOptions {
 		return this;
 	}
 
+	@Override
+	public int getExcludeFieldModifiers() {
+		return this.excludeFieldModifiers;
+	}
+
+	@Override
+	public DecorationType getDecorationType() {
+		return this.decorationType;
+	}
+
+	@Override
+	public JsonCapabilityVersion getCapabilityVersion() {
+		return this.capabilityVersion;
+	}
+
+	@Override
+	public String getTabulation() {
+		return this.tabulation;
+	}
 	//@Override
 	//public boolean sosisonComments() {
 	//	return sosisonComments;
 	//}
-
 	//@Override
 	//public SosisonCodecOptions setSosisonComments(boolean enabled) {
 	//	this.sosisonComments = enabled;
 	//	return this;
 	//}
 }
-

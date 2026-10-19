@@ -1,7 +1,5 @@
 package net.skds.lib2.utils;
 
-import lombok.Getter;
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +40,6 @@ public class HttpUtils { // TODO
 		return map;
 	}
 
-
 	public static DownloadProcess downloadFromNet(String url) {
 		try {
 			@SuppressWarnings("resource")
@@ -56,11 +53,10 @@ public class HttpUtils { // TODO
 			List<String> cl = response.headers().map().get("content-length");
 			if (cl == null || cl.isEmpty()) {
 				return new DownloadProcess(response.statusCode(), 0, response.body());
-				//throw new RuntimeException("content-length not provided");
 			}
+			//throw new RuntimeException("content-length not provided");
 			int len = Integer.parseInt(cl.getFirst());
 			return new DownloadProcess(response.statusCode(), len, response.body());
-
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to download " + url, e);
 		}
@@ -85,6 +81,7 @@ public class HttpUtils { // TODO
 		}
 		throw new RuntimeException("Unable to download " + url);
 	}
+
 
 	public record Response(int code, byte[] data, HttpResponse<byte[]> response) {
 	}
@@ -112,14 +109,11 @@ public class HttpUtils { // TODO
 		throw new RuntimeException("Unable to download " + url);
 	}
 
-	public static class DownloadProcess implements AutoCloseable {
 
+	public static class DownloadProcess implements AutoCloseable {
 		private final BufferedInputStream inputStream;
-		@Getter
 		private final byte[] content;
-		@Getter
 		private volatile int progress = 0;
-		@Getter
 		private final int responseCode;
 
 		protected DownloadProcess(int code, int size, InputStream is) {
@@ -186,6 +180,18 @@ public class HttpUtils { // TODO
 		@Override
 		public void close() throws Exception {
 			inputStream.close();
+		}
+
+		public byte[] getContent() {
+			return this.content;
+		}
+
+		public int getProgress() {
+			return this.progress;
+		}
+
+		public int getResponseCode() {
+			return this.responseCode;
 		}
 	}
 }

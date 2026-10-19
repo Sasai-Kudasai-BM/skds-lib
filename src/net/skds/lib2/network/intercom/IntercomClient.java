@@ -1,28 +1,20 @@
 package net.skds.lib2.network.intercom;
 
-import lombok.CustomLog;
-import lombok.Getter;
 import net.skds.lib2.network.intercom.packet.IntercomOutputPacket;
 import net.skds.lib2.network.tcp.ClientsideTCPConnectionOptions;
 import net.skds.lib2.network.tcp.TCPConnectionFactory;
 import net.skds.lib2.security.CustomX509TrustManager;
 import net.skds.lib2.security.SKDSTrusted;
 import net.skds.lib2.utils.ThreadUtils;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 
-@CustomLog
 public class IntercomClient implements IntercomConnectionOwner<ClientIntercomConnection, ClientsideTCPConnectionOptions> {
-
-	@Getter
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(IntercomClient.class);
 	private final Configuration configuration;
-	@Getter
 	private final CustomX509TrustManager trustManager;
 	private final TCPConnectionFactory<ClientIntercomConnection, IntercomClient> connectionFactory;
-
-	@Getter
 	private ClientIntercomConnection connection;
 
 	public IntercomClient(Configuration configuration, TCPConnectionFactory<ClientIntercomConnection, IntercomClient> connectionFactory) {
@@ -55,7 +47,6 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 			ThreadUtils.await(delay);
 		}
 		if (connected()) {
-
 			log.info("[" + configuration.name() + "] Connected to " + address);
 			return true;
 		} else {
@@ -105,10 +96,19 @@ public class IntercomClient implements IntercomConnectionOwner<ClientIntercomCon
 		return configuration.name;
 	}
 
-	public record Configuration(ClientsideTCPConnectionOptions options,
-								SecurityOptions securityOptions,
-								IntercomSettings intercomSettings,
-								String name
-	) {
+
+	public record Configuration(ClientsideTCPConnectionOptions options, SecurityOptions securityOptions, IntercomSettings intercomSettings, String name) {
+	}
+
+	public Configuration getConfiguration() {
+		return this.configuration;
+	}
+
+	public CustomX509TrustManager getTrustManager() {
+		return this.trustManager;
+	}
+
+	public ClientIntercomConnection getConnection() {
+		return this.connection;
 	}
 }

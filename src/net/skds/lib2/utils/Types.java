@@ -1,14 +1,10 @@
 package net.skds.lib2.utils;
 
-import lombok.experimental.UtilityClass;
-
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Objects;
 
-@UtilityClass
-public class Types {
-
+public final class Types {
 	public static ParameterizedType parameterizedType(Type rawType, Type... typeArguments) {
 		return new ParameterizedTypeImpl(null, rawType, typeArguments);
 	}
@@ -17,6 +13,7 @@ public class Types {
 		return new ParameterizedTypeImpl(ownerType, rawType, typeArguments);
 	}
 
+
 	@SuppressWarnings("ClassCanBeRecord")
 	private static final class ParameterizedTypeImpl implements ParameterizedType {
 		private final Type ownerType;
@@ -24,15 +21,12 @@ public class Types {
 		private final Type[] typeArguments;
 
 		public ParameterizedTypeImpl(Type ownerType, Type rawType, Type... typeArguments) {
-
 			if (rawType instanceof Class<?> rawTypeAsClass) {
-				boolean isStaticOrTopLevelClass = Modifier.isStatic(rawTypeAsClass.getModifiers())
-						|| rawTypeAsClass.getEnclosingClass() == null;
+				boolean isStaticOrTopLevelClass = Modifier.isStatic(rawTypeAsClass.getModifiers()) || rawTypeAsClass.getEnclosingClass() == null;
 				if (ownerType == null && !isStaticOrTopLevelClass) {
 					throw new IllegalArgumentException();
 				}
 			}
-
 			this.ownerType = ownerType;
 			this.rawType = rawType;
 			this.typeArguments = typeArguments.clone();
@@ -58,19 +52,13 @@ public class Types {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o)
-				return true;
-			return o instanceof ParameterizedType that &&
-					Objects.equals(ownerType, that.getOwnerType()) &&
-					Objects.equals(rawType, that.getRawType()) &&
-					Arrays.equals(typeArguments, that.getActualTypeArguments());
+			if (this == o) return true;
+			return o instanceof ParameterizedType that && Objects.equals(ownerType, that.getOwnerType()) && Objects.equals(rawType, that.getRawType()) && Arrays.equals(typeArguments, that.getActualTypeArguments());
 		}
 
 		@Override
 		public int hashCode() {
-			return Arrays.hashCode(typeArguments) ^
-					Objects.hashCode(ownerType) ^
-					Objects.hashCode(rawType);
+			return Arrays.hashCode(typeArguments) ^ Objects.hashCode(ownerType) ^ Objects.hashCode(rawType);
 		}
 
 		@Override
@@ -79,7 +67,6 @@ public class Types {
 			if (length == 0) {
 				return typeToString(rawType);
 			}
-
 			StringBuilder stringBuilder = new StringBuilder(30 * (length + 1));
 			stringBuilder.append(typeToString(rawType)).append("<").append(typeToString(typeArguments[0]));
 			for (int i = 1; i < length; i++) {
@@ -108,9 +95,7 @@ public class Types {
 			if (!(b instanceof ParameterizedType pb)) {
 				return false;
 			}
-			return Objects.equals(pa.getOwnerType(), pb.getOwnerType())
-					&& pa.getRawType().equals(pb.getRawType())
-					&& Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
+			return Objects.equals(pa.getOwnerType(), pb.getOwnerType()) && pa.getRawType().equals(pb.getRawType()) && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
 		} else if (a instanceof GenericArrayType ga) {
 			if (!(b instanceof GenericArrayType gb)) {
 				return false;
@@ -120,16 +105,18 @@ public class Types {
 			if (!(b instanceof WildcardType wb)) {
 				return false;
 			}
-			return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
-					&& Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
+			return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds()) && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
 		} else if (a instanceof TypeVariable<?> va) {
 			if (!(b instanceof TypeVariable<?> vb)) {
 				return false;
 			}
-			return va.getGenericDeclaration() == vb.getGenericDeclaration()
-					&& va.getName().equals(vb.getName());
+			return va.getGenericDeclaration() == vb.getGenericDeclaration() && va.getName().equals(vb.getName());
 		} else {
 			return false;
 		}
+	}
+
+	private Types() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

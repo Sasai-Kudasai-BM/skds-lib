@@ -94,7 +94,7 @@ public class StringClassLoader {
 
 		@Override
 		public JavaFileObject getJavaFileForOutput(
-				JavaFileManager.Location location,
+				Location location,
 				String className,
 				JavaFileObject.Kind kind,
 				FileObject sibling

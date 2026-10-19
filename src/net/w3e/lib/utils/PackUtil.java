@@ -1,10 +1,6 @@
 package net.w3e.lib.utils;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class PackUtil {
-
+public final class PackUtil {
 	public static String toString(byte b) {
 		return b + ": " + String.format("%8s", Integer.toBinaryString(Byte.toUnsignedInt(b))).replaceAll(" ", "0");
 	}
@@ -58,16 +54,16 @@ public class PackUtil {
 	}
 
 	public static long pack(int i, int j) {
-		return (((long) i) << 32) | (j & 0xffffffffL);
+		return (((long) i) << 32) | (j & 4294967295L);
 	}
 
 	public static int[] unpack(long l) {
-		return new int[]{(int) (l >> 32), (int) l};
+		return new int[] {(int) (l >> 32), (int) l};
 	}
+
 
 	public static class PackByteFlag {
 		private final int pos;
-
 		public final byte enable;
 
 		public PackByteFlag(int pos) {
@@ -87,5 +83,8 @@ public class PackUtil {
 			return PackUtil.set(flags, this.pos, mode);
 		}
 	}
-}
 
+	private PackUtil() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
+}

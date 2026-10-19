@@ -1,7 +1,5 @@
 package net.skds.lib2.shapes;
 
-import lombok.Getter;
-import lombok.Setter;
 import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.DeserializeBuilder;
 import net.skds.lib2.io.codec.ReflectiveBuilderCodec;
@@ -13,7 +11,6 @@ import net.skds.lib2.mat.matrix3.Matrix3;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.utils.AutoString;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,11 +19,8 @@ import java.util.Objects;
 
 @DefaultCodec(CompositeSuperShape.JCodec.class)
 public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<ShapeType> {
-
 	private static final ConvexShape[] empty = {};
-
 	public static final CompositeSuperShape EMPTY = new Empty();
-
 	private final Shape[] shapes;
 	private final transient AABB bounding;
 	private final Vec3 center;
@@ -196,18 +190,13 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 
 	public CompositeSuperShape setPose(PoseFunction pf, final Vec3 parentPos, final Quat parentRot, final double parentScale) {
 		final Shape[] shapes = new Shape[this.shapes.length];
-
 		PoseCallback pc = new PoseCallback();
-
 		for (int i = 0; i < shapes.length; i++) {
 			Shape shape = this.shapes[i];
-
 			pc.setPos(Vec3.ZERO);
 			pc.setRot(Quat.ONE);
 			pc.setScale(1);
-
 			pf.applyPose(shape, parentPos, parentRot, parentScale, pc);
-
 			Vec3 od = shape.getCenter().sub(this.center);
 			if (pc.pos != Vec3.ZERO) {
 				od = od.add(pc.pos);
@@ -217,11 +206,9 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 			} else if (parentRot != Quat.ONE) {
 				pc.rot = parentRot.multiply(pc.rot);
 			}
-
 			if (pc.scale != 1 || parentScale != 1) {
 				pc.scale *= parentScale;
 			}
-
 			Vec3 nd = od.transform(parentRot);
 			if (pc.scale != 1) {
 				nd = nd.scale(pc.scale);
@@ -230,14 +217,12 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 				nd = nd.add(pc.pos);
 			}
 			nd = nd.add(parentPos).sub(od);
-
 			if (shape instanceof CompositeSuperShape css) {
 				shapes[i] = css.setPose(pf, nd, pc.rot, pc.scale);
 			} else {
 				shapes[i] = shape.moveRotScale(nd, pc.rot, pc.scale);
 			}
 		}
-
 		return new CompositeSuperShape(shapes, center.add(parentPos), attachment);
 	}
 
@@ -276,22 +261,43 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 		return new CompositeSuperShape(shapes, center, attachment);
 	}
 
+
 	public class PoseCallback {
-		@Getter
-		@Setter
 		private Vec3 pos = Vec3.ZERO;
-		@Getter
-		@Setter
 		private Quat rot = Quat.ONE;
-		@Getter
-		@Setter
 		private double scale = 1;
+
+		public Vec3 getPos() {
+			return this.pos;
+		}
+
+		public void setPos(final Vec3 pos) {
+			this.pos = pos;
+		}
+
+		public Quat getRot() {
+			return this.rot;
+		}
+
+		public void setRot(final Quat rot) {
+			this.rot = rot;
+		}
+
+		public double getScale() {
+			return this.scale;
+		}
+
+		public void setScale(final double scale) {
+			this.scale = scale;
+		}
 	}
+
 
 	@FunctionalInterface
 	public interface PoseFunction {
 		void applyPose(Shape shape, Vec3 parentPos, Quat parentRot, double parentScale, PoseCallback callback);
 	}
+
 
 	private static final class Empty extends CompositeSuperShape {
 		public Empty() {
@@ -337,14 +343,14 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 		return false;
 	}
 
-	static final class JCodec extends ReflectiveBuilderCodec<CompositeSuperShape> {
 
+	static final class JCodec extends ReflectiveBuilderCodec<CompositeSuperShape> {
 		public JCodec(Type type, CodecRegistry registry) {
 			super(type, CompositeShapeTypeAdapter.class, registry);
 		}
 
-		private static class CompositeShapeTypeAdapter implements DeserializeBuilder<CompositeSuperShape> {
 
+		private static class CompositeShapeTypeAdapter implements DeserializeBuilder<CompositeSuperShape> {
 			private Shape[] shapes;
 			private Vec3 center = Vec3.ZERO;
 			private String attachment;

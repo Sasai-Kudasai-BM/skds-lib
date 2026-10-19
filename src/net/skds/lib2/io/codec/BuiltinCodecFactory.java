@@ -1,6 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import lombok.CustomLog;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.codec.annotation.DefaultEnumTypedCodec;
 import net.skds.lib2.io.codec.annotation.EnumNameDataFixer;
@@ -15,7 +14,6 @@ import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.*;
 import net.skds.lib2.utils.collection.ImmutableArrayHashMap;
 import net.skds.lib2.utils.function.MultiSupplier;
-
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -27,12 +25,10 @@ import java.sql.Time;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Supplier;
-
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
-@CustomLog
 public class BuiltinCodecFactory implements CodecFactory {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(BuiltinCodecFactory.class);
 	public static final BuiltinCodecFactory INSTANCE = new BuiltinCodecFactory();
 
 	final Map<Type, CodecFactory> map = new ImmutableArrayHashMap<>(
@@ -163,9 +159,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 				}
 			}
 		} else if (type instanceof ParameterizedType pt) {
-			if (!(pt.getRawType() instanceof Class<?> cl))
-				throw new UnsupportedOperationException("Unsupported or wildcard type \"" + pt + "\"");
-
+			if (!(pt.getRawType() instanceof Class<?> cl)) throw new UnsupportedOperationException("Unsupported or wildcard type \"" + pt + "\"");
 			if (Map.class.isAssignableFrom(cl)) {
 				return new MapCodec(cl, pt.getActualTypeArguments(), registry);
 			} else if (Collection.class.isAssignableFrom(cl)) {
@@ -182,7 +176,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 			UniversalSerializer<Object> serializer = getUniversalSerializer(cle, registry);
 			return new ArrayCodec(raw, deserializer, serializer, registry);
 		}
-
 		return ReflectiveCodecFactory.INSTANCE.createCodec(type, registry);
 	}
 
@@ -199,7 +192,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 		return new AbstractUniversalSerializer<>(registry) {
 			UniversalSerializer<Object> serializer;
-
 			@Override
 			public void write(Object value, UniversalWriter writer) throws IOException {
 				if (value == null) {
@@ -256,7 +248,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 					(MultiSupplier<Object>) ReflectUtils.getMultiConstructor(factoryClass, Type.class, CodecRegistry.class);
 			if (constructor != null) {
 				if (!UniversalCodec.class.isAssignableFrom(factoryClass)) {
-
 					if (!UniversalSerializer.class.isAssignableFrom(factoryClass) && !UniversalDeserializer.class.isAssignableFrom(factoryClass)) {
 						break l1;
 					}
@@ -295,7 +286,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 	@SuppressWarnings("ClassCanBeRecord")
 	public static class CollectionSerializer implements UniversalSerializer<Collection<Object>> {
-
 		final CodecRegistry registry;
 
 		public CollectionSerializer(CodecRegistry registry) {
@@ -329,9 +319,9 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
+
 	@SuppressWarnings("ClassCanBeRecord")
 	public static class MapSerializer implements UniversalSerializer<Map<Object, Object>> {
-
 		final CodecRegistry registry;
 
 		public MapSerializer(CodecRegistry registry) {
@@ -374,8 +364,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class MapCodec extends AbstractCodec<Map<?, ?>> {
 
+	public static class MapCodec extends AbstractCodec<Map<?, ?>> {
 		final Supplier<Map<Object, Object>> constructor;
 		final UniversalDeserializer<Object> keyDeserializer;
 		final UniversalDeserializer<Object> valueDeserializer;
@@ -383,8 +373,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 		final UniversalSerializer<Object> valueSerializer;
 
 		public MapCodec(Class<?> tClass, CodecRegistry registry) {
+			this(tClass, getParameters(tClass), registry);
+		}
+
+		private static Type[] getParameters(Class<?> c) {
 			Type[] parameters;
-			Class<?> c = tClass;
 			while (true) {
 				Class<?> s = c.getSuperclass();
 				if (s != null) {
@@ -402,11 +395,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 						}
 					}
 				} else {
-					throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass + "\"");
+					throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + c + "\"");
 				}
 				c = s;
 			}
-			this(tClass, parameters, registry);
+			return parameters;
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
@@ -424,8 +417,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 			super(tClass, registry);
 			//this.tClass = tClass;
 			if (parameters.length != 2) {
-				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass.getName()
-						+ " " + Arrays.toString(parameters) + "\"");
+				throw new IllegalArgumentException("Unable to create codec for non-canonical map declaration \"" + tClass.getName() + " " + Arrays.toString(parameters) + "\"");
 			}
 			this.keyDeserializer = registry.getDeserializerIndirect(parameters[0]);
 			this.valueDeserializer = registry.getDeserializerIndirect(parameters[1]);
@@ -460,7 +452,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 			if (size > 1) {
 				writer.lineBreakEnable(true);
 			}
-
 			for (Map.Entry<?, ?> entry : value.entrySet()) {
 				Object k = entry.getKey();
 				Object v = entry.getValue();
@@ -509,16 +500,32 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class CollectionCodec extends AbstractCodec<Collection<?>> {
 
+	public static class CollectionCodec extends AbstractCodec<Collection<?>> {
 		final Supplier<Collection<Object>> constructor;
 		final UniversalDeserializer<Object> deserializer;
 		final UniversalSerializer<Object> serializer;
 
-		@SuppressWarnings({"unchecked"})
 		public CollectionCodec(Class<?> tClass, CodecRegistry registry) {
+			this(tClass, getParameters(tClass), getConstructor(tClass), registry);
+		}
+
+		@SuppressWarnings({"unchecked"})
+		private static Supplier<Collection<Object>> getConstructor(Class<?> c) {
+			Supplier<Collection<Object>> tmpC;
+			if (c.isInterface() || Modifier.isAbstract(c.getModifiers())) {
+				throw new IllegalArgumentException("Unable to create codec for abstract class \"" + c + "\"");
+			} else {
+				tmpC = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(c);
+				if (tmpC == null) {
+					throw new IllegalArgumentException("Class \"" + c.getName() + "\" have no empty constructor!");
+				}
+			}
+			return tmpC;
+		}
+
+		private static Type[] getParameters(Class<?> c) {
 			Type[] parameters;
-			Class<?> c = tClass;
 			while (true) {
 				Class<?> s = c.getSuperclass();
 				if (s != null) {
@@ -536,20 +543,11 @@ public class BuiltinCodecFactory implements CodecFactory {
 						}
 					}
 				} else {
-					throw new IllegalArgumentException("Unable to create codec for non-canonical collection declaration \"" + tClass + "\"");
+					throw new IllegalArgumentException("Unable to create codec for non-canonical collection declaration \"" + c + "\"");
 				}
 				c = s;
 			}
-			Supplier<Collection<Object>> tmpC;
-			if (tClass.isInterface() || Modifier.isAbstract(tClass.getModifiers())) {
-				throw new IllegalArgumentException("Unable to create codec for abstract class \"" + tClass + "\"");
-			} else {
-				tmpC = (Supplier<Collection<Object>>) ReflectUtils.getConstructor(tClass);
-				if (tmpC == null) {
-					throw new IllegalArgumentException("Class \"" + tClass.getName() + "\" have no empty constructor!");
-				}
-			}
-			this(tClass, parameters, tmpC, registry);
+			return parameters;
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
@@ -630,8 +628,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class ArrayCodec extends AbstractCodec<Object> {
 
+	public static class ArrayCodec extends AbstractCodec<Object> {
 		final Class<?> tClass;
 		final UniversalDeserializer<Object> deserializer;
 		final UniversalSerializer<Object> serializer;
@@ -704,8 +702,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class IntArrayCodec extends AbstractCodec<int[]> {
 
+	public static final class IntArrayCodec extends AbstractCodec<int[]> {
 		public IntArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -725,8 +723,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class ByteArrayCodec extends AbstractCodec<byte[]> {
 
+	public static final class ByteArrayCodec extends AbstractCodec<byte[]> {
 		public ByteArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -746,8 +744,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class BooleanArrayCodec extends AbstractCodec<boolean[]> {
 
+	public static final class BooleanArrayCodec extends AbstractCodec<boolean[]> {
 		public BooleanArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -788,8 +786,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class ShortArrayCodec extends AbstractCodec<short[]> {
 
+	public static final class ShortArrayCodec extends AbstractCodec<short[]> {
 		public ShortArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -809,8 +807,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class CharArrayCodec extends AbstractCodec<char[]> {
 
+	public static final class CharArrayCodec extends AbstractCodec<char[]> {
 		public CharArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -830,8 +828,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class LongArrayCodec extends AbstractCodec<long[]> {
 
+	public static final class LongArrayCodec extends AbstractCodec<long[]> {
 		public LongArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -853,7 +851,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 
 	public static final class FloatArrayCodec extends AbstractCodec<float[]> {
-
 		public FloatArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -873,8 +870,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class DoubleArrayCodec extends AbstractCodec<double[]> {
 
+	public static final class DoubleArrayCodec extends AbstractCodec<double[]> {
 		public DoubleArrayCodec(CodecRegistry registry) {
 			super(registry);
 		}
@@ -896,7 +893,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 
 	public static final class FileCodec extends AbstractCodec<File> {
-
 		public FileCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -933,7 +929,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 
 	public static final class PathCodec extends AbstractCodec<Path> {
-
 		public PathCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -968,8 +963,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class URICodec extends AbstractCodec<URI> {
 
+	public static final class URICodec extends AbstractCodec<URI> {
 		public URICodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -995,8 +990,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class URLCodec extends AbstractCodec<URL> {
 
+	public static final class URLCodec extends AbstractCodec<URL> {
 		public URLCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1022,8 +1017,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class UUIDCodec extends AbstractCodec<UUID> {
 
+	public static final class UUIDCodec extends AbstractCodec<UUID> {
 		public UUIDCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1044,8 +1039,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class ObjectCodec extends AbstractCodec<Object> {
 
+	public static final class ObjectCodec extends AbstractCodec<Object> {
 		final UniversalDeserializer<JsonObject> jod;
 		final UniversalDeserializer<JsonArray> jad;
 
@@ -1102,8 +1097,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class StringCodec extends AbstractCodec<String> {
 
+	public static final class StringCodec extends AbstractCodec<String> {
 		final UniversalDeserializer<JsonObject> jod;
 		final UniversalDeserializer<JsonArray> jad;
 
@@ -1147,10 +1142,10 @@ public class BuiltinCodecFactory implements CodecFactory {
 					return String.valueOf(reader.readBoolean());
 				}
 				case BEGIN_OBJECT -> {
-					return jod.read(reader).toString();    // TODO
+					return jod.read(reader).toString(); // TODO
 				}
 				case BEGIN_LIST -> {
-					return jad.read(reader).toString();    // TODO
+					return jad.read(reader).toString(); // TODO
 				}
 				default -> {
 					if (type.isNumber()) {
@@ -1162,8 +1157,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class DateCodec extends AbstractCodec<Date> {
 
+	public static final class DateCodec extends AbstractCodec<Date> {
 		public DateCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
@@ -1196,8 +1191,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class ColorCodec extends AbstractCodec<Color> {
 
+	public static final class ColorCodec extends AbstractCodec<Color> {
 		public ColorCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
@@ -1267,8 +1262,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class EnumCodec<E extends Enum<E>> extends AbstractCodec<E> {
 
+	public static final class EnumCodec<E extends Enum<E>> extends AbstractCodec<E> {
 		private final Class<E> eClass;
 
 		@SuppressWarnings("unchecked")
@@ -1311,8 +1306,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 						E[] values = eClass.getEnumConstants();
 						if (n < 0 || n >= values.length) return null;
 						return values[n];
-					} else
-						throw new ParseException("Unexpected token " + type);
+					} else throw new ParseException("Unexpected token " + type);
 				}
 			}
 		}
@@ -1336,14 +1330,13 @@ public class BuiltinCodecFactory implements CodecFactory {
 				throw e;
 			}
 		} catch (Exception e) {
-			if (throwException)
-				throw new IllegalStateException(e);
+			if (throwException) throw new IllegalStateException(e);
 			return null;
 		}
 	}
 
-	public static class IntCodec extends AbstractCodec<Integer> {
 
+	public static class IntCodec extends AbstractCodec<Integer> {
 		public IntCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1373,8 +1366,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class WrappedIntCodec extends AbstractCodec<Integer> {
 
+	public static final class WrappedIntCodec extends AbstractCodec<Integer> {
 		public WrappedIntCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1409,8 +1402,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class ByteCodec extends AbstractCodec<Byte> {
 
+	public static final class ByteCodec extends AbstractCodec<Byte> {
 		public ByteCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1435,8 +1428,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class WrappedByteCodec extends AbstractCodec<Byte> {
 
+	public static final class WrappedByteCodec extends AbstractCodec<Byte> {
 		public WrappedByteCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1461,8 +1454,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class NumberCodec extends AbstractCodec<Number> {
 
+	public static final class NumberCodec extends AbstractCodec<Number> {
 		public NumberCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1492,8 +1485,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class BooleanCodec extends AbstractCodec<Boolean> {
 
+	public static class BooleanCodec extends AbstractCodec<Boolean> {
 		public BooleanCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1523,8 +1516,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class WrappedBooleanCodec extends AbstractCodec<Boolean> {
 
+	public static final class WrappedBooleanCodec extends AbstractCodec<Boolean> {
 		public WrappedBooleanCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1554,8 +1547,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class CharCodec extends AbstractCodec<Character> {
 
+	public static final class CharCodec extends AbstractCodec<Character> {
 		public CharCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1595,8 +1588,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class WrappedCharCodec extends AbstractCodec<Character> {
 
+	public static final class WrappedCharCodec extends AbstractCodec<Character> {
 		public WrappedCharCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1636,8 +1629,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class ShortCodec extends AbstractCodec<Short> {
 
+	public static final class ShortCodec extends AbstractCodec<Short> {
 		public ShortCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1667,8 +1660,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class WrappedShortCodec extends AbstractCodec<Short> {
 
+	public static final class WrappedShortCodec extends AbstractCodec<Short> {
 		public WrappedShortCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1698,8 +1691,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class LongCodec extends AbstractCodec<Long> {
 
+	public static final class LongCodec extends AbstractCodec<Long> {
 		public LongCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1729,8 +1722,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class WrappedLongCodec extends AbstractCodec<Long> {
 
+	public static final class WrappedLongCodec extends AbstractCodec<Long> {
 		public WrappedLongCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1760,8 +1753,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class FloatCodec extends AbstractCodec<Float> {
 
+	public static final class FloatCodec extends AbstractCodec<Float> {
 		public FloatCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1785,14 +1778,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 			SosisonEntryType type = reader.nextEntryType();
 			if (type == SosisonEntryType.NULL) {
 				reader.skipNull();
-				return 0f;
+				return 0.0F;
 			}
 			return reader.readFloat();
 		}
 	}
 
-	public static final class WrappedFloatCodec extends AbstractCodec<Float> {
 
+	public static final class WrappedFloatCodec extends AbstractCodec<Float> {
 		public WrappedFloatCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1822,8 +1815,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static final class DoubleCodec extends AbstractCodec<Double> {
 
+	public static final class DoubleCodec extends AbstractCodec<Double> {
 		public DoubleCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}
@@ -1847,14 +1840,14 @@ public class BuiltinCodecFactory implements CodecFactory {
 			SosisonEntryType type = reader.nextEntryType();
 			if (type == SosisonEntryType.NULL) {
 				reader.skipNull();
-				return 0d;
+				return 0.0;
 			}
 			return reader.readDouble();
 		}
 	}
 
-	public static final class WrappedDoubleCodec extends AbstractCodec<Double> {
 
+	public static final class WrappedDoubleCodec extends AbstractCodec<Double> {
 		public WrappedDoubleCodec(Type type, CodecRegistry registry) {
 			super(registry);
 		}

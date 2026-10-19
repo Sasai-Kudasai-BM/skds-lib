@@ -1,3 +1,9 @@
+plugins {
+	id "java"
+	id 'io.freefair.lombok' version '9.8.2'
+}
+var lmb = "org.projectlombok:lombok:1.18.48"
+
 version = "1.0"
 group = "net.skds"
 
@@ -6,30 +12,39 @@ sourceSets {
 		java.srcDir 'src'
 		resources.srcDir 'resources'
 	}
-}
-
-/*
-sourceSets {
-    main {
-        java.srcDir 'src'
-        resources.srcDir 'resources'
-    }
-    test {
-        java.srcDir 'test_src'
-        resources.srcDir 'test_resources'
-    }
+	test {
+		java.srcDir 'test_src'
+		resources.srcDir 'test_resources'
+	}
 }
 repositories {
-    mavenCentral()
+	mavenCentral()
 }
 dependencies {
-   compileOnly 'org.projectlombok:lombok:1.18.32'
-   annotationProcessor 'org.projectlombok:lombok:1.18.32'
-   testCompileOnly 'org.projectlombok:lombok:1.18.38'
-   testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
+	//compileOnly lmb
+	//annotationProcessor lmb
+	//testCompileOnly lmb
+	//testAnnotationProcessor lmb
+	testImplementation("it.unimi.dsi:fastutil:8.5.6")
 }
 
- //*/
-dependencies {
-	testImplementation("it.unimi.dsi:fastutil:8.5.6")
+// Valhalla
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.withType(JavaCompile).configureEach {
+	//options.fork = true
+	//options.forkOptions.executable = "${valhallaHome}/bin/javac"
+	//options.compilerArgs << '--release' << '28'
+	//options.compilerArgs << '--enable-preview'
+}
+
+tasks.withType(JavaExec).configureEach {
+	//jvmArgs '--enable-preview'
+}
+
+test {
+	//jvmArgs '--enable-preview'
 }

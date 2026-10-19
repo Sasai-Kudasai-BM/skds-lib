@@ -1,14 +1,10 @@
 package net.skds.lib2.utils.collection;
 
-import lombok.AllArgsConstructor;
-
 import java.util.*;
 
 public final class ImmutableArrayHashMap<K, V> extends AbstractImmutableMap<K, V> {
-
 	final Object[] table;
 	final int size;
-
 	private static final int EXPAND_FACTOR = 2;
 
 	public ImmutableArrayHashMap(Object... input) {
@@ -16,11 +12,9 @@ public final class ImmutableArrayHashMap<K, V> extends AbstractImmutableMap<K, V
 			throw new IllegalArgumentException("length is odd");
 		}
 		size = input.length >> 1;
-
 		int len = EXPAND_FACTOR * input.length;
 		len = (len + 1) & ~1; // ensure table is even length
 		table = new Object[len];
-
 		for (int i = 0; i < input.length; i += 2) {
 			@SuppressWarnings("unchecked")
 			K k = Objects.requireNonNull((K) input[i]);
@@ -92,8 +86,8 @@ public final class ImmutableArrayHashMap<K, V> extends AbstractImmutableMap<K, V
 		return size == 0;
 	}
 
-	class Itr implements Iterator<Map.Entry<K, V>> {
 
+	class Itr implements Iterator<Map.Entry<K, V>> {
 		private int remaining;
 		private int idx;
 
@@ -131,7 +125,6 @@ public final class ImmutableArrayHashMap<K, V> extends AbstractImmutableMap<K, V
 			public int size() {
 				return size;
 			}
-
 			@Override
 			public Iterator<Map.Entry<K, V>> iterator() {
 				return new Itr();
@@ -154,7 +147,7 @@ public final class ImmutableArrayHashMap<K, V> extends AbstractImmutableMap<K, V
 		}
 	}
 
-	@AllArgsConstructor
+
 	private class Entry implements Map.Entry<K, V> {
 		final K k;
 		final V v;
@@ -172,6 +165,11 @@ public final class ImmutableArrayHashMap<K, V> extends AbstractImmutableMap<K, V
 		@Override
 		public V setValue(V value) {
 			throw uoe();
+		}
+
+		public Entry(final K k, final V v) {
+			this.k = k;
+			this.v = v;
 		}
 	}
 }

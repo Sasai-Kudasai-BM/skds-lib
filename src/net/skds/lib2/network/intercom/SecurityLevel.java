@@ -1,10 +1,8 @@
 package net.skds.lib2.network.intercom;
 
-import lombok.AllArgsConstructor;
 import net.skds.lib2.network.AddressLocation;
 import net.skds.lib2.utils.EnumHelper;
 
-@AllArgsConstructor
 public enum SecurityLevel implements EnumHelper<SecurityLevel> {
 	LOCALHOST(false, false),
 	LAN_NO_ENCRYPTION(false, false),
@@ -21,5 +19,10 @@ public enum SecurityLevel implements EnumHelper<SecurityLevel> {
 			case LAN -> LAN_SAFE;
 			default -> WEB_SAFE;
 		};
+	}
+
+	private SecurityLevel(final boolean useEncryption, final boolean checkCertificate) {
+		this.useEncryption = useEncryption;
+		this.checkCertificate = checkCertificate;
 	}
 }

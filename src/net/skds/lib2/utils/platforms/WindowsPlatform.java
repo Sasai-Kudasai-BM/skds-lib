@@ -1,11 +1,9 @@
 package net.skds.lib2.utils.platforms;
 
-import lombok.CustomLog;
 import net.skds.lib2.natives.MemoryAccess;
 import net.skds.lib2.natives.windows.Kernel32;
 import net.skds.lib2.natives.windows.User32;
 import net.skds.lib2.utils.ThreadUtils;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -15,16 +13,14 @@ import java.awt.event.MouseListener;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.util.LinkedList;
-
 import static java.awt.event.KeyEvent.*;
 import static java.awt.event.KeyEvent.ALT_DOWN_MASK;
 import static java.awt.event.KeyEvent.CTRL_DOWN_MASK;
 import static java.awt.event.KeyEvent.SHIFT_DOWN_MASK;
 import static java.awt.event.MouseEvent.*;
 
-@CustomLog
 final class WindowsPlatform extends PlatformFeatures {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(WindowsPlatform.class);
 	private static final int WH_KEYBOARD_LL = 13;
 	private static final int WH_MOUSE_LL = 14;
 
@@ -36,13 +32,10 @@ final class WindowsPlatform extends PlatformFeatures {
 	private static final int WIN_R_MENU = 0xA5;
 
 	private final Component blankComponent = Box.createGlue();
-
 	private final User32 user32 = User32.getInstance();
 	private final Kernel32 kernel32 = Kernel32.getInstance();
 	//private final Toolkit toolkit = Toolkit.getDefaultToolkit();
-
 	private KeyListenerThread keyListenerThread;
-
 	private final long moduleHandle = kernel32.getModuleHandle(0);
 
 	public WindowsPlatform() {
@@ -111,9 +104,7 @@ final class WindowsPlatform extends PlatformFeatures {
 				k = wp / 3;
 				down = wp % 3 != 2;
 			}
-
 			//System.out.println(wp + " " + k + " " + down);
-
 			int id = down ? MOUSE_PRESSED : MOUSE_RELEASED;
 			switch (k) {
 				case 0 -> k = BUTTON1;
@@ -125,17 +116,12 @@ final class WindowsPlatform extends PlatformFeatures {
 	}
 
 	private KeyEvent processKeyEventLL(long ptr, long callTime, KeyListenerThread thread) {
-
 		//MemorySegment ms = MemorySegment.ofAddress(ptr).reinterpret(KBDLLHOOK_STRUCT.byteSize());
-
 		int vkCode = MemoryAccess.getInt(ptr);
 		int flags = MemoryAccess.getInt(ptr + 8);
-
 		boolean up = (flags & 128) != 0;
 		int id = up ? KEY_RELEASED : KEY_PRESSED;
-
 		int location = KEY_LOCATION_UNKNOWN;
-
 		switch (vkCode) {
 			case VK_SHIFT -> thread.applyMask(up, SHIFT_DOWN_MASK);
 			case WIN_L_SHIFT -> {
@@ -148,7 +134,6 @@ final class WindowsPlatform extends PlatformFeatures {
 				location = KEY_LOCATION_RIGHT;
 				vkCode = VK_SHIFT;
 			}
-
 			case VK_CONTROL -> thread.applyMask(up, CTRL_DOWN_MASK);
 			case WIN_L_CONTROL -> {
 				thread.applyMask(up, CTRL_DOWN_MASK);
@@ -160,7 +145,6 @@ final class WindowsPlatform extends PlatformFeatures {
 				location = KEY_LOCATION_RIGHT;
 				vkCode = VK_CONTROL;
 			}
-
 			case VK_ALT -> thread.applyMask(up, ALT_DOWN_MASK);
 			case WIN_L_MENU -> {
 				thread.applyMask(up, ALT_DOWN_MASK);
@@ -173,12 +157,11 @@ final class WindowsPlatform extends PlatformFeatures {
 				vkCode = VK_ALT;
 			}
 		}
-
 		return new KeyEvent(blankComponent, id, callTime, thread.keyFlags, vkCode, CHAR_UNDEFINED, location);
 	}
 
-	private class KeyListenerThread extends ThreadUtils.SKDSThread {
 
+	private class KeyListenerThread extends ThreadUtils.SKDSThread {
 		private final LinkedList<KeyListener> keyListeners = new LinkedList<>();
 		private final LinkedList<MouseListener> mouseListeners = new LinkedList<>();
 		private int keyFlags = 0;
@@ -258,7 +241,6 @@ final class WindowsPlatform extends PlatformFeatures {
 				}
 				return 0;
 			};
-
 			try {
 				MemorySegment segment = user32.lowLevelKeyboardProcUL.bind(kCaller, arena);
 				hookHandle = user32.setWindowsHookExA(WH_KEYBOARD_LL, segment.address(), moduleHandle, 0);

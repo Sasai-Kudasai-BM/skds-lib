@@ -1,10 +1,7 @@
 package net.skds.lib2.utils.logger;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.utils.AnsiEscape;
 
-@AllArgsConstructor
 public enum LoggerLevel {
 	SYSTEM_OUT("SYS_OUT", AnsiEscape.GREEN.sequence, OutType.OUT),
 	DEBUG("DEBUG", AnsiEscape.BRIGHT_BLACK.sequence, OutType.OUT),
@@ -15,12 +12,20 @@ public enum LoggerLevel {
 	ERROR("ERROR", AnsiEscape.BRIGHT_RED.sequence, OutType.ERR);
 
 	final String msg;
-	@Getter
 	private String color;
-
 	final OutType outType;
 
 	void setColor(AnsiEscape ansi) {
 		this.color = ansi.sequence;
+	}
+
+	private LoggerLevel(final String msg, final String color, final OutType outType) {
+		this.msg = msg;
+		this.color = color;
+		this.outType = outType;
+	}
+
+	public String getColor() {
+		return this.color;
 	}
 }

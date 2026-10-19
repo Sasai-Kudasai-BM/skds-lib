@@ -1,6 +1,5 @@
 package net.skds.lib2.demo;
 
-import lombok.CustomLog;
 import net.skds.lib2.mat.quat.Quat;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.shapes.AABB;
@@ -9,20 +8,16 @@ import net.skds.lib2.shapes.CompositeSuperShape.PoseCallback;
 import net.skds.lib2.shapes.CompositeSuperShape.PoseFunction;
 import net.skds.lib2.shapes.Shape;
 import net.skds.lib2.utils.logger.SKDSLogger;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@CustomLog
 public class DemoShape {
-
+	private static final SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(DemoShape.class);
 	private static final List<String> BONES_KEYS_FOUND = new ArrayList<>();
-
 	private static final PoseFunction FUNCTION = (Shape _, Vec3 _, Quat _, double _, PoseCallback _) -> {
-		//BONES_KEYS_FOUND.add(s.getAttachment().toString());
 	};
-
+	//BONES_KEYS_FOUND.add(s.getAttachment().toString());
 	private static final Vec3 OFFSET = Vec3.of(0, 10, 0);
 
 	public static void main(String[] args) {
@@ -36,12 +31,10 @@ public class DemoShape {
 				AABB.fromSize(2).withAttachment("box")
 		}, Vec3.ZERO, null);
 		log.info("Base box: " + shape.getBoundingBox());
-
 		log.warn("shape1");
 		print(shape, 1);
 		log.warn("shape2");
-		print(shape, 0.5f);
-
+		print(shape, 0.5F);
 		log.warn("shape rot");
 		CompositeSuperShape shape3 = shape.setPose(FUNCTION, OFFSET, Quat.fromAxisDegrees(Vec3.XP, 90), 1);
 		CompositeSuperShape shape4 = shape.setPose(FUNCTION, OFFSET, Quat.fromAxisDegrees(Vec3.XP, 180), 1);
@@ -55,12 +48,10 @@ public class DemoShape {
 		CompositeSuperShape shape1 = shape.setPose(FUNCTION, OFFSET, Quat.ONE, scale);
 		//CompositeSuperShape shape1 = shape.scale(scale).move(OFFSET);
 		//log.debug("apply function for bones: " + BONES_KEYS_FOUND);
-
 		AABB box = shape1.getBoundingBox();
 		AABB expectedBox = shape.move(OFFSET).getBoundingBox().scale(scale);
 		Vec3 size = box.dimensions();
 		Vec3 expectedSize = shape.getBoundingBox().dimensions().scale(scale);
-
 		if (box.equals(expectedBox)) {
 			System.out.println("new bounding box: " + box);
 		} else {

@@ -1,20 +1,14 @@
 package net.skds.lib2.network.intercom.packet.system;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.network.intercom.IntercomConnection;
 import net.skds.lib2.network.intercom.packet.IntercomPacket;
 import net.skds.lib2.network.intercom.packet.PacketType;
 import net.skds.lib2.network.intercom.packet.SystemPacketRegistry;
-
 import java.io.IOException;
 
-@Getter
-@AllArgsConstructor
 public class DisconnectPacket implements IntercomPacket<IntercomConnection<?>> {
-
 	private final long time;
 	private final String reason;
 
@@ -34,7 +28,6 @@ public class DisconnectPacket implements IntercomPacket<IntercomConnection<?>> {
 		connection.handleDisconnect(this);
 	}
 
-
 	@Override
 	public boolean isInstantHandle() {
 		return true;
@@ -48,5 +41,18 @@ public class DisconnectPacket implements IntercomPacket<IntercomConnection<?>> {
 	@Override
 	public PacketType packetType() {
 		return PacketType.SYSTEM_CRITICAL;
+	}
+
+	public long getTime() {
+		return this.time;
+	}
+
+	public String getReason() {
+		return this.reason;
+	}
+
+	public DisconnectPacket(final long time, final String reason) {
+		this.time = time;
+		this.reason = reason;
 	}
 }

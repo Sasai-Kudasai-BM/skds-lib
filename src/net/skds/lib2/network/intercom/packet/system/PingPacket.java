@@ -1,18 +1,14 @@
 package net.skds.lib2.network.intercom.packet.system;
 
-import lombok.AllArgsConstructor;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.network.intercom.IntercomConnection;
 import net.skds.lib2.network.intercom.packet.IntercomPacket;
 import net.skds.lib2.network.intercom.packet.PacketType;
 import net.skds.lib2.network.intercom.packet.SystemPacketRegistry;
-
 import java.io.IOException;
 
-@AllArgsConstructor
 public class PingPacket implements IntercomPacket<IntercomConnection<?>> {
-
 	private final long time;
 
 	public PingPacket(ExtendedDataInput input) throws IOException {
@@ -29,7 +25,6 @@ public class PingPacket implements IntercomPacket<IntercomConnection<?>> {
 		connection.send(new PongPacket(time));
 	}
 
-
 	@Override
 	public boolean isInstantHandle() {
 		return true;
@@ -43,5 +38,9 @@ public class PingPacket implements IntercomPacket<IntercomConnection<?>> {
 	@Override
 	public PacketType packetType() {
 		return PacketType.SYSTEM;
+	}
+
+	public PingPacket(final long time) {
+		this.time = time;
 	}
 }

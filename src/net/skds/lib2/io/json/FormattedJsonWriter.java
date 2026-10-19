@@ -1,24 +1,18 @@
 package net.skds.lib2.io.json;
 
-import lombok.CustomLog;
-import lombok.Getter;
 import net.skds.lib2.io.chars.CharOutput;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.exception.EndOfOutputException;
 import net.skds.lib2.utils.StringUtils;
 import net.skds.lib2.utils.exception.StackUnderflowException;
-
 import java.io.IOException;
 import java.util.UUID;
 
-@CustomLog
 public final class FormattedJsonWriter implements UniversalWriter {
-
-	@Getter
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(FormattedJsonWriter.class);
 	private final CharOutput output;
 	private final String tab;
 	private final JsonCodecOptions.JsonCapabilityVersion cpv;
-
 	private StackEntry stack;
 	private String nextComment;
 
@@ -93,7 +87,6 @@ public final class FormattedJsonWriter implements UniversalWriter {
 	//public void writeTime(long n) throws IOException {
 	//	writeLong(n);
 	//}
-
 	@Override
 	public void writeInt(int n) throws IOException {
 		pushValue();
@@ -298,6 +291,7 @@ public final class FormattedJsonWriter implements UniversalWriter {
 		this.stack = e.parent;
 	}
 
+
 	private static class StackEntry {
 		int n;
 		final StackEntry parent;
@@ -308,5 +302,9 @@ public final class FormattedJsonWriter implements UniversalWriter {
 			this.parent = parent;
 			this.isList = isList;
 		}
+	}
+
+	public CharOutput getOutput() {
+		return this.output;
 	}
 }

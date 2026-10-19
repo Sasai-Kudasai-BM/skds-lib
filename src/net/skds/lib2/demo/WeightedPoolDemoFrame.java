@@ -1,44 +1,36 @@
 package net.skds.lib2.demo;
 
-import lombok.CustomLog;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.collection.WeightedPool;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@CustomLog
 public class WeightedPoolDemoFrame extends JFrame {
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(WeightedPoolDemoFrame.class);
 
 	public WeightedPoolDemoFrame() {
 		super("WeightedPool demo");
-
 		setLayout(new FlowLayout());
-
 		JButton btn = new JButton("size 0");
 		btn.addActionListener(_ -> {
 			WeightedPool<String> wp = new WeightedPool<>(List.of(), _ -> 1);
-
 			log.debug("========= size 0 ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 1");
 		btn.addActionListener(_ -> {
 			WeightedPool<String> wp = new WeightedPool<>(List.of("ass"), _ -> 1);
-
 			log.debug("========= size 1 ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 5");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -46,14 +38,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
-
 			log.debug("========= size 5 ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 10");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -61,14 +51,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
-
 			log.debug("========= size 10 ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 15");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -76,14 +64,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
-
 			log.debug("========= size 15 ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 100 R");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -91,14 +77,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, String::hashCode);
-
 			log.debug("========= size 100 R ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 1000 R");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -106,14 +90,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, String::hashCode);
-
 			log.debug("========= size 1000 R ==========");
 			for (int i = 0; i < 12; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 10 Fail");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -121,14 +103,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, _ -> FastMath.RANDOM.nextFloat());
-
 			log.debug("========= size 10 Fail ==========");
 			for (int i = 0; i < 11; i++) {
 				log.debug(wp.get(i / 10f));
 			}
 		});
 		add(btn);
-
 		btn = new JButton("size 10 remove");
 		btn.addActionListener(_ -> {
 			List<String> list = new ArrayList<>();
@@ -136,15 +116,12 @@ public class WeightedPoolDemoFrame extends JFrame {
 				list.add(String.valueOf(i));
 			}
 			WeightedPool<String> wp = new WeightedPool<>(list, _ -> 1);
-
 			log.debug("========= size 10 remove ==========");
 			for (int i = 0; i < 11; i++) {
 				log.debug(wp.getAndRemove(.5f));
 			}
-
 		});
 		add(btn);
-
 		setMinimumSize(new Dimension(300, 50));
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();

@@ -1,8 +1,5 @@
 package net.skds.lib2.natives;
 
-import lombok.CustomLog;
-import lombok.experimental.UtilityClass;
-
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -14,23 +11,18 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
 /*
 --enable-native-access=ALL-UNNAMED
  */
-@CustomLog
-@UtilityClass
 @SuppressWarnings("unused")
 public final class LinkerUtils {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(LinkerUtils.class);
 	public static final boolean NATIVE_ORDER = ByteOrder.BIG_ENDIAN == ByteOrder.nativeOrder();
 	public static final Arena ARENA = Arena.global();
 	public static final Linker LINKER = Linker.nativeLinker();
 	public static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.loaderLookup();
 	public static final MethodHandles.Lookup METHOD_LOOKUP = MethodHandles.lookup();
-
-	private static final Map<Class<?>, LayoutInfo> PRIMITIVE_LAYOUTS = new HashMap<>(16, .5f);
-
+	private static final Map<Class<?>, LayoutInfo> PRIMITIVE_LAYOUTS = new HashMap<>(16, 0.5F);
 	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
 	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
 	public static final ValueLayout.OfShort SHORT = ValueLayout.JAVA_SHORT;
@@ -40,7 +32,6 @@ public final class LinkerUtils {
 	public static final ValueLayout.OfFloat FLOAT = ValueLayout.JAVA_FLOAT;
 	public static final ValueLayout.OfDouble DOUBLE = ValueLayout.JAVA_DOUBLE;
 	public static final ValueLayout VOID = null;
-
 	public static final VarHandle BOOLEAN_HANDLE = BOOLEAN.varHandle();
 	public static final VarHandle BYTE_HANDLE = BYTE.varHandle();
 	public static final VarHandle SHORT_HANDLE = SHORT.varHandle();
@@ -48,8 +39,6 @@ public final class LinkerUtils {
 	public static final VarHandle LONG_HANDLE = LONG.varHandle();
 	public static final VarHandle FLOAT_HANDLE = FLOAT.varHandle();
 	public static final VarHandle DOUBLE_HANDLE = DOUBLE.varHandle();
-
-
 	public static final TypeGlue G_BOOLEAN = new TypeGlue(ValueLayout.JAVA_BOOLEAN, boolean.class);
 	public static final TypeGlue G_BYTE = new TypeGlue(ValueLayout.JAVA_BYTE, byte.class);
 	public static final TypeGlue G_SHORT = new TypeGlue(ValueLayout.JAVA_SHORT, short.class);
@@ -59,7 +48,6 @@ public final class LinkerUtils {
 	public static final TypeGlue G_FLOAT = new TypeGlue(ValueLayout.JAVA_FLOAT, float.class);
 	public static final TypeGlue G_DOUBLE = new TypeGlue(ValueLayout.JAVA_DOUBLE, double.class);
 	public static final TypeGlue G_VOID = new TypeGlue(null, void.class);
-
 
 	private static FunctionDescriptor fd(Class<?> returnType, Class<?>[] argTypes) {
 		if (!returnType.isPrimitive()) throw new IllegalArgumentException("non-primitive return type " + returnType);
@@ -157,7 +145,6 @@ public final class LinkerUtils {
 		);
 	}
 
-
 	public static <T> UpcallLink<T> createUpcallLink(Class<T> clazz, TypeGlue returnType, TypeGlue... argTypes) {
 		return createUpcallLink(clazz, "call", returnType, argTypes);
 	}
@@ -205,10 +192,12 @@ public final class LinkerUtils {
 		return arr;
 	}
 
-	public record TypeGlue(ValueLayout nType, Class<?> jType) {
+
+	public static record TypeGlue(ValueLayout nType, Class<?> jType) {
 	}
 
-	public record LayoutInfo(ValueLayout layout, String name, Class<?> tClass) {
+
+	public static record LayoutInfo(ValueLayout layout, String name, Class<?> tClass) {
 	}
 
 	public static LayoutInfo getLayoutInfo(Class<?> cl) {
@@ -227,4 +216,7 @@ public final class LinkerUtils {
 		PRIMITIVE_LAYOUTS.put(double.class, new LayoutInfo(ValueLayout.JAVA_DOUBLE, "DOUBLE", ValueLayout.OfDouble.class));
 	}
 
+	private LinkerUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }

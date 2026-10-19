@@ -1,13 +1,9 @@
 package net.skds.lib2.utils;
 
 import com.sun.management.HotSpotDiagnosticMXBean;
-import lombok.AllArgsConstructor;
-import lombok.CustomLog;
-import lombok.NoArgsConstructor;
 import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 import net.skds.lib2.mat.ByteArrayPrimitiveOperations;
 import net.skds.lib2.utils.logger.SKDSLogger;
-
 import javax.management.MBeanServer;
 import java.awt.*;
 import java.io.*;
@@ -31,30 +27,24 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 @SuppressWarnings("unused")
-@CustomLog
 public class SKDSUtils {
-
+	private static final SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(SKDSUtils.class);
 	public static final HexFormat HEX_FORMAT_LC = StringUtils.HEX_FORMAT_LC;
 	public static final OSType OS_TYPE = getOS();
 	public static final String OS_ARC = getOSAndArc();
 	public static final int DEFAULT_BUFFER_SIZE = Integer.getInteger("skds.default_buffer_size", 8192);
-
 	public static final Runnable EMPTY_RUNNABLE = () -> {
 	};
 	public static final Predicate<?> TRUE_PREDICATE = o -> true;
 	public static final Predicate<?> FALSE_PREDICATE = o -> false;
-
 	public static final Random R = new Random();
-
 	public static final UUID NULL_UUID = new UUID(0, 0);
-
 	private static final Function<Throwable, Object> CATCHER = t -> {
 		t.printStackTrace(SKDSLogger.ERROR_PRINTSTREAM);
 		return null;
 	};
 	private static final Consumer<?> EMPTY_CONSUMER = o -> {
 	};
-
 	private static Supplier<MessageDigest> SHA1 = getMDSafe("SHA1", md -> SHA1 = md);
 	private static Supplier<MessageDigest> SHA256 = getMDSafe("SHA256", md -> SHA256 = md);
 	private static Supplier<MessageDigest> SHA512 = getMDSafe("SHA512", md -> SHA512 = md);
@@ -119,7 +109,6 @@ public class SKDSUtils {
 		if (dataLen == 0) return ArrayUtils.EMPTY_BYTE;
 		return new byte[dataLen < DEFAULT_BUFFER_SIZE ? dataLen : DEFAULT_BUFFER_SIZE];
 	}
-
 
 	public static <T> T castOrThrow(Object o, Class<T> type, String message) {
 		try {
@@ -237,7 +226,7 @@ public class SKDSUtils {
 	public static int[] UUID2IntArray(UUID uuid) {
 		long l = uuid.getLeastSignificantBits();
 		long m = uuid.getMostSignificantBits();
-		return new int[]{(int) (m >> 32), (int) m, (int) (l >> 32), (int) l};
+		return new int[] {(int) (m >> 32), (int) m, (int) (l >> 32), (int) l};
 	}
 
 	public static UUID IntArray2UUID(int[] uuid) {
@@ -257,13 +246,13 @@ public class SKDSUtils {
 		if (bytes < 1L << 10) {
 			return bytes + " B";
 		} else if (bytes < 1L << 20) {
-			return "%.2f kiB".formatted(bytes / 1024d);
+			return "%.2f kiB".formatted(bytes / 1024.0);
 		} else if (bytes < 1L << 30) {
-			return "%.2f MiB".formatted(bytes / (1024d * 1024));
+			return "%.2f MiB".formatted(bytes / (1024.0 * 1024));
 		} else if (bytes < 1L << 40) {
-			return "%.2f GiB".formatted(bytes / (1024d * 1024 * 1024));
+			return "%.2f GiB".formatted(bytes / (1024.0 * 1024 * 1024));
 		} else {
-			return "%.2f TiB".formatted(bytes / (1024d * 1024 * 1024 * 1024));
+			return "%.2f TiB".formatted(bytes / (1024.0 * 1024 * 1024 * 1024));
 		}
 	}
 
@@ -271,13 +260,13 @@ public class SKDSUtils {
 		if (of < 1L << 10) {
 			return "%s / %s B".formatted(bytes, of);
 		} else if (of < 1L << 20) {
-			return "%.2f / %.2f kiB".formatted(bytes / 1024d, of / 1024d);
+			return "%.2f / %.2f kiB".formatted(bytes / 1024.0, of / 1024.0);
 		} else if (of < 1L << 30) {
-			return "%.2f / %.2f MiB".formatted(bytes / (1024d * 1024), of / (1024d * 1024));
+			return "%.2f / %.2f MiB".formatted(bytes / (1024.0 * 1024), of / (1024.0 * 1024));
 		} else if (of < 1L << 40) {
-			return "%.2f / %.2f GiB".formatted(bytes / (1024d * 1024 * 1024), of / (1024d * 1024 * 1024));
+			return "%.2f / %.2f GiB".formatted(bytes / (1024.0 * 1024 * 1024), of / (1024.0 * 1024 * 1024));
 		} else {
-			return "%.2f / %.2f TiB".formatted(bytes / (1024d * 1024 * 1024 * 1024), of / (1024d * 1024 * 1024 * 1024));
+			return "%.2f / %.2f TiB".formatted(bytes / (1024.0 * 1024 * 1024 * 1024), of / (1024.0 * 1024 * 1024 * 1024));
 		}
 	}
 
@@ -297,8 +286,6 @@ public class SKDSUtils {
 
 
 	@Deprecated(forRemoval = true)
-	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class PairIF {
 		public int i;
 		public float f;
@@ -307,7 +294,16 @@ public class SKDSUtils {
 		public String toString() {
 			return String.format("[%s <-> %s]", i, f);
 		}
+
+		public PairIF() {
+		}
+
+		public PairIF(final int i, final float f) {
+			this.i = i;
+			this.f = f;
+		}
 	}
+
 
 	@Deprecated(forRemoval = true)
 	public static class Pair<A, B> {
@@ -328,6 +324,7 @@ public class SKDSUtils {
 		}
 	}
 
+
 	@Deprecated(forRemoval = true)
 	public static class Numered<T> {
 		public T value;
@@ -343,6 +340,7 @@ public class SKDSUtils {
 			return String.format("[%s <-> %s]", value, index);
 		}
 	}
+
 
 	@Deprecated(forRemoval = true)
 	public static class NumeredConstant<T> {
@@ -360,15 +358,18 @@ public class SKDSUtils {
 		}
 	}
 
+
 	public interface Indexed {
 		int getIndex();
 	}
+
 
 	public interface NamedWithId {
 		String getName();
 
 		String getId();
 	}
+
 
 	@Deprecated
 	public static class R3ICorded<T> {
@@ -475,36 +476,33 @@ public class SKDSUtils {
 	}
 
 	public static ByteBuffer compress(byte[] data, int offset, int len, int compressionLevel) {
-		try (Deflater deflater = new Deflater(compressionLevel)) {
-			deflater.setInput(data, offset, len);
-			deflater.finish();
-			byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
-			ByteArrayExtendedDataOutput bao = new ByteArrayExtendedDataOutput(len + 32);
-			do {
-				int i = deflater.deflate(outBuffer);
-				bao.write(outBuffer, 0, i);
-			} while (!deflater.finished());
-
-			deflater.end();
-			return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
-		}
+		Deflater deflater = new Deflater(compressionLevel);
+		deflater.setInput(data, offset, len);
+		deflater.finish();
+		byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
+		ByteArrayExtendedDataOutput bao = new ByteArrayExtendedDataOutput(len + 32);
+		do {
+			int i = deflater.deflate(outBuffer);
+			bao.write(outBuffer, 0, i);
+		} while (!deflater.finished());
+		deflater.end();
+		return ByteBuffer.wrap(bao.rawArray(), 0, bao.size());
 	}
 
 	public static void compress(byte[] data, int offset, int len, int compressionLevel, DataOutput output) {
-		try (Deflater deflater = new Deflater(compressionLevel)) {
-			deflater.setInput(data, offset, len);
-			deflater.finish();
-			byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
-			try {
-				do {
-					int i = deflater.deflate(outBuffer);
-					output.write(outBuffer, 0, i);
-				} while (!deflater.finished());
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			deflater.end();
+		Deflater deflater = new Deflater(compressionLevel);
+		deflater.setInput(data, offset, len);
+		deflater.finish();
+		byte[] outBuffer = new byte[(Math.min(len + 32, SKDSUtils.DEFAULT_BUFFER_SIZE))];
+		try {
+			do {
+				int i = deflater.deflate(outBuffer);
+				output.write(outBuffer, 0, i);
+			} while (!deflater.finished());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
+		deflater.end();
 	}
 
 	public static ByteBuffer compress(byte[] data, int offset, int len) {
@@ -520,20 +518,19 @@ public class SKDSUtils {
 	}
 
 	public static ByteBuffer decompress(byte[] data, int offset, int len, int uncompressedSize) throws DataFormatException {
-		try (Inflater inflater = new Inflater()) {
-			inflater.setInput(data, offset, len);
-			ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
-			while (true) {
-				inflater.inflate(outBuffer);
-				if (!inflater.finished()) {
-					if (!outBuffer.hasRemaining()) {
-						throw new RuntimeException("Decompressed data size is larger than specified " + uncompressedSize);
-					}
-				} else break;
-			}
-			inflater.end();
-			return outBuffer.flip();
+		Inflater inflater = new Inflater();
+		inflater.setInput(data, offset, len);
+		ByteBuffer outBuffer = ByteBuffer.allocate(uncompressedSize);
+		while (true) {
+			inflater.inflate(outBuffer);
+			if (!inflater.finished()) {
+				if (!outBuffer.hasRemaining()) {
+					throw new RuntimeException("Decompressed data size is larger than specified " + uncompressedSize);
+				}
+			} else break;
 		}
+		inflater.end();
+		return outBuffer.flip();
 	}
 
 	private static String getOSAndArc() {
@@ -567,11 +564,7 @@ public class SKDSUtils {
 		System.out.println("Dumping heap");
 		try {
 			MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-			HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(
-					server,
-					"com.sun.management:type=HotSpotDiagnostic",
-					HotSpotDiagnosticMXBean.class
-			);
+			HotSpotDiagnosticMXBean mxBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
 			mxBean.dumpHeap(filePath, true);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -582,7 +575,6 @@ public class SKDSUtils {
 
 	public enum OSType {
 		WINDOWS, LINUX, OSX, SOLARIS, UNKNOWN;
-
 		public final String nameLC;
 
 		OSType() {

@@ -1,10 +1,7 @@
 package net.skds.lib2.shapes2d;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import net.skds.lib2.mat.vec2.Vec2;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AABRBuilder {
 	private double minX;
 	private double minY;
@@ -56,14 +53,12 @@ public class AABRBuilder {
 		if (point.y() < minY) {
 			minY = point.y();
 		}
-
 		return this;
 	}
 
 	public AABRBuilder expand(Vec2... points) {
 		for (int i = 0; i < points.length; i++) {
 			Vec2 point = points[i];
-
 			if (point.x() > maxX) {
 				maxX = point.x();
 			}
@@ -93,7 +88,9 @@ public class AABRBuilder {
 		if (box.minY < minY) {
 			minY = box.minY;
 		}
-
 		return this;
+	}
+
+	protected AABRBuilder() {
 	}
 }

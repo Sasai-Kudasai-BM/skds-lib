@@ -1,18 +1,14 @@
 package net.skds.lib2.security;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.SKDSUtils;
-
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 
-@UtilityClass
-public class X509Utils {
-
+public final class X509Utils {
 	public static final CertificateFactory X509_FACTORY;
 
 	public static X509Certificate[] readCertificates(InputStream is) {
@@ -51,4 +47,7 @@ public class X509Utils {
 		X509_FACTORY = factory;
 	}
 
+	private X509Utils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }

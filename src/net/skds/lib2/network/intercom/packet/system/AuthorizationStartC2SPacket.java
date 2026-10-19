@@ -1,7 +1,5 @@
 package net.skds.lib2.network.intercom.packet.system;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.network.NetworkDirection;
@@ -10,20 +8,13 @@ import net.skds.lib2.network.intercom.packet.IntercomPacket;
 import net.skds.lib2.network.intercom.packet.PacketType;
 import net.skds.lib2.network.intercom.packet.SystemPacketRegistry;
 import net.skds.lib2.security.AuthorizationData;
-
 import java.io.IOException;
 
-@AllArgsConstructor
-@Getter
 public class AuthorizationStartC2SPacket implements IntercomPacket<ServerIntercomConnection> {
-
 	private final AuthorizationData authorizationData;
 
 	public AuthorizationStartC2SPacket(ExtendedDataInput input) throws IOException {
-		this.authorizationData = new AuthorizationData(
-				input.readSizedString(),
-				input.readByteArray()
-		);
+		this.authorizationData = new AuthorizationData(input.readSizedString(), input.readByteArray());
 	}
 
 	@Override
@@ -36,7 +27,6 @@ public class AuthorizationStartC2SPacket implements IntercomPacket<ServerInterco
 	public void handle(ServerIntercomConnection connection) {
 		connection.authorizationStart(authorizationData);
 	}
-
 
 	@Override
 	public boolean isInstantHandle() {
@@ -56,5 +46,13 @@ public class AuthorizationStartC2SPacket implements IntercomPacket<ServerInterco
 	@Override
 	public PacketType packetType() {
 		return PacketType.SYSTEM_CRITICAL;
+	}
+
+	public AuthorizationStartC2SPacket(final AuthorizationData authorizationData) {
+		this.authorizationData = authorizationData;
+	}
+
+	public AuthorizationData getAuthorizationData() {
+		return this.authorizationData;
 	}
 }

@@ -1,10 +1,7 @@
 package net.skds.lib2.shapes;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import net.skds.lib2.mat.vec3.Vec3;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AABBBuilder {
 	private double minX;
 	private double minY;
@@ -68,14 +65,12 @@ public class AABBBuilder {
 		if (point.z() < minZ) {
 			minZ = point.z();
 		}
-
 		return this;
 	}
 
 	public AABBBuilder expand(Vec3... points) {
 		for (int i = 0; i < points.length; i++) {
 			Vec3 point = points[i];
-
 			if (point.x() > maxX) {
 				maxX = point.x();
 			}
@@ -117,7 +112,9 @@ public class AABBBuilder {
 		if (box.minZ < minZ) {
 			minZ = box.minZ;
 		}
-
 		return this;
+	}
+
+	protected AABBBuilder() {
 	}
 }

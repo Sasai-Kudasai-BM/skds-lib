@@ -1,12 +1,7 @@
 package net.skds.lib2.mat;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public enum AxisDirection {
-	POSITIVE(1),
-	NEGATIVE(-1);
-
+	POSITIVE(1), NEGATIVE(-1);
 	private final int offset;
 
 	public int offset() {
@@ -15,5 +10,9 @@ public enum AxisDirection {
 
 	public AxisDirection getOpposite() {
 		return this == POSITIVE ? NEGATIVE : POSITIVE;
+	}
+
+	private AxisDirection(final int offset) {
+		this.offset = offset;
 	}
 }

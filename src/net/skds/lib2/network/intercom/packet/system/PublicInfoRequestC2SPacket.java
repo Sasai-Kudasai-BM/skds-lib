@@ -1,7 +1,5 @@
 package net.skds.lib2.network.intercom.packet.system;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.network.NetworkDirection;
@@ -9,14 +7,9 @@ import net.skds.lib2.network.intercom.ServerIntercomConnection;
 import net.skds.lib2.network.intercom.packet.IntercomPacket;
 import net.skds.lib2.network.intercom.packet.PacketType;
 import net.skds.lib2.network.intercom.packet.SystemPacketRegistry;
-
 import java.io.IOException;
 
-@AllArgsConstructor
-@Getter
 public class PublicInfoRequestC2SPacket implements IntercomPacket<ServerIntercomConnection> {
-
-
 	public PublicInfoRequestC2SPacket(ExtendedDataInput input) {
 	}
 
@@ -47,5 +40,8 @@ public class PublicInfoRequestC2SPacket implements IntercomPacket<ServerIntercom
 	@Override
 	public PacketType packetType() {
 		return PacketType.SYSTEM;
+	}
+
+	public PublicInfoRequestC2SPacket() {
 	}
 }

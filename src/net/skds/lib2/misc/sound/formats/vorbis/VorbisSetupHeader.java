@@ -1,29 +1,20 @@
 package net.skds.lib2.misc.sound.formats.vorbis;
 
-import lombok.Getter;
 import net.skds.lib2.io.codec.CodecRole;
 import net.skds.lib2.io.codec.annotation.CodecRoleConstrains;
 import net.skds.lib2.io.exception.ParseException;
-
 import java.io.IOException;
 
-@Getter
 @CodecRoleConstrains(CodecRole.SERIALIZE)
 public class VorbisSetupHeader extends AbstractVorbisHeader {
-
 	private VorbisCodebook[] codebooks;
-
 	private int[] floorTypes;
 	private VorbisFloor0[] floors0;
 	private VorbisFloor1[] floors1;
-
 	private int[] residueTypes;
 	private VorbisResidue[] residues;
-
 	private VorbisMapping[] mappings;
-
 	private VorbisMode[] modes;
-
 	private final transient VorbisProcessor processor;
 
 	public VorbisSetupHeader(VorbisProcessor processor) {
@@ -34,7 +25,6 @@ public class VorbisSetupHeader extends AbstractVorbisHeader {
 	@Override
 	public void read(ByteArrayBitInputStream input) throws IOException {
 		super.read(input);
-
 		int cc = input.readAlignedInt(1) + 1;
 		this.codebooks = new VorbisCodebook[cc];
 		for (int i = 0; i < cc; i++) {
@@ -42,12 +32,10 @@ public class VorbisSetupHeader extends AbstractVorbisHeader {
 			this.codebooks[i] = codebook;
 			codebook.read(input);
 		}
-
 		int tc = input.readInt(6) + 1;
 		for (int i = 0; i < tc; i++) {
 			if (input.readInt(16) != 0) throw new ParseException("Vorbis error condition in time domain transforms");
 		}
-
 		int fc = input.readInt(6) + 1;
 		floorTypes = new int[fc];
 		this.floors0 = new VorbisFloor0[fc];
@@ -67,7 +55,6 @@ public class VorbisSetupHeader extends AbstractVorbisHeader {
 			}
 			floorTypes[i] = floorType;
 		}
-
 		int rc = input.readInt(6) + 1;
 		this.residueTypes = new int[rc];
 		this.residues = new VorbisResidue[rc];
@@ -81,7 +68,6 @@ public class VorbisSetupHeader extends AbstractVorbisHeader {
 			residue.read(input);
 			this.residues[i] = residue;
 		}
-
 		int mappingCount = input.readInt(6) + 1;
 		this.mappings = new VorbisMapping[mappingCount];
 		for (int i = 0; i < mappingCount; i++) {
@@ -92,7 +78,6 @@ public class VorbisSetupHeader extends AbstractVorbisHeader {
 			this.mappings[i] = mapping;
 			mapping.read(input);
 		}
-
 		int modeCount = input.readInt(6) + 1;
 		this.modes = new VorbisMode[modeCount];
 		for (int i = 0; i < modeCount; i++) {
@@ -101,12 +86,47 @@ public class VorbisSetupHeader extends AbstractVorbisHeader {
 			this.modes[i] = mode;
 		}
 		if (!input.readBit()) throw new ParseException("Vorbis farming error");
-
 		//if (!validate()) throw new ParseException("Validation failed");
 	}
 
 	@Override
 	protected boolean validate() {
 		return true;
+	}
+
+	public VorbisCodebook[] getCodebooks() {
+		return this.codebooks;
+	}
+
+	public int[] getFloorTypes() {
+		return this.floorTypes;
+	}
+
+	public VorbisFloor0[] getFloors0() {
+		return this.floors0;
+	}
+
+	public VorbisFloor1[] getFloors1() {
+		return this.floors1;
+	}
+
+	public int[] getResidueTypes() {
+		return this.residueTypes;
+	}
+
+	public VorbisResidue[] getResidues() {
+		return this.residues;
+	}
+
+	public VorbisMapping[] getMappings() {
+		return this.mappings;
+	}
+
+	public VorbisMode[] getModes() {
+		return this.modes;
+	}
+
+	public VorbisProcessor getProcessor() {
+		return this.processor;
 	}
 }

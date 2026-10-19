@@ -1,11 +1,9 @@
 package net.skds.lib2.utils;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.io.chars.CharInput;
 import net.skds.lib2.io.chars.CharOutput;
 import net.skds.lib2.io.exception.EndOfInputException;
 import net.skds.lib2.io.exception.EndOfOutputException;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HexFormat;
@@ -13,9 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @SuppressWarnings("unused")
-@UtilityClass
-public class StringUtils {
-
+public final class StringUtils {
 	public static final HexFormat HEX_FORMAT_LC = HexFormat.of();
 	public static final HexFormat HEX_FORMAT_UC = HexFormat.of().withUpperCase();
 
@@ -286,7 +282,6 @@ public class StringUtils {
 			int start = p;
 			while (input.isAvailable(p, 1)) {
 				int c = input.getCharAt(p++);
-
 				if (c == quote) {
 					input.setPos(p);
 					int len = p - start - 1;
@@ -309,7 +304,6 @@ public class StringUtils {
 					start = p;
 				}
 			}
-
 			if (builder == null) {
 				int estimatedLength = (p - start) * 2;
 				builder = new StringBuilder(Math.max(estimatedLength, 16));
@@ -318,63 +312,55 @@ public class StringUtils {
 			input.setPos(p);
 			if (!input.isAvailable(p, 1)) {
 				return builder.toString();
-				//throw new IOException("Unterminated string");
 			}
+			//throw new IOException("Unterminated string");
 		}
 	}
-
 
 	public static char readEscapeCharacter(CharInput input) throws IOException {
-
 		char escaped = input.getCurrentCharAntInc();
 		switch (escaped) {
-			case 'u':
-				if (!input.isAvailable(4)) {
-					throw new EndOfInputException("Unterminated escape sequence");
+		case 'u': 
+			if (!input.isAvailable(4)) {
+				throw new EndOfInputException("Unterminated escape sequence");
+			}
+			// Equivalent to Integer.parseInt(stringPool.get(buffer, pos, 4), 16);
+			char result = 0;
+			for (int i = input.getPos(), end = i + 4; i < end; i++) {
+				char c = input.getCharAt(i);
+				result <<= 4;
+				if (c >= '0' && c <= '9') {
+					result += (char) (c - '0');
+				} else if (c >= 'a' && c <= 'f') {
+					result += (char) (c - 'a' + 10);
+				} else if (c >= 'A' && c <= 'F') {
+					result += (char) (c - 'A' + 10);
+				} else {
+					throw new NumberFormatException("\\u" + input.subString(4));
 				}
-				// Equivalent to Integer.parseInt(stringPool.get(buffer, pos, 4), 16);
-				char result = 0;
-				for (int i = input.getPos(), end = i + 4; i < end; i++) {
-					char c = input.getCharAt(i);
-					result <<= 4;
-					if (c >= '0' && c <= '9') {
-						result += (char) (c - '0');
-					} else if (c >= 'a' && c <= 'f') {
-						result += (char) (c - 'a' + 10);
-					} else if (c >= 'A' && c <= 'F') {
-						result += (char) (c - 'A' + 10);
-					} else {
-						throw new NumberFormatException("\\u" + input.subString(4));
-					}
-				}
-				input.skip(4);
-				return result;
-
-			case 't':
-				return '\t';
-
-			case 'b':
-				return '\b';
-
-			case 'n':
-				return '\n';
-
-			case 'r':
-				return '\r';
-
-			case 'f':
-				return '\f';
-
-			case '\n', '\'', '"', '\\', '/':
-				return escaped;
-			default:
-				// throw error when none of the above cases are matched
-				throw new IOException("Invalid escape sequence");
+			}
+			input.skip(4);
+			return result;
+		case 't': 
+			return '\t';
+		case 'b': 
+			return '\b';
+		case 'n': 
+			return '\n';
+		case 'r': 
+			return '\r';
+		case 'f': 
+			return '\f';
+		case '\n', '\'', '\"', '\\', '/': 
+			return escaped;
+		default: 
+			// throw error when none of the above cases are matched
+			throw new IOException("Invalid escape sequence");
 		}
 	}
 
-	public static class PatternFormatter {
 
+	public static class PatternFormatter {
 		private final List<String> parts = new ArrayList<>();
 		private final List<String> keys = new ArrayList<>();
 
@@ -410,8 +396,8 @@ public class StringUtils {
 		}
 	}
 
-	public static class SequenceFormatter {
 
+	public static class SequenceFormatter {
 		private final List<String> parts = new ArrayList<>();
 
 		private SequenceFormatter(String pattern, String delimiter) {
@@ -439,5 +425,9 @@ public class StringUtils {
 			}
 			return sb.toString();
 		}
+	}
+
+	private StringUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

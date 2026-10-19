@@ -1,22 +1,12 @@
 package net.skds.lib2.utils;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 @SuppressWarnings("unused")
 public final class Holders {
 	private Holders() {
-
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Getter
-	@Setter
-	public static class Multi2Holder<A, B> {
 
+	public static class Multi2Holder<A, B> {
 		protected A valueA;
 		protected B valueB;
 
@@ -30,14 +20,34 @@ public final class Holders {
 		public String toString() {
 			return "MultiHolder(" + valueA + ", " + valueB + ")";
 		}
+
+		public Multi2Holder() {
+		}
+
+		public Multi2Holder(final A valueA, final B valueB) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+		}
+
+		public A getValueA() {
+			return this.valueA;
+		}
+
+		public B getValueB() {
+			return this.valueB;
+		}
+
+		public void setValueA(final A valueA) {
+			this.valueA = valueA;
+		}
+
+		public void setValueB(final B valueB) {
+			this.valueB = valueB;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Getter
-	@Setter
-	public static class Multi3Holder<A, B, C> {
 
+	public static class Multi3Holder<A, B, C> {
 		protected A valueA;
 		protected B valueB;
 		protected C valueC;
@@ -53,14 +63,43 @@ public final class Holders {
 		public String toString() {
 			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ")";
 		}
+
+		public Multi3Holder() {
+		}
+
+		public Multi3Holder(final A valueA, final B valueB, final C valueC) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			this.valueC = valueC;
+		}
+
+		public A getValueA() {
+			return this.valueA;
+		}
+
+		public B getValueB() {
+			return this.valueB;
+		}
+
+		public C getValueC() {
+			return this.valueC;
+		}
+
+		public void setValueA(final A valueA) {
+			this.valueA = valueA;
+		}
+
+		public void setValueB(final B valueB) {
+			this.valueB = valueB;
+		}
+
+		public void setValueC(final C valueC) {
+			this.valueC = valueC;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Getter
-	@Setter
-	public static class Multi4Holder<A, B, C, D> {
 
+	public static class Multi4Holder<A, B, C, D> {
 		protected A valueA;
 		protected B valueB;
 		protected C valueC;
@@ -78,14 +117,52 @@ public final class Holders {
 		public String toString() {
 			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ", " + valueD + ")";
 		}
+
+		public Multi4Holder() {
+		}
+
+		public Multi4Holder(final A valueA, final B valueB, final C valueC, final D valueD) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			this.valueC = valueC;
+			this.valueD = valueD;
+		}
+
+		public A getValueA() {
+			return this.valueA;
+		}
+
+		public B getValueB() {
+			return this.valueB;
+		}
+
+		public C getValueC() {
+			return this.valueC;
+		}
+
+		public D getValueD() {
+			return this.valueD;
+		}
+
+		public void setValueA(final A valueA) {
+			this.valueA = valueA;
+		}
+
+		public void setValueB(final B valueB) {
+			this.valueB = valueB;
+		}
+
+		public void setValueC(final C valueC) {
+			this.valueC = valueC;
+		}
+
+		public void setValueD(final D valueD) {
+			this.valueD = valueD;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Getter
-	@Setter
-	public static class Multi5Holder<A, B, C, D, E> {
 
+	public static class Multi5Holder<A, B, C, D, E> {
 		protected A valueA;
 		protected B valueB;
 		protected C valueC;
@@ -105,28 +182,86 @@ public final class Holders {
 		public String toString() {
 			return "MultiHolder(" + valueA + ", " + valueB + ", " + valueC + ", " + valueD + ", " + valueE + ")";
 		}
+
+		public Multi5Holder() {
+		}
+
+		public Multi5Holder(final A valueA, final B valueB, final C valueC, final D valueD, final E valueE) {
+			this.valueA = valueA;
+			this.valueB = valueB;
+			this.valueC = valueC;
+			this.valueD = valueD;
+			this.valueE = valueE;
+		}
+
+		public A getValueA() {
+			return this.valueA;
+		}
+
+		public B getValueB() {
+			return this.valueB;
+		}
+
+		public C getValueC() {
+			return this.valueC;
+		}
+
+		public D getValueD() {
+			return this.valueD;
+		}
+
+		public E getValueE() {
+			return this.valueE;
+		}
+
+		public void setValueA(final A valueA) {
+			this.valueA = valueA;
+		}
+
+		public void setValueB(final B valueB) {
+			this.valueB = valueB;
+		}
+
+		public void setValueC(final C valueC) {
+			this.valueC = valueC;
+		}
+
+		public void setValueD(final D valueD) {
+			this.valueD = valueD;
+		}
+
+		public void setValueE(final E valueE) {
+			this.valueE = valueE;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class ObjectHolder<T> {
 
-		@Getter
-		@Setter
+	public static class ObjectHolder<T> {
 		protected T value;
 
 		@Override
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public ObjectHolder() {
+		}
+
+		public ObjectHolder(final T value) {
+			this.value = value;
+		}
+
+		public T getValue() {
+			return this.value;
+		}
+
+		public void setValue(final T value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class IntHolder {
 
-		@Getter
-		@Setter
+	public static class IntHolder {
 		protected int value;
 
 		public int increment() {
@@ -149,14 +284,25 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public IntHolder() {
+		}
+
+		public IntHolder(final int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return this.value;
+		}
+
+		public void setValue(final int value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class LongHolder {
 
-		@Getter
-		@Setter
+	public static class LongHolder {
 		protected long value;
 
 		public long increment() {
@@ -179,14 +325,25 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public LongHolder() {
+		}
+
+		public LongHolder(final long value) {
+			this.value = value;
+		}
+
+		public long getValue() {
+			return this.value;
+		}
+
+		public void setValue(final long value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class FloatHolder {
 
-		@Getter
-		@Setter
+	public static class FloatHolder {
 		protected float value;
 
 		public float increment() {
@@ -209,14 +366,25 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public FloatHolder() {
+		}
+
+		public FloatHolder(final float value) {
+			this.value = value;
+		}
+
+		public float getValue() {
+			return this.value;
+		}
+
+		public void setValue(final float value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class DoubleHolder {
 
-		@Getter
-		@Setter
+	public static class DoubleHolder {
 		protected double value;
 
 		public double increment() {
@@ -239,13 +407,25 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public DoubleHolder() {
+		}
+
+		public DoubleHolder(final double value) {
+			this.value = value;
+		}
+
+		public double getValue() {
+			return this.value;
+		}
+
+		public void setValue(final double value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class BooleanHolder {
 
-		@Setter
+	public static class BooleanHolder {
 		protected boolean value;
 
 		@Deprecated
@@ -261,14 +441,21 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public BooleanHolder() {
+		}
+
+		public BooleanHolder(final boolean value) {
+			this.value = value;
+		}
+
+		public void setValue(final boolean value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class ByteHolder {
 
-		@Getter
-		@Setter
+	public static class ByteHolder {
 		protected byte value;
 
 		public byte increment() {
@@ -291,14 +478,25 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public ByteHolder() {
+		}
+
+		public ByteHolder(final byte value) {
+			this.value = value;
+		}
+
+		public byte getValue() {
+			return this.value;
+		}
+
+		public void setValue(final byte value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class CharHolder {
 
-		@Getter
-		@Setter
+	public static class CharHolder {
 		protected char value;
 
 		public char increment() {
@@ -321,14 +519,25 @@ public final class Holders {
 		public String toString() {
 			return "Holder(" + value + ")";
 		}
+
+		public CharHolder() {
+		}
+
+		public CharHolder(final char value) {
+			this.value = value;
+		}
+
+		public char getValue() {
+			return this.value;
+		}
+
+		public void setValue(final char value) {
+			this.value = value;
+		}
 	}
 
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class ShortHolder {
 
-		@Getter
-		@Setter
+	public static class ShortHolder {
 		protected short value;
 
 		public short increment() {
@@ -350,6 +559,21 @@ public final class Holders {
 		@Override
 		public String toString() {
 			return "Holder(" + value + ")";
+		}
+
+		public ShortHolder() {
+		}
+
+		public ShortHolder(final short value) {
+			this.value = value;
+		}
+
+		public short getValue() {
+			return this.value;
+		}
+
+		public void setValue(final short value) {
+			this.value = value;
 		}
 	}
 }

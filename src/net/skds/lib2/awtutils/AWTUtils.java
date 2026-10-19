@@ -1,15 +1,11 @@
 package net.skds.lib2.awtutils;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.utils.exception.UnsupportedSystemException;
-
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.Method;
 
-@UtilityClass
-public class AWTUtils {
-
+public final class AWTUtils {
 	public static void initWindow(JFrame window) {
 		window.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		window.pack();
@@ -34,6 +30,7 @@ public class AWTUtils {
 	 * </pre>
 	 */
 	public static long getHWnd(Window window) {
+
 		@FunctionalInterface
 		interface Accessor {
 			long get(Window window);
@@ -69,6 +66,7 @@ public class AWTUtils {
 	 * </pre>
 	 */
 	public static long getX11Display() {
+
 		@FunctionalInterface
 		interface Accessor {
 			long get();
@@ -108,6 +106,7 @@ public class AWTUtils {
 	 * </pre>
 	 */
 	public static long getX11WindowId(Window window) {
+
 		@FunctionalInterface
 		interface Accessor {
 			long get(Window window);
@@ -145,6 +144,7 @@ public class AWTUtils {
 	 * </pre>
 	 */
 	public static int getX11WindowVisualId(Window window) {
+
 		@FunctionalInterface
 		interface Accessor {
 			int get(Window window);
@@ -177,6 +177,7 @@ public class AWTUtils {
 	}
 
 	private static Object getWindowPeer(Window window) throws Exception {
+
 		@FunctionalInterface
 		interface Accessor {
 			Object get(Window window) throws Exception;
@@ -205,5 +206,9 @@ public class AWTUtils {
 			}
 		}
 		return Accessor.ACCESSOR.get(window);
+	}
+
+	private AWTUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

@@ -1,38 +1,29 @@
 package net.skds.lib2.mat;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Random;
 
-@UtilityClass
 @SuppressWarnings({"ManualMinMaxCalculation", "unused"})
-public class FastMath {
-
+public final class FastMath {
 	public static final Random RANDOM = new Random();
-
 	public static final float PI = (float) Math.PI;
 	public static final float TWO_PI = PI * 2;
 	public static final float HALF_PI = PI / 2;
-
 	public static final float RAD_2_DGR = (180 / PI);
 	public static final float DGR_2_RAD = (PI / 180);
-
 	public static final float SQRT_2 = (float) Math.sqrt(2);
 	public static final float SQRT_3 = (float) Math.sqrt(3);
-
 	private static final int LUT_SIZE_D = 4096;
 	private static final int LUT_MASK_D = LUT_SIZE_D - 1;
 	private static final double DEG_TO_INDEX_D = LUT_SIZE_D / 360.0;
 	private static final int COS_SHIFT_D = LUT_SIZE_D / 4;
 	private static final double[] SIN_TABLE_D = new double[LUT_SIZE_D];
-
 	private static final int LUT_SIZE_F = 2048;
 	private static final int LUT_MASK_F = LUT_SIZE_F - 1;
-	private static final float DEG_TO_INDEX_F = LUT_SIZE_F / 360.0f;
+	private static final float DEG_TO_INDEX_F = LUT_SIZE_F / 360.0F;
 	private static final int COS_SHIFT_F = LUT_SIZE_F / 4;
 	private static final float[] SIN_TABLE_F = new float[LUT_SIZE_F];
 
-	public boolean isPowerOf2(int value) {
+	public static boolean isPowerOf2(int value) {
 		return 1 << Integer.numberOfTrailingZeros(value) == value;
 	}
 
@@ -87,7 +78,9 @@ public class FastMath {
 	}
 
 	public static double gaussian() {
-		double v1, v2, s;
+		double v1;
+		double v2;
+		double s;
 		do {
 			v1 = 2 * RANDOM.nextDouble() - 1; // between -1 and 1
 			v2 = 2 * RANDOM.nextDouble() - 1; // between -1 and 1
@@ -162,7 +155,6 @@ public class FastMath {
 		}
 		a *= 4 * x * (180 - x);
 		double b = 40500 - (x * (180 - x));
-
 		return a / b;
 	}
 
@@ -177,7 +169,6 @@ public class FastMath {
 		}
 		a *= 4 * x * (180 - x);
 		float b = 40500 - (x * (180 - x));
-
 		return a / b;
 	}
 
@@ -217,10 +208,10 @@ public class FastMath {
 
 	public static float wrapDegrees(float degrees) {
 		float d = modInt(degrees, 360);
-		if (d >= 180.0f) {
-			d -= 360.0f;
-		} else if (d < -180.0f) {
-			d += 360.0f;
+		if (d >= 180.0F) {
+			d -= 360.0F;
+		} else if (d < -180.0F) {
+			d += 360.0F;
 		}
 		return d;
 	}
@@ -293,22 +284,22 @@ public class FastMath {
 
 	public static double cosInterpolate(double t, double min, double max) {
 		double ft = t * 180;
-		double f = (1 - cosDegr(ft)) * .5;
+		double f = (1 - cosDegr(ft)) * 0.5;
 		return min * (1 - f) + max * f;
 	}
 
 	public static float cosInterpolate(float t, float min, float max) {
 		float ft = t * 180;
-		float f = (1 - cosDegr(ft)) * .5f;
+		float f = (1 - cosDegr(ft)) * 0.5F;
 		return min * (1 - f) + max * f;
 	}
 
 	public static double nearest(double t, double min, double max) {
-		return (t >= .5) ? max : min;
+		return (t >= 0.5) ? max : min;
 	}
 
 	public static float nearest(float t, float min, float max) {
-		return (t >= .5f) ? max : min;
+		return (t >= 0.5F) ? max : min;
 	}
 
 	public static double lerp(double t, double min, double max) {
@@ -330,8 +321,7 @@ public class FastMath {
 		float part = pos - b1;
 		int idx1 = b1 & LUT_MASK_F;
 		int idx2 = (b1 + 1) & LUT_MASK_F;
-
-		return SIN_TABLE_F[idx1] * (1.0f - part) + SIN_TABLE_F[idx2] * part;
+		return SIN_TABLE_F[idx1] * (1.0F - part) + SIN_TABLE_F[idx2] * part;
 	}
 
 	public static float cosDegr(float angle) {
@@ -341,8 +331,7 @@ public class FastMath {
 		float part = pos - b1;
 		int idx1 = (b1 + COS_SHIFT_F) & LUT_MASK_F;
 		int idx2 = (b1 + COS_SHIFT_F + 1) & LUT_MASK_F;
-
-		return SIN_TABLE_F[idx1] * (1.0f - part) + SIN_TABLE_F[idx2] * part;
+		return SIN_TABLE_F[idx1] * (1.0F - part) + SIN_TABLE_F[idx2] * part;
 	}
 
 	public static double sinDegr(double angle) {
@@ -352,7 +341,6 @@ public class FastMath {
 		double part = pos - b1;
 		int idx1 = b1 & LUT_MASK_D;
 		int idx2 = (b1 + 1) & LUT_MASK_D;
-
 		return SIN_TABLE_D[idx1] * (1.0 - part) + SIN_TABLE_D[idx2] * part;
 	}
 
@@ -363,7 +351,6 @@ public class FastMath {
 		double part = pos - b1;
 		int idx1 = (b1 + COS_SHIFT_D) & LUT_MASK_D;
 		int idx2 = (b1 + COS_SHIFT_D + 1) & LUT_MASK_D;
-
 		return SIN_TABLE_D[idx1] * (1.0 - part) + SIN_TABLE_D[idx2] * part;
 	}
 
@@ -447,24 +434,24 @@ public class FastMath {
 
 	@Deprecated
 	public static float invSqrt(float x) {
-		float half = 0.5f * x;
+		float half = 0.5F * x;
 		int i = Float.floatToRawIntBits(x);
 		i = 0x5F3759DF - (i >> 1);
 		x = Float.intBitsToFloat(i);
-		x *= (1.5f - half * x * x);
-		x *= (1.5f - half * x * x);
+		x *= (1.5F - half * x * x);
+		x *= (1.5F - half * x * x);
 		return x;
 	}
 
 	@Deprecated
 	public static double invSqrt(double x) {
-		double half = 0.5d * x;
+		double half = 0.5 * x;
 		long i = Double.doubleToRawLongBits(x);
 		i = 0x5FE6EC85E7DE30DAL - (i >> 1);
 		x = Double.longBitsToDouble(i);
-		x *= (1.5d - half * x * x);
-		x *= (1.5d - half * x * x);
-		x *= (1.5d - half * x * x);
+		x *= (1.5 - half * x * x);
+		x *= (1.5 - half * x * x);
+		x *= (1.5 - half * x * x);
 		return x;
 	}
 
@@ -487,8 +474,9 @@ public class FastMath {
 		return Math.abs(a - b) < eps;
 	}
 
+
 	@FunctionalInterface
-	public interface FloatInterpolation {
+	public static interface FloatInterpolation {
 		float interpolate(float t, float min, float max);
 	}
 
@@ -499,5 +487,9 @@ public class FastMath {
 		for (int i = 0; i < LUT_SIZE_F; i++) {
 			SIN_TABLE_F[i] = (float) Math.sin(Math.toRadians(i * 360.0 / LUT_SIZE_F));
 		}
+	}
+
+	private FastMath() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

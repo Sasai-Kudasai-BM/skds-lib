@@ -1,7 +1,5 @@
 package net.skds.lib2.network.intercom.packet.system;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
 import net.skds.lib2.network.NetworkDirection;
@@ -9,13 +7,9 @@ import net.skds.lib2.network.intercom.ClientIntercomConnection;
 import net.skds.lib2.network.intercom.packet.IntercomPacket;
 import net.skds.lib2.network.intercom.packet.PacketType;
 import net.skds.lib2.network.intercom.packet.SystemPacketRegistry;
-
 import java.io.IOException;
 
-@AllArgsConstructor
-@Getter
 public class PublicInfoResponseS2CPacket implements IntercomPacket<ClientIntercomConnection> {
-
 	private final String publicInfo;
 
 	public PublicInfoResponseS2CPacket(ExtendedDataInput input) throws IOException {
@@ -50,5 +44,13 @@ public class PublicInfoResponseS2CPacket implements IntercomPacket<ClientInterco
 	@Override
 	public PacketType packetType() {
 		return PacketType.SYSTEM;
+	}
+
+	public PublicInfoResponseS2CPacket(final String publicInfo) {
+		this.publicInfo = publicInfo;
+	}
+
+	public String getPublicInfo() {
+		return this.publicInfo;
 	}
 }

@@ -1,17 +1,13 @@
 package net.skds.lib2.utils;
 
-import lombok.Getter;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-
 //@SuppressWarnings("unused")
-@Getter
 public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput {
 	private final ByteBuffer buffer;
 
@@ -214,7 +210,7 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 
 	@Override
 	public int readUnsignedByte() {
-		return buffer.get() & 0xff;
+		return buffer.get() & 255;
 	}
 
 	@Override
@@ -224,7 +220,7 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 
 	@Override
 	public int readUnsignedShort() {
-		return buffer.getShort() & 0xffff;
+		return buffer.getShort() & 65535;
 	}
 
 	@Override
@@ -258,6 +254,7 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 		this.buffer.position(this.buffer.position() + length);
 	}
 
+
 	private class BufferOutputStream extends OutputStream {
 		@Override
 		public void write(int b) {
@@ -274,6 +271,7 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 			buffer.put(b, off, len);
 		}
 	}
+
 
 	private class BufferInputStream extends InputStream {
 		@Override
@@ -336,4 +334,7 @@ public final class SKDSByteBuf implements ExtendedDataInput, ExtendedDataOutput 
 		}
 	}
 
+	public ByteBuffer getBuffer() {
+		return this.buffer;
+	}
 }

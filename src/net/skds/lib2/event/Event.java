@@ -1,10 +1,13 @@
 package net.skds.lib2.event;
 
-import lombok.Getter;
-import lombok.Setter;
-
 public class Event {
-	@Setter
-	@Getter
 	protected boolean canceled = false;
+
+	public void setCanceled(final boolean canceled) {
+		this.canceled = canceled;
+	}
+
+	public boolean isCanceled() {
+		return this.canceled;
+	}
 }

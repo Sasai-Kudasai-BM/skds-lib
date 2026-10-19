@@ -1,18 +1,14 @@
 package net.skds.lib2.io.json.elements;
 
-import lombok.NoArgsConstructor;
 import net.skds.lib2.io.codec.*;
 import net.skds.lib2.io.exception.ParseException;
 import net.skds.lib2.io.sosison.SosisonEntryType;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
-@NoArgsConstructor
 public final class JsonArray extends ArrayList<JsonElement> implements JsonElement {
-
 	@Override
 	public JsonElementType type() {
 		return JsonElementType.LIST;
@@ -70,8 +66,8 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 		return array;
 	}
 
-	public static class Codec extends AbstractCodec<JsonArray> {
 
+	public static class Codec extends AbstractCodec<JsonArray> {
 		private final UniversalCodec<JsonElement> elementCodec;
 
 		public Codec(Type type, CodecRegistry registry) {
@@ -123,5 +119,8 @@ public final class JsonArray extends ArrayList<JsonElement> implements JsonEleme
 				default -> throw new ParseException("Unexpected token " + type);
 			}
 		}
+	}
+
+	public JsonArray() {
 	}
 }

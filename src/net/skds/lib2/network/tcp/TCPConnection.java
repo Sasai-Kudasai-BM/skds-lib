@@ -1,14 +1,11 @@
 package net.skds.lib2.network.tcp;
 
-import lombok.CustomLog;
-import lombok.Getter;
 import net.skds.lib2.io.ContinuousBuffer;
 import net.skds.lib2.misc.timer.SimpleTimer;
 import net.skds.lib2.network.exception.WrongSideException;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.ThreadUtils;
 import net.skds.lib2.utils.logger.SKDSLogger;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,37 +18,23 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 
-@CustomLog
 public abstract class TCPConnection<O extends TCPConnectionOptions> implements Closeable {
-
-	@Getter
+	private static final SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(TCPConnection.class);
 	private final SocketChannel channel;
-	@Getter
 	private final InetSocketAddress address;
-	@Getter
 	protected final O options;
 	private final ByteBuffer directInputBuffer;
 	private final ByteBuffer directOutputBuffer;
 	private final ContinuousBuffer inputData;
 	private final ContinuousBuffer outputData;
-	@Getter
 	private final InputStream inputStream;
-	@Getter
 	private final OutputStream outputStream;
-	@Getter
 	private Thread inputThread;
-	@Getter
 	private Thread outputThread;
 	private long lastTalk = 0;
-
-	@Getter
 	private final boolean serverside;
-
-	@Getter
 	private boolean packetTerminated = false;
-
 	private boolean threadsStarted = false;
-
 	private boolean closed = false;
 
 	public TCPConnection(SocketChannel channel, boolean isServerside, O options) {
@@ -68,7 +51,6 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 			channel.socket().setSendBufferSize(outputSize);
 			this.directOutputBuffer = ByteBuffer.allocateDirect(outputSize).flip();
 			this.outputData = new ContinuousBuffer(outputSize, -1);
-
 			final Socket socket = channel.socket();
 			socket.setTcpNoDelay(true);
 			socket.setSoTimeout(5000);
@@ -96,15 +78,12 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 	}
 
 	public void validateServerside() {
-		if (!serverside)
-			throw new WrongSideException("Connection [%s] expected to be serverside but it is clientside".formatted(this));
+		if (!serverside) throw new WrongSideException("Connection [%s] expected to be serverside but it is clientside".formatted(this));
 	}
 
 	public void validateClientside() {
-		if (serverside)
-			throw new WrongSideException("Connection [%s] expected to be clientside but it is serverside".formatted(this));
+		if (serverside) throw new WrongSideException("Connection [%s] expected to be clientside but it is serverside".formatted(this));
 	}
-
 
 	protected void setPacketTerminated() {
 		this.packetTerminated = true;
@@ -229,8 +208,8 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 		return read;
 	}
 
-	private class InStr extends InputStream {
 
+	private class InStr extends InputStream {
 		private final byte[] buf = {0};
 
 		@Override
@@ -239,7 +218,7 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 			if (r == 0) {
 				return -1;
 			}
-			return buf[0] & 0xff;
+			return buf[0] & 255;
 		}
 
 		@Override
@@ -249,10 +228,7 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 
 		@Override
 		public int read(byte[] b, int off, int len) throws IOException {
-			if (Thread.currentThread() != inputThread) throw new WrongThreadException(
-					"Read operation must only be called from " + inputThread
-							+ " but was called from " + Thread.currentThread()
-			);
+			if (Thread.currentThread() != inputThread) throw new WrongThreadException("Read operation must only be called from " + inputThread + " but was called from " + Thread.currentThread());
 			return doRead(b, off, len);
 		}
 
@@ -272,8 +248,8 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 		}
 	}
 
-	private class OutStr extends OutputStream {
 
+	private class OutStr extends OutputStream {
 		private final byte[] buf = {0};
 
 		@Override
@@ -284,10 +260,7 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 
 		@Override
 		public void write(byte[] b, int off, int len) {
-			if (Thread.currentThread() != outputThread) throw new WrongThreadException(
-					"Write operation must only be called from " + outputThread
-							+ " but was called from " + Thread.currentThread()
-			);
+			if (Thread.currentThread() != outputThread) throw new WrongThreadException("Write operation must only be called from " + outputThread + " but was called from " + Thread.currentThread());
 			int put = outputData.putData(b, off, len);
 			if (put < len) {
 				throw new IllegalStateException();
@@ -300,5 +273,39 @@ public abstract class TCPConnection<O extends TCPConnectionOptions> implements C
 		}
 	}
 
+	public SocketChannel getChannel() {
+		return this.channel;
+	}
 
+	public InetSocketAddress getAddress() {
+		return this.address;
+	}
+
+	public O getOptions() {
+		return this.options;
+	}
+
+	public InputStream getInputStream() {
+		return this.inputStream;
+	}
+
+	public OutputStream getOutputStream() {
+		return this.outputStream;
+	}
+
+	public Thread getInputThread() {
+		return this.inputThread;
+	}
+
+	public Thread getOutputThread() {
+		return this.outputThread;
+	}
+
+	public boolean isServerside() {
+		return this.serverside;
+	}
+
+	public boolean isPacketTerminated() {
+		return this.packetTerminated;
+	}
 }

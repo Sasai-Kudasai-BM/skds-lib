@@ -1,15 +1,11 @@
 package net.skds.lib2.mat;
 
-import lombok.AllArgsConstructor;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-@AllArgsConstructor
 public class VarInt extends Number implements Comparable<Integer> {
-
 	public final int value;
 
 	@Override
@@ -124,4 +120,7 @@ public class VarInt extends Number implements Comparable<Integer> {
 				? 4 : 5;
 	}
 
+	public VarInt(final int value) {
+		this.value = value;
+	}
 }

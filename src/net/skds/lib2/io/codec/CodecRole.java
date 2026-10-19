@@ -1,10 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@AllArgsConstructor
-@Getter
 public enum CodecRole {
 	SERIALIZE(true, false),
 	DESERIALIZE(false, true),
@@ -13,4 +8,17 @@ public enum CodecRole {
 
 	private final boolean canSerialize;
 	private final boolean canDeserialize;
+
+	private CodecRole(final boolean canSerialize, final boolean canDeserialize) {
+		this.canSerialize = canSerialize;
+		this.canDeserialize = canDeserialize;
+	}
+
+	public boolean isCanSerialize() {
+		return this.canSerialize;
+	}
+
+	public boolean isCanDeserialize() {
+		return this.canDeserialize;
+	}
 }

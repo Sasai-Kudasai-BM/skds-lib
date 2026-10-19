@@ -1,12 +1,7 @@
 package net.skds.lib2.utils.tlsf;
 
-import lombok.Getter;
-
-
 public final class TLSFBlock {
-	@Getter
 	long size;
-	@Getter
 	long offset;
 	TLSFBlock prev;
 	TLSFBlock next;
@@ -17,5 +12,13 @@ public final class TLSFBlock {
 
 	TLSFBlock(long size) {
 		this.size = size;
+	}
+
+	public long getSize() {
+		return this.size;
+	}
+
+	public long getOffset() {
+		return this.offset;
 	}
 }

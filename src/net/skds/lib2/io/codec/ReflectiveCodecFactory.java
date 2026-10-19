@@ -1,7 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import lombok.AllArgsConstructor;
-import lombok.CustomLog;
 import net.skds.lib2.io.codec.annotation.*;
 import net.skds.lib2.io.codec.typed.TypedConfig;
 import net.skds.lib2.io.json.annotation.JsonComment;
@@ -10,7 +8,6 @@ import net.skds.lib2.reflection.ReflectUtils;
 import net.skds.lib2.utils.Numbers;
 import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.function.MultiSupplier;
-
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
@@ -19,11 +16,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@CustomLog
 public class ReflectiveCodecFactory implements CodecFactory {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(ReflectiveCodecFactory.class);
 	private static final FieldCodec[] fieldCodecArray = {};
-
 	public static final ReflectiveCodecFactory INSTANCE = new ReflectiveCodecFactory();
 
 	@Override
@@ -132,23 +127,10 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		return new CombinedCodec<>(new ReflectiveSerializer(tClass, registry), new ReflectiveDeserializer<>(tClass, registry));
 	}
 
-	public static class CombinedReflectiveCodec extends CombinedCodec<Object> {
 
+	public static class CombinedReflectiveCodec extends CombinedCodec<Object> {
 		public <T> CombinedReflectiveCodec(Class<T> tClass, FieldCodec[] codecs, Supplier<T> constructor, CodecRegistry registry) {
-			super(new ReflectiveSerializer(
-							tClass,
-							codecs,
-							registry
-					),
-					new ReflectiveDeserializer<>(
-							tClass,
-							Arrays.stream(codecs).collect(Collectors.toMap(
-									e -> e.field.getName(),
-									e -> e
-							)),
-							constructor,
-							registry
-					));
+			super(new ReflectiveSerializer(tClass, codecs, registry), new ReflectiveDeserializer<>(tClass, Arrays.stream(codecs).collect(Collectors.toMap(e -> e.field.getName(), e -> e)), constructor, registry));
 		}
 	}
 
@@ -172,8 +154,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		return new CombinedCodec<>(new RecordSerializer(tClass, registry), new RecordDeserializer(tClass, registry));
 	}
 
-	public static class ReflectiveDeserializer<T> implements UniversalDeserializer<T> {
 
+	public static class ReflectiveDeserializer<T> implements UniversalDeserializer<T> {
 		final Class<T> tClass;
 		final Supplier<T> constructor;
 		final Map<String, FieldCodec> readers;
@@ -195,9 +177,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			} else {
 				tmpC = ReflectUtils.getConstructor((Class<T>) tClass);
 				if (tmpC == null) {
-					throw new RuntimeException("Class \"" +
-							tClass.getName() +
-							"\" have no empty constructor and can not be created by ReflectiveCodec");
+					throw new RuntimeException("Class \"" + tClass.getName() + "\" have no empty constructor and can not be created by ReflectiveCodec");
 				}
 			}
 			this.constructor = tmpC;
@@ -244,9 +224,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	@AllArgsConstructor
-	public static class ReflectiveSerializer implements UniversalSerializer<Object> {
 
+	public static class ReflectiveSerializer implements UniversalSerializer<Object> {
 		final Class<?> tClass;
 		final FieldCodec[] writers;
 		final CodecRegistry registry;
@@ -293,10 +272,16 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		public CodecRegistry getRegistry() {
 			return registry;
 		}
+
+		public ReflectiveSerializer(final Class<?> tClass, final FieldCodec[] writers, final CodecRegistry registry) {
+			this.tClass = tClass;
+			this.writers = writers;
+			this.registry = registry;
+		}
 	}
 
-	public static class RecordDeserializer implements UniversalDeserializer<Object> {
 
+	public static class RecordDeserializer implements UniversalDeserializer<Object> {
 		final Class<?> tClass;
 		final CodecRegistry registry;
 		final MultiSupplier<Object> constructor;
@@ -334,14 +319,10 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				names[i] = name;
 				readers.put(name, i);
 			}
-
 			tmpC = ReflectUtils.getMultiConstructor((Class<Object>) tClass, args);
 			if (tmpC == null) {
-				throw new IllegalArgumentException("Record \"" +
-						tClass.getName() +
-						"\" have no available canonical constructor and can not be created by ReflectiveCodec");
+				throw new IllegalArgumentException("Record \"" + tClass.getName() + "\" have no available canonical constructor and can not be created by ReflectiveCodec");
 			}
-
 			this.components = args;
 			this.constructor = tmpC;
 			this.deserializers = des;
@@ -372,7 +353,6 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				}
 			}
 			reader.endObject();
-
 			wrapPrimitives(components, args);
 			Object o = constructor.get(args);
 			if (o instanceof PostDeserializeCall pdc && (o instanceof TypedConfig<?>)) {
@@ -482,13 +462,12 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			if (ss.skipNull()) {
 				predicate = ((Predicate<T>) Objects::isNull).or(predicate);
 			}
-
 		}
 		return predicate;
 	}
 
-	public static class RecordSerializer implements UniversalSerializer<Object> {
 
+	public static class RecordSerializer implements UniversalSerializer<Object> {
 		final Class<?> tClass;
 		final CodecRegistry registry;
 		final UniversalSerializer<Object>[] serializers;
@@ -545,7 +524,6 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				};
 				names[i] = name;
 			}
-
 			this.skipPredicates = skips;
 			this.nonNullSerializers = c;
 			this.serializers = (UniversalSerializer<Object>[]) ser;
@@ -610,9 +588,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 
 	private static void collectFields(Class<?> c, CodecRegistry registry, List<FieldCodec> list) {
 		if (c == Object.class) return;
-
 		List<FieldCodec> fields = new ArrayList<>();
-
 		UniversalCodecOptions options = registry.options;
 		for (Field f : c.getDeclaredFields()) {
 			if ((f.getModifiers() & options.getExcludeFieldModifiers()) != 0) {
@@ -650,14 +626,13 @@ public class ReflectiveCodecFactory implements CodecFactory {
 				fields.add(codec);
 			}
 		}
-
 		list.addAll(0, fields);
-
 		Class<?> sup = c.getSuperclass();
 		if (sup != Object.class) {
 			collectFields(sup, registry, list);
 		}
 	}
+
 
 	public static abstract class FieldCodec {
 		public final Field field;
@@ -694,8 +669,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class ByteFieldCodec extends FieldCodec {
 
+	public static class ByteFieldCodec extends FieldCodec {
 		public ByteFieldCodec(Field field) {
 			super(field);
 		}
@@ -718,8 +693,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class ShortFieldCodec extends FieldCodec {
 
+	public static class ShortFieldCodec extends FieldCodec {
 		public ShortFieldCodec(Field field) {
 			super(field);
 		}
@@ -742,8 +717,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class IntFieldCodec extends FieldCodec {
 
+	public static class IntFieldCodec extends FieldCodec {
 		public IntFieldCodec(Field field) {
 			super(field);
 		}
@@ -766,8 +741,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class LongFieldCodec extends FieldCodec {
 
+	public static class LongFieldCodec extends FieldCodec {
 		public LongFieldCodec(Field field) {
 			super(field);
 		}
@@ -790,8 +765,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class FloatFieldCodec extends FieldCodec {
 
+	public static class FloatFieldCodec extends FieldCodec {
 		public FloatFieldCodec(Field field) {
 			super(field);
 		}
@@ -814,8 +789,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class DoubleFieldCodec extends FieldCodec {
 
+	public static class DoubleFieldCodec extends FieldCodec {
 		public DoubleFieldCodec(Field field) {
 			super(field);
 		}
@@ -837,6 +812,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			return value == skipSerialization.defaultDouble();
 		}
 	}
+
 
 	public static class CharFieldCodec extends FieldCodec {
 		private final UniversalDeserializer<Character> deserializer;
@@ -864,8 +840,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class BooleanFieldCodec extends FieldCodec {
 
+	public static class BooleanFieldCodec extends FieldCodec {
 		public BooleanFieldCodec(Field field) {
 			super(field);
 		}
@@ -888,8 +864,8 @@ public class ReflectiveCodecFactory implements CodecFactory {
 		}
 	}
 
-	public static class ObjFieldCodec<T> extends FieldCodec {
 
+	public static class ObjFieldCodec<T> extends FieldCodec {
 		private final UniversalSerializer<T> serializer;
 		private final UniversalDeserializer<T> deserializer;
 		private final Predicate<T> skipPredicate;
@@ -955,5 +931,4 @@ public class ReflectiveCodecFactory implements CodecFactory {
 			return skipPredicate.test((T) value);
 		}
 	}
-
 }

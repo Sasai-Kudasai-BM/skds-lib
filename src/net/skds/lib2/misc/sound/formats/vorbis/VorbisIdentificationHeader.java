@@ -1,13 +1,9 @@
 package net.skds.lib2.misc.sound.formats.vorbis;
 
-import lombok.Getter;
 import net.skds.lib2.io.exception.ParseException;
-
 import java.io.IOException;
 
-@Getter
 public class VorbisIdentificationHeader extends AbstractVorbisHeader {
-
 	private long vorbisVersion;
 	private int channels;
 	private long sampleRate;
@@ -49,9 +45,40 @@ public class VorbisIdentificationHeader extends AbstractVorbisHeader {
 			ok &= blockSize1 <= 8192;
 			ok &= blockSize1 >= 64;
 			ok &= blockSize0 <= blockSize1;
-
 			return ok;
 		}
 		return false;
+	}
+
+	public long getVorbisVersion() {
+		return this.vorbisVersion;
+	}
+
+	public int getChannels() {
+		return this.channels;
+	}
+
+	public long getSampleRate() {
+		return this.sampleRate;
+	}
+
+	public int getMaxBitrate() {
+		return this.maxBitrate;
+	}
+
+	public int getNormalBitrate() {
+		return this.normalBitrate;
+	}
+
+	public int getMinBitrate() {
+		return this.minBitrate;
+	}
+
+	public int getBlockSize0() {
+		return this.blockSize0;
+	}
+
+	public int getBlockSize1() {
+		return this.blockSize1;
 	}
 }

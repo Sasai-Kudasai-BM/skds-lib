@@ -1,9 +1,7 @@
 package net.skds.lib2.network.intercom;
 
-import lombok.Getter;
 import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.ThreadUtils;
-
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -14,9 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.concurrent.CompletableFuture;
 
-@Getter
 public class ServerIntercomEncryption extends IntercomEncryption {
-
 	private static final KeyPairGenerator generator;
 
 	public ServerIntercomEncryption() {

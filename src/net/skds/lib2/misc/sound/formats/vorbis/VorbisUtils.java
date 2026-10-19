@@ -1,23 +1,15 @@
 package net.skds.lib2.misc.sound.formats.vorbis;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class VorbisUtils {
-
-
+public final class VorbisUtils {
 	public static long lookup1Values(long entries, int dimensions) {
 		if (dimensions <= 0 || entries <= 0) {
 			return 0;
 		}
-
 		int returnValue = 0;
-
 		// Use a while loop to find the largest integer N
 		// such that N^dimensions <= entries.
 		while (true) {
 			int nextValue = returnValue + 1;
-
 			// Calculate nextValue ^ dimensions safely
 			long testPower = 1;
 			boolean overflow = false;
@@ -29,15 +21,12 @@ public class VorbisUtils {
 				}
 				testPower *= nextValue;
 			}
-
 			if (overflow || testPower > entries) {
 				// The next integer value is too large or caused overflow.
 				break;
 			}
-
 			returnValue = nextValue;
 		}
-
 		return returnValue;
 	}
 
@@ -51,5 +40,9 @@ public class VorbisUtils {
 	public static int iLog(int x) {
 		if (x < 0) return 0;
 		return Integer.SIZE - Integer.numberOfLeadingZeros(x);
+	}
+
+	private VorbisUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

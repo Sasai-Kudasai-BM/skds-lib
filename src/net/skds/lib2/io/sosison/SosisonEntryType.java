@@ -1,10 +1,7 @@
 package net.skds.lib2.io.sosison;
 
-import lombok.Getter;
-
-
 public enum SosisonEntryType {
-	NULL(0, 0, false, false, false),
+	NULL(0, 0, false, false, false), 
 	//BINARY(1, false, false), // use byte array
 	// reserved
 	BYTE(2, 1, true, true, false),
@@ -28,26 +25,19 @@ public enum SosisonEntryType {
 	;
 
 	public static final int FLAG_BITS = 2;
-	public static final int ID_MASK = 0xff >> FLAG_BITS;
-	public static final int FLAG_MASK = 0xff & ~ID_MASK;
+	public static final int ID_MASK = 255 >> FLAG_BITS;
+	public static final int FLAG_MASK = 255 & ~ID_MASK;
 	public static final int FLAG_1_MASK = FLAG_MASK << 1 & FLAG_MASK;
 	public static final int FLAG_2_MASK = FLAG_MASK >> 1 & FLAG_MASK;
-
 	public static final int BOOLEAN_FLAG = FLAG_1_MASK;
 	public static final int ARRAY_FLAG = FLAG_1_MASK;
 	public static final int BYTE_SIZE_FLAG = FLAG_2_MASK;
-
 	private static final byte[] NULL_DATA = {0, NULL.getId()}; // zero name, null
 	private static final SosisonEntryType[] lookup = new SosisonEntryType[ID_MASK + 1];
-
-	@Getter
 	private final byte id;
-	@Getter
 	private final boolean isNumber;
-	@Getter
 	private final boolean isTerminal;
 	private final boolean supportArrays;
-	@Getter
 	private final int size;
 
 	SosisonEntryType(int id, int size, boolean isNumber, boolean supportArrays, boolean isTerminal) {
@@ -95,5 +85,21 @@ public enum SosisonEntryType {
 		for (SosisonEntryType e : values()) {
 			lookup[e.id & ID_MASK] = e;
 		}
+	}
+
+	public byte getId() {
+		return this.id;
+	}
+
+	public boolean isNumber() {
+		return this.isNumber;
+	}
+
+	public boolean isTerminal() {
+		return this.isTerminal;
+	}
+
+	public int getSize() {
+		return this.size;
 	}
 }

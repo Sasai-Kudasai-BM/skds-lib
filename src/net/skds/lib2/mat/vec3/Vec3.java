@@ -21,8 +21,7 @@ import java.util.function.Predicate;
 
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
-// TODO проверить гетеры
-@SuppressWarnings("unused")
+
 @DefaultCodec(Vec3.Codec.class)
 public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 

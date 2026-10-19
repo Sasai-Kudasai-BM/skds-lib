@@ -1,7 +1,5 @@
 package net.skds.lib2.security;
 
-import lombok.experimental.UtilityClass;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -14,9 +12,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-@UtilityClass
-public class SKDSTrusted {
-
+public final class SKDSTrusted {
 	public static final String TRUSTED_CERTIFICATE = """
 			-----BEGIN CERTIFICATE-----
 			MIIQ+DCCCOCgAwIBAgIUYAWosgSajpPvbt4Yu8ABmjTkWq0wDQYJKoZIhvcNAQEL
@@ -145,10 +141,14 @@ public class SKDSTrusted {
 	public static void addTrusted() {
 		try {
 			SSLContext sc = SSLContext.getInstance("SSL");
-			sc.init(null, new TrustManager[]{createTrustManager()}, SecureRandom.getInstanceStrong());
+			sc.init(null, new TrustManager[] {createTrustManager()}, SecureRandom.getInstanceStrong());
 			SSLContext.setDefault(sc);
 		} catch (KeyManagementException | NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private SKDSTrusted() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

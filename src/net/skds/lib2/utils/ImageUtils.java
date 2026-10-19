@@ -1,10 +1,8 @@
 package net.skds.lib2.utils;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.misc.fields.IntField2D;
 import net.skds.lib2.misc.fields.IntField2DImpl;
 import net.w3e.lib.utils.FileUtils;
-
 import javax.imageio.*;
 import javax.imageio.spi.*;
 import java.awt.*;
@@ -15,26 +13,21 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 
-@UtilityClass
 @SuppressWarnings("unused")
-public class ImageUtils {
-
+public final class ImageUtils {
 	private static final ImageReaderSpi PNG_READER;
 	private static final ImageReaderSpi JPG_READER;
 	private static final ImageReaderSpi GIF_READER;
 	private static final ImageReaderSpi TIFF_READER;
 	private static final ImageInputStreamSpi INPUT_STREAM_SPI;
 	private static final ImageInputStreamSpi FILE_INPUT_STREAM_SPI;
-
 	private static final ImageWriterSpi PNG_WRITER;
 	private static final ImageWriterSpi JPG_WRITER;
 	private static final ImageWriterSpi GIF_WRITER;
 	private static final ImageWriterSpi TIFF_WRITER;
 	private static final ImageOutputStreamSpi FILE_OUTPUT_STREAM_SPI;
 	private static final ImageOutputStreamSpi OUTPUT_STREAM_SPI;
-
 	private static final String DATA_BUFFER_INT_ERR = "Unable to get DataBufferInt from image";
-
 	public static final ColorModel COLOR_MODEL_ARGB = ColorModel.getRGBdefault();
 	public static final ColorModel COLOR_MODEL_RGB = new DirectColorModel(24,
 			0x00ff0000,  // Red
@@ -42,7 +35,6 @@ public class ImageUtils {
 			0x000000ff,  // Blue
 			0x00000000   // Alpha
 	);
-
 
 	public static BufferedImage readPNG(final InputStream is) {
 		return readImage(is, PNG_READER);
@@ -75,7 +67,6 @@ public class ImageUtils {
 	public static BufferedImage readTIFF(final File file) {
 		return readImage(file, TIFF_READER);
 	}
-
 
 	public static void writePNG(final RenderedImage image, final File file) {
 		writeImage(image, file, PNG_WRITER);
@@ -194,12 +185,12 @@ public class ImageUtils {
 		return os.toByteArray();
 	}
 
-
 	public static BufferedImage fieldToImage(IntField2D field) {
 		return intsToImage(field.width(), field.height(), field.toArray());
 	}
 
 	public static BufferedImage intsToImage(int w, int h, int[] data) {
+
 		interface Masks {
 			int[] ARGB_MASKS = {0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000};
 		}
@@ -210,6 +201,7 @@ public class ImageUtils {
 	}
 
 	public static BufferedImage rgbBytesToImage(int w, int h, byte[] data) {
+
 		interface Offsets {
 			int[] B_OFFS = {0, 1, 2};
 		}
@@ -221,6 +213,7 @@ public class ImageUtils {
 	}
 
 	public static BufferedImage argbBytesToImage(int w, int h, byte[] data) {
+
 		interface Offsets {
 			int[] B_OFFS = {0, 1, 2, 3};
 		}
@@ -264,7 +257,6 @@ public class ImageUtils {
 		}
 		return image;
 	}
-
 
 	public static BufferedImage drawPerPixelFill(int w, int h, PerPixelDraw draw) {
 		BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -333,7 +325,8 @@ public class ImageUtils {
 		}
 	}
 
-	public interface PerPixelDraw {
+
+	public static interface PerPixelDraw {
 		int draw(int x, int y);
 	}
 
@@ -408,5 +401,9 @@ public class ImageUtils {
 			OUTPUT_STREAM_SPI = tmpOut;
 			FILE_OUTPUT_STREAM_SPI = tmpFOut;
 		}
+	}
+
+	private ImageUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

@@ -1,13 +1,8 @@
 package net.skds.lib2.network;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * @noinspection FieldMayBeFinal
  */
-@Getter
-@Setter
 public abstract class CommonConnectionOptions implements Cloneable {
 
 	private int silenceTimeout = 10_000;
@@ -15,5 +10,13 @@ public abstract class CommonConnectionOptions implements Cloneable {
 	@Override
 	public CommonConnectionOptions clone() {
 		throw new RuntimeException(new CloneNotSupportedException());
+	}
+
+	public int getSilenceTimeout() {
+		return this.silenceTimeout;
+	}
+
+	public void setSilenceTimeout(final int silenceTimeout) {
+		this.silenceTimeout = silenceTimeout;
 	}
 }

@@ -1,22 +1,17 @@
 package net.skds.lib2.misc.sound.formats.vorbis;
 
-import lombok.Getter;
 import net.skds.lib2.misc.ogg.OggPage;
 import net.skds.lib2.utils.StringUtils;
-
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@Getter
 public class VorbisProcessor implements Consumer<OggPage> {
-
 	private VorbisIdentificationHeader identificationHeader;
 	private VorbisCommentHeader commentHeader;
 	private VorbisSetupHeader setupHeader;
 	private VorbisStreamState state = VorbisStreamState.NONE;
-
 	private List<VorbisAudioPacket> audioPackets = new LinkedList<>();
 
 	@Override
@@ -58,4 +53,23 @@ public class VorbisProcessor implements Consumer<OggPage> {
 		}
 	}
 
+	public VorbisIdentificationHeader getIdentificationHeader() {
+		return this.identificationHeader;
+	}
+
+	public VorbisCommentHeader getCommentHeader() {
+		return this.commentHeader;
+	}
+
+	public VorbisSetupHeader getSetupHeader() {
+		return this.setupHeader;
+	}
+
+	public VorbisStreamState getState() {
+		return this.state;
+	}
+
+	public List<VorbisAudioPacket> getAudioPackets() {
+		return this.audioPackets;
+	}
 }

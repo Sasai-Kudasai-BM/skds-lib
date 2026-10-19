@@ -1,10 +1,8 @@
 package net.skds.lib2.utils;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.mat.FastMath;
 
 @SuppressWarnings("unused")
-@UtilityClass
 public class ColorUtils {
 
 	public static final FloatColorScheme[] FLOAT_COLOR_SCHEMES = {

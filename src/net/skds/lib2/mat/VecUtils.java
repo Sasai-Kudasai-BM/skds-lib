@@ -1,13 +1,10 @@
 package net.skds.lib2.mat;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
 
 @SuppressWarnings("unused")
-@UtilityClass
 public final class VecUtils {
-
 	public static double dist2Line(Vec3 start, Vec3 direction, Vec3 point) {
 		return perpendicularPoint(start, direction, point).distanceTo(point);
 	}
@@ -34,11 +31,9 @@ public final class VecUtils {
 	}
 
 	public static Vec3 sphereContactPointLimited(Vec3 start, Vec3 direction, Vec3 center, double radius) {
-		
 		if (start.distanceTo(center) <= radius) return start;
 		double dirL = direction.length();
 		Vec3 dir = direction.scale(1 / dirL);
-
 		double proj = center.sub(start).dot(dir);
 		if (proj < 0 || proj > dirL + radius) return null;
 		Vec3 pp = start.addScale(dir, proj);
@@ -50,4 +45,7 @@ public final class VecUtils {
 		return start.addScale(dir, proj - delta);
 	}
 
+	private VecUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }

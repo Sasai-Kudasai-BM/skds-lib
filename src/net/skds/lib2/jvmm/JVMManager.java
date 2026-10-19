@@ -1,13 +1,9 @@
 package net.skds.lib2.jvmm;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.HashMap;
 import java.util.Map;
 
-@UtilityClass
-public class JVMManager {
-
+public final class JVMManager {
 	public static final String JAVA_VERSION = "JAVA_VERSION";
 
 	public static Map<String, String> getPropertyMap(String release) {
@@ -27,4 +23,7 @@ public class JVMManager {
 		return map;
 	}
 
+	private JVMManager() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }

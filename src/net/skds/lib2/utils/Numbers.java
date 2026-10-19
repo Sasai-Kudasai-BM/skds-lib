@@ -1,10 +1,6 @@
 package net.skds.lib2.utils;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class Numbers {
-
+public final class Numbers {
 	public static final Number ZERO = 0;
 
 	public static Number parseNumber(String stringValue) {
@@ -22,19 +18,19 @@ public class Numbers {
 		return Long.parseLong(stringValue);
 	}
 
-	public int leftBytes(long l) {
+	public static int leftBytes(long l) {
 		return (int) (l >> 32);
 	}
 
-	public int rightBytes(long l) {
+	public static int rightBytes(long l) {
 		return (int) (l & 0xFFFFFFFFL);
 	}
 
-	public int leftBytes(double d) {
+	public static int leftBytes(double d) {
 		return (int) (Double.doubleToLongBits(d) >> 32);
 	}
 
-	public int rightBytes(double d) {
+	public static int rightBytes(double d) {
 		return (int) (Double.doubleToLongBits(d) & 0xFFFFFFFFL);
 	}
 }

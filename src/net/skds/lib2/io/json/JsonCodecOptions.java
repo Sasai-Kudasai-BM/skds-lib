@@ -5,14 +5,14 @@ import net.skds.lib2.io.codec.UniversalCodecOptionsImpl;
 
 public interface JsonCodecOptions extends CodecOptions {
 
-	UniversalCodecOptionsImpl setDecorationType(JsonCodecOptions.DecorationType decorationType);
+	UniversalCodecOptionsImpl setDecorationType(DecorationType decorationType);
 
 	UniversalCodecOptionsImpl setCapabilityVersion(JsonCapabilityVersion capabilityVersion);
 
 	UniversalCodecOptionsImpl setTabulation(String tabulation);
 
 
-	JsonCodecOptions.DecorationType getDecorationType();
+	DecorationType getDecorationType();
 
 	JsonCapabilityVersion getCapabilityVersion();
 

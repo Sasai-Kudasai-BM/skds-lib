@@ -1,8 +1,5 @@
 package net.skds.lib2.misc.clazz.classbuilder;
 
-import lombok.AllArgsConstructor;
-
-@AllArgsConstructor
 public enum ClassType {
 	CLASS("class"),
 	INTERFACE("interface"),
@@ -11,4 +8,8 @@ public enum ClassType {
 	ANNOTATION_INTERFACE("@interface");
 
 	public final String declaration;
+
+	private ClassType(final String declaration) {
+		this.declaration = declaration;
+	}
 }

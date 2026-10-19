@@ -1,10 +1,7 @@
 package net.skds.lib2.security;
 
-
-import lombok.CustomLog;
 import net.skds.lib2.utils.ArrayUtils;
 import net.skds.lib2.utils.SKDSUtils;
-
 import javax.net.ssl.*;
 import java.net.Socket;
 import java.security.*;
@@ -14,8 +11,8 @@ import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.function.Function;
 
-@CustomLog
 public class CustomKeyManager extends X509ExtendedKeyManager {
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(CustomKeyManager.class);
 	private final Map<String, X509Credentials> credentialsMap = new HashMap<>();
 	private final Map<String, String> aliasMap = new HashMap<>();
 	private static final String LOCALHOST = "localhost";
@@ -24,7 +21,6 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 			throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, CertificateParsingException {
 		Objects.requireNonNull(ks);
 		Enumeration<String> aliases = ks.aliases();
-
 		while (aliases.hasMoreElements()) {
 			String alias = aliases.nextElement();
 			if (ks.isKeyEntry(alias)) {
@@ -33,17 +29,14 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 				if (certs == null) continue;
 				X509Certificate[] x509Certs = new X509Certificate[certs.length];
 				for (int i = 0; i < certs.length; i++) {
-
 					X509Certificate cert = SKDSUtils.castOrThrow(certs[i], X509Certificate.class, "Not a X509 certificate");
 					x509Certs[i] = cert;
-
 					aliasMap.put(cert.getSubjectX500Principal().getName(), alias);
 					Collection<List<?>> names = cert.getSubjectAlternativeNames();
 					if (names != null) for (List<?> l : names) {
 						aliasMap.put(l.getLast().toString(), alias);
 					}
 				}
-
 				X509Credentials cred = new X509Credentials(key, x509Certs);
 				this.credentialsMap.put(alias, cred);
 			}
@@ -134,6 +127,7 @@ public class CustomKeyManager extends X509ExtendedKeyManager {
 	public String[] getServerAliases(String keyType, Principal[] issuers) {
 		return ArrayUtils.emptyArray();
 	}
+
 
 	private record X509Credentials(PrivateKey privateKey, X509Certificate[] certificates) {
 	}

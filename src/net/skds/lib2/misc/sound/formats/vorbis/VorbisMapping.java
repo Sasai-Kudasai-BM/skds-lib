@@ -1,18 +1,12 @@
 package net.skds.lib2.misc.sound.formats.vorbis;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import net.skds.lib2.io.codec.CodecRole;
 import net.skds.lib2.io.codec.annotation.CodecRoleConstrains;
 import net.skds.lib2.io.exception.ParseException;
-
 import java.io.IOException;
 
-@Getter
 @CodecRoleConstrains(CodecRole.SERIALIZE)
 public class VorbisMapping extends VorbisFloor {
-
-	@Getter(AccessLevel.NONE)
 	private final transient VorbisProcessor processor;
 	private byte[] mux;
 	private int[] submapFloor;
@@ -61,11 +55,29 @@ public class VorbisMapping extends VorbisFloor {
 			if (residue >= processor.getSetupHeader().getResidueTypes().length) throw err();
 			submapResidue[i] = residue;
 		}
-
 	}
 
 	private IOException err() {
 		return new ParseException("Vorbis error condition in mappings");
 	}
 
+	public byte[] getMux() {
+		return this.mux;
+	}
+
+	public int[] getSubmapFloor() {
+		return this.submapFloor;
+	}
+
+	public int[] getSubmapResidue() {
+		return this.submapResidue;
+	}
+
+	public int[] getMagnitude() {
+		return this.magnitude;
+	}
+
+	public int[] getAngle() {
+		return this.angle;
+	}
 }

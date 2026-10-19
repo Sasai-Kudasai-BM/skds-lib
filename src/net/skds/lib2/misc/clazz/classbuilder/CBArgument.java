@@ -1,12 +1,8 @@
 package net.skds.lib2.misc.clazz.classbuilder;
 
-import lombok.AllArgsConstructor;
-
 import java.util.List;
 
-@AllArgsConstructor
 public class CBArgument {
-
 	public final CBType type;
 	public final String name;
 	public final List<CBAnnotation> annotations;
@@ -42,7 +38,6 @@ public class CBArgument {
 				if (arg.annotations != null) for (CBAnnotation annotation : arg.annotations) {
 					sb.append(annotation).append(" ");
 				}
-
 				arg.writeMethod(sb);
 			}
 			sb.setLength(sb.length() - 2);
@@ -53,4 +48,10 @@ public class CBArgument {
 		sb.append(this.type).append(" ").append(this.name).append(", ");
 	}
 
+	public CBArgument(final CBType type, final String name, final List<CBAnnotation> annotations, final String comment) {
+		this.type = type;
+		this.name = name;
+		this.annotations = annotations;
+		this.comment = comment;
+	}
 }

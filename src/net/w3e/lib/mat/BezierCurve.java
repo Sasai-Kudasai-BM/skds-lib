@@ -1,15 +1,11 @@
 package net.w3e.lib.mat;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.mat.vec2.Vec2;
 import net.skds.lib2.mat.vec2.Vec2D;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
-
 //https://ru.wikipedia.org/wiki/Кривая_Безье
-@UtilityClass
-public class BezierCurve {
-
+public final class BezierCurve {
 	/**
 	 * (1-t)^2*P0 + 2t(1 - t)P1 + t^2*P2
 	 */

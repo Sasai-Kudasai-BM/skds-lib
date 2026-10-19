@@ -1,7 +1,5 @@
 package net.skds.lib2.security;
 
-import lombok.CustomLog;
-
 import javax.net.ssl.*;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
@@ -13,9 +11,8 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
-@CustomLog
 public class CustomX509TrustManager extends X509ExtendedTrustManager {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(CustomX509TrustManager.class);
 	private final X509ExtendedTrustManager base;
 	private final X509Certificate[] trusted;
 	private final Map<String, X509Certificate> trustedMap = new HashMap<>();
@@ -64,7 +61,6 @@ public class CustomX509TrustManager extends X509ExtendedTrustManager {
 			X509Certificate cert = x509Certificates[i];
 			String principial = cert.getSubjectX500Principal().getName();
 			map.put(principial, cert);
-
 			Collection<List<?>> an = cert.getSubjectAlternativeNames();
 			if (an != null) {
 				for (List<?> list : an) {
@@ -77,7 +73,6 @@ public class CustomX509TrustManager extends X509ExtendedTrustManager {
 	}
 
 	private CertificateStatus checkCertChain(X509Certificate cert, Map<String, X509Certificate> certMap) throws CertificateException {
-
 		String issuerName = cert.getIssuerX500Principal().getName();
 		X509Certificate trustedIssuer = trustedMap.get(issuerName);
 		if (trustedIssuer != null) {
@@ -92,7 +87,6 @@ public class CustomX509TrustManager extends X509ExtendedTrustManager {
 			}
 			X509Certificate issuer = certMap.remove(issuerName);
 			if (issuer == null) return CertificateStatus.INVALID;
-
 			try {
 				cert.verify(issuer.getPublicKey());
 			} catch (GeneralSecurityException e) {
@@ -101,14 +95,12 @@ public class CustomX509TrustManager extends X509ExtendedTrustManager {
 			CertificateStatus status = checkCertChain(issuer, certMap);
 			if (!status.isOk()) return status;
 		}
-
 		Date now = new Date();
 		if (now.after(cert.getNotAfter())) {
 			return CertificateStatus.EXPIRED;
 		} else if (now.before(cert.getNotBefore())) {
 			return CertificateStatus.NOT_VALID_YET;
 		}
-
 		return CertificateStatus.VALID;
 	}
 
@@ -158,7 +150,6 @@ public class CustomX509TrustManager extends X509ExtendedTrustManager {
 			throw ce;
 		}
 	}
-
 
 	@Override
 	public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {

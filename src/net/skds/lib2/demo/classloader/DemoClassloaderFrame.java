@@ -1,8 +1,6 @@
 package net.skds.lib2.demo.classloader;
 
-import lombok.CustomLog;
 import net.skds.lib2.utils.classloader.JarClassLoader;
-
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -12,9 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Objects;
 
-@CustomLog
 public class DemoClassloaderFrame extends JFrame {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(DemoClassloaderFrame.class);
 	private TestClassloader classloader = new TestClassloader();
 	private WeakReference<TestClassloader> ref = new WeakReference<>(classloader);
 	private String testClass = "net.skds.lib2.demo.classloader.TestClass";
@@ -24,7 +21,6 @@ public class DemoClassloaderFrame extends JFrame {
 		super("Classloader demo");
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		setPreferredSize(new Dimension(300, 200));
-
 		JButton button = new JButton("create new");
 		button.addActionListener(_ -> {
 			classloader = new TestClassloader();
@@ -33,7 +29,6 @@ public class DemoClassloaderFrame extends JFrame {
 			ref = new WeakReference<>(classloader);
 		});
 		add(button);
-
 		button = new JButton("load class");
 		button.addActionListener(_ -> {
 			try {
@@ -46,16 +41,12 @@ public class DemoClassloaderFrame extends JFrame {
 			}
 		});
 		add(button);
-
 		button = new JButton("jar");
 		button.addActionListener(_ -> {
-
 			JarClassLoader jcl = new JarClassLoader(Path.of("kek.jar"));
-
 			for (String r : jcl.listResources()) {
 				System.out.println(r);
 			}
-
 			try (InputStream is = jcl.getResourceAsStream("META-INF/MANIFEST.MF")) {
 				Objects.requireNonNull(is);
 				System.out.println(new String(is.readAllBytes(), StandardCharsets.UTF_8));
@@ -64,8 +55,6 @@ public class DemoClassloaderFrame extends JFrame {
 			}
 		});
 		add(button);
-
-
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		pack();
 		setLocation(-getWidth() / 2, -getHeight());

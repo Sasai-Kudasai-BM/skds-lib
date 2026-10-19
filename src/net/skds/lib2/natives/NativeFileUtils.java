@@ -1,20 +1,15 @@
 package net.skds.lib2.natives;
 
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.utils.SKDSUtils;
-
 import java.io.*;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import static net.skds.lib2.utils.SKDSFiles.DEFAULT_OPTIONS;
 
-@UtilityClass
-public class NativeFileUtils {
-
+public final class NativeFileUtils {
 	public static MemorySegment readToNativeMemory(File file) throws IOException {
 		return readToNativeMemory(Arena.ofAuto(), file);
 	}
@@ -51,5 +46,9 @@ public class NativeFileUtils {
 				os.write(buffer);
 			}
 		}
+	}
+
+	private NativeFileUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

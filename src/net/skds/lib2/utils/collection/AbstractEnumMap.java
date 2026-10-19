@@ -1,11 +1,7 @@
 package net.skds.lib2.utils.collection;
 
-import lombok.Getter;
-
 class AbstractEnumMap<E extends Enum<E>> {
-
 	protected final E[] keyUniverse;
-	@Getter
 	protected final Class<E> enumType;
 
 	public AbstractEnumMap(Class<E> enumType) {
@@ -17,4 +13,7 @@ class AbstractEnumMap<E extends Enum<E>> {
 		return this.keyUniverse.length;
 	}
 
+	public Class<E> getEnumType() {
+		return this.enumType;
+	}
 }

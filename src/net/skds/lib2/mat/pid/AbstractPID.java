@@ -1,32 +1,21 @@
 package net.skds.lib2.mat.pid;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import net.skds.lib2.io.codec.AbstractCodec;
 import net.skds.lib2.io.codec.CodecRegistry;
 import net.skds.lib2.io.codec.UniversalReader;
 import net.skds.lib2.io.codec.UniversalWriter;
 import net.skds.lib2.io.codec.annotation.DefaultCodec;
 import net.skds.lib2.io.exception.ParseException;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
-
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
-@Getter
-@Setter
-@AllArgsConstructor
 public abstract class AbstractPID {
-
 	protected static final double DEFAULT_MIN = -Double.MAX_VALUE;
 	protected static final double DEFAULT_MAX = Double.MAX_VALUE;
-
 	protected double p;
 	protected double i;
 	protected double d;
-
 	protected double iLimMin = DEFAULT_MIN;
 	protected double iLimMax = DEFAULT_MAX;
 
@@ -42,9 +31,9 @@ public abstract class AbstractPID {
 
 	public abstract void reset();
 
+
 	@DefaultCodec(JCodec.class)
 	public record PIDConfig(double p, double i, double d, double min, double max) {
-
 		public PIDConfig(double p, double i, double d) {
 			this(p, i, d, DEFAULT_MIN, DEFAULT_MAX);
 		}
@@ -58,8 +47,8 @@ public abstract class AbstractPID {
 		}
 	}
 
-	final static class JCodec extends AbstractCodec<PIDConfig> {
 
+	static final class JCodec extends AbstractCodec<PIDConfig> {
 		public JCodec(Type type, CodecRegistry registry) {
 			super(type, registry);
 		}
@@ -96,10 +85,8 @@ public abstract class AbstractPID {
 			double p = 1;
 			double i = 0;
 			double d = 0;
-
 			double min = DEFAULT_MIN;
 			double max = DEFAULT_MAX;
-
 			switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
@@ -127,11 +114,57 @@ public abstract class AbstractPID {
 					}
 					reader.endObject();
 				}
-				default ->
-						throw new ParseException("Unsupported token in PIDConfig \"" + reader.nextEntryType() + "\"");
+				default -> throw new ParseException("Unsupported token in PIDConfig \"" + reader.nextEntryType() + "\"");
 			}
-
 			return new PIDConfig(p, i, d, min, max);
 		}
+	}
+
+	public double getP() {
+		return this.p;
+	}
+
+	public double getI() {
+		return this.i;
+	}
+
+	public double getD() {
+		return this.d;
+	}
+
+	public double getILimMin() {
+		return this.iLimMin;
+	}
+
+	public double getILimMax() {
+		return this.iLimMax;
+	}
+
+	public void setP(final double p) {
+		this.p = p;
+	}
+
+	public void setI(final double i) {
+		this.i = i;
+	}
+
+	public void setD(final double d) {
+		this.d = d;
+	}
+
+	public void setILimMin(final double iLimMin) {
+		this.iLimMin = iLimMin;
+	}
+
+	public void setILimMax(final double iLimMax) {
+		this.iLimMax = iLimMax;
+	}
+
+	public AbstractPID(final double p, final double i, final double d, final double iLimMin, final double iLimMax) {
+		this.p = p;
+		this.i = i;
+		this.d = d;
+		this.iLimMin = iLimMin;
+		this.iLimMax = iLimMax;
 	}
 }

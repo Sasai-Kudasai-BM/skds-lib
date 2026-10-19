@@ -1,10 +1,8 @@
 package net.skds.lib2.mat.vec2;
 
-import lombok.Getter;
 import net.skds.lib2.mat.AxisDirection;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.ArrayUtils;
-
 import java.util.Random;
 import java.util.function.Predicate;
 
@@ -16,22 +14,15 @@ public enum Direction2D implements Vec2 {
 	LEFT(3, 2, AxisDirection.POSITIVE, Axis.X, new Vec2I(1, 0));
 
 	public static final Direction2D[] VALUES = values();
-
-	@Getter
 	private final int id;
 	private final int idOpposite;
-	@Getter
 	private final Axis axis;
-	@Getter
 	private final AxisDirection direction;
 	private final Vec2I vector;
-
 	public static final Direction2D XP = LEFT;
 	public static final Direction2D XN = RIGHT;
 	public static final Direction2D YP = UP;
 	public static final Direction2D YN = DOWN;
-
-
 	private static Direction2D[][] shuffleA;
 
 	Direction2D(int id, int idOpposite, AxisDirection direction, Axis axis, Vec2I vector) {
@@ -180,8 +171,7 @@ public enum Direction2D implements Vec2 {
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction2D direction2 : iterable) {
 			float g = x * direction2.xf() + y * direction2.yf();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -193,8 +183,7 @@ public enum Direction2D implements Vec2 {
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction2D direction2 : VALUES) {
 			float g = x * direction2.xf() + y * direction2.yf();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -206,14 +195,12 @@ public enum Direction2D implements Vec2 {
 		int f = Integer.MIN_VALUE;
 		for (Direction2D direction2 : VALUES) {
 			int g = x * direction2.xi() + y * direction2.yi();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
 		return direction;
 	}
-
 
 	public static Direction2D getFromOffset(int x, int y) {
 		if (x > 0) {
@@ -233,8 +220,7 @@ public enum Direction2D implements Vec2 {
 
 	public static Direction2D get(AxisDirection direction, Axis axis) {
 		for (Direction2D direction2 : VALUES) {
-			if (direction2.getDirection() != direction || direction2.getAxis() != axis)
-				continue;
+			if (direction2.getDirection() != direction || direction2.getAxis() != axis) continue;
 			return direction2;
 		}
 		throw new IllegalArgumentException("No such direction: " + direction + " " + axis);
@@ -244,7 +230,7 @@ public enum Direction2D implements Vec2 {
 		return this.vector;
 	}
 
-	@Getter
+
 	public enum Axis implements Predicate<Direction2D> {
 		X("xf") {
 			@Override
@@ -298,7 +284,6 @@ public enum Direction2D implements Vec2 {
 				return positive ? Direction2D.YP : Direction2D.YN;
 			}
 		};
-
 		public static final Axis[] VALUES;
 		private final String name;
 
@@ -336,8 +321,11 @@ public enum Direction2D implements Vec2 {
 		static {
 			VALUES = Axis.values();
 		}
-	}
 
+		public String getName() {
+			return this.name;
+		}
+	}
 
 	@Override
 	public Vec2I getAsIntVec() {
@@ -352,5 +340,17 @@ public enum Direction2D implements Vec2 {
 	@Override
 	public Vec2D getAsDoubleVec() {
 		return this.vector.getAsDoubleVec();
+	}
+
+	public int getId() {
+		return this.id;
+	}
+
+	public Axis getAxis() {
+		return this.axis;
+	}
+
+	public AxisDirection getDirection() {
+		return this.direction;
 	}
 }

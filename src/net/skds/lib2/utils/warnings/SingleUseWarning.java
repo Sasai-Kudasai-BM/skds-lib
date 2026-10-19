@@ -1,14 +1,10 @@
 package net.skds.lib2.utils.warnings;
 
-import lombok.CustomLog;
 import net.skds.lib2.utils.SKDSUtils;
-
 import java.util.function.Consumer;
 
-
-@CustomLog
 public final class SingleUseWarning {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(SingleUseWarning.class);
 	private Consumer<Object> action;
 
 	public SingleUseWarning(String message) {
@@ -29,5 +25,4 @@ public final class SingleUseWarning {
 	public void warn(Object o) {
 		action.accept(o);
 	}
-
 }

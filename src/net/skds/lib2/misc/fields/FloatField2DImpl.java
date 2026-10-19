@@ -14,7 +14,7 @@ public final class FloatField2DImpl implements FloatField2D {
 
 	public FloatField2DImpl(int width, int height, float[] data) {
 		if (width * height != data.length)
-			throw new IllegalArgumentException("Expected data length of %s but got %s".formatted(width * height, data.length));
+			throw new IllegalArgumentException("Expected data length is %s but got %s".formatted(width * height, data.length));
 		this.width = width;
 		this.height = height;
 		this.array = data;

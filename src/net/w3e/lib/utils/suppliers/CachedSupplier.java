@@ -1,18 +1,15 @@
 package net.w3e.lib.utils.suppliers;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.function.Supplier;
 
 public interface CachedSupplier<T> extends Supplier<T> {
-
 	void resetCache();
 
 	static <T> CachedSupplier<T> of(Supplier<T> sup) {
 		return new CachedSupplierImpl<>(sup);
 	}
 
-	@RequiredArgsConstructor
+
 	class CachedSupplierImpl<T> implements CachedSupplier<T> {
 		private final Supplier<T> sup;
 		private boolean initialized = false;
@@ -32,11 +29,16 @@ public interface CachedSupplier<T> extends Supplier<T> {
 			}
 			return this.value;
 		}
+
+		public CachedSupplierImpl(final Supplier<T> sup) {
+			this.sup = sup;
+		}
 	}
 
 	static <T> CachedSupplier<T> ofValue(T value) {
 		return new NonCachedSupplierImpl<>(value);
 	}
+
 
 	record NonCachedSupplierImpl<T>(T value) implements CachedSupplier<T> {
 		@Override

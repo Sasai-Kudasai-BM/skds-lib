@@ -1,10 +1,6 @@
 package net.skds.lib2.misc.qr;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class QRCodeUtils {
-
+public final class QRCodeUtils {
 	public static int getVersion(int dots) {
 		dots -= 17;
 		if (dots % 4 != 0) {
@@ -18,5 +14,9 @@ public class QRCodeUtils {
 			throw new QRCodeException("Invalid dot version " + version);
 		}
 		return version * 4 + 17;
+	}
+
+	private QRCodeUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

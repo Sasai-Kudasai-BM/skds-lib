@@ -1,10 +1,8 @@
 package net.skds.lib2.mat.vec3;
 
-import lombok.Getter;
 import net.skds.lib2.mat.AxisDirection;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.utils.ArrayUtils;
-
 import java.util.Random;
 import java.util.function.Predicate;
 
@@ -19,24 +17,17 @@ public enum Direction implements Vec3 {
 
 	public static final Direction[] VALUES = values();
 	public static final Direction[] HORIZONTAL = {BACKWARD, FORWARD, RIGHT, LEFT};
-
-	@Getter
 	private final int id;
 	private final int idOpposite;
 	private final int idHorizontal;
-	@Getter
 	private final String name;
-	@Getter
 	private final Axis axis;
-	@Getter
 	private final AxisDirection direction;
 	private final Vec3I vector;
-
 	public static final Direction EAST = LEFT;
 	public static final Direction WEST = RIGHT;
 	public static final Direction SOUTH = FORWARD;
 	public static final Direction NORTH = BACKWARD;
-
 	public static final Direction XP = EAST;
 	public static final Direction XN = WEST;
 	public static final Direction YP = UP;
@@ -455,8 +446,7 @@ public enum Direction implements Vec3 {
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : iterable) {
 			float g = x * direction2.xf() + y * direction2.yf() + z * direction2.zf();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -468,8 +458,7 @@ public enum Direction implements Vec3 {
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : VALUES) {
 			float g = x * direction2.xf() + y * direction2.yf() + z * direction2.zf();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -481,8 +470,7 @@ public enum Direction implements Vec3 {
 		int f = Integer.MIN_VALUE;
 		for (Direction direction2 : VALUES) {
 			int g = x * direction2.xi() + y * direction2.yi() + z * direction2.zi();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -502,8 +490,7 @@ public enum Direction implements Vec3 {
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : HORIZONTAL) {
 			float g = x * direction2.vector.xf() + z * direction2.vector.zf();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -515,8 +502,7 @@ public enum Direction implements Vec3 {
 		float f = Float.NEGATIVE_INFINITY;
 		for (Direction direction2 : iterable) {
 			float g = x * direction2.vector.xf() + z * direction2.vector.zf();
-			if (!(g > f))
-				continue;
+			if (!(g > f)) continue;
 			f = g;
 			direction = direction2;
 		}
@@ -524,7 +510,6 @@ public enum Direction implements Vec3 {
 	}
 
 	public static Direction getFromOffset(int x, int y, int z) {
-
 		if (x > 0) {
 			return XP;
 		}
@@ -552,8 +537,7 @@ public enum Direction implements Vec3 {
 
 	public static Direction get(AxisDirection direction, Axis axis) {
 		for (Direction direction2 : VALUES) {
-			if (direction2.getDirection() != direction || direction2.getAxis() != axis)
-				continue;
+			if (direction2.getDirection() != direction || direction2.getAxis() != axis) continue;
 			return direction2;
 		}
 		throw new IllegalArgumentException("No such direction: " + direction + " " + axis);
@@ -563,15 +547,15 @@ public enum Direction implements Vec3 {
 		return this.vector;
 	}
 
-	@Deprecated // rewrite
+	// rewrite
+	@Deprecated
 	public boolean pointsTo(float yaw) {
 		float g = -FastMath.sinDegr(yaw);
 		float h = FastMath.cosDegr(yaw);
-		return (float) this.vector.x() * g + (float) this.vector.z() * h > 0.0f;
+		return (float) this.vector.x() * g + (float) this.vector.z() * h > 0.0F;
 	}
 
 
-	@Getter
 	public enum Axis implements Predicate<Direction> {
 		X("xf") {
 			@Override
@@ -651,7 +635,6 @@ public enum Direction implements Vec3 {
 				return positive ? Direction.ZP : Direction.ZN;
 			}
 		};
-
 		public static final Axis[] VALUES;
 		private final String name;
 
@@ -697,6 +680,10 @@ public enum Direction implements Vec3 {
 		static {
 			VALUES = Axis.values();
 		}
+
+		public String getName() {
+			return this.name;
+		}
 	}
 
 	@Override
@@ -712,5 +699,21 @@ public enum Direction implements Vec3 {
 	@Override
 	public Vec3D getAsDoubleVec() {
 		return this.vector.getAsDoubleVec();
+	}
+
+	public int getId() {
+		return this.id;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public Axis getAxis() {
+		return this.axis;
+	}
+
+	public AxisDirection getDirection() {
+		return this.direction;
 	}
 }

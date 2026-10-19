@@ -1,9 +1,5 @@
 package net.skds.lib2.network.intercom;
 
-import lombok.AccessLevel;
-import lombok.CustomLog;
-import lombok.Getter;
-import lombok.Setter;
 import net.skds.lib2.io.ByteArrayExtendedDataOutput;
 import net.skds.lib2.io.ExtendedDataInput;
 import net.skds.lib2.io.ExtendedDataOutput;
@@ -19,7 +15,6 @@ import net.skds.lib2.network.tcp.TCPConnection;
 import net.skds.lib2.network.tcp.TCPConnectionOptions;
 import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.logger.SKDSLogger;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -27,60 +22,30 @@ import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.DataFormatException;
 
-@CustomLog
 public abstract class IntercomConnection<C extends IntercomConnection<?>> extends TCPConnection<TCPConnectionOptions> {
-
+	private static final SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(IntercomConnection.class);
 	private final LinkedBlockingQueue<IntercomInputPacket<?>> inputPacketQueue = new LinkedBlockingQueue<>();
 	private final LinkedBlockingQueue<IntercomOutputPacket> outputPacketQueue = new LinkedBlockingQueue<>();
-	@Getter
 	private final IntercomConnectionOwner<C, ?> connectionOwner;
-
 	private ExtendedDataInput input = ExtendedDataInput.wrap(getInputStream());
 	private ExtendedDataOutput output = ExtendedDataOutput.wrap(getOutputStream());
-
 	private final ByteArrayExtendedDataOutput bundleOutputBuffer;
 	private final ByteArrayExtendedDataOutput outputBuffer;
 	private final int outputBufferSize;
 	protected final IntercomSettings intercomSettings;
-	@Getter
 	private final AddressLocation addressLocation;
-
 	private IntercomOutputPacket terminationPacket;
-
-	@Setter(AccessLevel.PROTECTED)
-	@Getter
 	private SecurityLevel securityLevel;
-
-
-	@Getter
 	private HandshakeStatus handshakeStatus = HandshakeStatus.NONE;
-
-	@Getter
-	@Setter
 	private boolean forceInstantHandle = true;
-	@Setter
-	@Getter
 	private boolean isPacketErrorCritical = false;
-	@Getter
 	private int lastPing = 999;
-
-	@Getter
 	private boolean authorized = false;
-
-	@Getter
-	@Setter
 	private PacketRegistry applicationPacketRegistry = _ -> null;
-
 	private IntercomOutputPacket pendingPacket;
-
 	protected IntercomEncryption encryption;
 
-	public IntercomConnection(SocketChannel channel,
-							  boolean isServerside,
-							  IntercomConnectionOwner<C, ?> connectionOwner,
-							  IntercomSettings intercomSettings,
-							  TCPConnectionOptions options
-	) {
+	public IntercomConnection(SocketChannel channel, boolean isServerside, IntercomConnectionOwner<C, ?> connectionOwner, IntercomSettings intercomSettings, TCPConnectionOptions options) {
 		super(channel, isServerside, options);
 		this.outputBufferSize = options.getOutputBufferSize();
 		this.intercomSettings = intercomSettings;
@@ -100,8 +65,7 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 
 	public void send(IntercomOutputPacket packet) {
 		if (isAlive()) {
-			if (!validateSendSide(packet.getDirection()))
-				throw new WrongSideException(packet.getDirection().toString());
+			if (!validateSendSide(packet.getDirection())) throw new WrongSideException(packet.getDirection().toString());
 			outputPacketQueue.offer(packet);
 		}
 	}
@@ -122,24 +86,21 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 
 	public synchronized void validateHandshakeStatus(HandshakeStatus required, HandshakeStatus next, AbstractIntercomPacket packet) {
 		if (this.handshakeStatus != required) {
-			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s for packet %s"
-					.formatted(required, this.handshakeStatus, packet.getClass().getSimpleName()));
+			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s for packet %s".formatted(required, this.handshakeStatus, packet.getClass().getSimpleName()));
 		}
 		this.handshakeStatus = next;
 	}
 
 	public synchronized void validateHandshakeStatus(HandshakeStatus required, HandshakeStatus next) {
 		if (this.handshakeStatus != required) {
-			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s for next state %s"
-					.formatted(required, this.handshakeStatus, next));
+			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s for next state %s".formatted(required, this.handshakeStatus, next));
 		}
 		this.handshakeStatus = next;
 	}
 
 	public synchronized void validateHandshakeStatus(HandshakeStatus required) {
 		if (this.handshakeStatus != required) {
-			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s"
-					.formatted(required, this.handshakeStatus));
+			throw new ProtocolViolationException("HandshakeStatus mismatch: requires %s but actually is %s".formatted(required, this.handshakeStatus));
 		}
 	}
 
@@ -174,8 +135,8 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 		if (dl != null) {
 			//log.warn("disconnectListener in close");
 			dl.onDisconnect((C) this);
-			//this.connectionOwner = null;
 		}
+		//this.connectionOwner = null;
 		super.close();
 	}
 
@@ -289,7 +250,6 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 		try {
 			if (this.pendingPacket == null) {
 				while ((packet = (isQueueEmpty && bundle.isEmpty()) ? outputPacketQueue.take() : outputPacketQueue.poll()) != null) {
-
 					if (packet.packetType().allowBundle) {
 						bundle.addLast(packet);
 					} else {
@@ -310,7 +270,6 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 			final ByteArrayExtendedDataOutput out = this.outputBuffer;
 			final ByteArrayExtendedDataOutput bundleOut = this.bundleOutputBuffer;
 			final boolean doBundle = intercomSettings.checkBundling(bundleSize);
-
 			boolean terminate = false;
 			while (!terminate && (packet = bundle.pollFirst()) != null) {
 				if (packet == terminationPacket) {
@@ -318,7 +277,8 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 				}
 				packet.write(out);
 				int uncompressed = -1;
-				if (!doBundle && intercomSettings.checkCompression(out.size(), addressLocation)) { // try to compress
+				if (!doBundle && intercomSettings.checkCompression(out.size(), addressLocation)) {
+					// try to compress
 					ByteBuffer bb = SKDSUtils.compress(out.rawArray(), 0, out.size());
 					if (bb.remaining() + 4 < out.size()) {
 						uncompressed = out.size();
@@ -330,10 +290,10 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 				bundleOut.write(out.rawArray(), 0, out.size());
 				out.resetAndCap(this.outputBufferSize);
 			}
-
 			if (doBundle) {
 				int uncompressed = -1;
-				if (intercomSettings.checkCompression(out.size(), addressLocation)) { // try to compress
+				if (intercomSettings.checkCompression(out.size(), addressLocation)) {
+					// try to compress
 					ByteBuffer bb = SKDSUtils.compress(bundleOut.rawArray(), 0, bundleOut.size());
 					if (bb.remaining() + 4 < bundleOut.size()) {
 						uncompressed = bundleOut.size();
@@ -350,5 +310,57 @@ public abstract class IntercomConnection<C extends IntercomConnection<?>> extend
 			}
 		} catch (InterruptedException ignored) {
 		}
+	}
+
+	public IntercomConnectionOwner<C, ?> getConnectionOwner() {
+		return this.connectionOwner;
+	}
+
+	public AddressLocation getAddressLocation() {
+		return this.addressLocation;
+	}
+
+	protected void setSecurityLevel(final SecurityLevel securityLevel) {
+		this.securityLevel = securityLevel;
+	}
+
+	public SecurityLevel getSecurityLevel() {
+		return this.securityLevel;
+	}
+
+	public HandshakeStatus getHandshakeStatus() {
+		return this.handshakeStatus;
+	}
+
+	public boolean isForceInstantHandle() {
+		return this.forceInstantHandle;
+	}
+
+	public void setForceInstantHandle(final boolean forceInstantHandle) {
+		this.forceInstantHandle = forceInstantHandle;
+	}
+
+	public void setPacketErrorCritical(final boolean isPacketErrorCritical) {
+		this.isPacketErrorCritical = isPacketErrorCritical;
+	}
+
+	public boolean isPacketErrorCritical() {
+		return this.isPacketErrorCritical;
+	}
+
+	public int getLastPing() {
+		return this.lastPing;
+	}
+
+	public boolean isAuthorized() {
+		return this.authorized;
+	}
+
+	public PacketRegistry getApplicationPacketRegistry() {
+		return this.applicationPacketRegistry;
+	}
+
+	public void setApplicationPacketRegistry(final PacketRegistry applicationPacketRegistry) {
+		this.applicationPacketRegistry = applicationPacketRegistry;
 	}
 }

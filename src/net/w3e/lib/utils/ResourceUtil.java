@@ -1,7 +1,5 @@
 package net.w3e.lib.utils;
 
-import lombok.experimental.UtilityClass;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,20 +9,15 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-@UtilityClass
-public class ResourceUtil {
-
+public final class ResourceUtil {
 	public static List<String> listAllResources(String folderPath) {
 		List<String> resultFiles = new ArrayList<>();
 		ClassLoader classLoader = ResourceUtil.class.getClassLoader();
-
 		try {
 			Enumeration<URL> urls = classLoader.getResources(folderPath);
-
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				URI uri = url.toURI();
-
 				if ("jar".equals(uri.getScheme())) {
 					FileSystem fileSystem;
 					boolean closeFs = false;
@@ -34,7 +27,6 @@ public class ResourceUtil {
 						fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
 						closeFs = true;
 					}
-
 					try {
 						Path pathInJar = fileSystem.getPath(folderPath);
 						scanPath(pathInJar, folderPath, resultFiles);
@@ -51,19 +43,15 @@ public class ResourceUtil {
 		} catch (Exception e) {
 			System.err.println("Error while scan resources: " + e.getMessage());
 		}
-
 		return resultFiles;
 	}
 
 	private static void scanPath(Path rootPath, String originalFolder, List<String> resultList) throws IOException {
 		if (!Files.exists(rootPath)) return;
-
 		try (Stream<Path> walk = Files.walk(rootPath)) {
 			walk.filter(Files::isRegularFile).forEach(path -> {
 				String rawPath = path.toString();
-
 				rawPath = rawPath.replace("\\", "/");
-
 				int startIndex = rawPath.indexOf(originalFolder);
 				if (startIndex != -1) {
 					String cleanResourcePath = rawPath.substring(startIndex);
@@ -87,4 +75,7 @@ public class ResourceUtil {
 		System.out.println("ClassPath: " + Arrays.toString(classPathValues));
 	}
 
+	private ResourceUtil() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }

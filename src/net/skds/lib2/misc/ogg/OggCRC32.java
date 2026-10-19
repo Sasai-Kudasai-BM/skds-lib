@@ -1,10 +1,6 @@
 package net.skds.lib2.misc.ogg;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class OggCRC32 {
-
+public final class OggCRC32 {
 	private static final int CRC_POLYNOMIAL = 0x04C11DB7;
 	private static final int[] CRC_TABLE = new int[256];
 
@@ -26,11 +22,10 @@ public class OggCRC32 {
 	//public int getCRC(byte[] arr) {
 	//	return getCRC(arr, 0);
 	//}
-
-	public int getCRC(byte[] arr, int previous) {
+	public static int getCRC(byte[] arr, int previous) {
 		int crc = previous;
-		int a, b;
-
+		int a;
+		int b;
 		for (int i = 0; i < arr.length; i++) {
 			a = crc << 8;
 			b = CRC_TABLE[(crc >>> 24) ^ (arr[i] & 0xff)];
@@ -39,11 +34,11 @@ public class OggCRC32 {
 		return crc;
 	}
 
-	public int getMagicCRC(int magic) {
+	public static int getMagicCRC(int magic) {
 		magic = Integer.reverseBytes(magic);
 		int crc = 0;
-		int a, b;
-
+		int a;
+		int b;
 		for (int i = 0; i < 4; i++) {
 			a = crc << 8;
 			b = CRC_TABLE[(crc >>> 24) ^ (magic & 0xff)];
@@ -53,5 +48,7 @@ public class OggCRC32 {
 		return crc;
 	}
 
+	private OggCRC32() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }
-

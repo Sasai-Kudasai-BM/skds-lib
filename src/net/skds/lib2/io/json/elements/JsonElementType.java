@@ -1,10 +1,7 @@
 package net.skds.lib2.io.json.elements;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import net.skds.lib2.io.sosison.SosisonEntryType;
 
-@AllArgsConstructor
 public enum JsonElementType {
 	BOOLEAN(SosisonEntryType.BOOLEAN),
 	OBJECT(SosisonEntryType.BEGIN_OBJECT) {
@@ -27,11 +24,17 @@ public enum JsonElementType {
 			return false;
 		}
 	};
-
-	@Getter
 	private final SosisonEntryType beginEntryType;
 
 	public boolean isJsonPrimitive() {
 		return true;
+	}
+
+	private JsonElementType(final SosisonEntryType beginEntryType) {
+		this.beginEntryType = beginEntryType;
+	}
+
+	public SosisonEntryType getBeginEntryType() {
+		return this.beginEntryType;
 	}
 }

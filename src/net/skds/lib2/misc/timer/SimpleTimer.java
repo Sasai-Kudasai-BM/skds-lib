@@ -1,18 +1,13 @@
 package net.skds.lib2.misc.timer;
 
-import lombok.CustomLog;
 import net.skds.lib2.utils.ThreadUtils;
-
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 
-@CustomLog
 public class SimpleTimer {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(SimpleTimer.class);
 	public static final SimpleTimer INSTANCE;
-
 	private static final Comparator<Entry> COMPARATOR = (e1, e2) -> Long.compare(e1.time, e2.time);
-
 	private boolean stopped = false;
 	private final Thread thread;
 	private final PriorityBlockingQueue<Entry> queue = new PriorityBlockingQueue<>(16, COMPARATOR);
@@ -22,7 +17,6 @@ public class SimpleTimer {
 			{
 				setDaemon(true);
 			}
-
 			@Override
 			public void run() {
 				while (!stopped) {
@@ -104,8 +98,8 @@ public class SimpleTimer {
 		}
 	}
 
-	private record Entry(ScheduledTimedAction action, long time) {
 
+	private record Entry(ScheduledTimedAction action, long time) {
 	}
 
 	static {
@@ -113,7 +107,6 @@ public class SimpleTimer {
 			{
 				start();
 			}
-
 			@Override
 			public void stop() {
 				throw new UnsupportedOperationException("This instance must not be stopped");

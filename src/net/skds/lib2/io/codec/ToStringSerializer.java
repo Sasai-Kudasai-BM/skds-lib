@@ -1,13 +1,9 @@
 package net.skds.lib2.io.codec;
 
-import lombok.Getter;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 public class ToStringSerializer implements UniversalSerializer<Object> {
-
-	@Getter(onMethod_ = @Override)
 	private CodecRegistry registry;
 
 	public ToStringSerializer(Type type, CodecRegistry registry) {
@@ -23,4 +19,8 @@ public class ToStringSerializer implements UniversalSerializer<Object> {
 		}
 	}
 
+	@Override
+	public CodecRegistry getRegistry() {
+		return this.registry;
+	}
 }

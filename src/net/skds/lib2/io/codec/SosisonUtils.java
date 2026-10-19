@@ -1,7 +1,5 @@
 package net.skds.lib2.io.codec;
 
-import lombok.Getter;
-import lombok.experimental.UtilityClass;
 import net.skds.lib2.annotations.NotNull;
 import net.skds.lib2.io.codec.annotation.DefaultFile;
 import net.skds.lib2.io.codec.typed.ConfigEnumType;
@@ -13,7 +11,6 @@ import net.skds.lib2.io.json.JsonCodecOptions;
 import net.skds.lib2.io.json.elements.JsonElement;
 import net.skds.lib2.reflection.ReflectUtils;
 import net.w3e.lib.utils.FileUtils;
-
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -24,17 +21,11 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.function.Supplier;
 
-@UtilityClass
 @SuppressWarnings("unused")
-public class SosisonUtils {
-
-	@Getter
+public final class SosisonUtils {
 	private static CodecRegistry compactRegistry;
-	@Getter
 	private static CodecRegistry fancyRegistry;
-	@Getter
 	private static CodecRegistry json5Registry;
-	@Getter
 	private static CodecRegistry jsonCRegistry;
 	private static UniversalCodecOptions options;
 	private static final CodecFactory.MapJsonFactory userMapCodecFactory = CodecFactory.newMapFactory();
@@ -152,7 +143,6 @@ public class SosisonUtils {
 		return null;
 	}
 
-
 	public static <T> T readJson(String file, Type type) {
 		return readJson(Path.of(file), type);
 	}
@@ -256,7 +246,6 @@ public class SosisonUtils {
 		return null;
 	}
 
-
 	public static <T> T parseJson(JsonElement json, Type type) {
 		try {
 			UniversalDeserializer<T> deserializer = fancyRegistry.getDeserializer(type);
@@ -307,7 +296,6 @@ public class SosisonUtils {
 	}
 
 	// COMPACT
-
 	@SuppressWarnings("unchecked")
 	public static <T> String toJsonCompact(T object) {
 		if (object == null) {
@@ -337,8 +325,27 @@ public class SosisonUtils {
 		return false;
 	}
 
-
 	static {
 		setOptions(new UniversalCodecOptionsImpl());
+	}
+
+	private SosisonUtils() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
+
+	public static CodecRegistry getCompactRegistry() {
+		return SosisonUtils.compactRegistry;
+	}
+
+	public static CodecRegistry getFancyRegistry() {
+		return SosisonUtils.fancyRegistry;
+	}
+
+	public static CodecRegistry getJson5Registry() {
+		return SosisonUtils.json5Registry;
+	}
+
+	public static CodecRegistry getJsonCRegistry() {
+		return SosisonUtils.jsonCRegistry;
 	}
 }

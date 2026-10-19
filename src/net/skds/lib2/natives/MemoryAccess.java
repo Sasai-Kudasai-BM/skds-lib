@@ -1,7 +1,5 @@
 package net.skds.lib2.natives;
 
-import lombok.experimental.UtilityClass;
-
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.MemorySegment;
@@ -13,10 +11,8 @@ import java.util.Collection;
  * <p>AKA "Safe UnsafeAnal", "SafeAnal"</p>
  * (I LOVE anal (both roles))
  */
-@UtilityClass
 @SuppressWarnings("unused")
-public class MemoryAccess {
-
+public final class MemoryAccess {
 	private static final VarHandle VH_BYTE = ValueLayout.JAVA_BYTE.varHandle();
 	private static final VarHandle VH_SHORT = ValueLayout.JAVA_SHORT.varHandle();
 	private static final VarHandle VH_CHAR = ValueLayout.JAVA_CHAR.varHandle();
@@ -24,7 +20,6 @@ public class MemoryAccess {
 	private static final VarHandle VH_LONG = ValueLayout.JAVA_LONG.varHandle();
 	private static final VarHandle VH_FLOAT = ValueLayout.JAVA_FLOAT.varHandle();
 	private static final VarHandle VH_DOUBLE = ValueLayout.JAVA_DOUBLE.varHandle();
-
 	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
 	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
 	public static final ValueLayout.OfShort SHORT = ValueLayout.JAVA_SHORT;
@@ -34,7 +29,6 @@ public class MemoryAccess {
 	public static final ValueLayout.OfLong PTR = ValueLayout.JAVA_LONG;
 	public static final ValueLayout.OfFloat FLOAT = ValueLayout.JAVA_FLOAT;
 	public static final ValueLayout.OfDouble DOUBLE = ValueLayout.JAVA_DOUBLE;
-
 	public static final MemorySegment ALL_MEMORY = MemorySegment.NULL.reinterpret((1L << 63) - 1);
 
 	public static byte[] getByteArray(MemorySegment segment, long offset, int length) {
@@ -154,7 +148,6 @@ public class MemoryAccess {
 		}
 		return arena.allocateFrom(ValueLayout.JAVA_LONG, pointers);
 	}
-
 
 	public static String[] getCStringArray(MemorySegment segment, long offset, int count) {
 		long[] pointers = new long[count];
@@ -482,5 +475,9 @@ public class MemoryAccess {
 
 	public static double getDouble(long address, int index) {
 		return (double) VH_DOUBLE.get(ALL_MEMORY, address + index * 8L);
+	}
+
+	private MemoryAccess() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 }

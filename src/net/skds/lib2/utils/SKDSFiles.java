@@ -1,8 +1,5 @@
 package net.skds.lib2.utils;
 
-import lombok.CustomLog;
-import lombok.experimental.UtilityClass;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -11,22 +8,18 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-@CustomLog
-@UtilityClass
-public class SKDSFiles {
-
+public final class SKDSFiles {
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(SKDSFiles.class);
 	public static final FileVisitor<Path> DELETER = new FileVisitor<>() {
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
 			return FileVisitResult.CONTINUE;
 		}
-
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 			Files.delete(file);
 			return FileVisitResult.CONTINUE;
 		}
-
 		@Override
 		public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
 			if (exc instanceof NoSuchFileException) {
@@ -35,19 +28,16 @@ public class SKDSFiles {
 				throw exc;
 			}
 		}
-
 		@Override
 		public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 			Files.delete(dir);
 			return FileVisitResult.CONTINUE;
 		}
 	};
-
 	public static final OpenOption[] DEFAULT_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE};
 	public static final CopyOption[] DEFAULT_COPY_OPTIONS = {StandardCopyOption.REPLACE_EXISTING};
 	public static final Set<OpenOption> DEFAULT_OPTIONS_SET = Set.of(DEFAULT_OPTIONS);
 	public static final boolean IS_PATH_CANONICAL = File.separatorChar == '/';
-
 	public static final Path DESKTOP_PATH;
 
 	public static String toCanonicalPath(String path) {
@@ -80,20 +70,17 @@ public class SKDSFiles {
 					Files.createDirectories(destPath);
 					return FileVisitResult.CONTINUE;
 				}
-
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					Path destPath = dst.resolve(src.relativize(file));
 					Files.copy(file, destPath, DEFAULT_COPY_OPTIONS);
 					return FileVisitResult.CONTINUE;
 				}
-
 				@Override
 				public FileVisitResult visitFileFailed(Path file, IOException exc) {
 					log.warn("Failed to copy file \"" + file + "\": " + exc.getMessage());
 					return FileVisitResult.CONTINUE;
 				}
-
 				@Override
 				public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
 					return FileVisitResult.CONTINUE;
@@ -254,7 +241,6 @@ public class SKDSFiles {
 		}
 	}
 
-
 	static {
 		Path desktopPath = null;
 		try {
@@ -265,4 +251,7 @@ public class SKDSFiles {
 		DESKTOP_PATH = desktopPath;
 	}
 
+	private SKDSFiles() {
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+	}
 }

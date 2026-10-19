@@ -1,15 +1,11 @@
 package net.skds.lib2.mat;
 
-import lombok.AllArgsConstructor;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-@AllArgsConstructor
 public class VarLong extends Number implements Comparable<Long> {
-
 	public final long value;
 
 	@Override
@@ -101,5 +97,9 @@ public class VarLong extends Number implements Comparable<Long> {
 			}
 			output.writeByte(temp);
 		} while (value != 0);
+	}
+
+	public VarLong(final long value) {
+		this.value = value;
 	}
 }

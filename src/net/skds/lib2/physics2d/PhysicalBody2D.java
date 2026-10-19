@@ -1,7 +1,5 @@
 package net.skds.lib2.physics2d;
 
-import lombok.Getter;
-import lombok.Setter;
 import net.skds.lib2.mat.matrix2.Matrix2;
 import net.skds.lib2.mat.vec2.Vec2;
 import net.skds.lib2.shapes2d.AABR;
@@ -10,29 +8,14 @@ import net.skds.lib2.shapes2d.Shape2D;
 import net.skds.lib2.utils.Tickable;
 
 public class PhysicalBody2D implements Tickable {
-
-	@Getter
 	private PhysicalSpace2D space;
-
 	private AABRTree.TreeNode<PhysicalBody2D> entry;
-
-	@Getter
 	private Vec2 pos;
-	@Getter
 	private Vec2 vel = Vec2.ZERO;
-	@Getter
-	@Setter
 	private float spin = 0;
-	@Getter
 	private Matrix2 rotation = Matrix2.SINGLE;
-
-	@Getter
 	private Shape2D baseShape;
-
-	@Getter
 	private Shape2D shape;
-
-	@Getter
 	private AABR bounding;
 
 	public PhysicalBody2D(Vec2 pos, Shape2D shape) {
@@ -91,7 +74,41 @@ public class PhysicalBody2D implements Tickable {
 	@Override
 	public void tick() {
 		addVel(space.getTickG(pos));
+	}
 
+	public PhysicalSpace2D getSpace() {
+		return this.space;
+	}
 
+	public Vec2 getPos() {
+		return this.pos;
+	}
+
+	public Vec2 getVel() {
+		return this.vel;
+	}
+
+	public float getSpin() {
+		return this.spin;
+	}
+
+	public void setSpin(final float spin) {
+		this.spin = spin;
+	}
+
+	public Matrix2 getRotation() {
+		return this.rotation;
+	}
+
+	public Shape2D getBaseShape() {
+		return this.baseShape;
+	}
+
+	public Shape2D getShape() {
+		return this.shape;
+	}
+
+	public AABR getBounding() {
+		return this.bounding;
 	}
 }

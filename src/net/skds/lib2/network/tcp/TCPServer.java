@@ -1,9 +1,7 @@
 package net.skds.lib2.network.tcp;
 
-import lombok.CustomLog;
 import net.skds.lib2.utils.SKDSUtils;
 import net.skds.lib2.utils.ThreadUtils;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -12,24 +10,19 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
-@CustomLog
 public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C, ServersideTCPConnectionOptions> {
-
+	private static final net.skds.lib2.utils.logger.SKDSLogger log = net.skds.lib2.utils.logger.SKDSLoggerFactory.getLogger(TCPServer.class);
 	protected boolean running = false;
 	//public final Selector selector;
 	public final Selector monitirSelector;
 	public final ServerSocketChannel server;
 	protected final Object acceptAttachment = new Object();
 	private final ServersideTCPConnectionOptions options;
-
 	protected final String serverName;
 	protected final TCPConnectionFactory<?, TCPServer<C>> connectionFactory;
 
 	@SuppressWarnings("unchecked")
-	public TCPServer(ServersideTCPConnectionOptions options,
-					 String serverName,
-					 TCPConnectionFactory<C, ? extends TCPServer<C>> connectionFactory
-	) {
+	public TCPServer(ServersideTCPConnectionOptions options, String serverName, TCPConnectionFactory<C, ? extends TCPServer<C>> connectionFactory) {
 		this.options = options;
 		this.serverName = serverName;
 		this.connectionFactory = (TCPConnectionFactory<?, TCPServer<C>>) connectionFactory;
@@ -41,7 +34,6 @@ public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C,
 			throw new RuntimeException(e);
 		}
 	}
-
 
 	public void stop() {
 		running = false;
@@ -61,7 +53,6 @@ public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C,
 			server.configureBlocking(false);
 			server.register(monitirSelector, SelectionKey.OP_ACCEPT, acceptAttachment);
 			//server.register(selector, SelectionKey.OP_READ);
-
 			final ServerSocket socket = server.socket();
 			socket.setSoTimeout(options.getAcceptTimeout());
 			ThreadUtils.runNewThreadMainGroup(() -> {
@@ -88,7 +79,8 @@ public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C,
 				return;
 			}
 			try {
-				@SuppressWarnings("resource") final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
+				@SuppressWarnings("resource")
+				final SocketChannel sc = ((ServerSocketChannel) key.channel()).accept();
 				//key.cancel();
 				//log.debug("[Monitor] accepting " + sc.getRemoteAddress());
 				connectionFactory.createConnection(sc, this).thenAccept(cc -> {
@@ -129,19 +121,16 @@ public class TCPServer<C extends TCPConnection<?>> implements ConnectionOwner<C,
 
 	@Override
 	public void onConnect(C connection) {
-
 	}
 
 	@Override
 	public void onDisconnect(C connection) {
-
 	}
 
 	@Override
 	public ServersideTCPConnectionOptions getOptions() {
 		return options;
 	}
-
 	//protected void outputLoop(AbstractClientConnection<?> connection) {
 	//	while (running && connection.isAlive()) {
 	//		try {

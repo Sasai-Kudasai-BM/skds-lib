@@ -1,7 +1,5 @@
 package net.skds.lib2.misc.ogg;
 
-import lombok.Getter;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +8,6 @@ import java.util.List;
 
 public final class OggInputStream implements Closeable {
 	private final InputStream in;
-	@Getter
 	private boolean closed = false;
 	private OggPage lastPage;
 
@@ -55,5 +52,9 @@ public final class OggInputStream implements Closeable {
 	public void close() throws IOException {
 		this.closed = true;
 		in.close();
+	}
+
+	public boolean isClosed() {
+		return this.closed;
 	}
 }
