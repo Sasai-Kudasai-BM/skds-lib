@@ -86,14 +86,14 @@ public record ComplexFloatArray(float[] array) implements Cloneable { // TODO im
 
 	public void mul(ComplexFloatArray other) {
 		checkLength(other);
-		int p = array.length / 2;
-		for (int j = 0; j < p; j++) {
-			float re = other.array[p];
-			float im = other.array[p + 1];
-			float r = array[p];
-			float i = array[p + 1];
-			array[p] = r * re - i * im;
-			array[p + 1] = r * im + i * re;
+		int p = array.length;
+		for (int j = 0; j < p; j += 2) {
+			float re = other.array[j];
+			float im = other.array[j + 1];
+			float r = array[j];
+			float i = array[j + 1];
+			array[j] = r * re - i * im;
+			array[j + 1] = r * im + i * re;
 		}
 	}
 
@@ -138,14 +138,14 @@ public record ComplexFloatArray(float[] array) implements Cloneable { // TODO im
 	public void inverse() {
 		int l = array.length;
 		for (int i = 0; i < l; i++) {
-			array[i] -= array[i];
+			array[i] = -array[i];
 		}
 	}
 
 	public void conjugate() {
-		int p = array.length / 2;
-		for (int j = 0; j < p; j++) {
-			array[p + 1] -= array[p + 1];
+		int p = array.length;
+		for (int j = 0; j < p; j += 2) {
+			array[j + 1] = -array[j + 1];
 		}
 	}
 

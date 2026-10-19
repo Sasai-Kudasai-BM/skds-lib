@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.function.IntConsumer;
 import java.util.function.ObjIntConsumer;
 
-public class FastAABBTree<T> {
+public final class FastAABBTree<T> {
 
 	private static final float COST_RATIO = 0.5f;
 	public static final int NULL = -1;

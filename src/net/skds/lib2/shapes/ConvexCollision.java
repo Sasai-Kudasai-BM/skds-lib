@@ -27,7 +27,7 @@ public class ConvexCollision {
 				for (int j = 0; j < s2Norm.length; j++) {
 					Vec3 cross = s1Norm[i].cross(s2Norm[j]);
 					double len = cross.length();
-					if (len > 1E-30) {
+					if (len > 1E-10) {
 						terminators.add(cross.scale(1 / len));
 					}
 				}
@@ -53,7 +53,7 @@ public class ConvexCollision {
 				for (int j = 0; j < s2Norm.length; j++) {
 					Vec3 cross = s1Norm[i].cross(s2Norm[j]);
 					double len = cross.length();
-					if (len > 1E-30) {
+					if (len > 1E-10) {
 						terminators.add(cross.scale(1 / len));
 					}
 				}
@@ -105,7 +105,7 @@ public class ConvexCollision {
 			double bMin = b.getProjectionMin(terminator);
 			double bMax = b.getProjectionMax(terminator);
 
-			if (Math.abs(v) < 1E-30) {
+			if (Math.abs(v) < 1E-10) {
 				if (aMax + aMin < bMax + bMin) {
 					if (aMax <= bMin) {
 						return null;
@@ -191,7 +191,7 @@ public class ConvexCollision {
 			double bMin = b.getProjectionMin(axis);
 			double bMax = b.getProjectionMax(axis);
 
-			if (Math.abs(v) < 1E-30) {
+			if (Math.abs(v) < 1E-10) {
 				if (aMax + aMin < bMax + bMin) {
 					if (aMax <= bMin) {
 						return null;
