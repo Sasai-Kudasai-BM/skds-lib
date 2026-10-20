@@ -486,7 +486,7 @@ public sealed interface Quat permits QuatD, QuatF {
 		double z = z();
 		double w = w();
 		double f = x * x + y * y + z * z + w * w;
-		double g = FastMath.invSqrt(f);
+		double g = FastMath.invSqrt(f + Double.MIN_NORMAL);
 		return new QuatD(x * g, y * g, z * g, w * g);
 	}
 
@@ -496,7 +496,7 @@ public sealed interface Quat permits QuatD, QuatF {
 		float z = zf();
 		float w = wf();
 		float f = x * x + y * y + z * z + w * w;
-		float g = FastMath.invSqrt(f);
+		float g = FastMath.invSqrt(f + Float.MIN_NORMAL);
 		return new QuatF(x * g, y * g, z * g, w * g);
 	}
 

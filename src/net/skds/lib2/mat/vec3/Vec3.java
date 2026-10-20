@@ -21,8 +21,7 @@ import java.util.function.Predicate;
 
 import static net.skds.lib2.io.sosison.SosisonEntryType.END_OBJECT;
 
-// TODO проверить гетеры
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 @DefaultCodec(Vec3.Codec.class)
 public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Direction {
 
@@ -199,7 +198,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double x2 = x * x;
 		double y2 = y * y;
 		double z2 = z * z;
-		double k = FastMath.invSqrt(x2 + y2 + z2);
+		double k = FastMath.invSqrt(x2 + y2 + z2 + Double.MIN_NORMAL);
 		return new Vec3D(x * k, y * k, z * k);
 	}
 
@@ -215,7 +214,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		float x2 = x * x;
 		float y2 = y * y;
 		float z2 = z * z;
-		float k = FastMath.invSqrt(x2 + y2 + z2);
+		float k = FastMath.invSqrt(x2 + y2 + z2 + Float.MIN_NORMAL);
 		return new Vec3F(x * k, y * k, z * k);
 	}
 
@@ -224,7 +223,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double y = y();
 		double z = z();
 		double d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0);
+		d0 = FastMath.invSqrt(d0 + Double.MIN_NORMAL);
 		return new Vec3D(x * d0, y * d0, z * d0);
 	}
 
@@ -237,7 +236,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		float y = yf();
 		float z = zf();
 		float d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0);
+		d0 = FastMath.invSqrt(d0 + Float.MIN_NORMAL);
 		return new Vec3F(x * d0, y * d0, z * d0);
 	}
 
@@ -247,7 +246,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double y = y();
 		double z = z();
 		double d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0) * scale;
+		d0 = FastMath.invSqrt(d0 + Double.MIN_NORMAL) * scale;
 		return new Vec3D(x * d0, y * d0, z * d0);
 	}
 
@@ -262,7 +261,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		float y = yf();
 		float z = zf();
 		float d0 = x * x + y * y + z * z;
-		d0 = FastMath.invSqrt(d0) * scale;
+		d0 = FastMath.invSqrt(d0 + Float.MIN_NORMAL) * scale;
 		return new Vec3F(x * d0, y * d0, z * d0);
 	}
 
@@ -1024,7 +1023,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return new Vec3F(x1 - x2, y1 - y2, z1 - z2);
 	}
 
-	// TODO для Vec2
 	default Vec3D cross(Vec3 vec) {
 		return new Vec3D(
 				this.y() * vec.z() - this.z() * vec.y(),

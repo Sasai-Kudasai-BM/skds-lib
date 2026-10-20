@@ -166,7 +166,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 	static Vec2D normalized(double x, double y) {
 		double x2 = x * x;
 		double y2 = y * y;
-		double k = FastMath.invSqrt(x2 + y2);
+		double k = FastMath.invSqrt(x2 + y2 + Double.MIN_NORMAL);
 		return new Vec2D(x * k, y * k);
 	}
 
@@ -196,7 +196,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 	static Vec2F normalizedF(float x, float y) {
 		float x2 = x * x;
 		float y2 = y * y;
-		float k = FastMath.invSqrt(x2 + y2);
+		float k = FastMath.invSqrt(x2 + y2 + Float.MIN_NORMAL);
 		return new Vec2F(x * k, y * k);
 	}
 
@@ -204,7 +204,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		double x = x();
 		double y = y();
 		double d0 = x * x + y * y;
-		d0 = FastMath.invSqrt(d0);
+		d0 = FastMath.invSqrt(d0 + Double.MIN_NORMAL);
 		return new Vec2D(x * d0, y * d0);
 	}
 
@@ -216,7 +216,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		float x = xf();
 		float y = yf();
 		float d0 = x * x + y * y;
-		d0 = FastMath.invSqrt(d0);
+		d0 = FastMath.invSqrt(d0 + Float.MIN_NORMAL);
 		return new Vec2F(x * d0, y * d0);
 	}
 
@@ -224,7 +224,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		double x = x();
 		double y = y();
 		double d0 = x * x + y * y;
-		d0 = FastMath.invSqrt(d0) * scale;
+		d0 = FastMath.invSqrt(d0 + Double.MIN_NORMAL) * scale;
 		return new Vec2D(x * d0, y * d0);
 	}
 
@@ -253,7 +253,7 @@ public sealed interface Vec2 extends Vector permits Direction2D, Vec2D, Vec2F, V
 		float x = xf();
 		float y = yf();
 		float d0 = x * x + y * y;
-		d0 = FastMath.invSqrt(d0) * scale;
+		d0 = FastMath.invSqrt(d0 + Float.MIN_NORMAL) * scale;
 		return new Vec2F(x * d0, y * d0);
 	}
 

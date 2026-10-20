@@ -445,27 +445,12 @@ public class FastMath {
 		return i;
 	}
 
-	@Deprecated
 	public static float invSqrt(float x) {
-		float half = 0.5f * x;
-		int i = Float.floatToRawIntBits(x);
-		i = 0x5F3759DF - (i >> 1);
-		x = Float.intBitsToFloat(i);
-		x *= (1.5f - half * x * x);
-		x *= (1.5f - half * x * x);
-		return x;
+		return 1F / (float) Math.sqrt(x);
 	}
 
-	@Deprecated
 	public static double invSqrt(double x) {
-		double half = 0.5d * x;
-		long i = Double.doubleToRawLongBits(x);
-		i = 0x5FE6EC85E7DE30DAL - (i >> 1);
-		x = Double.longBitsToDouble(i);
-		x *= (1.5d - half * x * x);
-		x *= (1.5d - half * x * x);
-		x *= (1.5d - half * x * x);
-		return x;
+		return 1D / Math.sqrt(x);
 	}
 
 	public static int smallestEncompassingPowerOfTwo(int value) {
