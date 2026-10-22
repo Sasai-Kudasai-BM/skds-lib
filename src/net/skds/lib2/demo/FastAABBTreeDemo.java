@@ -114,7 +114,7 @@ public class FastAABBTreeDemo extends JFrame {
 								// TODO
 							} else {
 								collisionIdsBuffer.clear();
-								tree.forEachCollision(drawMinX, drawMinY, 0.0, drawMaxX, drawMaxY, 0.0, (_, id) -> collisionIdsBuffer.add(id));
+								tree.forEachCollision(drawMinX, drawMinY, 0.0, drawMaxX, drawMaxY, 0.0, -1, (_, id) -> collisionIdsBuffer.add(id));
 								for (int id : collisionIdsBuffer) {
 									if (id == movingNodeId) {
 										movingNodeId = FastAABBTree.NULL;
@@ -175,7 +175,7 @@ public class FastAABBTreeDemo extends JFrame {
 				}
 			});
 
-			tree.forEachCollision(0, 0, 0, 1000, 600, 1.0, (color, id) -> {
+			tree.forEachCollision(0, 0, 0, 1000, 600, 1.0, -1, (color, id) -> {
 				AABB aabb = tree.getBounds(id);
 				g2d.setColor(color);
 				g.drawRect((int) aabb.minX, (int) aabb.minY, (int) (aabb.maxX - aabb.minX), (int) (aabb.maxY - aabb.minY));
@@ -194,7 +194,7 @@ public class FastAABBTreeDemo extends JFrame {
 						g.drawRect((int) drawMinX, (int) drawMinY, (int) (drawMaxX - drawMinX), (int) (drawMaxY - drawMinY));
 
 						g2d.setColor(Color.LIGHT_GRAY);
-						tree.forEachCollision(drawMinX, drawMinY, 0.0, drawMaxX, drawMaxY, 1.0, (_, id) -> {
+						tree.forEachCollision(drawMinX, drawMinY, 0.0, drawMaxX, drawMaxY, 1.0, -1, (_, id) -> {
 							AABB aabb = tree.getBounds(id);
 							g.drawRect((int) aabb.minX, (int) aabb.minY, (int) (aabb.maxX - aabb.minX), (int) (aabb.maxY - aabb.minY));
 						});

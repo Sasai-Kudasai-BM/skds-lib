@@ -303,6 +303,10 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 		return i;
 	}
 
+	/**
+	 * @deprecated can return abnormal box
+	 */
+	@Deprecated
 	public AABB shrink(double x, double y, double z) {
 		double d = this.minX;
 		double e = this.minY;
@@ -333,28 +337,13 @@ public final class AABB implements ConvexShape, TypedConfig<ShapeType> {
 	}
 
 	public AABB stretch(double x, double y, double z) {
-		double d = this.minX;
-		double e = this.minY;
-		double f = this.minZ;
-		double g = this.maxX;
-		double h = this.maxY;
-		double i = this.maxZ;
-		if (x < 0.0) {
-			d += x;
-		} else if (x > 0.0) {
-			g += x;
-		}
-		if (y < 0.0) {
-			e += y;
-		} else if (y > 0.0) {
-			h += y;
-		}
-		if (z < 0.0) {
-			f += z;
-		} else if (z > 0.0) {
-			i += z;
-		}
-		return new AABB(d, e, f, g, h, i, attachment);
+		double minX = this.minX + Math.min(x, 0.0);
+		double maxX = this.maxX + Math.max(x, 0.0);
+		double minY = this.minY + Math.min(y, 0.0);
+		double maxY = this.maxY + Math.max(y, 0.0);
+		double minZ = this.minZ + Math.min(z, 0.0);
+		double maxZ = this.maxZ + Math.max(z, 0.0);
+		return new AABB(minX, minY, minZ, maxX, maxY, maxZ, attachment);
 	}
 
 	public AABB expand(double x, double y, double z) {
