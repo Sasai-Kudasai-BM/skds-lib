@@ -6,6 +6,7 @@ import net.skds.lib2.utils.function.Object2FloatFunction;
 import net.skds.lib2.utils.linkiges.Obj2FloatPair;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
@@ -254,6 +255,11 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		}
 	}
 
+	@Override
+	public String toString() {
+		return Arrays.toString(entries);
+	}
+
 	private class Entry implements Obj2FloatPair<T>, Cloneable {
 		final T value;
 		final float weight;
@@ -281,6 +287,14 @@ public sealed class WeightedPool<T> implements Iterable<Obj2FloatPair<T>>, Clone
 		@Override
 		protected Entry clone() {
 			return new Entry(value, weight, weightCeiling, chance);
+		}
+
+		@Override
+		public String toString() {
+			return "Entry{" +
+					"value=" + value +
+					", weight=" + weight +
+					'}';
 		}
 	}
 
