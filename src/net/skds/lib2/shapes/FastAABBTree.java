@@ -21,6 +21,7 @@ public final class FastAABBTree<T> {
 	private int root = NULL;
 
 	private int[] queryStack;
+	private int stackPos;
 
 	private final int initialSize;
 
@@ -169,8 +170,11 @@ public final class FastAABBTree<T> {
 		bounding[npIdx + 5] = Math.max(bounding[sIdx + 5], lMaxZ);
 
 		if (oldParent != NULL) {
-			if (left[oldParent] == sibling) left[oldParent] = newParent;
-			else right[oldParent] = newParent;
+			if (left[oldParent] == sibling) {
+				left[oldParent] = newParent;
+			} else {
+				right[oldParent] = newParent;
+			}
 
 			left[newParent] = sibling;
 			right[newParent] = leafId;
@@ -203,9 +207,11 @@ public final class FastAABBTree<T> {
 		int sibling = (left[p] == leafId) ? right[p] : left[p];
 
 		if (grandParent != NULL) {
-			if (left[grandParent] == p) left[grandParent] = sibling;
-			else right[grandParent] = sibling;
-
+			if (left[grandParent] == p) {
+				left[grandParent] = sibling;
+			} else {
+				right[grandParent] = sibling;
+			}
 			parent[sibling] = grandParent;
 			freeNode(p);
 			freeNode(leafId);
@@ -248,20 +254,24 @@ public final class FastAABBTree<T> {
 	private void removeKeepNode(int leafId) {
 		if (leafId == root) {
 			root = NULL;
+			parent[leafId] = NULL;
+			left[leafId] = NULL;
+			right[leafId] = NULL;
 			return;
 		}
 		int p = parent[leafId];
-		if (p == NULL) {
-			throw new IllegalStateException("Already removed or invalid node ID");
+		if (p < 0) {
+			throw new IllegalStateException("Already removed or invalid node ID " + p);
 		}
-
 		int grandParent = parent[p];
 		int sibling = (left[p] == leafId) ? right[p] : left[p];
 
 		if (grandParent != NULL) {
-			if (left[grandParent] == p) left[grandParent] = sibling;
-			else right[grandParent] = sibling;
-
+			if (left[grandParent] == p) {
+				left[grandParent] = sibling;
+			} else {
+				right[grandParent] = sibling;
+			}
 			parent[sibling] = grandParent;
 			freeNode(p);
 			normalize(grandParent);
@@ -273,12 +283,12 @@ public final class FastAABBTree<T> {
 	}
 
 
-	public void forEachCollision(AABB box, ObjIntConsumer<T> action) {
-		forEachCollision(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, action);
+	public void forEachCollision(AABB box, int minIndex, ObjIntConsumer<T> action) {
+		forEachCollision(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, minIndex, action);
 	}
 
 	@SuppressWarnings("unchecked")
-	public void forEachCollision(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, ObjIntConsumer<T> action) {
+	public void forEachCollision(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, int minIndex, ObjIntConsumer<T> action) {
 		if (root == NULL) return;
 
 		int bIdx = root * 6;
@@ -289,17 +299,16 @@ public final class FastAABBTree<T> {
 		}
 
 		if (right[root] == NULL) {
-			action.accept((T) values[root], root);
+			if (root > minIndex) {
+				action.accept((T) values[root], root);
+			}
 			return;
 		}
 
-		ensureStackCapacity(parent.length);
+		int lastStack = pushStack(root);
 
-		int stackPtr = 0;
-		queryStack[stackPtr++] = root;
-
-		while (stackPtr > 0) {
-			int n = queryStack[--stackPtr];
+		while (stackPos > lastStack) {
+			int n = popStack();
 			int l = left[n];
 			int r = right[n];
 
@@ -309,9 +318,11 @@ public final class FastAABBTree<T> {
 						maxY < bounding[idx + 1] || minY > bounding[idx + 4] ||
 						maxZ < bounding[idx + 2] || minZ > bounding[idx + 5])) {
 					if (right[l] == NULL) {
-						action.accept((T) values[l], l);
+						if (l > minIndex) {
+							action.accept((T) values[l], l);
+						}
 					} else {
-						queryStack[stackPtr++] = l;
+						pushStack(l);
 					}
 				}
 			}
@@ -321,13 +332,28 @@ public final class FastAABBTree<T> {
 						maxY < bounding[idx + 1] || minY > bounding[idx + 4] ||
 						maxZ < bounding[idx + 2] || minZ > bounding[idx + 5])) {
 					if (right[r] == NULL) {
-						action.accept((T) values[r], r);
+						if (r > minIndex) {
+							action.accept((T) values[r], r);
+						}
 					} else {
-						queryStack[stackPtr++] = r;
+						pushStack(r);
 					}
 				}
 			}
 		}
+	}
+
+	private int pushStack(int i) {
+		int lp = stackPos;
+		if (queryStack.length <= lp) {
+			queryStack = Arrays.copyOf(queryStack, queryStack.length * 2);
+		}
+		queryStack[stackPos++] = i;
+		return lp;
+	}
+
+	private int popStack() {
+		return queryStack[--stackPos];
 	}
 
 	@SuppressWarnings("unchecked")
@@ -339,25 +365,17 @@ public final class FastAABBTree<T> {
 			return;
 		}
 
-		ensureStackCapacity(parent.length);
-		int stackPtr = 0;
-		queryStack[stackPtr++] = root;
+		int lastStack = pushStack(root);
 
-		while (stackPtr > 0) {
-			int n = queryStack[--stackPtr];
+		while (stackPos > lastStack) {
+			int n = popStack();
 			if (n != NULL && right[n] == NULL) {
 				action.accept((T) values[n], n);
 			}
 			if (right[n] != NULL) {
-				queryStack[stackPtr++] = left[n];
-				queryStack[stackPtr++] = right[n];
+				pushStack(left[n]);
+				pushStack(right[n]);
 			}
-		}
-	}
-
-	private void ensureStackCapacity(int capacity) {
-		if (queryStack.length < capacity) {
-			queryStack = new int[capacity * 2];
 		}
 	}
 
@@ -456,16 +474,14 @@ public final class FastAABBTree<T> {
 	public void forEachNode(IntConsumer action) {
 		if (root == NULL) return;
 
-		ensureStackCapacity(parent.length);
-		int stackPtr = 0;
-		queryStack[stackPtr++] = root;
+		int lastStack = pushStack(root);
 
-		while (stackPtr > 0) {
-			int n = queryStack[--stackPtr];
+		while (stackPos > lastStack) {
+			int n = popStack();
 			action.accept(n);
 			if (right[n] != NULL) {
-				queryStack[stackPtr++] = left[n];
-				queryStack[stackPtr++] = right[n];
+				pushStack(left[n]);
+				pushStack(right[n]);
 			}
 		}
 	}
