@@ -65,29 +65,29 @@ public sealed interface Quat permits QuatD, QuatF {
 		return 31 * i + Double.hashCode(q.w());
 	}
 
-	Quat multiply(Quat q);
+	QuatD multiply(Quat q);
 
-	Quat multiplyF(Quat q);
+	QuatF multiplyF(Quat q);
 
-	Quat rotateAxisDegrees(Vec3 axis, double angle);
+	QuatD rotateAxisDegrees(Vec3 axis, double angle);
 
-	Quat rotateAxisDegreesF(Vec3 axis, float angle);
+	QuatF rotateAxisDegreesF(Vec3 axis, float angle);
 
-	Quat spin(Vec3 spin);
+	QuatD spin(Vec3 spin);
 
-	Quat spinF(Vec3 spin);
+	QuatF spinF(Vec3 spin);
 
-	Quat conjugate();
+	QuatD conjugate();
 
-	Quat conjugateF();
+	QuatF conjugateF();
 
-	Quat normalize();
+	QuatD normalize();
 
-	Quat normalizeF();
+	QuatF normalizeF();
 
-	Vec3 forward();
+	Vec3D forward();
 
-	Vec3 forwardF();
+	Vec3F forwardF();
 
 	static QuatD fromAxisDegrees(Vec3 axis, double angle) {
 		if (Math.abs(angle) < 1E-30) return Quat.ONE;
@@ -179,25 +179,13 @@ public sealed interface Quat permits QuatD, QuatF {
 		return new QuatF(x, y, z, w);
 	}
 
-	default Vec3D up() {
-		// TODO
-		return Matrix3.fromQuat(this).up();
-	}
+	Vec3D up();
 
-	default Vec3F upF() {
-		// TODO
-		return Matrix3.fromQuat(this).upF();
-	}
+	Vec3F upF();
 
-	default Vec3D left() {
-		// TODO
-		return Matrix3.fromQuat(this).left();
-	}
+	Vec3D left();
 
-	default Vec3F leftF() {
-		// TODO
-		return Matrix3.fromQuat(this).leftF();
-	}
+	Vec3F leftF();
 
 	static Quat sLerp(Quat qa, Quat qb, double t) {
 		double cosHalfTheta = qa.w() * qb.w() + qa.x() * qb.x() + qa.y() * qb.y() + qa.z() * qb.z();
