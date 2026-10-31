@@ -351,7 +351,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 
 			@Override
 			public CompositeSuperShape build() {
-				return new CompositeSuperShape(shapes, center, this.attachment);
+				return new CompositeSuperShape(this.shapes, this.center, this.attachment);
 			}
 		}
 	}

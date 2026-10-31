@@ -956,14 +956,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
-	default Vec3D invSub(Vec3 vec) {
-		return new Vec3D(
-				-this.x() - vec.x(),
-				-this.y() - vec.y(),
-				-this.z() - vec.z()
-		);
-	}
-
 	default Vec3D sub(double x2, double y2, double z2) {
 		return new Vec3D(
 				this.x() - x2,
@@ -980,14 +972,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
-	default Vec3I invSubI(Vec3 vec) {
-		return new Vec3I(
-				-this.xi() - vec.xi(),
-				-this.yi() - vec.yi(),
-				-this.zi() - vec.zi()
-		);
-	}
-
 	default Vec3I subI(int x2, int y2, int z2) {
 		return new Vec3I(
 				this.xi() - x2,
@@ -1001,14 +985,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 				this.xf() - vec.xf(),
 				this.yf() - vec.yf(),
 				this.zf() - vec.zf()
-		);
-	}
-
-	default Vec3F invSubF(Vec3 vec) {
-		return new Vec3F(
-				-this.xf() - vec.xf(),
-				-this.yf() - vec.yf(),
-				-this.zf() - vec.zf()
 		);
 	}
 
@@ -1030,6 +1006,30 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 
 	static Vec3F subF(float x1, float y1, float z1, float x2, float y2, float z2) {
 		return new Vec3F(x1 - x2, y1 - y2, z1 - z2);
+	}
+
+	default Vec3D invSub(Vec3 vec) {
+		return new Vec3D(
+				-this.x() - vec.x(),
+				-this.y() - vec.y(),
+				-this.z() - vec.z()
+		);
+	}
+
+	default Vec3I invSubI(Vec3 vec) {
+		return new Vec3I(
+				-this.xi() - vec.xi(),
+				-this.yi() - vec.yi(),
+				-this.zi() - vec.zi()
+		);
+	}
+
+	default Vec3F invSubF(Vec3 vec) {
+		return new Vec3F(
+				-this.xf() - vec.xf(),
+				-this.yf() - vec.yf(),
+				-this.zf() - vec.zf()
+		);
 	}
 
 	default Vec3D cross(Vec3 vec) {
@@ -1291,7 +1291,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return change ? new Vec3F(x, y, z) : this.getAsFloatVec();
 	}
 
-
 	default Vec3D flip() {
 		return new Vec3D(
 				1d / this.x(),
@@ -1309,34 +1308,16 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	}
 
 	default Vec3D abs() {
-		double x = this.x();
-		double y = this.y();
-		double z = this.z();
-		if (x < 0) {
-			x = -x;
-		}
-		if (y < 0) {
-			y = -y;
-		}
-		if (z < 0) {
-			z = -z;
-		}
+		double x = Math.abs(this.x());
+		double y = Math.abs(this.y());
+		double z = Math.abs(this.z());
 		return new Vec3D(x, y, z);
 	}
 
 	default Vec3I absI() {
-		int x = this.xi();
-		int y = this.yi();
-		int z = this.zi();
-		if (x < 0) {
-			x = -x;
-		}
-		if (y < 0) {
-			y = -y;
-		}
-		if (z < 0) {
-			z = -z;
-		}
+		int x = Math.abs(this.xi());
+		int y = Math.abs(this.yi());
+		int z = Math.abs(this.zi());
 		return new Vec3I(x, y, z);
 	}
 
@@ -1360,15 +1341,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double x = this.x();
 		double y = this.y();
 		double z = this.z();
-		if (x < d) {
-			x = d;
-		}
-		if (y < d) {
-			y = d;
-		}
-		if (z < d) {
-			z = d;
-		}
+		if (x < d) x = d;
+		if (y < d) y = d;
+		if (z < d) z = d;
 		return new Vec3D(x, y, z);
 	}
 
@@ -1376,15 +1351,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		int x = this.xi();
 		int y = this.yi();
 		int z = this.zi();
-		if (x < d) {
-			x = d;
-		}
-		if (y < d) {
-			y = d;
-		}
-		if (z < d) {
-			z = d;
-		}
+		if (x < d) x = d;
+		if (y < d) y = d;
+		if (z < d) z = d;
 		return new Vec3I(x, y, z);
 	}
 
@@ -1392,15 +1361,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		float x = this.xf();
 		float y = this.yf();
 		float z = this.zf();
-		if (x < d) {
-			x = d;
-		}
-		if (y < d) {
-			y = d;
-		}
-		if (z < d) {
-			z = d;
-		}
+		if (x < d) x = d;
+		if (y < d) y = d;
+		if (z < d) z = d;
 		return new Vec3F(x, y, z);
 	}
 
@@ -1408,15 +1371,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double x = this.x();
 		double y = this.y();
 		double z = this.z();
-		if (x > d) {
-			x = d;
-		}
-		if (y > d) {
-			y = d;
-		}
-		if (z > d) {
-			z = d;
-		}
+		if (x > d) x = d;
+		if (y > d) y = d;
+		if (z > d) z = d;
 		return new Vec3D(x, y, z);
 	}
 
@@ -1424,15 +1381,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		int x = this.xi();
 		int y = this.yi();
 		int z = this.zi();
-		if (x > d) {
-			x = d;
-		}
-		if (y > d) {
-			y = d;
-		}
-		if (z > d) {
-			z = d;
-		}
+		if (x > d) x = d;
+		if (y > d) y = d;
+		if (z > d) z = d;
 		return new Vec3I(x, y, z);
 	}
 
@@ -1440,15 +1391,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		float x = this.xf();
 		float y = this.yf();
 		float z = this.zf();
-		if (x > d) {
-			x = d;
-		}
-		if (y > d) {
-			y = d;
-		}
-		if (z > d) {
-			z = d;
-		}
+		if (x > d) x = d;
+		if (y > d) y = d;
+		if (z > d) z = d;
 		return new Vec3F(x, y, z);
 	}
 
@@ -1456,15 +1401,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		double x = this.x();
 		double y = this.y();
 		double z = this.z();
-		if (Math.abs(x) < lim) {
-			x = 0;
-		}
-		if (Math.abs(y) < lim) {
-			y = 0;
-		}
-		if (Math.abs(z) < lim) {
-			z = 0;
-		}
+		if (Math.abs(x) < lim) x = 0;
+		if (Math.abs(y) < lim) y = 0;
+		if (Math.abs(z) < lim) z = 0;
 
 		if (x == 0 && y == 0 && z == 0) return Vec3D.ZERO;
 		return new Vec3D(x, y, z);
@@ -1474,15 +1413,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		float x = this.xf();
 		float y = this.yf();
 		float z = this.zf();
-		if (Math.abs(x) < lim) {
-			x = 0;
-		}
-		if (Math.abs(y) < lim) {
-			y = 0;
-		}
-		if (Math.abs(z) < lim) {
-			z = 0;
-		}
+		if (Math.abs(x) < lim) x = 0;
+		if (Math.abs(y) < lim) y = 0;
+		if (Math.abs(z) < lim) z = 0;
 
 		if (x == 0 && y == 0 && z == 0) return Vec3F.ZERO;
 		return new Vec3F(x, y, z);
@@ -1501,9 +1434,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	static Vec3D avg(Vec3... vectors) {
 		int c = 0;
 
-		double x = 0;
-		double y = 0;
-		double z = 0;
+		double x = 0, y = 0, z = 0, w = 0;
 		for (Vec3 vec : vectors) {
 			if (vec != null) {
 				c++;
@@ -1513,10 +1444,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 			}
 		}
 
-		if (c == 0) {
-			return Vec3D.ZERO;
-		}
-
+		if (c == 0) return Vec3D.ZERO;
 		return new Vec3D(x / c, y / c, z / c);
 	}
 
@@ -1547,6 +1475,10 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 
 	default double[] asArray() {
 		return new double[]{x(), y(), z()};
+	}
+
+	default int[] asArrayI() {
+		return new int[]{xi(), yi(), zi()};
 	}
 
 	default float[] asArrayF() {
@@ -1585,11 +1517,11 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return new Vec3F(yf(), xf(), zf());
 	}
 
-	default Vec3D yzc() {
+	default Vec3D yzx() {
 		return new Vec3D(y(), z(), x());
 	}
 
-	default Vec3F yzcF() {
+	default Vec3F yzxF() {
 		return new Vec3F(yf(), zf(), xf());
 	}
 

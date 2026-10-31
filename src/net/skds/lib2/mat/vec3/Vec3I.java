@@ -317,4 +317,5 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 			};
 		}
 	}
+
 }
