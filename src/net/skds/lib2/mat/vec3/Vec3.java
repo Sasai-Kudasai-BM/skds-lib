@@ -807,6 +807,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3D div(Vec3 div) {
 		return new Vec3D(
 				this.x() / div.x(),
@@ -815,6 +816,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3D div(double sx, double sy, double sz) {
 		return new Vec3D(
 				this.x() / sx,
@@ -823,6 +825,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3D div(double div) {
 		return new Vec3D(
 				this.x() / div,
@@ -831,6 +834,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3I divI(Vec3 div) {
 		return new Vec3I(
 				this.xi() / div.xi(),
@@ -839,6 +843,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3I divI(int sx, int sy, int sz) {
 		return new Vec3I(
 				this.xi() / sx,
@@ -847,6 +852,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3I divI(int div) {
 		return new Vec3I(
 				this.xi() / div,
@@ -855,6 +861,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3F divF(Vec3 div) {
 		return new Vec3F(
 				this.xf() / div.xf(),
@@ -863,6 +870,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3F divF(float sx, float sy, float sz) {
 		return new Vec3F(
 				this.xf() / sx,
@@ -871,6 +879,7 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		);
 	}
 
+	@Deprecated
 	default Vec3F divF(float div) {
 		return new Vec3F(
 				this.xf() / div,
@@ -1514,10 +1523,11 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	static boolean equals(Vec3 v1, Vec3 v2) {
 		if (v1 == v2) return true;
 		if (v1 == null || v2 == null) return false;
-		long diff = (Double.doubleToRawLongBits(v1.x()) ^ Double.doubleToRawLongBits(v2.x()))
-				| (Double.doubleToRawLongBits(v1.y()) ^ Double.doubleToRawLongBits(v2.y()))
-				| (Double.doubleToRawLongBits(v1.z()) ^ Double.doubleToRawLongBits(v2.z()));
-		return diff == 0L;
+		return v1.x() == v2.x() && v1.y() == v2.y() && v1.z() == v2.z();
+	}
+
+	static boolean valueEquals(Vec3 v1, Vec3 v2) {
+		return v1.x() == v2.x() && v1.y() == v2.y() && v1.z() == v2.z();
 	}
 
 	static int hashCode(Vec3 vec) {
@@ -1699,10 +1709,10 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 			double y = 0;
 			double z = 0;
 
-			switch (reader.nextEntryType()) {
+			return switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
-					return null;
+					yield null;
 				}
 				case BEGIN_LIST -> {
 					reader.beginList();
@@ -1710,28 +1720,28 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 					y = reader.readDouble();
 					z = reader.readDouble();
 					reader.endList();
+					yield new Vec3D(x, y, z);
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
-						double i = reader.readDouble();
 						switch (s.toLowerCase()) {
-							case "x" -> x = i;
-							case "y" -> y = i;
-							case "z" -> z = i;
+							case "x" -> x = reader.readDouble();
+							case "y" -> y = reader.readDouble();
+							case "z" -> z = reader.readDouble();
+							default -> reader.skipValue();
 						}
 					}
 					reader.endObject();
+					yield new Vec3D(x, y, z);
 				}
-				case INT -> new Vec3D(reader.readInt());
-				case FLOAT -> new Vec3D(reader.readFloat());
+				case INT -> new Vec3I(reader.readInt());
+				case FLOAT -> new Vec3F(reader.readFloat());
 				case LONG -> new Vec3D(reader.readLong());
 				case DOUBLE -> new Vec3D(reader.readDouble());
 				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
-			}
-
-			return new Vec3D(x, y, z);
+			};
 		}
 	}
 

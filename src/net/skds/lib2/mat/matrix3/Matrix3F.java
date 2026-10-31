@@ -59,21 +59,21 @@ public record Matrix3F(
 		if (this == obj) {
 			return true;
 		} else if (obj instanceof Matrix3 m) {
-			return Matrix3.equals(this, m);
+			return Matrix3.valueEquals(this, m);
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		int i = this.m00f != 0.0F ? Float.floatToIntBits(this.m00f) : 0;
-		i = 31 * i + (this.m01f != 0.0F ? Float.floatToIntBits(this.m01f) : 0);
-		i = 31 * i + (this.m02f != 0.0F ? Float.floatToIntBits(this.m02f) : 0);
-		i = 31 * i + (this.m10f != 0.0F ? Float.floatToIntBits(this.m10f) : 0);
-		i = 31 * i + (this.m11f != 0.0F ? Float.floatToIntBits(this.m11f) : 0);
-		i = 31 * i + (this.m12f != 0.0F ? Float.floatToIntBits(this.m12f) : 0);
-		i = 31 * i + (this.m20f != 0.0F ? Float.floatToIntBits(this.m20f) : 0);
-		i = 31 * i + (this.m21f != 0.0F ? Float.floatToIntBits(this.m21f) : 0);
-		return 31 * i + (this.m22f != 0.0F ? Float.floatToIntBits(this.m22f) : 0);
+		int i = this.m00f != 0.0F ? Double.hashCode(this.m00f) : 0;
+		i = 31 * i + (this.m01f != 0.0F ? Double.hashCode(this.m01f) : 0);
+		i = 31 * i + (this.m02f != 0.0F ? Double.hashCode(this.m02f) : 0);
+		i = 31 * i + (this.m10f != 0.0F ? Double.hashCode(this.m10f) : 0);
+		i = 31 * i + (this.m11f != 0.0F ? Double.hashCode(this.m11f) : 0);
+		i = 31 * i + (this.m12f != 0.0F ? Double.hashCode(this.m12f) : 0);
+		i = 31 * i + (this.m20f != 0.0F ? Double.hashCode(this.m20f) : 0);
+		i = 31 * i + (this.m21f != 0.0F ? Double.hashCode(this.m21f) : 0);
+		return 31 * i + (this.m22f != 0.0F ? Double.hashCode(this.m22f) : 0);
 	}
 }

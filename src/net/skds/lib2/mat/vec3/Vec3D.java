@@ -126,10 +126,13 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (obj instanceof Vec3 vec) {
-			return Vec3.equals(this, vec);
 		}
-		return false;
+		return obj instanceof Vec3 vec && switch (vec) {
+			case Vec3D(double x2, double y2, double z2) -> this.x == x2 && this.y == y2 && this.z == z2;
+			case Vec3F(float x2, float y2, float z2) -> this.x == x2 && this.y == y2 && this.z == z2;
+			case Vec3I(int x2, int y2, int z2) -> this.x == x2 && this.y == y2 && this.z == z2;
+			case Direction dir -> this.x == dir.x() && this.y == dir.y() && this.z == dir.z();
+		};
 	}
 
 	@Override
@@ -180,10 +183,10 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 			double y = 0;
 			double z = 0;
 
-			switch (reader.nextEntryType()) {
+			return switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
-					return null;
+					yield null;
 				}
 				case BEGIN_LIST -> {
 					reader.beginList();
@@ -191,28 +194,28 @@ public record Vec3D(double x, double y, double z) implements Vec3 {
 					y = reader.readDouble();
 					z = reader.readDouble();
 					reader.endList();
+					yield new Vec3D(x, y, z);
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
-						double i = reader.readDouble();
 						switch (s.toLowerCase()) {
-							case "x" -> x = i;
-							case "y" -> y = i;
-							case "z" -> z = i;
+							case "x" -> x = reader.readDouble();
+							case "y" -> y = reader.readDouble();
+							case "z" -> z = reader.readDouble();
+							default -> reader.skipValue();
 						}
 					}
 					reader.endObject();
+					yield new Vec3D(x, y, z);
 				}
 				case INT -> new Vec3D(reader.readInt());
 				case FLOAT -> new Vec3D(reader.readFloat());
 				case LONG -> new Vec3D(reader.readLong());
 				case DOUBLE -> new Vec3D(reader.readDouble());
 				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
-			}
-
-			return new Vec3D(x, y, z);
+			};
 		}
 	}
 }

@@ -89,6 +89,13 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		}
 	}
 
+	static boolean valueEquals(Matrix3 m1, Matrix3 m2) {
+		return m1.m00() == m2.m00() && m1.m01() == m2.m01() && m1.m02() == m2.m02()
+				&& m1.m10() == m2.m10() && m1.m11() == m2.m11() && m1.m12() == m2.m12()
+				&& m1.m20() == m2.m20() && m1.m21() == m2.m21() && m1.m22() == m2.m22();
+
+	}
+
 	static Matrix3D fromNormals(Vec3[] normals) {
 		return new Matrix3D(
 				normals[0].x(),
@@ -300,16 +307,17 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		double f7 = -(this.m00() * this.m12() - this.m02() * this.m10());
 		double f8 = this.m00() * this.m11() - this.m01() * this.m10();
 		double det = this.m00() * f + this.m01() * f1 + this.m02() * f2;
+		double invDet = 1 / det;
 		return new Matrix3D(
-				f * det,
-				f1 * det,
-				f2 * det,
-				f3 * det,
-				f4 * det,
-				f5 * det,
-				f6 * det,
-				f7 * det,
-				f8 * det
+				f * invDet,
+				f1 * invDet,
+				f2 * invDet,
+				f3 * invDet,
+				f4 * invDet,
+				f5 * invDet,
+				f6 * invDet,
+				f7 * invDet,
+				f8 * invDet
 		);
 	}
 
@@ -324,16 +332,17 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		float f7 = -(this.m00f() * this.m12f() - this.m02f() * this.m10f());
 		float f8 = this.m00f() * this.m11f() - this.m01f() * this.m10f();
 		float det = this.m00f() * f + this.m01f() * f1 + this.m02f() * f2;
+		float invDet = 1 / det;
 		return new Matrix3F(
-				f * det,
-				f1 * det,
-				f2 * det,
-				f3 * det,
-				f4 * det,
-				f5 * det,
-				f6 * det,
-				f7 * det,
-				f8 * det
+				f * invDet,
+				f1 * invDet,
+				f2 * invDet,
+				f3 * invDet,
+				f4 * invDet,
+				f5 * invDet,
+				f6 * invDet,
+				f7 * invDet,
+				f8 * invDet
 		);
 	}
 
@@ -588,7 +597,7 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 
 		double lenXLen = a.length() * b.length();
 		double dot = a.dot(b);
-		cross.div(len);
+		cross.scale(1 / len);
 
 		double c = dot / lenXLen;
 		double s = len / lenXLen;
@@ -623,7 +632,7 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 
 		float lenXLen = a.lengthF() * b.lengthF();
 		float dot = a.dotF(b);
-		cross = cross.divF(len);
+		cross = cross.scale(1 / len);
 
 		float c = dot / lenXLen;
 		float s = len / lenXLen;

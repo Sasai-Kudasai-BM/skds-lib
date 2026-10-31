@@ -211,10 +211,17 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (obj instanceof Vec3 vec) {
-			return Vec3.equals(this, vec);
 		}
-		return false;
+		return obj instanceof Vec3 vec && switch (vec) {
+			case Vec3I(int x2, int y2, int z2) -> this.xi == x2 && this.yi == y2 && this.zi == z2;
+
+			case Vec3D(double x2, double y2, double z2) ->
+					(double) this.xi == x2 && (double) this.yi == y2 && (double) this.zi == z2;
+			case Vec3F(float x2, float y2, float z2) ->
+					(double) this.xi == (double) x2 && (double) this.yi == (double) y2 && (double) this.zi == (double) z2;
+			case Direction dir ->
+					(double) this.xi == dir.x() && (double) this.yi == dir.y() && (double) this.zi == dir.z();
+		};
 	}
 
 	@Override
@@ -275,10 +282,10 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 			int y = 0;
 			int z = 0;
 
-			switch (reader.nextEntryType()) {
+			return switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
-					return null;
+					yield null;
 				}
 				case BEGIN_LIST -> {
 					reader.beginList();
@@ -286,28 +293,28 @@ public record Vec3I(int xi, int yi, int zi) implements Vec3, Comparable<Vec3> {
 					y = reader.readInt();
 					z = reader.readInt();
 					reader.endList();
+					yield new Vec3I(x, y, z);
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
-						int i = reader.readInt();
 						switch (s.toLowerCase()) {
-							case "x" -> x = i;
-							case "y" -> y = i;
-							case "z" -> z = i;
+							case "x" -> x = reader.readInt();
+							case "y" -> y = reader.readInt();
+							case "z" -> z = reader.readInt();
+							default -> reader.skipValue();
 						}
 					}
 					reader.endObject();
+					yield new Vec3I(x, y, z);
 				}
 				case INT -> new Vec3I(reader.readInt());
 				case FLOAT -> new Vec3I((int) reader.readFloat());
 				case LONG -> new Vec3I((int) reader.readLong());
 				case DOUBLE -> new Vec3I((int) reader.readDouble());
 				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
-			}
-
-			return new Vec3I(x, y, z);
+			};
 		}
 	}
 }

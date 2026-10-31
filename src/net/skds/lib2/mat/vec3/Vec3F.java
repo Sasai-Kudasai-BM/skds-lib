@@ -156,10 +156,17 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} else if (obj instanceof Vec3 vec) {
-			return Vec3.equals(this, vec);
 		}
-		return false;
+		return obj instanceof Vec3 vec && switch (vec) {
+			case Vec3F(float x2, float y2, float z2) -> this.xf == x2 && this.yf == y2 && this.zf == z2;
+
+			case Vec3D(double x2, double y2, double z2) ->
+					(double) this.xf == x2 && (double) this.yf == y2 && (double) this.zf == z2;
+			case Vec3I(int x2, int y2, int z2) ->
+					(double) this.xf == (double) x2 && (double) this.yf == (double) y2 && (double) this.zf == (double) z2;
+			case Direction dir ->
+					(double) this.xf == dir.x() && (double) this.yf == dir.y() && (double) this.zf == dir.z();
+		};
 	}
 
 	@Override
@@ -210,10 +217,10 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 			float y = 0;
 			float z = 0;
 
-			switch (reader.nextEntryType()) {
+			return switch (reader.nextEntryType()) {
 				case NULL -> {
 					reader.skipNull();
-					return null;
+					yield null;
 				}
 				case BEGIN_LIST -> {
 					reader.beginList();
@@ -221,28 +228,28 @@ public record Vec3F(float xf, float yf, float zf) implements Vec3 {
 					y = reader.readFloat();
 					z = reader.readFloat();
 					reader.endList();
+					yield new Vec3F(x, y, z);
 				}
 				case BEGIN_OBJECT -> {
 					reader.beginObject();
 					while (reader.nextEntryType() != SosisonEntryType.END_OBJECT) {
 						String s = reader.readName();
-						float i = reader.readFloat();
 						switch (s.toLowerCase()) {
-							case "x" -> x = i;
-							case "y" -> y = i;
-							case "z" -> z = i;
+							case "x" -> x = reader.readFloat();
+							case "y" -> y = reader.readFloat();
+							case "z" -> z = reader.readFloat();
+							default -> reader.skipValue();
 						}
 					}
 					reader.endObject();
+					yield new Vec3F(x, y, z);
 				}
 				case INT -> new Vec3F(reader.readInt());
 				case FLOAT -> new Vec3F(reader.readFloat());
 				case LONG -> new Vec3F(reader.readLong());
 				case DOUBLE -> new Vec3F((float) reader.readDouble());
 				default -> throw new ParseException("Unsupported token in vector \"" + reader.nextEntryType() + "\"");
-			}
-
-			return new Vec3F(x, y, z);
+			};
 		}
 	}
 }
