@@ -137,7 +137,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 	}
 
 	@Override
-	public CompositeShape rotate(Quat q) {
+	public CompositeSuperShape rotate(Quat q) {
 		return rotate(Matrix3.fromQuat(q));
 	}
 
@@ -190,7 +190,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 	}
 
 	@Override
-	public CompositeShape moveRotScale(Vec3 pos, Quat q, double scale) {
+	public CompositeSuperShape moveRotScale(Vec3 pos, Quat q, double scale) {
 		return moveRotScale(pos, Matrix3.fromQuat(q), scale);
 	}
 
@@ -276,7 +276,7 @@ public sealed class CompositeSuperShape implements CompositeShape, TypedConfig<S
 		return new CompositeSuperShape(shapes, center, attachment);
 	}
 
-	public class PoseCallback {
+	public static class PoseCallback {
 		@Getter
 		@Setter
 		private Vec3 pos = Vec3.ZERO;
