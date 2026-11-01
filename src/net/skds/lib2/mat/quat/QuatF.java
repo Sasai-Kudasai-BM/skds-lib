@@ -71,8 +71,9 @@ public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 	}
 
 	@Override
-	public QuatF rotateAxisDegrees(Vec3 axis, double angle) {
-		return rotateAxisDegreesF(axis, (float) angle);
+	public QuatD rotateAxisDegrees(Vec3 axis, double angle) {
+		double f0 = FastMath.sinDegr(angle / 2.0);
+		return multiply(axis.x() * f0, axis.y() * f0, axis.z() * f0, FastMath.cosDegr(angle / 2.0));
 	}
 
 	@Override
@@ -89,8 +90,16 @@ public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 	}
 
 	@Override
-	public QuatF spin(Vec3 spin) {
-		return spinF(spin);
+	public QuatD spin(Vec3 spin) {
+		double angle = spin.length();
+		if (angle < 1E-7) return new QuatD(xf, yf, zf, wf);
+		double f0 = FastMath.sinRad(angle / 2.0);
+		return multiply(
+				spin.x() * f0 / angle,
+				spin.y() * f0 / angle,
+				spin.z() * f0 / angle,
+				FastMath.cosRad(angle / 2.0)
+		);
 	}
 
 	@Override
@@ -99,8 +108,8 @@ public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 	}
 
 	@Override
-	public QuatF conjugate() {
-		return new QuatF(-xf, -yf, -zf, wf);
+	public QuatD conjugate() {
+		return new QuatD(-xf, -yf, -zf, wf);
 	}
 
 	@Override
@@ -113,6 +122,44 @@ public record QuatF(float xf, float yf, float zf, float wf) implements Quat {
 	public QuatD normalize() {
 		double g = FastMath.invSqrt((double) xf * xf + (double) yf * yf + (double) zf * zf + (double) wf * wf + Double.MIN_NORMAL);
 		return new QuatD(xf * g, yf * g, zf * g, wf * g);
+	}
+
+	@Override
+	public Vec3D up() {
+		double x = x(), y = y(), z = z(), w = w();
+		return new Vec3D(
+				2.0 * (x * y - z * w),
+				1.0 - 2.0 * x * x - 2.0 * z * z,
+				2.0 * (y * z + x * w)
+		);
+	}
+
+	@Override
+	public Vec3F upF() {
+		return new Vec3F(
+				2.0f * (xf * yf - zf * wf),
+				1.0f - 2.0f * xf * xf - 2.0f * zf * zf,
+				2.0f * (yf * zf + xf * wf)
+		);
+	}
+
+	@Override
+	public Vec3D left() {
+		double x = x(), y = y(), z = z(), w = w();
+		return new Vec3D(
+				1.0 - 2.0 * y * y - 2.0 * z * z,
+				2.0 * (x * y + z * w),
+				2.0 * (z * x - y * w)
+		);
+	}
+
+	@Override
+	public Vec3F leftF() {
+		return new Vec3F(
+				1.0f - 2.0f * yf * yf - 2.0f * zf * zf,
+				2.0f * (xf * yf + zf * wf),
+				2.0f * (zf * xf - yf * wf)
+		);
 	}
 
 	@Override

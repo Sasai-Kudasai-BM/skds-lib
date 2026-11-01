@@ -295,22 +295,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		return x * x + y * y + z * z;
 	}
 
-	default int lengthI() {
-		return (int) Math.sqrt(this.xi() * this.xi() + this.yi() * this.yi() + this.zi() * this.zi());
-	}
-
-	default int lengthSquaredI() {
-		return this.xi() * this.xi() + this.yi() * this.yi() + this.zi() * this.zi();
-	}
-
-	static int lengthI(int x, int y, int z) {
-		return (int) Math.sqrt(x * x + y * y + z * z);
-	}
-
-	static int lengthSquaredI(int x, int y, int z) {
-		return x * x + y * y + z * z;
-	}
-
 	static float lengthF(float x, float y, float z) {
 		return (float) Math.sqrt(x * x + y * y + z * z);
 	}
@@ -364,34 +348,6 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 		dx -= x();
 		dy -= y();
 		dz -= z();
-		return dx * dx + dy * dy + dz * dz;
-	}
-
-	default int distanceToI(Vec3 vec) {
-		int dx = vec.xi() - xi();
-		int dy = vec.yi() - yi();
-		int dz = vec.zi() - zi();
-		return (int) Math.sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
-	default int distanceToI(int x2, int y2, int z2) {
-		x2 -= xi();
-		y2 -= yi();
-		z2 -= zi();
-		return (int) Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2);
-	}
-
-	default int squareDistanceToI(Vec3 vec) {
-		int dx = vec.xi() - xi();
-		int dy = vec.yi() - yi();
-		int dz = vec.zi() - zi();
-		return dx * dx + dy * dy + dz * dz;
-	}
-
-	default int squareDistanceToI(int dx, int dy, int dz) {
-		dx -= xi();
-		dy -= yi();
-		dz -= zi();
 		return dx * dx + dy * dy + dz * dz;
 	}
 
@@ -508,39 +464,29 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 	}
 
 	default double projOn(Vec3 vec) {
-		double l = vec.length();
-		double ret = this.x() * vec.x() + this.y() * vec.y() + this.z() * vec.z();
-		return l == 0 ? ret : ret / l;
+		double k = FastMath.invSqrt(vec.x() * vec.x() + vec.y() * vec.y() + vec.z() * vec.z() + Double.MIN_NORMAL);
+		return (this.x() * vec.x() + this.y() * vec.y() + this.z() * vec.z()) * k;
 	}
 
 	default double projOn(double x2, double y2, double z2) {
-		double l = length(x2, y2, z2);
-		double ret = this.x() * x2 + this.y() * y2 + this.z() * z2;
-		return l == 0 ? ret : ret / l;
+		double k = FastMath.invSqrt(x2 * x2 + y2 * y2 + z2 * z2 + Double.MIN_NORMAL);
+		return (this.x() * x2 + this.y() * y2 + this.z() * z2) * k;
 	}
 
-	default int projOnI(Vec3 vec) {
-		int l = vec.lengthI();
-		int ret = this.xi() * vec.xi() + this.yi() * vec.yi() + this.zi() * vec.zi();
-		return l == 0 ? ret : ret / l;
-	}
 
 	default int projOn(int x2, int y2, int z2) {
-		int l = lengthI(x2, y2, z2);
-		int ret = this.xi() * x2 + this.yi() * y2 + this.zi() * z2;
-		return l == 0 ? ret : ret / l;
+		double k = FastMath.invSqrt((double) x2 * x2 + (double) y2 * y2 + (double) z2 * z2 + Double.MIN_NORMAL);
+		return (int) (((double) this.xi() * x2 + (double) this.yi() * y2 + (double) this.zi() * z2) * k);
 	}
 
 	default float projOnF(Vec3 vec) {
-		float l = vec.lengthF();
-		float ret = this.xf() * vec.xf() + this.yf() * vec.yf() + this.zf() * vec.zf();
-		return l == 0 ? ret : ret / l;
+		float k = FastMath.invSqrt(vec.xf() * vec.xf() + vec.yf() * vec.yf() + vec.zf() * vec.zf() + Float.MIN_NORMAL);
+		return (this.xf() * vec.xf() + this.yf() * vec.yf() + this.zf() * vec.zf()) * k;
 	}
 
 	default float projOnF(float x2, float y2, float z2) {
-		float l = lengthF(x2, y2, z2);
-		float ret = this.xf() * x2 + this.yf() * y2 + this.zf() * z2;
-		return l == 0 ? ret : ret / l;
+		float k = FastMath.invSqrt(x2 * x2 + y2 * y2 + z2 * z2 + Float.MIN_NORMAL);
+		return (this.xf() * x2 + this.yf() * y2 + this.zf() * z2) * k;
 	}
 
 	default Vec3 up() {
@@ -1659,9 +1605,9 @@ public sealed interface Vec3 extends Vector permits Vec3D, Vec3F, Vec3I, Directi
 					while (reader.nextEntryType() != END_OBJECT) {
 						String s = reader.readName();
 						switch (s.toLowerCase()) {
-							case "x" -> x = reader.readDouble();
-							case "y" -> y = reader.readDouble();
-							case "z" -> z = reader.readDouble();
+							case "x", "r" -> x = reader.readDouble();
+							case "y", "g" -> y = reader.readDouble();
+							case "z", "b" -> z = reader.readDouble();
 							default -> reader.skipValue();
 						}
 					}

@@ -71,10 +71,8 @@ public enum Direction implements Vec3 {
 			{Direction.SOUTH, Direction.NORTH, Direction.WEST, Direction.EAST},
 	};
 
-	private static Direction[][] shuffleA;
-
 	Direction(int id, int idOpposite, int idHorizontal, String name, AxisDirection direction, Axis axis,
-			  Vec3I vector) {
+	          Vec3I vector) {
 		this.id = id;
 		this.idHorizontal = idHorizontal;
 		this.idOpposite = idOpposite;
@@ -102,30 +100,6 @@ public enum Direction implements Vec3 {
 
 	public static Direction[] randomHorizontal(Random random) {
 		return ArrayUtils.getRandom(shuffleH, random);
-	}
-
-	public static Direction[] randomAll() {
-		return randomAll(FastMath.RANDOM);
-	}
-
-	public static Direction[] randomAll(Random random) {
-		Direction[][] a = shuffleA;
-		if (a == null) {
-			synchronized (Direction.class) {
-				a = shuffleA;
-				if (a == null) {
-					a = ArrayUtils.shuffleArray(VALUES);
-					/*Set<List<Direction>> compare = new HashSet<>();
-					for (Direction[] l : a) {
-						if (!compare.add(Arrays.asList(l))) {
-							throw new IllegalStateException();
-						}
-					}*/
-					shuffleA = a;
-				}
-			}
-		}
-		return ArrayUtils.getRandom(a, random);
 	}
 
 	public Direction rotateClockwise(Axis axis) {

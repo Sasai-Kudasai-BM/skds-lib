@@ -41,41 +41,23 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 
 	double m22();
 
-	default float m00f() {
-		return (float) m00();
-	}
+	float m00f();
 
-	default float m01f() {
-		return (float) m01();
-	}
+	float m01f();
 
-	default float m02f() {
-		return (float) m02();
-	}
+	float m02f();
 
-	default float m10f() {
-		return (float) m10();
-	}
+	float m10f();
 
-	default float m11f() {
-		return (float) m11();
-	}
+	float m11f();
 
-	default float m12f() {
-		return (float) m12();
-	}
+	float m12f();
 
-	default float m20f() {
-		return (float) m20();
-	}
+	float m20f();
 
-	default float m21f() {
-		return (float) m21();
-	}
+	float m21f();
 
-	default float m22f() {
-		return (float) m22();
-	}
+	float m22f();
 
 	static boolean equals(Matrix3 m1, Matrix3 m2) {
 		if (m1 == m2) {
@@ -280,313 +262,67 @@ public sealed interface Matrix3 permits Matrix3D, Matrix3F {
 		return fromNormalsF(left, forward.crossF(left), forward);
 	}
 
-	default Matrix3D transpose() {
-		return new Matrix3D(
-				m00(), m10(), m20(),
-				m01(), m11(), m21(),
-				m02(), m12(), m22()
-		);
-	}
+	Matrix3D transpose();
 
-	default Matrix3F transposeF() {
-		return new Matrix3F(
-				m00f(), m10f(), m20f(),
-				m01f(), m11f(), m21f(),
-				m02f(), m12f(), m22f()
-		);
-	}
+	Matrix3F transposeF();
 
-	default Matrix3D invert() {
-		double f = this.m11() * this.m22() - this.m12() * this.m21();
-		double f1 = -(this.m10() * this.m22() - this.m12() * this.m20());
-		double f2 = this.m10() * this.m21() - this.m11() * this.m20();
-		double f3 = -(this.m01() * this.m22() - this.m02() * this.m21());
-		double f4 = this.m00() * this.m22() - this.m02() * this.m20();
-		double f5 = -(this.m00() * this.m21() - this.m01() * this.m20());
-		double f6 = this.m01() * this.m12() - this.m02() * this.m11();
-		double f7 = -(this.m00() * this.m12() - this.m02() * this.m10());
-		double f8 = this.m00() * this.m11() - this.m01() * this.m10();
-		double det = this.m00() * f + this.m01() * f1 + this.m02() * f2;
-		double invDet = 1 / det;
-		return new Matrix3D(
-				f * invDet,
-				f1 * invDet,
-				f2 * invDet,
-				f3 * invDet,
-				f4 * invDet,
-				f5 * invDet,
-				f6 * invDet,
-				f7 * invDet,
-				f8 * invDet
-		);
-	}
+	Matrix3D invert();
 
-	default Matrix3F invertF() {
-		float f = this.m11f() * this.m22f() - this.m12f() * this.m21f();
-		float f1 = -(this.m10f() * this.m22f() - this.m12f() * this.m20f());
-		float f2 = this.m10f() * this.m21f() - this.m11f() * this.m20f();
-		float f3 = -(this.m01f() * this.m22f() - this.m02f() * this.m21f());
-		float f4 = this.m00f() * this.m22f() - this.m02f() * this.m20f();
-		float f5 = -(this.m00f() * this.m21f() - this.m01f() * this.m20f());
-		float f6 = this.m01f() * this.m12f() - this.m02f() * this.m11f();
-		float f7 = -(this.m00f() * this.m12f() - this.m02f() * this.m10f());
-		float f8 = this.m00f() * this.m11f() - this.m01f() * this.m10f();
-		float det = this.m00f() * f + this.m01f() * f1 + this.m02f() * f2;
-		float invDet = 1 / det;
-		return new Matrix3F(
-				f * invDet,
-				f1 * invDet,
-				f2 * invDet,
-				f3 * invDet,
-				f4 * invDet,
-				f5 * invDet,
-				f6 * invDet,
-				f7 * invDet,
-				f8 * invDet
-		);
-	}
+	Matrix3F invertF();
 
-	default Obj2DoublePairRecord<Matrix3D> adjugateAndDet() {
-		double f0 = this.m11() * this.m22() - this.m12() * this.m21();
-		double f1 = -(this.m10() * this.m22() - this.m12() * this.m20());
-		double f2 = this.m10() * this.m21() - this.m11() * this.m20();
-		double f3 = -(this.m01() * this.m22() - this.m02() * this.m21());
-		double f4 = this.m00() * this.m22() - this.m02() * this.m20();
-		double f5 = -(this.m00() * this.m21() - this.m01() * this.m20());
-		double f6 = this.m01() * this.m12() - this.m02() * this.m11();
-		double f7 = -(this.m00() * this.m12() - this.m02() * this.m10());
-		double f8 = this.m00() * this.m11() - this.m01() * this.m10();
-		double det = this.m00() * f0 + this.m01() * f1 + this.m02() * f2;
-		Matrix3D m = new Matrix3D(
-				f0,
-				f1,
-				f2,
-				f3,
-				f4,
-				f5,
-				f6,
-				f7,
-				f8
-		);
-		return new Obj2DoublePairRecord<>(m, det);
-	}
+	Obj2DoublePairRecord<Matrix3D> adjugateAndDet();
 
-	default Obj2FloatPairRecord<Matrix3F> adjugateAndDetF() {
-		float f = this.m11f() * this.m22f() - this.m12f() * this.m21f();
-		float f1 = -(this.m10f() * this.m22f() - this.m12f() * this.m20f());
-		float f2 = this.m10f() * this.m21f() - this.m11f() * this.m20f();
-		float f3 = -(this.m01f() * this.m22f() - this.m02f() * this.m21f());
-		float f4 = this.m00f() * this.m22f() - this.m02f() * this.m20f();
-		float f5 = -(this.m00f() * this.m21f() - this.m01f() * this.m20f());
-		float f6 = this.m01f() * this.m12f() - this.m02f() * this.m11f();
-		float f7 = -(this.m00f() * this.m12f() - this.m02f() * this.m10f());
-		float f8 = this.m00f() * this.m11f() - this.m01f() * this.m10f();
-		float det = this.m00f() * f + this.m01f() * f1 + this.m02f() * f2;
-		Matrix3F m = new Matrix3F(
-				f,
-				f1,
-				f2,
-				f3,
-				f4,
-				f5,
-				f6,
-				f7,
-				f8
-		);
-		return new Obj2FloatPairRecord<>(m, det);
-	}
+	Obj2FloatPairRecord<Matrix3F> adjugateAndDetF();
 
-	default double det() {
-		double f = this.m11() * this.m22() - this.m12() * this.m21();
-		double f1 = -(this.m10() * this.m22() - this.m12() * this.m20());
-		double f2 = this.m10() * this.m21() - this.m11() * this.m20();
-		return this.m00() * f + this.m01() * f1 + this.m02() * f2;
-	}
+	double det();
 
-	default float detF() {
-		float f = this.m11f() * this.m22f() - this.m12f() * this.m21f();
-		float f1 = -(this.m10f() * this.m22f() - this.m12f() * this.m20f());
-		float f2 = this.m10f() * this.m21f() - this.m11f() * this.m20f();
-		return this.m00f() * f + this.m01f() * f1 + this.m02f() * f2;
-	}
+	float detF();
 
-	default Matrix3D multiply(Matrix3 m2) {
-		return new Matrix3D(
-				this.m00() * m2.m00() + this.m01() * m2.m10() + this.m02() * m2.m20(),
-				this.m00() * m2.m01() + this.m01() * m2.m11() + this.m02() * m2.m21(),
-				this.m00() * m2.m02() + this.m01() * m2.m12() + this.m02() * m2.m22(),
-				this.m10() * m2.m00() + this.m11() * m2.m10() + this.m12() * m2.m20(),
-				this.m10() * m2.m01() + this.m11() * m2.m11() + this.m12() * m2.m21(),
-				this.m10() * m2.m02() + this.m11() * m2.m12() + this.m12() * m2.m22(),
-				this.m20() * m2.m00() + this.m21() * m2.m10() + this.m22() * m2.m20(),
-				this.m20() * m2.m01() + this.m21() * m2.m11() + this.m22() * m2.m21(),
-				this.m20() * m2.m02() + this.m21() * m2.m12() + this.m22() * m2.m22()
-		);
-	}
+	Matrix3D multiply(Matrix3 m2);
 
-	default Matrix3F multiplyF(Matrix3 m2) {
-		return new Matrix3F(
-				this.m00f() * m2.m00f() + this.m01f() * m2.m10f() + this.m02f() * m2.m20f(),
-				this.m00f() * m2.m01f() + this.m01f() * m2.m11f() + this.m02f() * m2.m21f(),
-				this.m00f() * m2.m02f() + this.m01f() * m2.m12f() + this.m02f() * m2.m22f(),
-				this.m10f() * m2.m00f() + this.m11f() * m2.m10f() + this.m12f() * m2.m20f(),
-				this.m10f() * m2.m01f() + this.m11f() * m2.m11f() + this.m12f() * m2.m21f(),
-				this.m10f() * m2.m02f() + this.m11f() * m2.m12f() + this.m12f() * m2.m22f(),
-				this.m20f() * m2.m00f() + this.m21f() * m2.m10f() + this.m22f() * m2.m20f(),
-				this.m20f() * m2.m01f() + this.m21f() * m2.m11f() + this.m22f() * m2.m21f(),
-				this.m20f() * m2.m02f() + this.m21f() * m2.m12f() + this.m22f() * m2.m22f()
-		);
-	}
+	Matrix3F multiplyF(Matrix3 m2);
 
-	default Matrix3D multiply(Quat q) {
-		return this.multiply(fromQuat(q));
-	}
+	Matrix3D multiply(Quat q);
 
-	default Matrix3F multiplyF(Quat q) {
-		return this.multiplyF(fromQuatF(q));
-	}
+	Matrix3F multiplyF(Quat q);
 
-	default Matrix3D scale(double scale) {
-		return new Matrix3D(
-				m00() * scale,
-				m01() * scale,
-				m02() * scale,
-				m10() * scale,
-				m11() * scale,
-				m12() * scale,
-				m20() * scale,
-				m21() * scale,
-				m22() * scale
-		);
-	}
+	Matrix3D scale(double scale);
 
-	default Matrix3D scaleNS(double sx, double sy, double sz) {
-		return new Matrix3D(
-				m00() * sx,
-				m01() * sy,
-				m02() * sz,
-				m10() * sx,
-				m11() * sy,
-				m12() * sz,
-				m20() * sx,
-				m21() * sy,
-				m22() * sz
-		);
-	}
+	Matrix3D scaleNS(double sx, double sy, double sz);
 
-	default Matrix3F scaleF(float scale) {
-		return new Matrix3F(
-				m00f() * scale,
-				m01f() * scale,
-				m02f() * scale,
-				m10f() * scale,
-				m11f() * scale,
-				m12f() * scale,
-				m20f() * scale,
-				m21f() * scale,
-				m22f() * scale
-		);
-	}
+	Matrix3F scaleF(float scale);
 
-	default Matrix3F scaleNSF(float sx, float sy, float sz) {
-		return new Matrix3F(
-				m00f() * sx,
-				m01f() * sy,
-				m02f() * sz,
-				m10f() * sx,
-				m11f() * sy,
-				m12f() * sz,
-				m20f() * sx,
-				m21f() * sy,
-				m22f() * sz
-		);
-	}
+	Matrix3F scaleNSF(float sx, float sy, float sz);
 
-	default Vec3D getYPRAngles() {
-		double yaw = 0;
-		double pitch = 0;
-		double roll = 0;
-		// Assuming the angles are in radians.
-		if (m10() > 0.999999) { // singularity at north pole
-			yaw = Math.atan2(m02(), m22());
-			pitch = Math.PI / 2;
-			roll = 0;
-		} else if (m10() < -0.999999) { // singularity at south pole
-			yaw = Math.atan2(m02(), m22());
-			pitch = -Math.PI / 2;
-			roll = 0;
-		} else {
-			yaw = Math.atan2(-m20(), m00());
-			pitch = Math.atan2(-m12(), m11());
-			roll = Math.asin(m10());
-		}
+	Vec3D getYPRAngles();
 
-		return new Vec3D(yaw, pitch, roll);
-	}
+	Vec3D[] asNormals();
 
-	default Vec3D[] asNormals() {
-		Vec3D[] norms = new Vec3D[3];
-		norms[0] = new Vec3D(m00(), m10(), m20());
-		norms[1] = new Vec3D(m01(), m11(), m21());
-		norms[2] = new Vec3D(m02(), m12(), m22());
-		return norms;
-	}
+	Vec3F[] asNormalsF();
 
-	default Vec3F[] asNormalsF() {
-		Vec3F[] norms = new Vec3F[3];
-		norms[0] = new Vec3F(m00f(), m10f(), m20f());
-		norms[1] = new Vec3F(m01f(), m11f(), m21f());
-		norms[2] = new Vec3F(m02f(), m12f(), m22f());
-		return norms;
-	}
+	Vec3D left();
 
-	default Vec3D left() {
-		return new Vec3D(m00(), m10(), m20());
-	}
+	Vec3D leftNorm();
 
-	default Vec3D leftNorm() {
-		return Vec3.normalized(m00(), m10(), m20());
-	}
+	Vec3F leftF();
 
-	default Vec3F leftF() {
-		return new Vec3F(m00f(), m10f(), m20f());
-	}
+	Vec3F leftNormF();
 
-	default Vec3F leftNormF() {
-		return Vec3.normalizedF(m00f(), m10f(), m20f());
-	}
+	Vec3D up();
 
-	default Vec3D up() {
-		return new Vec3D(m01(), m11(), m21());
-	}
+	Vec3D upNorm();
 
-	default Vec3D upNorm() {
-		return Vec3.normalized(m01(), m11(), m21());
-	}
+	Vec3F upF();
 
-	default Vec3F upF() {
-		return new Vec3F(m01f(), m11f(), m21f());
-	}
+	Vec3F upNormF();
 
-	default Vec3F upNormF() {
-		return Vec3.normalizedF(m01f(), m11f(), m21f());
-	}
+	Vec3D forward();
 
-	default Vec3D forward() {
-		return new Vec3D(m02(), m12(), m22());
-	}
+	Vec3D forwardNorm();
 
-	default Vec3D forwardNorm() {
-		return Vec3.normalized(m02(), m12(), m22());
-	}
+	Vec3F forwardF();
 
-	default Vec3F forwardF() {
-		return new Vec3F(m02f(), m12f(), m22f());
-	}
-
-	default Vec3F forwardNormF() {
-		return Vec3.normalizedF(m02f(), m12f(), m22f());
-	}
+	Vec3F forwardNormF();
 
 	static Matrix3D rotationFromAToB(Vec3 a, Vec3 b) {
 		Vec3 cross = a.cross(b);

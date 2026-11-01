@@ -3,6 +3,7 @@ package net.skds.lib2.mat.quat;
 import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.vec3.Vec3;
 import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec3.Vec3F;
 
 public record QuatD(double x, double y, double z, double w) implements Quat {
 
@@ -12,8 +13,15 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	}
 
 	@Override
-	public QuatD multiplyF(Quat q) {
-		return multiply(q);
+	public QuatF multiplyF(Quat q) {
+		float xf = (float) x, yf = (float) y, zf = (float) z, wf = (float) w;
+		float qx = q.xf(), qy = q.yf(), qz = q.zf(), qw = q.wf();
+		return new QuatF(
+				wf * qx + xf * qw + yf * qz - zf * qy,
+				wf * qy - xf * qz + yf * qw + zf * qx,
+				wf * qz + xf * qy - yf * qx + zf * qw,
+				wf * qw - xf * qx - yf * qy - zf * qz
+		);
 	}
 
 	public QuatD multiply(QuatD q) {
@@ -36,8 +44,17 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	}
 
 	@Override
-	public QuatD rotateAxisDegreesF(Vec3 axis, float angle) {
-		return rotateAxisDegrees(axis, angle);
+	public QuatF rotateAxisDegreesF(Vec3 axis, float angle) {
+		float f0 = FastMath.sinDegr(angle / 2.0f);
+		float xf = (float) x, yf = (float) y, zf = (float) z, wf = (float) w;
+		float qx = axis.xf() * f0, qy = axis.yf() * f0, qz = axis.zf() * f0;
+		float qw = FastMath.cosDegr(angle / 2.0f);
+		return new QuatF(
+				wf * qx + xf * qw + yf * qz - zf * qy,
+				wf * qy - xf * qz + yf * qw + zf * qx,
+				wf * qz + xf * qy - yf * qx + zf * qw,
+				wf * qw - xf * qx - yf * qy - zf * qz
+		);
 	}
 
 	@Override
@@ -54,8 +71,21 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	}
 
 	@Override
-	public QuatD spinF(Vec3 spin) {
-		return spin(spin);
+	public QuatF spinF(Vec3 spin) {
+		float angle = spin.lengthF();
+		if (angle < 1E-7f) return new QuatF((float) x, (float) y, (float) z, (float) w);
+		float f0 = FastMath.sinRad(angle / 2.0f);
+		float qx = spin.xf() * f0 / angle;
+		float qy = spin.yf() * f0 / angle;
+		float qz = spin.zf() * f0 / angle;
+		float qw = FastMath.cosRad(angle / 2.0f);
+		float xf = (float) x, yf = (float) y, zf = (float) z, wf = (float) w;
+		return new QuatF(
+				wf * qx + xf * qw + yf * qz - zf * qy,
+				wf * qy - xf * qz + yf * qw + zf * qx,
+				wf * qz + xf * qy - yf * qx + zf * qw,
+				wf * qw - xf * qx - yf * qy - zf * qz
+		);
 	}
 
 	@Override
@@ -64,8 +94,8 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	}
 
 	@Override
-	public QuatD conjugateF() {
-		return conjugate();
+	public QuatF conjugateF() {
+		return new QuatF((float) -x, (float) -y, (float) -z, (float) w);
 	}
 
 	@Override
@@ -75,8 +105,57 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	}
 
 	@Override
-	public QuatD normalizeF() {
-		return normalize();
+	public QuatF normalizeF() {
+		float xf = (float) x;
+		float yf = (float) y;
+		float zf = (float) z;
+		float wf = (float) w;
+		float g = FastMath.invSqrt(xf * xf + yf * yf + zf * zf + wf * wf + Float.MIN_NORMAL);
+		return new QuatF(xf * g, yf * g, zf * g, wf * g);
+	}
+
+	@Override
+	public Vec3D up() {
+		return new Vec3D(
+				2.0 * (x * y - z * w),
+				1.0 - 2.0 * x * x - 2.0 * z * z,
+				2.0 * (y * z + x * w)
+		);
+	}
+
+	@Override
+	public Vec3F upF() {
+		float xf = (float) x;
+		float yf = (float) y;
+		float zf = (float) z;
+		float wf = (float) w;
+		return new Vec3F(
+				2.0f * (xf * yf - zf * wf),
+				1.0f - 2.0f * xf * xf - 2.0f * zf * zf,
+				2.0f * (yf * zf + xf * wf)
+		);
+	}
+
+	@Override
+	public Vec3D left() {
+		return new Vec3D(
+				1.0 - 2.0 * y * y - 2.0 * z * z,
+				2.0 * (x * y + z * w),
+				2.0 * (z * x - y * w)
+		);
+	}
+
+	@Override
+	public Vec3F leftF() {
+		float xf = (float) x;
+		float yf = (float) y;
+		float zf = (float) z;
+		float wf = (float) w;
+		return new Vec3F(
+				1.0f - 2.0f * yf * yf - 2.0f * zf * zf,
+				2.0f * (xf * yf + zf * wf),
+				2.0f * (zf * xf - yf * wf)
+		);
 	}
 
 	@Override
@@ -85,8 +164,13 @@ public record QuatD(double x, double y, double z, double w) implements Quat {
 	}
 
 	@Override
-	public Vec3D forwardF() {
-		return forward();
+	public Vec3F forwardF() {
+		float xf = (float) x, yf = (float) y, zf = (float) z, wf = (float) w;
+		return new Vec3F(
+				2.0f * (zf * xf + yf * wf),
+				2.0f * (yf * zf - xf * wf),
+				1.0f - 2.0f * xf * xf - 2.0f * yf * yf
+		);
 	}
 
 	@Override
