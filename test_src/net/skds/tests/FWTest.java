@@ -69,5 +69,7 @@ public class FWTest {
 	public interface Null {
 
 		int who(long a, long b);
+
+		int who(long a, int b);
 	}
 }

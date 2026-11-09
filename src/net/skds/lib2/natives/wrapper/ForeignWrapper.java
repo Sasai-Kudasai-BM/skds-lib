@@ -18,20 +18,18 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.SymbolLookup;
 import java.lang.invoke.MethodHandle;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class ForeignWrapper {
 
 	private static final String CLASS_SUFFIX = "_wrapped";
-	private static final WrapperClassLoader CLASS_LOADER = new WrapperClassLoader();
+	private static final WeakHashMap<ClassLoader, WeakReference<WrapperClassLoader>> LOADERS = new WeakHashMap<>();
 	private static final ConcurrentHashMap<Class<?>, Object> INSTANCES = new ConcurrentHashMap<>(8, .5f);
 
 	public static <T> T wrap(Class<T> c) {
@@ -40,43 +38,41 @@ public class ForeignWrapper {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T wrap(Class<T> c, Path libraryPath, Arena arena) {
-		checkInterface(c);
 		Object inst = INSTANCES.get(c);
 		if (inst != null) {
 			return (T) inst;
 		}
-		Class<T> wrapper = createWrapper(c);
-		if (wrapper == null) {
+		synchronized (c) {
 			inst = INSTANCES.get(c);
 			if (inst != null) {
 				return (T) inst;
-			} else {
-				throw new IllegalStateException("Unable to wrap " + c);
 			}
-		}
-		var constructor = Objects.requireNonNull(ReflectUtils.getConstructor(wrapper, SymbolLookup.class), "Invalid wrapper");
-		SymbolLookup lookup = null;
-		if (libraryPath != null) {
-			lookup = SymbolLookup.libraryLookup(libraryPath, arena);
-		} else {
-			LibraryInfo libraryInfo = c.getAnnotation(LibraryInfo.class);
-			SKDSUtils.OSType os = SKDSUtils.OS_TYPE;
-			if (libraryInfo != null) for (LibraryName ln : libraryInfo.value()) {
-				if (ln.os() == os) {
-					lookup = SymbolLookup.libraryLookup(ln.value(), arena);
-					break;
+			checkInterface(c);
+			Class<T> wrapper = createWrapper(c);
+			var constructor = Objects.requireNonNull(ReflectUtils.getConstructor(wrapper, SymbolLookup.class), "Invalid wrapper");
+			SymbolLookup lookup = null;
+			if (libraryPath != null) {
+				lookup = SymbolLookup.libraryLookup(libraryPath, arena);
+			} else {
+				LibraryInfo libraryInfo = c.getAnnotation(LibraryInfo.class);
+				SKDSUtils.OSType os = SKDSUtils.OS_TYPE;
+				if (libraryInfo != null) for (LibraryName ln : libraryInfo.value()) {
+					if (ln.os() == os) {
+						lookup = SymbolLookup.libraryLookup(ln.value(), arena);
+						break;
+					}
+				}
+				if (lookup == null) {
+					lookup = SymbolLookup.loaderLookup();
 				}
 			}
-			if (lookup == null) {
-				lookup = SymbolLookup.loaderLookup();
+			T obj = constructor.apply(lookup);
+			Object prev = INSTANCES.putIfAbsent(c, obj);
+			if (prev != null) {
+				return (T) prev;
 			}
+			return obj;
 		}
-		T obj = constructor.apply(lookup);
-		Object prev = INSTANCES.putIfAbsent(c, obj);
-		if (prev != null) {
-			return (T) prev;
-		}
-		return obj;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,7 +81,23 @@ public class ForeignWrapper {
 		ClassDesc classDesc = ClassDesc.of(className);
 		Builder builder = new Builder(c, classDesc);
 		byte[] classBytes = ClassFile.of().build(classDesc, builder);
-		return (Class<W>) CLASS_LOADER.getClassFromBytes(className, classBytes);
+		return (Class<W>) getLoader(c).getClassFromBytes(className, classBytes);
+	}
+
+	private static WrapperClassLoader getLoader(Class<?> targetInterface) {
+		ClassLoader parent = targetInterface.getClassLoader();
+		if (parent == null) {
+			parent = ClassLoader.getSystemClassLoader();
+		}
+		synchronized (LOADERS) {
+			WeakReference<WrapperClassLoader> ref = LOADERS.get(parent);
+			WrapperClassLoader loader = (ref != null) ? ref.get() : null;
+			if (loader == null) {
+				loader = new WrapperClassLoader(parent);
+				LOADERS.put(parent, new WeakReference<>(loader));
+			}
+			return loader;
+		}
 	}
 
 	private static final class Builder implements Consumer<ClassBuilder> {
@@ -98,8 +110,10 @@ public class ForeignWrapper {
 		Builder(Class<?> cl, ClassDesc classDesc) {
 			this.classDesc = classDesc;
 			this.interfaceClass = cl;
-			ArrayList<Method> methods = new ArrayList<>();
-			collectMethods(cl, methods);
+			HashSet<Method> methods = new HashSet<>();
+			HashSet<Class<?>> visited = new HashSet<>();
+			visited.add(cl);
+			collectMethods(cl, methods, visited);
 			for (Method m : methods) {
 				String jName = m.getName();
 				String nName = jName;
@@ -110,25 +124,25 @@ public class ForeignWrapper {
 				Class<?> rt = m.getReturnType();
 				checkPrimitive(rt);
 				Class<?>[] argsTypes = m.getParameterTypes();
-				Parameter[] args = m.getParameters();
-				String[] argsNames = new String[args.length];
-				for (int i = 0; i < args.length; i++) {
+				int pc = m.getParameterCount();
+				for (int i = 0; i < pc; i++) {
 					checkPrimitive(argsTypes[i]);
-					argsNames[i] = args[i].getName();
 				}
-				this.methods.add(new NativeMethodSignature(nName, jName, rt, argsTypes, argsNames));
+				this.methods.add(new NativeMethodSignature(nName, jName, rt, argsTypes));
 			}
 		}
 
-		static void collectMethods(Class<?> cl, List<Method> list) {
+		static void collectMethods(Class<?> cl, Collection<Method> methods, Collection<Class<?>> visited) {
 			final int modsMask = Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC;
 			final int modsResult = Modifier.ABSTRACT | Modifier.PUBLIC;
 			for (Class<?> c2 : cl.getInterfaces()) {
-				collectMethods(c2, list);
+				if (visited.add(c2)) {
+					collectMethods(c2, methods, visited);
+				}
 			}
 			for (Method m : cl.getDeclaredMethods()) {
 				if ((m.getModifiers() & modsMask) == modsResult) {
-					list.add(m);
+					methods.add(m);
 				}
 			}
 		}
@@ -156,7 +170,7 @@ public class ForeignWrapper {
 
 			builder.withFlags(Modifier.PUBLIC | Modifier.FINAL);
 			builder.withInterfaceSymbols(interfaceClass.describeConstable().orElseThrow());
-			builder.withVersion(ClassFile.latestMajorVersion(), ClassFile.latestMinorVersion());
+			builder.withVersion(ClassFile.JAVA_25_VERSION, 0);
 
 			builder.withMethod("<init>",
 					MethodTypeDesc.of(
@@ -189,7 +203,7 @@ public class ForeignWrapper {
 								code.aastore();// store value to array
 							}
 							code.invokestatic(linkerUtilsCD, "createHandle", createHandleMTD);
-							code.putfield(classDesc, nms.javaName, mhc);
+							code.putfield(classDesc, nms.handleFieldName(), mhc);
 						}
 						code.return_();
 					})
@@ -197,7 +211,7 @@ public class ForeignWrapper {
 
 			ClassDesc rteDesc = RuntimeException.class.describeConstable().orElseThrow();
 			for (NativeMethodSignature nms : this.methods) {
-				builder.withField(nms.javaName, mhc, fMods);
+				builder.withField(nms.handleFieldName(), mhc, fMods);
 				ClassDesc[] args = new ClassDesc[nms.arguments.length];
 				for (int i = 0; i < nms.arguments.length; i++) {
 					Class<?> argC = nms.arguments[i];
@@ -215,15 +229,13 @@ public class ForeignWrapper {
 						m -> m.withCode(code -> code.trying(tr -> {
 							// get handle
 							tr.aload(code.receiverSlot());
-							tr.getfield(classDesc, nms.javaName, mhc);
+							tr.getfield(classDesc, nms.handleFieldName(), mhc);
 							// load args
-							int slot = 1;
-							for (Class<?> argC : nms.arguments) {
+							for (int i = 0, l = nms.arguments.length; i < l; i++) {
+								Class<?> argC = nms.arguments[i];
 								TypeKind tk = TypeKind.fromDescriptor(argC.descriptorString());
-								int ss = tk.slotSize();
-								//slot += slot % ss; // align
+								int slot = code.parameterSlot(i);
 								tr.loadLocal(tk, slot);
-								slot += ss;
 							}
 							// invoke
 							tr.invokevirtual(mhc, "invokeExact", mtd);
@@ -262,16 +274,24 @@ public class ForeignWrapper {
 			String nativeName,
 			String javaName,
 			Class<?> returnType,
-			Class<?>[] arguments,
-			String[] argumentNames
+			Class<?>[] arguments
 	) {
-
+		String handleFieldName() {
+			if (arguments.length == 0) {
+				return javaName;
+			}
+			StringBuilder sb = new StringBuilder(javaName).append("$");
+			for (Class<?> c : arguments) {
+				sb.append(c.descriptorString());
+			}
+			return sb.toString();
+		}
 	}
 
 	private static final class WrapperClassLoader extends ClassLoader {
 
-		WrapperClassLoader() {
-			super("ForeignWrapperClassloader", getSystemClassLoader());
+		WrapperClassLoader(ClassLoader parent) {
+			super("ForeignWrapperClassloader", parent);
 		}
 
 		public Class<?> getClassFromBytes(String className, byte[] classBytes) {
