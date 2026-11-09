@@ -72,6 +72,15 @@ public final class SKDSLoggerConfig {
 		private EnumSet<LoggerLevel> levels = EnumSet.allOf(LoggerLevel.class);
 	}
 
+	public static void compactConfig() {
+		Cfg cfg = instance.cfg;
+		cfg.timeFormat = "HH:mm:ss";
+		cfg.includeThread = false;
+		cfg.includeLoggerClass = false;
+		cfg.includeStackTop = false;
+		set(cfg);
+	}
+
 	public static void set(Cfg cfg) {
 		instance = new SKDSLoggerConfig(cfg);
 	}

@@ -271,7 +271,7 @@ public class RenderDemo3dPanel extends JPanel {
 		Polygon polygon = new Polygon();
 		for (int i = 0; i < points.length; i++) {
 			Vec3 point = points[i];
-			point = point.getAsFloatVec4().transformF(last).getAsFloatVec3();
+			point = point.getAsFloatVec4().transformF(last).toVec3();
 			if (point.z() < 0 || point.z() > 1) {
 				return;
 			}
@@ -282,8 +282,8 @@ public class RenderDemo3dPanel extends JPanel {
 
 	private void drawLine(Graphics2D g, MatrixStack stack, Vec3 a, Vec3 b) {
 		Matrix4 last = stack.getLast();
-		a = a.getAsFloatVec4().transformF(last).getAsFloatVec3();
-		b = b.getAsFloatVec4().transformF(last).getAsFloatVec3();
+		a = a.getAsFloatVec4().transformF(last).toVec3();
+		b = b.getAsFloatVec4().transformF(last).toVec3();
 		if ((a.z() < 0 && b.z() < 0) || a.z() > 1 || b.z() > 1) {
 			return;
 		}
@@ -291,7 +291,7 @@ public class RenderDemo3dPanel extends JPanel {
 	}
 
 	private void drawPoint(Graphics2D g, MatrixStack stack, Vec3 point, float size) {
-		point = point.getAsFloatVec4().transformF(stack.getLast()).getAsFloatVec3();
+		point = point.getAsFloatVec4().transformF(stack.getLast()).toVec3();
 		if (point.z() < 0 || point.z() > 1) {
 			return;
 		}

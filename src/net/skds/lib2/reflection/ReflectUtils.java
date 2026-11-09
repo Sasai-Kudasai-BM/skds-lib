@@ -7,7 +7,9 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @UtilityClass
@@ -52,6 +54,40 @@ public class ReflectUtils {
 			return (arg) -> {
 				try {
 					return (T) c.newInstance(arg);
+				} catch (Exception e) {
+					System.err.println("error with " + tClass + " " + c);
+					throw new RuntimeException(e);
+				}
+			};
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+	}
+
+	public static <T, A> Function<A, T> getConstructor(Class<T> tClass, Class<A> arg0) {
+		try {
+			Constructor<T> c = tClass.getDeclaredConstructor(arg0);
+			c.setAccessible(true);
+			return (arg) -> {
+				try {
+					return (T) c.newInstance(arg);
+				} catch (Exception e) {
+					System.err.println("error with " + tClass + " " + c);
+					throw new RuntimeException(e);
+				}
+			};
+		} catch (NoSuchMethodException e) {
+			return null;
+		}
+	}
+
+	public static <T, A0, A1> BiFunction<A0, A1, T> getConstructor(Class<T> tClass, Class<A0> arg0, Class<A1> arg1) {
+		try {
+			Constructor<T> c = tClass.getDeclaredConstructor(arg0, arg1);
+			c.setAccessible(true);
+			return (a0, a1) -> {
+				try {
+					return (T) c.newInstance(a0, a1);
 				} catch (Exception e) {
 					System.err.println("error with " + tClass + " " + c);
 					throw new RuntimeException(e);

@@ -54,7 +54,7 @@ public class ForeignWrapper {
 				throw new IllegalStateException("Unable to wrap " + c);
 			}
 		}
-		var constructor = Objects.requireNonNull(ReflectUtils.getMultiConstructor(wrapper, SymbolLookup.class), "Invalid wrapper");
+		var constructor = Objects.requireNonNull(ReflectUtils.getConstructor(wrapper, SymbolLookup.class), "Invalid wrapper");
 		SymbolLookup lookup = null;
 		if (libraryPath != null) {
 			lookup = SymbolLookup.libraryLookup(libraryPath, arena);
@@ -71,7 +71,7 @@ public class ForeignWrapper {
 				lookup = SymbolLookup.loaderLookup();
 			}
 		}
-		T obj = constructor.get(lookup);
+		T obj = constructor.apply(lookup);
 		Object prev = INSTANCES.putIfAbsent(c, obj);
 		if (prev != null) {
 			return (T) prev;

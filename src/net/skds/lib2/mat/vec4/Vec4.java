@@ -7,6 +7,9 @@ import net.skds.lib2.mat.FastMath;
 import net.skds.lib2.mat.Vector;
 import net.skds.lib2.mat.matrix4.Matrix4;
 import net.skds.lib2.mat.quat.Quat;
+import net.skds.lib2.mat.vec3.Vec3D;
+import net.skds.lib2.mat.vec3.Vec3F;
+import net.skds.lib2.mat.vec3.Vec3I;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -1205,6 +1208,18 @@ public sealed interface Vec4 extends Vector permits Vec4D, Vec4F, Vec4I {
 
 	default String getAsArrayString() {
 		return "[" + this.x() + "," + this.y() + "," + this.z() + "," + this.w() + "]";
+	}
+
+	default Vec3F toVec3F() {
+		return new Vec3F(xf(), yf(), zf());
+	}
+
+	default Vec3D toVec3() {
+		return new Vec3D(x(), y(), z());
+	}
+
+	default Vec3I toVec3I() {
+		return new Vec3I(xi(), yi(), zi());
 	}
 
 	final class Codec extends AbstractCodec<Vec4> {
