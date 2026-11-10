@@ -848,7 +848,7 @@ public class ReflectiveCodecFactory implements CodecFactory {
 
 		@Override
 		protected void write(UniversalWriter writer, Object o) throws IOException, IllegalAccessException {
-			writer.writeLong(field.getChar(o));
+			writer.writeInt(field.getChar(o));
 		}
 
 		@Override

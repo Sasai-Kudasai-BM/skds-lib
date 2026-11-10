@@ -221,8 +221,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 	}
 
 	public static UniversalCodec<Object> getDefaultCodec(AnnotatedElement annotatedElement,
-														 Type type,
-														 CodecRegistry registry
+	                                                     Type type,
+	                                                     CodecRegistry registry
 	) {
 		DefaultCodec defaultCodec = annotatedElement.getAnnotation(DefaultCodec.class);
 		if (defaultCodec == null) {
@@ -238,8 +238,8 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 	@SuppressWarnings("unchecked")
 	public static UniversalCodec<Object> getDefaultCodec(DefaultCodec defaultCodec, AnnotatedElement annotatedElement,
-														 Type type,
-														 CodecRegistry registry
+	                                                     Type type,
+	                                                     CodecRegistry registry
 	) {
 		Class<?> factoryClass = defaultCodec.value();
 		if (CodecFactory.class.isAssignableFrom(factoryClass)) {
@@ -1359,7 +1359,7 @@ public class BuiltinCodecFactory implements CodecFactory {
 				writer.writeInt(0);
 				return;
 			}
-			writer.writeRaw(value.toString());
+			writer.writeInt(value);
 		}
 
 		@Override
@@ -1395,11 +1395,6 @@ public class BuiltinCodecFactory implements CodecFactory {
 
 		@Override
 		public Integer read(UniversalReader reader) throws IOException {
-			try {
-				reader.nextEntryType();
-			} catch (Exception e) {
-				reader.nextEntryType();
-			}
 			SosisonEntryType type = reader.nextEntryType();
 			if (type == SosisonEntryType.NULL) {
 				reader.skipNull();

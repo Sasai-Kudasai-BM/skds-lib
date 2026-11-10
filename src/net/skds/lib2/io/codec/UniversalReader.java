@@ -144,7 +144,6 @@ public interface UniversalReader {
 							} else throw new ParseException("Unexpected token " + et);
 						}
 					}
-					array.add((char) readInt());
 				}
 				endList();
 				return array.getArray();
