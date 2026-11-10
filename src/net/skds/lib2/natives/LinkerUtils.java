@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public final class LinkerUtils {
 	public static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.loaderLookup();
 	public static final MethodHandles.Lookup METHOD_LOOKUP = MethodHandles.lookup();
 
-	private static final Map<Class<?>, LayoutInfo> PRIMITIVE_LAYOUTS = new HashMap<>(16, .5f);
+	private static final Map<Class<?>, LayoutInfo> PRIMITIVE_LAYOUTS = new IdentityHashMap<>();
 
 	public static final ValueLayout.OfBoolean BOOLEAN = ValueLayout.JAVA_BOOLEAN;
 	public static final ValueLayout.OfByte BYTE = ValueLayout.JAVA_BYTE;
